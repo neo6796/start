@@ -19,14 +19,22 @@ export default async function MenuListPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">Menu</h1>
-        <Link
-          href="/admin/menu/nove"
-          className="rounded-lg bg-orange-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-700"
-        >
-          + Nové menu
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/admin/menu/tyzden"
+            className="rounded-lg bg-orange-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-700"
+          >
+            📅 Týždenné menu
+          </Link>
+          <Link
+            href="/admin/menu/nove"
+            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          >
+            + Jeden deň
+          </Link>
+        </div>
       </div>
 
       {restaurants.length === 0 && (

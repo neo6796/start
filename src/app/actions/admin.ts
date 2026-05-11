@@ -104,6 +104,60 @@ export async function deleteMenuDay(id: string) {
   revalidatePath("/admin");
 }
 
+// ---------- Weekly editor ----------
+
+const weekDaySchema = z.object({
+  date: z.string().min(1),
+  items: z.array(menuItemInput),
+});
+
+const weekSchema = z.object({
+  restaurantId: z.string().min(1),
+  days: z.array(weekDaySchema).min(1).max(7),
+});
+
+export async function upsertMenuWeek(input: z.infer<typeof weekSchema>) {
+  await requireAdmin();
+  const data = weekSchema.parse(input);
+
+  await prisma.$transaction(async (tx) => {
+    for (const day of data.days) {
+      const date = startOfLocalDay(new Date(day.date));
+      const filtered = day.items.filter((it) => it.name.trim());
+
+      if (filtered.length === 0) {
+        // Empty day - delete if exists
+        await tx.menuDay.deleteMany({
+          where: { date, restaurantId: data.restaurantId },
+        });
+        continue;
+      }
+
+      const md = await tx.menuDay.upsert({
+        where: { date_restaurantId: { date, restaurantId: data.restaurantId } },
+        create: { date, restaurantId: data.restaurantId, source: "MANUAL" },
+        update: { source: "MANUAL", published: true },
+      });
+      await tx.menuItem.deleteMany({ where: { menuDayId: md.id } });
+      await tx.menuItem.createMany({
+        data: filtered.map((it, i) => ({
+          menuDayId: md.id,
+          category: it.category,
+          name: it.name,
+          description: it.description || null,
+          price: Math.round(it.priceEur * 100),
+          allergens: it.allergens || null,
+          position: i,
+        })),
+      });
+    }
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/admin/menu");
+}
+
 // ---------- Payments ----------
 
 const paymentSchema = z.object({

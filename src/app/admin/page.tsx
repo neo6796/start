@@ -26,7 +26,8 @@ export default async function AdminHome() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <AdminTile href="/admin/menu" title="Spravovať menu" description="Pridať alebo upraviť denné menu" />
+        <AdminTile href="/admin/menu/tyzden" title="Týždenné menu" description="Zadať celý Po–Pi v jednom kroku" />
+        <AdminTile href="/admin/menu" title="Všetky menu" description="Prehľad a úprava existujúcich" />
         <AdminTile href="/admin/objednavky" title="Dnešné objednávky" description="Kto čo má objednané dnes" />
         <AdminTile href="/admin/dlhy" title="Dlhy a platby" description="Evidencia platieb a dlhov" />
         <AdminTile href="/admin/restauracie" title="Reštaurácie" description="Pridať/upraviť dodávateľov" />

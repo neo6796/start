@@ -51,3 +51,19 @@ export function endOfMonth(d: Date = new Date()): Date {
   x.setHours(0, 0, 0, 0);
   return x;
 }
+
+// Monday of the week containing d (local time, 00:00).
+export function startOfWeek(d: Date = new Date()): Date {
+  const x = startOfLocalDay(d);
+  const day = x.getDay(); // 0 = Sun, 1 = Mon, ...
+  const diff = day === 0 ? -6 : 1 - day;
+  return addDays(x, diff);
+}
+
+export function formatWeekday(d: Date): string {
+  return new Intl.DateTimeFormat("sk-SK", { weekday: "long" }).format(d);
+}
+
+export function formatShortDate(d: Date): string {
+  return new Intl.DateTimeFormat("sk-SK", { day: "numeric", month: "numeric" }).format(d);
+}
