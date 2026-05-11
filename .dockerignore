@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.gitignore
+.env.local
+.env.development
+.env.test
+dev.db
+prisma/dev.db
+prisma/dev.db-journal
+README.md
+CLAUDE.md
+AGENTS.md
+.vscode
+.idea
+**/*.log
+coverage

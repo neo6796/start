@@ -29,9 +29,15 @@ export async function placeOrder(input: z.infer<typeof placeSchema>) {
 
   const day = startOfLocalDay(item.menuDay.date);
 
-  // One main course per user per day - if they already ordered, replace it.
+  // One order per (user, day, category) - choosing another item from the same
+  // category replaces the existing one.
   const existing = await prisma.order.findFirst({
-    where: { userId: session.user.id, date: day, status: "PLACED" },
+    where: {
+      userId: session.user.id,
+      date: day,
+      status: "PLACED",
+      menuItem: { category: item.category },
+    },
   });
 
   if (existing) {

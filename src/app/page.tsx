@@ -30,9 +30,15 @@ export default async function HomePage() {
       date: { gte: today, lt: horizon },
       status: "PLACED",
     },
+    include: { menuItem: { select: { category: true } } },
   });
-  const ordersByDate = new Map<string, (typeof myOrders)[number]>();
-  for (const o of myOrders) ordersByDate.set(startOfLocalDay(o.date).toISOString(), o);
+  // (dateISO -> (category -> order))
+  const ordersByDate = new Map<string, Map<string, { id: string; menuItemId: string }>>();
+  for (const o of myOrders) {
+    const key = startOfLocalDay(o.date).toISOString();
+    if (!ordersByDate.has(key)) ordersByDate.set(key, new Map());
+    ordersByDate.get(key)!.set(o.menuItem.category, { id: o.id, menuItemId: o.menuItemId });
+  }
 
   if (menuDays.length === 0) {
     return (
@@ -58,7 +64,7 @@ export default async function HomePage() {
       </div>
 
       {menuDays.map((day) => {
-        const myOrder = ordersByDate.get(startOfLocalDay(day.date).toISOString());
+        const myByCategory = ordersByDate.get(startOfLocalDay(day.date).toISOString()) ?? new Map();
         const closed = isPastCutoff(day.date, day.restaurant.cutoffHour);
         return (
           <MenuDayCard
@@ -68,8 +74,7 @@ export default async function HomePage() {
             cutoffHour={day.restaurant.cutoffHour}
             closed={closed}
             items={day.items}
-            myOrderItemId={myOrder?.menuItemId ?? null}
-            myOrderId={myOrder?.id ?? null}
+            myOrdersByCategory={Object.fromEntries(myByCategory)}
           />
         );
       })}

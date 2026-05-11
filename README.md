@@ -102,20 +102,53 @@ public/
   sw.js                  # service worker (push + install)
 ```
 
-## Produkčné nasadenie
+## Produkčné nasadenie (Docker)
 
-Pre 50 ľudí postačí 1 vCPU / 1 GB RAM.
+Pre 50 ľudí postačí 1 vCPU / 1 GB RAM. Najjednoduchšie cez Docker:
+
+```bash
+cp .env.production.example .env.production
+# vyplň AUTH_SECRET (openssl rand -base64 32), SMTP, ADMIN_EMAILS, VAPID, CRON_SECRET
+docker compose up -d --build
+```
+
+App beží na `http://localhost:3000`. Pred verejné nasadenie postav reverse proxy
+(Caddy/nginx/Traefik) s HTTPS – Web Push aj magic-link odkazy potrebujú HTTPS.
+
+**Volume**: SQLite DB sa drží v dockerovskom volume `obedy-data` (mount na `/data`).
+Migrácie sa automaticky aplikujú pri štarte kontajnera (entrypoint volá
+`prisma migrate deploy`).
+
+**Záloha DB** (jednoduchý nightly cron):
+```bash
+docker run --rm -v obedy_obedy-data:/src -v $(pwd)/backup:/dst alpine \
+  sh -c "cp /src/dev.db /dst/dev-$(date +%Y%m%d).db"
+```
+
+Pre kontinuálnu replikáciu (point-in-time recovery) odporúčam
+[Litestream](https://litestream.io) ako sidecar kontajner.
+
+**Cron-y** mimo Dockera (na hostiteľovi):
+```cron
+# Pripomienka pred uzávierkou (Po-Pi 9:30)
+30 9 * * 1-5 curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" \
+  https://obedy.firma.sk/api/push/remind
+
+# Scraping (až to neskôr zapneš)
+0 7 * * 1-5 curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" \
+  https://obedy.firma.sk/api/scrape
+```
+
+### Alternatíva: bez Dockera
 
 ```bash
 pnpm build
+DATABASE_URL=file:./prod.db pnpm prisma migrate deploy
 NODE_ENV=production pnpm start
 ```
 
-SQLite DB drž zálohovanú (`litestream` alebo nightly `cp`).
-
 ## Ďalšie nápady
 
-- Export mesačného prehľadu objednávok do CSV/PDF
-- Viacero variantov v jednej objednávke (polievka + hlavné)
 - Hlasovanie o reštaurácii pre nasledujúci týždeň
 - Slack / Teams bot ako tenká vrstva nad rovnakým API
+- Doplnenie scrapera pre gastroabm.sk (kód je pripravený, len treba odomknúť v UI)

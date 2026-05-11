@@ -30,6 +30,7 @@ export default async function AdminHome() {
         <AdminTile href="/admin/menu" title="Všetky menu" description="Prehľad a úprava existujúcich" />
         <AdminTile href="/admin/objednavky" title="Dnešné objednávky" description="Kto čo má objednané dnes" />
         <AdminTile href="/admin/dlhy" title="Dlhy a platby" description="Evidencia platieb a dlhov" />
+        <AdminTile href="/admin/export" title="Export (CSV)" description="Mesačný prehľad pre mzdovú" />
         <AdminTile href="/admin/restauracie" title="Reštaurácie" description="Pridať/upraviť dodávateľov" />
         <AdminTile href="/admin/pouzivatelia" title="Používatelia" description="Spravovať roly" />
         <AdminTile href="/admin/scraper" title="Scraper" description="Ručne spustiť sťahovanie menu" />
