@@ -1,0 +1,15 @@
+{
+  "name": "obedy",
+  "version": "1.0.0",
+  "description": "Aplikácia na objednávanie obedov, rozúčtovanie a mesačný report",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "seed": "node src/seed.js",
+    "dev": "node --watch src/server.js"
+  }
+}

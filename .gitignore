@@ -1,0 +1,13 @@
+node_modules/
+package-lock.json
+
+# runtime data — DB, WAL, session secret
+data/*.db
+data/*.db-*
+data/*.wal
+data/*.shm
+data/session.secret
+
+# logs / OS
+*.log
+.DS_Store

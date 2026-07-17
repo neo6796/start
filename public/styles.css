@@ -1,0 +1,105 @@
+:root {
+  --bg: #f4f6f9;
+  --card: #ffffff;
+  --ink: #1c2430;
+  --muted: #6b7683;
+  --line: #e3e8ee;
+  --brand: #2b6cb0;
+  --brand-ink: #ffffff;
+  --ok: #2f855a;
+  --warn: #b7791f;
+  --bad: #c53030;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(20, 30, 45, .08), 0 4px 14px rgba(20, 30, 45, .06);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg); color: var(--ink); line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+}
+.loading { padding: 3rem; text-align: center; color: var(--muted); }
+
+/* layout */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 1rem;
+  padding: .7rem 1rem; background: var(--brand); color: var(--brand-ink);
+  box-shadow: var(--shadow);
+}
+.topbar .brand { font-weight: 700; font-size: 1.05rem; margin-right: auto; }
+.topbar .who { font-size: .85rem; opacity: .95; }
+.container { max-width: 1080px; margin: 0 auto; padding: 1rem; }
+.tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1rem; }
+.tabs button {
+  border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  padding: .5rem .9rem; border-radius: 999px; cursor: pointer; font-size: .9rem;
+}
+.tabs button.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+/* cards */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1rem; margin-bottom: 1rem; }
+.card h2 { margin: 0 0 .75rem; font-size: 1.05rem; }
+.card h3 { margin: 0 0 .5rem; font-size: .95rem; color: var(--muted); font-weight: 600; }
+.muted { color: var(--muted); font-size: .85rem; }
+.row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: end; }
+.row > * { flex: 0 0 auto; }
+.grow { flex: 1 1 200px; }
+
+/* forms */
+label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: .2rem; }
+input, select, textarea {
+  font: inherit; padding: .5rem .6rem; border: 1px solid var(--line); border-radius: 8px;
+  background: #fff; color: var(--ink); width: 100%; min-width: 0;
+}
+textarea { min-height: 60px; }
+button.btn {
+  font: inherit; border: 0; border-radius: 8px; padding: .55rem .9rem; cursor: pointer;
+  background: var(--brand); color: #fff; font-weight: 600;
+}
+button.btn.sm { padding: .35rem .6rem; font-size: .82rem; }
+button.btn.ghost { background: #eef2f7; color: var(--ink); }
+button.btn.danger { background: var(--bad); }
+button.btn.ok { background: var(--ok); }
+button.btn:disabled { opacity: .5; cursor: not-allowed; }
+.field { margin-bottom: .6rem; }
+
+/* tables */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--muted); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+tbody tr:hover { background: #fafbfc; }
+.right { text-align: right; }
+
+/* badges */
+.badge { display: inline-block; padding: .1rem .5rem; border-radius: 999px; font-size: .72rem; font-weight: 600; }
+.badge.ok { background: #e6f4ec; color: var(--ok); }
+.badge.warn { background: #fdf3e0; color: var(--warn); }
+.badge.bad { background: #fdecec; color: var(--bad); }
+.badge.locked { background: #eef0f3; color: var(--muted); }
+
+/* menu day cards */
+.day { border: 1px solid var(--line); border-radius: var(--radius); padding: .8rem; margin-bottom: .8rem; }
+.day-head { display: flex; align-items: center; gap: .6rem; margin-bottom: .6rem; }
+.day-head .date { font-weight: 700; }
+.choice { display: flex; align-items: center; gap: .6rem; padding: .55rem; border: 1px solid var(--line); border-radius: 8px; margin-bottom: .4rem; }
+.choice.selected { border-color: var(--ok); background: #f2faf5; }
+.choice .info { flex: 1 1 auto; min-width: 0; }
+.choice .price { font-weight: 700; white-space: nowrap; }
+
+/* login */
+.login-wrap { max-width: 380px; margin: 8vh auto; }
+.login-wrap .card { padding: 1.5rem; }
+
+/* toast */
+#toast { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; gap: .4rem; }
+.toast { background: #1c2430; color: #fff; padding: .6rem 1rem; border-radius: 8px; box-shadow: var(--shadow); font-size: .88rem; }
+.toast.err { background: var(--bad); }
+.toast.ok { background: var(--ok); }
+
+@media (max-width: 640px) {
+  th, td { padding: .45rem .4rem; }
+  .topbar .who { display: none; }
+}
