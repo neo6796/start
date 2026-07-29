@@ -93,10 +93,33 @@ jednotlivé platformy.
 > **HTTPS** (výnimka je `localhost` pri vývoji). V produkcii teda appku nasaď za
 > HTTPS — stačí napr. reverznou proxy (Caddy/Nginx) s platným certifikátom.
 
+## Uzávierka objednávok + WhatsApp pripomienka
+
+Objednávky sa každý týždeň **uzatvárajú k deadline-u** (predvolene **štvrtok 12:00**,
+časová zóna `Europe/Bratislava`). Po uzávierke sa na daný týždeň už objednať nedá —
+appka to zobrazí aj zablokuje tlačidlo.
+
+**Deň pred uzávierkou** (predvolene streda 12:00) appka automaticky pošle
+**WhatsApp pripomienku** ľuďom, ktorí už niekedy objednávali, ale tento týždeň si
+ešte neobjednali. Za týždeň sa pošle najviac raz (aj po reštarte servera).
+
+Nastavuje sa cez env premenné (viď `backend/.env.example`):
+
+| Premenná | Význam | Predvolené |
+|----------|--------|-----------|
+| `DEADLINE_DAY` | Deň uzávierky (1=Po … 7=Ne) | `4` (štvrtok) |
+| `DEADLINE_TIME` | Čas uzávierky (HH:MM) | `12:00` |
+| `REMINDER_OFFSET_DAYS` | Koľko dní pred uzávierkou poslať pripomienku | `1` |
+| `REMINDER_TIME` | Čas odoslania pripomienky | `12:00` |
+| `ENFORCE_DEADLINE` | Blokovať objednávky po uzávierke | `true` |
+| `TZ_NAME` | Časová zóna pre výpočty | `Europe/Bratislava` |
+| `PUBLIC_URL` | Odkaz na appku v pripomienke | – |
+
 ## API prehľad
 
 | Metóda | Endpoint | Popis |
 |--------|----------|-------|
+| GET | `/api/config` | Stav uzávierky (otvorené/zatvorené, kedy je deadline) |
 | GET | `/api/products` | Zoznam produktov |
 | POST | `/api/products` | Pridať produkt |
 | DELETE | `/api/products/:id` | Skryť produkt (soft delete) |

@@ -11,6 +11,7 @@ async function req(path, options = {}) {
 
 export const api = {
   health: () => req('/health'),
+  config: () => req('/config'),
   currentWeek: () => req('/current-week'),
   products: () => req('/products'),
   createOrder: (order) => req('/orders', { method: 'POST', body: JSON.stringify(order) }),

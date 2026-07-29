@@ -121,13 +121,17 @@ function OrderForm() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [deadline, setDeadline] = useState(null);
 
   useEffect(() => {
     api.products()
       .then((p) => setProducts(p))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
+    api.config().then((c) => setDeadline(c.deadline)).catch(() => {});
   }, []);
+
+  const closed = deadline && deadline.enforced && !deadline.open;
 
   const categories = useMemo(() => {
     const map = new Map();
@@ -199,6 +203,14 @@ function OrderForm() {
 
   return (
     <form className="card" onSubmit={submit}>
+      {deadline && (
+        <div className={`deadline-strip ${closed ? 'closed' : 'open'}`}>
+          {closed
+            ? <>🔒 Objednávky na tento týždeň sú <strong>uzavreté</strong> (uzávierka bola {deadline.label}).</>
+            : <>⏳ Objednávky na tento týždeň prijímame do <strong>{deadline.label}</strong>.</>}
+        </div>
+      )}
+
       <div className="fields">
         <label>
           Meno *
@@ -244,8 +256,8 @@ function OrderForm() {
 
       <div className="submit-bar">
         <span className="total">Spolu: <strong>{totalUnits} ks</strong></span>
-        <button className="primary" type="submit" disabled={submitting}>
-          {submitting ? 'Odosielam…' : 'Odoslať objednávku'}
+        <button className="primary" type="submit" disabled={submitting || closed}>
+          {closed ? 'Uzavreté' : submitting ? 'Odosielam…' : 'Odoslať objednávku'}
         </button>
       </div>
     </form>

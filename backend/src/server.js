@@ -7,6 +7,9 @@ import { fileURLToPath } from 'node:url';
 import { load, save, id } from './store.js';
 import { seedIfNeeded } from './seed.js';
 import { isoWeek } from './week.js';
+import { config } from './config.js';
+import { deadlineStatus } from './deadline.js';
+import { startScheduler } from './scheduler.js';
 import {
   sendWhatsApp,
   notifyAdmin,
@@ -26,6 +29,11 @@ data = seedIfNeeded(data, save);
 // ---- Zdravie / konfigurácia ----
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, whatsapp: whatsappEnabled ? 'live' : 'dev' });
+});
+
+// Stav uzávierky pre frontend (otvorené/zatvorené, kedy je deadline).
+app.get('/api/config', (_req, res) => {
+  res.json({ deadline: deadlineStatus(), whatsapp: whatsappEnabled ? 'live' : 'dev' });
 });
 
 // ---- Produkty (katalóg) ----
@@ -90,6 +98,15 @@ app.get('/api/orders', (req, res) => {
 });
 
 app.post('/api/orders', async (req, res) => {
+  // Uzávierka: po deadline-e sa na tento týždeň už objednávať nedá.
+  const dl = deadlineStatus();
+  if (config.enforceDeadline && !dl.open) {
+    return res.status(409).json({
+      error: `Objednávky na tento týždeň sú už uzavreté (uzávierka bola ${dl.label}). Skús to znova budúci týždeň.`,
+      deadline: dl,
+    });
+  }
+
   const { errors, order } = validateOrder(req.body, data.products);
   if (errors.length) return res.status(400).json({ error: errors.join(' ') });
 
@@ -161,6 +178,11 @@ if (existsSync(FRONTEND_DIST)) {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
+  const dl = deadlineStatus();
   console.log(`Mlieko API beží na http://localhost:${PORT}`);
   console.log(`WhatsApp režim: ${whatsappEnabled ? 'LIVE (Twilio)' : 'DEV (výpis do konzoly)'}`);
+  console.log(`Uzávierka objednávok: ${dl.deadlineDayName} ${dl.deadlineTime} (TZ ${config.tz}), enforcovanie: ${config.enforceDeadline ? 'áno' : 'nie'}`);
+
+  // Spusti plánovač pripomienok (deň pred uzávierkou).
+  startScheduler(() => data, save);
 });
