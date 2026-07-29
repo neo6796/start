@@ -1,0 +1,10 @@
+# Caddyfile pre NATÍVNy beh na Windows (Caddy.exe).
+# Rozdiel oproti Docker verzii: backend beží na localhoste, nie ako služba "app".
+#
+# SITE_ADDRESS nastav ako systémovú premennú, napr.:
+#   - skutočná doména:  mlieko.ahafarma.sk   → Caddy vybaví HTTPS automaticky
+#   - lokálny test:      :80                  → bez HTTPS (http://localhost)
+{$SITE_ADDRESS::80} {
+	encode gzip
+	reverse_proxy 127.0.0.1:3001
+}

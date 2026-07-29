@@ -57,7 +57,10 @@ vybaví a obnovuje HTTPS certifikát (Let's Encrypt) zadarmo.
 - **Váš firemný server / NAS / mini-PC** (stačí ~1 GB RAM) — dáta ostávajú u vás.
 - Alebo lacný **VPS** (Hetzner, DigitalOcean…), ak nechcete vlastný hardvér.
 
-### Postup
+> **Windows Server?** Docker nie je nutný — pozri **[DEPLOY-WINDOWS.md](DEPLOY-WINDOWS.md)**
+> pre natívny beh (Node + Caddy ako Windows služby) aj variant cez Docker Desktop.
+
+### Postup (Linux / Docker)
 ```bash
 git clone <adresa-repozitára> && cd start
 cp .env.example .env          # uprav doménu, uzávierku a Twilio údaje
