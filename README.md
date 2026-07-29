@@ -47,6 +47,39 @@ npm start          # backend servíruje API aj hotový frontend na porte 3001
 
 Otvor `http://localhost:3001`.
 
+## Nasadenie na server (Docker + Caddy s HTTPS)
+
+Celá appka sa nasadí **jedným príkazom**. Server potrebuje len nainštalovaný
+**Docker** — nič iné (žiadne Node, npm). Súčasťou je **Caddy**, ktorý automaticky
+vybaví a obnovuje HTTPS certifikát (Let's Encrypt) zadarmo.
+
+### Na čom to môže bežať
+- **Váš firemný server / NAS / mini-PC** (stačí ~1 GB RAM) — dáta ostávajú u vás.
+- Alebo lacný **VPS** (Hetzner, DigitalOcean…), ak nechcete vlastný hardvér.
+
+### Postup
+```bash
+git clone <adresa-repozitára> && cd start
+cp .env.example .env          # uprav doménu, uzávierku a Twilio údaje
+docker compose up -d --build  # postaví a spustí appku + Caddy
+```
+Appka beží na `https://<tvoja-doména>`. Dáta sa ukladajú do Docker volume
+`milk-data` (prežijú reštart aj aktualizáciu).
+
+Aktualizácia po zmene kódu:
+```bash
+git pull && docker compose up -d --build
+```
+
+### HTTPS a doména
+- V `.env` nastav `SITE_ADDRESS` na skutočnú doménu (napr. `mlieko.ahafarma.sk`)
+  a nasmeruj jej **A záznam** na verejnú IP servera. Caddy zvyšok vyrieši sám.
+- **Server bez verejnej IP** (len vnútrofiremný)? Dve bežné možnosti:
+  - **Cloudflare Tunnel** — vystaví appku na HTTPS bez otvárania portov.
+  - **Firemná VPN** — appka dostupná len zvnútra siete; vtedy stačí `SITE_ADDRESS=:80`
+    (bez verejného HTTPS), prípadne interný certifikát.
+- Na lokálne vyskúšanie nechaj `SITE_ADDRESS=:80` a otvor `http://localhost`.
+
 ## Zapnutie WhatsApp (Twilio)
 
 Bez konfigurácie appka beží v **DEV režime** – WhatsApp správy sa iba vypíšu do

@@ -1,0 +1,7 @@
+# Caddy sa postará o HTTPS certifikát automaticky (Let's Encrypt),
+# ak do SITE_ADDRESS zadáš skutočnú doménu (napr. mlieko.ahafarma.sk).
+# Na lokálne vyskúšanie nechaj predvolené :80 (bez HTTPS).
+{$SITE_ADDRESS::80} {
+	encode gzip
+	reverse_proxy app:3001
+}

@@ -1,0 +1,45 @@
+# Nasadenie: appka (Node) + Caddy (HTTPS reverzná proxy).
+# Nastavenia sa načítajú zo súboru `.env` (skopíruj z `.env.example`).
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    expose:
+      - "3001"
+    environment:
+      PORT: "3001"
+      TZ_NAME: "${TZ_NAME:-Europe/Bratislava}"
+      # uzávierka
+      DEADLINE_DAY: "${DEADLINE_DAY:-4}"
+      DEADLINE_TIME: "${DEADLINE_TIME:-12:00}"
+      REMINDER_OFFSET_DAYS: "${REMINDER_OFFSET_DAYS:-1}"
+      REMINDER_TIME: "${REMINDER_TIME:-12:00}"
+      ENFORCE_DEADLINE: "${ENFORCE_DEADLINE:-true}"
+      PUBLIC_URL: "${PUBLIC_URL:-}"
+      # WhatsApp (Twilio) – doplň v .env
+      TWILIO_ACCOUNT_SID: "${TWILIO_ACCOUNT_SID:-}"
+      TWILIO_AUTH_TOKEN: "${TWILIO_AUTH_TOKEN:-}"
+      TWILIO_WHATSAPP_FROM: "${TWILIO_WHATSAPP_FROM:-}"
+      ADMIN_WHATSAPP_TO: "${ADMIN_WHATSAPP_TO:-}"
+    volumes:
+      - milk-data:/app/backend/data
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_ADDRESS: "${SITE_ADDRESS:-:80}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
+volumes:
+  milk-data:
+  caddy-data:
+  caddy-config:
