@@ -2,12 +2,21 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { api } from './api.js';
 
 export default function App() {
-  const [tab, setTab] = useState('order');
+  // ?tab=admin umožní poslať nákupcovi priamy odkaz na Spracovanie.
+  const [tab, setTab] = useState(() => {
+    const t = new URLSearchParams(window.location.search).get('tab');
+    return ['order', 'summary', 'admin'].includes(t) ? t : 'order';
+  });
   const [health, setHealth] = useState(null);
 
   useEffect(() => {
     api.health().then(setHealth).catch(() => setHealth({ ok: false }));
   }, []);
+
+  // Samostatná stránka pre kuriéra: /kurier?t=<token>
+  if (window.location.pathname === '/kurier') {
+    return <CourierPage />;
+  }
 
   return (
     <div className="app">
@@ -33,12 +42,15 @@ export default function App() {
           Objednať
         </button>
         <button className={tab === 'summary' ? 'active' : ''} onClick={() => setTab('summary')}>
-          Súhrn pre nákupcu
+          Súhrn
+        </button>
+        <button className={tab === 'admin' ? 'active' : ''} onClick={() => setTab('admin')}>
+          Spracovanie
         </button>
       </nav>
 
       <main className="content">
-        {tab === 'order' ? <OrderForm /> : <Summary />}
+        {tab === 'order' ? <OrderForm /> : tab === 'summary' ? <Summary /> : <AdminPanel />}
       </main>
 
       <footer className="foot">Objednávky sa uzatvárajú podľa dohody vo firme (napr. štvrtok 12:00).</footer>
@@ -323,7 +335,7 @@ function Summary() {
             {orders.map((o) => (
               <li key={o.id}>
                 <div className="order-top">
-                  <strong>{o.employeeName}</strong>
+                  <strong>{o.employeeName} <StatusChip status={o.status} /></strong>
                   <span className="muted">{new Date(o.createdAt).toLocaleString('sk-SK')}</span>
                 </div>
                 <div className="order-items">
@@ -335,6 +347,200 @@ function Summary() {
               </li>
             ))}
           </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const STATUS_LABELS = {
+  received: { text: 'prijatá', cls: 'st-received' },
+  confirmed: { text: 'potvrdená', cls: 'st-confirmed' },
+  partially_confirmed: { text: 'čiastočne', cls: 'st-partial' },
+  unavailable: { text: 'nedostupná', cls: 'st-unavailable' },
+  delivered: { text: 'doručená', cls: 'st-delivered' },
+};
+
+function StatusChip({ status }) {
+  const s = STATUS_LABELS[status] || { text: status, cls: '' };
+  return <span className={`status-chip ${s.cls}`}>{s.text}</span>;
+}
+
+function AdminPanel() {
+  const [info, setInfo] = useState(null);
+  const [pin, setPin] = useState(() => localStorage.getItem('mlieko_admin_pin') || '');
+  const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [unavailable, setUnavailable] = useState({});
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const [error, setError] = useState(null);
+
+  async function refresh() {
+    try {
+      const i = await api.adminInfo();
+      setInfo(i);
+      if (!deliveryDate) setDeliveryDate(i.suggestedDeliveryDate);
+      const [ps, os] = await Promise.all([api.products(), api.orders(i.week)]);
+      setProducts(ps);
+      setOrders(os);
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+  useEffect(() => { refresh(); }, []);
+
+  if (error) return <p className="error">{error}</p>;
+  if (!info) return <p className="muted">Načítavam…</p>;
+
+  const pending = orders.filter((o) => o.status === 'received');
+  const toDeliver = orders.filter((o) => ['confirmed', 'partially_confirmed'].includes(o.status));
+
+  function toggleUnavailable(pid) {
+    setUnavailable((prev) => ({ ...prev, [pid]: !prev[pid] }));
+  }
+
+  async function runProcess() {
+    setBusy(true); setMsg(null); setError(null);
+    try {
+      localStorage.setItem('mlieko_admin_pin', pin);
+      const unavailableProductIds = Object.keys(unavailable).filter((k) => unavailable[k]);
+      const r = await api.adminProcess(pin, { deliveryDate, unavailableProductIds });
+      setMsg(r.processed === 0
+        ? 'Žiadne nespracované objednávky.'
+        : `Spracovaných ${r.processed} objednávok (potvrdené: ${r.counts.confirmed}, čiastočné: ${r.counts.partially_confirmed}, nedostupné: ${r.counts.unavailable}). WhatsApp odoslaný ${r.notified}×. Doručenie: ${r.deliveryLabel}.`);
+      await refresh();
+    } catch (e) { setError(e.message); } finally { setBusy(false); }
+  }
+
+  async function runDelivered() {
+    setBusy(true); setMsg(null); setError(null);
+    try {
+      localStorage.setItem('mlieko_admin_pin', pin);
+      const r = await api.adminDelivered(pin);
+      setMsg(r.delivered === 0
+        ? 'Žiadne objednávky na naskladnenie (už sú doručené alebo nespracované).'
+        : `📦 Naskladnené: ${r.delivered} objednávok, notifikácií odoslaných ${r.notified}.`);
+      await refresh();
+    } catch (e) { setError(e.message); } finally { setBusy(false); }
+  }
+
+  return (
+    <div className="stack">
+      {info.pinRequired && (
+        <div className="card">
+          <label>Admin PIN
+            <input type="password" value={pin} onChange={(e) => setPin(e.target.value)} placeholder="PIN" />
+          </label>
+        </div>
+      )}
+
+      <div className="card">
+        <h3 style={{ marginTop: 0 }}>1 · Potvrdenie po uzávierke</h3>
+        <p className="muted">Nespracované objednávky: <strong>{pending.length}</strong> (týždeň {info.week})</p>
+        <label>Deň doručenia
+          <input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} />
+        </label>
+        <h3>Nedostupné položky (nezaškrtnuté = potvrdené)</h3>
+        {products.map((p) => (
+          <label key={p.id} className="check-row">
+            <input type="checkbox" checked={!!unavailable[p.id]} onChange={() => toggleUnavailable(p.id)} />
+            <span>{p.name}</span>
+          </label>
+        ))}
+        <div className="submit-bar">
+          <span className="muted">Pošle WhatsApp potvrdenia s dňom doručenia.</span>
+          <button className="primary" disabled={busy || pending.length === 0} onClick={runProcess}>
+            Potvrdiť objednávky
+          </button>
+        </div>
+      </div>
+
+      <div className="card">
+        <h3 style={{ marginTop: 0 }}>2 · Deň D — naskladnenie do boxu</h3>
+        <p className="muted">Čaká na doručenie: <strong>{toDeliver.length}</strong> objednávok</p>
+        <div className="submit-bar">
+          <span className="muted">Pošle „📦 tovar je v boxe" všetkým potvrdeným.</span>
+          <button className="primary" disabled={busy || toDeliver.length === 0} onClick={runDelivered}>
+            📦 Tovar naskladnený
+          </button>
+        </div>
+        {info.courierLinkEnabled && (
+          <p className="muted" style={{ marginTop: 12 }}>
+            Kuriér môže naskladnenie potvrdiť sám cez odkaz <code>{window.location.origin}/kurier?t=&lt;token&gt;</code> (token je v nastavení servera).
+          </p>
+        )}
+      </div>
+
+      {msg && <div className="card success"><p style={{ margin: 0 }}>{msg}</p></div>}
+      {error && <p className="error">{error}</p>}
+
+      <div className="card">
+        <h3 style={{ marginTop: 0 }}>Objednávky týždňa</h3>
+        {orders.length === 0 ? <p className="muted">Žiadne objednávky.</p> : (
+          <ul className="order-list">
+            {orders.map((o) => (
+              <li key={o.id}>
+                <div className="order-top">
+                  <strong>{o.employeeName} <StatusChip status={o.status} /></strong>
+                  <span className="muted">{new Date(o.createdAt).toLocaleString('sk-SK')}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CourierPage() {
+  const token = new URLSearchParams(window.location.search).get('t') || '';
+  const [state, setState] = useState('ready'); // ready | busy | done | error
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+
+  async function confirm() {
+    setState('busy'); setError(null);
+    try {
+      const r = await api.courierDelivered(token);
+      setResult(r);
+      setState('done');
+    } catch (e) {
+      setError(e.message);
+      setState('error');
+    }
+  }
+
+  return (
+    <div className="app courier">
+      <header className="topbar" style={{ justifyContent: 'center' }}>
+        <div className="brand">
+          <img className="logo-img" src="/logo.png" alt="Aha farma" />
+          <div>
+            <h1>Potvrdenie doručenia</h1>
+            <p className="subtitle">Chladený príjmový box</p>
+          </div>
+        </div>
+      </header>
+
+      <div className="card" style={{ textAlign: 'center' }}>
+        {state === 'done' ? (
+          <>
+            <h2>✅ Ďakujeme!</h2>
+            <p>Naskladnených objednávok: <strong>{result.delivered}</strong>, notifikácií odoslaných: <strong>{result.notified}</strong>.</p>
+            {result.delivered === 0 && <p className="muted">Všetko už bolo potvrdené skôr — netreba nič robiť.</p>}
+          </>
+        ) : (
+          <>
+            <p>Po vložení tovaru do chladeného boxu stlač tlačidlo — zákazníkom odíde WhatsApp notifikácia, že tovar je pripravený.</p>
+            <button className="primary big" disabled={state === 'busy' || !token} onClick={confirm}>
+              {state === 'busy' ? 'Odosielam…' : '📦 Tovar je v boxe'}
+            </button>
+            {!token && <p className="error">V odkaze chýba token (parameter ?t=).</p>}
+            {error && <p className="error">{error}</p>}
+          </>
         )}
       </div>
     </div>

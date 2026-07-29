@@ -150,6 +150,24 @@ Nastavuje sa cez env premenné (viď `backend/.env.example`):
 | `ENFORCE_DEADLINE` | Blokovať objednávky po uzávierke | `true` |
 | `TZ_NAME` | Časová zóna pre výpočty | `Europe/Bratislava` |
 | `PUBLIC_URL` | Odkaz na appku v pripomienke | – |
+| `DELIVERY_DAY` | Predvolený deň doručenia (1=Po … 7=Ne) | `5` (piatok) |
+| `ADMIN_PIN` | PIN pre záložku Spracovanie | – (bez ochrany) |
+| `COURIER_TOKEN` | Token kuriérskeho odkazu `/kurier?t=…` | – (vypnuté) |
+
+## Spracovanie po uzávierke a doručenie (deň D)
+
+Životný cyklus objednávky: `prijatá → potvrdená / čiastočne / nedostupná → doručená`.
+
+1. **Po uzávierke** otvorí nákupca záložku **Spracovanie** (`/?tab=admin`,
+   voliteľne chránená `ADMIN_PIN`): skontroluje objednávky, prípadne označí
+   **nedostupné položky**, potvrdí **deň doručenia** (predvolený piatok) a klikne
+   *Potvrdiť objednávky* — každému zákazníkovi odíde WhatsApp potvrdenie
+   objednávky / jej časti s dňom očakávaného doručenia.
+2. **V deň D** kuriér privezie tovar do spoločného **chladeného boxu**
+   a potvrdí naskladnenie cez odkaz **`/kurier?t=<COURIER_TOKEN>`**
+   (bez prihlásenia, jedno veľké tlačidlo). Alternatívne to spraví nákupca
+   tlačidlom v záložke Spracovanie. Zákazníkom odíde WhatsApp
+   „📦 tovar je v boxe". Akcia je idempotentná — druhé stlačenie nič nepošle.
 
 ## API prehľad
 
@@ -164,6 +182,10 @@ Nastavuje sa cez env premenné (viď `backend/.env.example`):
 | GET | `/api/summary?week=YYYY-Www` | Nákupný súhrn za týždeň |
 | GET | `/api/current-week` | Aktuálny ISO týždeň |
 | GET | `/api/health` | Stav + WhatsApp režim |
+| GET | `/api/admin/info` | Info pre Spracovanie (PIN?, kuriér?, návrh dňa doručenia) |
+| POST | `/api/admin/process` | Potvrdiť objednávky/časti + deň doručenia, poslať WhatsApp |
+| POST | `/api/admin/delivered` | Deň D: označiť doručené + poslať „tovar je v boxe" |
+| POST | `/api/courier/delivered` | To isté cez kuriérsky token (bez PIN) |
 
 ## Ďalšie možné kroky
 

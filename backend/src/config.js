@@ -23,6 +23,12 @@ export const config = {
   enforceDeadline: String(process.env.ENFORCE_DEADLINE ?? 'true').toLowerCase() !== 'false',
   // Verejná adresa appky – použije sa ako odkaz v pripomienke (voliteľné).
   publicUrl: (process.env.PUBLIC_URL || '').trim().replace(/\/$/, ''),
+  // Predvolený deň doručenia: 1=Po … 7=Ne (5 = piatok). Nákupca ho môže zmeniť.
+  deliveryDay: Math.min(7, Math.max(1, Number(process.env.DELIVERY_DAY) || 5)),
+  // PIN pre admin záložku (Spracovanie). Prázdne = bez ochrany (interné použitie).
+  adminPin: (process.env.ADMIN_PIN || '').trim(),
+  // Tajný token pre kuriérsky odkaz. Prázdne = kuriérsky odkaz vypnutý.
+  courierToken: (process.env.COURIER_TOKEN || '').trim(),
 };
 
 export const DAY_NAMES = ['', 'pondelok', 'utorok', 'streda', 'štvrtok', 'piatok', 'sobota', 'nedeľa'];

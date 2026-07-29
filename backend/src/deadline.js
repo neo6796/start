@@ -83,4 +83,24 @@ export function isReminderWindow(now = new Date()) {
   };
 }
 
+// Najbližší výskyt dňa doručenia (dnes alebo neskôr) ako "YYYY-MM-DD" v TZ.
+export function nextDeliveryDateISO(now = new Date()) {
+  const t = nowInTz(config.tz, now);
+  const add = (config.deliveryDay - t.weekday + 7) % 7;
+  const d = new Date(Date.UTC(t.year, t.month - 1, t.day, 12, 0, 0));
+  d.setUTCDate(d.getUTCDate() + add);
+  const mo = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  return `${d.getUTCFullYear()}-${mo}-${dd}`;
+}
+
+// "2026-08-01" → "piatok 01.08." (na zobrazenie v správach a UI).
+export function deliveryLabel(dateISO) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateISO || ''));
+  if (!m) return dateISO || '';
+  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12));
+  const weekday = d.getUTCDay() === 0 ? 7 : d.getUTCDay();
+  return `${DAY_NAMES[weekday]} ${m[3]}.${m[2]}.`;
+}
+
 export { DAY_NAMES_ACC };

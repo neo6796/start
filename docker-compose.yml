@@ -16,6 +16,9 @@ services:
       REMINDER_TIME: "${REMINDER_TIME:-12:00}"
       ENFORCE_DEADLINE: "${ENFORCE_DEADLINE:-true}"
       PUBLIC_URL: "${PUBLIC_URL:-}"
+      DELIVERY_DAY: "${DELIVERY_DAY:-5}"
+      ADMIN_PIN: "${ADMIN_PIN:-}"
+      COURIER_TOKEN: "${COURIER_TOKEN:-}"
       # WhatsApp (Twilio) – doplň v .env
       TWILIO_ACCOUNT_SID: "${TWILIO_ACCOUNT_SID:-}"
       TWILIO_AUTH_TOKEN: "${TWILIO_AUTH_TOKEN:-}"

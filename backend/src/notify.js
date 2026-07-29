@@ -88,6 +88,52 @@ export function buildConfirmationMessage(order, products) {
     .join('\n');
 }
 
+// Potvrdenie po uzávierke: čo je potvrdené / nedostupné + deň doručenia.
+export function buildProcessedMessage(order, products, deliveryLabelStr) {
+  const nameOf = (pid) => products.find((x) => x.id === pid)?.name || pid;
+  const unitOf = (pid) => products.find((x) => x.id === pid)?.unit || 'ks';
+  const confirmed = order.items.filter((it) => !it.unavailable);
+  const unavailable = order.items.filter((it) => it.unavailable);
+
+  if (confirmed.length === 0) {
+    return [
+      `😔 Objednávka – tento týždeň nedostupné`,
+      ``,
+      `Ahoj ${order.employeeName}, žiaľ, nič z tvojej objednávky tento týždeň nepríde:`,
+      unavailable.map((it) => `• ${nameOf(it.productId)} — ${it.qty}× (${unitOf(it.productId)})`).join('\n'),
+      ``,
+      `Ospravedlňujeme sa. Skús to, prosím, budúci týždeň. 🙏`,
+    ].join('\n');
+  }
+
+  const lines = [
+    `✅ Objednávka potvrdená${unavailable.length ? ' (čiastočne)' : ''}`,
+    ``,
+    `Ahoj ${order.employeeName}, potvrdzujeme:`,
+    confirmed.map((it) => `• ${nameOf(it.productId)} — ${it.qty}× (${unitOf(it.productId)})`).join('\n'),
+  ];
+  if (unavailable.length) {
+    lines.push(``, `❌ Tento týždeň nedostupné:`,
+      unavailable.map((it) => `• ${nameOf(it.productId)} — ${it.qty}×`).join('\n'));
+  }
+  lines.push(``, `🚚 Očakávané doručenie: ${deliveryLabelStr}`, ``, `Ďakujeme! 🥛`);
+  return lines.join('\n');
+}
+
+// Deň D: tovar je v chladenom boxe.
+export function buildDeliveredMessage(order, products) {
+  const nameOf = (pid) => products.find((x) => x.id === pid)?.name || pid;
+  const confirmed = order.items.filter((it) => !it.unavailable);
+  return [
+    `📦 Tovar je v chladenom boxe!`,
+    ``,
+    `Ahoj ${order.employeeName}, tvoja objednávka je naskladnená v spoločnom chladenom boxe – príď si po ňu:`,
+    confirmed.map((it) => `• ${nameOf(it.productId)} — ${it.qty}×`).join('\n'),
+    ``,
+    `Dobrú chuť! 🥛`,
+  ].join('\n');
+}
+
 // Notifikuje nákupcu o novej objednávke (ak je ADMIN_WHATSAPP_TO nastavené).
 export async function notifyAdmin(order, products) {
   if (!ADMIN_WHATSAPP_TO) return { ok: false, reason: 'no-admin' };

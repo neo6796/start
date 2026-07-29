@@ -280,3 +280,36 @@ button.primary:disabled { opacity: .6; cursor: default; }
   font-size: 12px;
   margin-top: 24px;
 }
+
+/* Stavy objednávok */
+.status-chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.st-received { background: #eef1f7; color: #4a5566; }
+.st-confirmed { background: #e4f6ec; color: #1f9d55; }
+.st-partial { background: #fff5e6; color: #8a5a00; }
+.st-unavailable { background: #fdeaec; color: #a3111f; }
+.st-delivered { background: #e3f0ff; color: #1c5fb8; }
+
+/* Admin – checkboxy nedostupných položiek */
+.check-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-weight: 500;
+  color: var(--ink);
+  font-size: 14px;
+}
+.check-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--brand); }
+
+/* Kuriérska stránka */
+button.primary.big { font-size: 20px; padding: 18px 32px; width: 100%; margin-top: 8px; }
+.courier .card { margin-top: 8px; }

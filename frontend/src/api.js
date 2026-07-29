@@ -17,4 +17,11 @@ export const api = {
   createOrder: (order) => req('/orders', { method: 'POST', body: JSON.stringify(order) }),
   orders: (week) => req(`/orders${week ? `?week=${encodeURIComponent(week)}` : ''}`),
   summary: (week) => req(`/summary${week ? `?week=${encodeURIComponent(week)}` : ''}`),
+  adminInfo: () => req('/admin/info'),
+  adminProcess: (pin, body) =>
+    req('/admin/process', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-pin': pin }, body: JSON.stringify(body) }),
+  adminDelivered: (pin) =>
+    req('/admin/delivered', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-pin': pin }, body: '{}' }),
+  courierDelivered: (token) =>
+    req('/courier/delivered', { method: 'POST', body: JSON.stringify({ token }) }),
 };

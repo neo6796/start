@@ -110,23 +110,26 @@ v DEV režime (správy sa logujú do konzoly). Pre produkciu treba schválené
 - Nasadenie: Docker + Caddy HTTPS, návod a skripty pre Windows Server
 - Klikateľné demo (artifact) s ukážkovými položkami a cenami
 
-### 🔨 Na doprogramovanie (nové požiadavky z tohto zadania)
-1. **Potvrdenie objednávky / jej časti po uzávierke** — admin rozhranie:
-   označiť položky ako potvrdené/nedostupné, zadať **deň očakávaného doručenia**,
-   hromadne odoslať WhatsApp potvrdenia.
-2. **Stavy objednávky** (`received → confirmed/partially_confirmed → delivered → closed`).
-3. **Kuriér / deň D** — jednoduchá akcia „Tovar naskladnený do boxu"
-   (tlačidlo alebo bezpečný odkaz pre kuriéra), ktorá hromadne pošle
-   zákazníkom notifikáciu „tovar je v chladenom boxe".
-4. *(voliteľné rozšírenia)* — potvrdenie vyzdvihnutia z boxu, história
-   objednávok zákazníka, mesačné vyúčtovanie na osobu.
+- ✅ **Potvrdenie objednávky / jej časti po uzávierke** — záložka *Spracovanie*
+  (voliteľný `ADMIN_PIN`): nedostupné položky, deň doručenia (predvolený piatok,
+  dá sa zmeniť), hromadné WhatsApp potvrdenia.
+- ✅ **Stavy objednávky** `received → confirmed / partially_confirmed /
+  unavailable → delivered` (so štítkami v UI).
+- ✅ **Kuriér / deň D** — bezpečný odkaz `/kurier?t=<token>` bez prihlásenia
+  + záložné tlačidlo v Spracovaní; hromadná notifikácia „📦 tovar je v boxe";
+  idempotentné.
+
+### 🔨 Možné budúce rozšírenia
+- Potvrdenie vyzdvihnutia z boxu *(zámerne vynechané — niet ako evidovať)*.
+- História objednávok zákazníka, mesačné vyúčtovanie na osobu.
 
 ---
 
-## 8. Otvorené otázky
+## 8. Rozhodnutia (zodpovedané otázky)
 
-- Kto potvrdzuje objednávky po uzávierke — jedna osoba (nákupca) v appke?
-- Deň doručenia — je fixný (napr. vždy utorok), alebo sa zadáva pri potvrdení?
-- Ako potvrdí kuriér naskladnenie — tlačidlo v appke, alebo špeciálny odkaz
-  (bez prihlásenia) ktorý dostane vopred?
-- Má box kapacitné obmedzenia / treba evidovať vyzdvihnutie?
+| Otázka | Rozhodnutie |
+|--------|-------------|
+| Kto potvrdzuje po uzávierke | Jedna osoba — nákupca v záložke *Spracovanie* (voliteľný PIN). |
+| Deň doručenia | Predvolený **piatok**, nákupca ho môže pri potvrdení zmeniť. |
+| Ako potvrdí kuriér | **Bezpečný odkaz** `/kurier?t=<token>` (primárne) + tlačidlo v admin záložke (záloha). |
+| Evidencia vyzdvihnutia | Nie — niet ako evidovať, kto si tovar z boxu zobral. |
