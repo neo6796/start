@@ -26,6 +26,8 @@ export default function App() {
         )}
       </header>
 
+      <InstallBanner />
+
       <nav className="tabs">
         <button className={tab === 'order' ? 'active' : ''} onClick={() => setTab('order')}>
           Objednať
@@ -42,6 +44,71 @@ export default function App() {
       <footer className="foot">Objednávky sa uzatvárajú podľa dohody vo firme (napr. štvrtok 12:00).</footer>
     </div>
   );
+}
+
+function InstallBanner() {
+  const [deferred, setDeferred] = useState(null);
+  const [dismissed, setDismissed] = useState(
+    () => localStorage.getItem('mlieko_install_dismissed') === '1'
+  );
+
+  // Beží appka už ako "nainštalovaná" (standalone)? Potom banner nezobrazuj.
+  const standalone =
+    window.matchMedia?.('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+
+  const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+
+  useEffect(() => {
+    function onPrompt(e) {
+      e.preventDefault();
+      setDeferred(e);
+    }
+    window.addEventListener('beforeinstallprompt', onPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', onPrompt);
+  }, []);
+
+  if (standalone || dismissed) return null;
+
+  function close() {
+    setDismissed(true);
+    localStorage.setItem('mlieko_install_dismissed', '1');
+  }
+
+  async function install() {
+    if (!deferred) return;
+    deferred.prompt();
+    await deferred.userChoice;
+    setDeferred(null);
+    close();
+  }
+
+  // Android / Huawei / desktop Chromium – natívna výzva na inštaláciu.
+  if (deferred) {
+    return (
+      <div className="install-banner">
+        <span>📲 Pridať appku na plochu telefónu?</span>
+        <div className="install-actions">
+          <button className="ghost" onClick={close}>Neskôr</button>
+          <button className="primary small" onClick={install}>Nainštalovať</button>
+        </div>
+      </div>
+    );
+  }
+
+  // iPhone – Safari nemá automatickú výzvu, ukáž krátky návod.
+  if (isIOS) {
+    return (
+      <div className="install-banner">
+        <span>📲 Pridaj na plochu: klepni na <strong>Zdieľať</strong> → <strong>Pridať na plochu</strong>.</span>
+        <div className="install-actions">
+          <button className="ghost" onClick={close}>OK</button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
 
 function OrderForm() {

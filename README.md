@@ -73,6 +73,26 @@ Pre reálne posielanie:
 > firmy. Na testovanie cez Twilio Sandbox to netreba – stačí, aby sa každý
 > príjemca raz pripojil k sandboxu.
 
+## Mobil (PWA) — iPhone / Android / Huawei
+
+Appka je **PWA (Progressive Web App)** — dá sa pridať na plochu telefónu a
+správa sa ako natívna appka, bez App Store / Google Play / Huawei AppGallery:
+
+- **Android / Huawei:** pri otvorení sa zobrazí výzva „Nainštalovať" (alebo cez
+  menu prehliadača → *Pridať na plochu*). Funguje aj na novších Huawei bez
+  Google služieb.
+- **iPhone (Safari):** tlačidlo *Zdieľať* → *Pridať na plochu*.
+- Po pridaní má appka vlastnú ikonu, otvára sa na celú obrazovku a vďaka
+  service workeru funguje aj pri slabom/žiadnom signáli.
+
+Notifikácie idú cez **WhatsApp**, ktorý je bežná appka na iPhone, Androide aj
+Huawei — netreba teda riešiť push notifikácie ani rozdielne systémy pre
+jednotlivé platformy.
+
+> **Podmienka pre inštaláciu PWA:** prehliadač povolí „Pridať na plochu" iba cez
+> **HTTPS** (výnimka je `localhost` pri vývoji). V produkcii teda appku nasaď za
+> HTTPS — stačí napr. reverznou proxy (Caddy/Nginx) s platným certifikátom.
+
 ## API prehľad
 
 | Metóda | Endpoint | Popis |
