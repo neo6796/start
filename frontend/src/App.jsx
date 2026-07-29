@@ -13,7 +13,7 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand">
-          <span className="logo">🥛</span>
+          <img className="logo-img" src="/logo.png" alt="Aha farma" />
           <div>
             <h1>Objednávanie mlieka</h1>
             <p className="subtitle">Interný firemný nástroj</p>

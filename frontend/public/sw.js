@@ -2,8 +2,8 @@
 //  - appka sa dá "nainštalovať" na plochu (iPhone / Android / Huawei),
 //  - statické súbory sa cachujú → funguje aj pri slabom/žiadnom signáli,
 //  - API požiadavky (/api/) sa NIKDY necachujú (vždy čerstvé dáta).
-const CACHE = 'mlieko-v1';
-const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
+const CACHE = 'mlieko-v2';
+const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/logo.png', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

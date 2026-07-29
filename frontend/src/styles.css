@@ -4,8 +4,8 @@
   --ink: #1c2430;
   --muted: #6b7684;
   --line: #e6e9f0;
-  --brand: #2f6df6;
-  --brand-dark: #1f52c8;
+  --brand: #e80020;
+  --brand-dark: #c0001a;
   --ok: #1f9d55;
   --err: #d64545;
   --radius: 14px;
@@ -35,9 +35,9 @@ body {
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
-.brand { display: flex; align-items: center; gap: 12px; }
-.logo { font-size: 34px; }
-.topbar h1 { margin: 0; font-size: 21px; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.logo-img { height: 42px; width: auto; display: block; }
+.topbar h1 { margin: 0; font-size: 18px; }
 .subtitle { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
 
 .badge {
@@ -55,9 +55,9 @@ body {
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  background: #eaf1ff;
-  border: 1px solid #cfe0ff;
-  color: #22356b;
+  background: #fdeaec;
+  border: 1px solid #f6ccd1;
+  color: #7a0d18;
   padding: 10px 14px;
   border-radius: 12px;
   font-size: 14px;
@@ -67,7 +67,7 @@ body {
 button.ghost {
   background: transparent;
   border: none;
-  color: #22356b;
+  color: #7a0d18;
   font-weight: 600;
   cursor: pointer;
   padding: 8px 10px;
