@@ -25,6 +25,7 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 18. **Názvy jedál sú voliteľné** — menu môže bežať len na `A/B/C`; namiesto písania sa dá pripnúť fotka, PDF alebo Word papierového menu, ktorý zároveň slúži ako dôkaz.
 19. **Trvale prihlásený** je predvolené, s kratšou platnosťou pre admina a opätovným overením hesla pri zásahoch do peňazí.
 20. **SMS zatiaľ nie** — pripraví sa len voliteľné pole „telefón", aby sa dala kedykoľvek zapnúť za pol dňa.
+21. **Exporty, história a zálohy sú súčasťou MVP** (kapitola 7), vrátane kompletného exportu dát na jedno kliknutie. Grafy až vo fáze 3.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -411,12 +412,55 @@ To isté pravidlo sa použije pri odhlásení po termíne cez admina (4.5) aj pr
 
 ---
 
-## 7. Výstupy a integrácie
+## 7. Výstupy, história a zálohy
 
-- **Denný súhrn pre dodávateľa** — počty na jedlo (`A: 12, B: 7, C: 3`), automatický e-mail v momente uzávierky (PDF + XLSX). Toto appku ospravedlňuje.
-- **Zoznam pre výdaj** — kto čo má, tlačiteľné, prípadne odškrtávanie prevzatia (fáza 3).
-- **Podklad pre mzdy** a **kontrola faktúry** — viď 6.3.
-- **Zoznam pre predáka** — jeho tím, tlačiteľné.
+### 7.1 Zásady
+- **XLSX je primárny formát** — účtovníci žijú v Exceli. V ňom sú **dátumy dátumami a sumy číslami**, nie textom; inak sa v exporte nedá počítať a je na nič.
+- **CSV v UTF-8 s BOM a bodkočiarkou** ako oddeľovačom. Bez toho Excel v slovenskom prostredí rozsype diakritiku aj stĺpce — je to drobnosť, ktorá kazí polovicu exportov na svete.
+- **PDF** na tlač a odosielanie dodávateľom.
+- Každý export má hlavičku: obdobie, dátum vygenerovania, kto ho vygeneroval.
+- Každý export sa zapíše do auditu — pri osobných údajoch treba vedieť, kto aký zoznam stiahol.
+- **Čo je na obrazovke, to sa dá exportovať.** Žiadna zostava, z ktorej sa dáta musia opisovať ručne.
+
+### 7.2 Prevádzkové výstupy
+| Výstup | Komu | Kedy | Formát |
+|---|---|---|---|
+| Objednávka — počty na jedlo (`A: 12, B: 7, C: 3`) | dodávateľovi | automaticky pri týždennej uzávierke | PDF + XLSX, e-mailom |
+| Korekčný súhrn (storná a doobjednávky, 4.3) | dodávateľovi | pri dennom deadline | PDF, e-mailom |
+| Denný zoznam pre výdaj | jedálni | ráno | PDF |
+| Zberný hárok, potvrdenie tímu, zoznam chýbajúcich (5.4) | predákovi | na požiadanie | PDF |
+
+### 7.3 Účtovníctvo a mzdy
+- **Mesačný podklad pre mzdy** — per osoba: osobné číslo, meno, tím, počet obedov, cena spolu, príspevok zamestnávateľa, sociálny fond, **zrážka zo mzdy**. XLSX + CSV, formát doladený podľa mzdového softvéru.
+- **Kontrola faktúry dodávateľa** — per poskytovateľ: počty porcií po dňoch × cena a súčet. Po zadaní fakturovanej sumy appka ukáže **rozdiel a deň, v ktorom vzniká**. Toto je najrýchlejšia cesta k odhaleniu, že dodávateľ fakturuje inak, než sa objednalo.
+- **Rozúčtovanie na strediská a tímy** — pre vnútropodnikové účtovníctvo.
+- **Neodhlásené obedy** — koľko sa ich zaplatilo zbytočne, per osoba a per tím, v eurách.
+- Všetko za **ľubovoľné obdobie**, nielen za mesiac — kvartál, rok, vlastný rozsah.
+
+### 7.4 Štatistika
+Čísla, ktoré niekto reálne otvorí:
+- vývoj počtu obedov v čase — celkovo, po tímoch, po poskytovateľoch,
+- **obľúbenosť jedál** (podiel A/B/C) — podklad na rokovanie s dodávateľom alebo na zmenu počtu jedál v ponuke,
+- **disciplína objednávania** — koľko % tímu objedná včas; ukáže, ktorý predák potrebuje pomoc,
+- **neodhlásené obedy v eurách** — spravidla najzaujímavejšie číslo pre vedenie,
+- náklady: priemerná cena obeda, celkový príspevok zamestnávateľa za mesiac (podklad na rozpočet),
+- účasť: koľko percent zamestnancov sa reálne stravuje.
+
+V MVP ako **tabuľky s exportom**. Grafy sú fáza 3 — pekné, ale nikto podľa nich nerozhoduje skôr, než uvidí čísla.
+
+### 7.5 História a spätné prehliadanie
+- Ľubovoľný minulý týždeň či mesiac sa otvorí **presne v stave, v akom bol**: kto čo mal objednané, kto to zadal, aké bolo menu vrátane prílohy a aká platila cena.
+- História je **pravdivá, nie prepočítaná** — zmena cenníka ani príspevkov nikdy neprepíše minulosť (6.1, 3.3.2).
+- **Karta osoby** — celá história jej objednávok s filtrom podľa obdobia. Typický spor sa vyrieši na dva kliky.
+- **Audit log** s vyhľadávaním podľa osoby, dátumu a typu úkonu. Odpovedá na otázku „kto mi to zmenil".
+- Uzavreté mesiace sú zamknuté; oprava ide ako položka do nasledujúceho mesiaca (6.3).
+
+### 7.6 Zálohy a prenositeľnosť dát
+- **Nočná automatická záloha** databázy **aj príloh menu**, ukladaná **mimo servera** — iné úložisko, ideálne iný poskytovateľ. Záloha na tom istom stroji nie je záloha.
+- Zálohy **šifrované**, retencia 30 denných + 12 mesačných.
+- **Štvrťročný test obnovy** so zápisom dátumu a výsledku. Netestovaná záloha je len nádej. Pri tejto veľkosti dát trvá obnova minúty.
+- **Kompletný export na jedno kliknutie** — admin si kedykoľvek stiahne ZIP so všetkými dátami (XLSX + prílohy). Firma tak nie je uzamknutá v appke, vie dáta odovzdať účtovníkom alebo kedykoľvek prejsť inam. Považujem to za slušnosť voči zákazníkovi, nie za funkciu navyše.
+- Postup obnovy je súčasťou prevádzkovej dokumentácie, nie len v hlave toho, kto to nasadil.
 
 ---
 
@@ -568,7 +612,7 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 |---|---|
 | **0 — Koncept** | tento dokument, odsúhlasenie |
 | **1 — Preview** | klikací prototyp bez databázy: login, **matica predáka**, týždeň stravníka, admin nastavenia, ručný editor menu, cenník s oboma modelmi príspevku, ukážky tlačových zostáv, 3 varianty loga |
-| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov, ručný editor menu + kopírovanie týždňa, **matica predáka**, delegácia a eskalácia, ceny a mesačný export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.4)**, **push notifikácie pre predákov a admina** + sprievodca inštaláciou na plochu, **príloha menu (fotka/PDF)**, audit, nasadenie |
-| **3 — Rozšírenia** | push pre stravníkov, SMS pre predákov ak treba, import menu (XLSX/CSV, prilepenie textu) podľa reálnych vzoriek, evidencia prevzatia, hostia, SSO, kiosk, rola dodávateľa, prípadná ukrajinčina |
+| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov, ručný editor menu + kopírovanie týždňa, **matica predáka**, delegácia a eskalácia, ceny a mesačný export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.4)**, **push notifikácie pre predákov a admina** + sprievodca inštaláciou na plochu, **príloha menu (fotka/PDF/Word)**, **exporty, história a zálohy (kapitola 7)**, audit, nasadenie |
+| **3 — Rozšírenia** | grafy a dashboard, push pre stravníkov, SMS pre predákov ak treba, import menu (XLSX/CSV, prilepenie textu) podľa reálnych vzoriek, evidencia prevzatia, hostia, SSO, kiosk, rola dodávateľa, prípadná ukrajinčina |
 
 Push je v MVP **len pre predákov a admina** (zopár ľudí, s každým sa dá inštalácia prejsť osobne), pre stravníkov ostáva vo fáze 3. Tlačové zostavy sú naopak plnohodnotnou súčasťou MVP — appku bude držať predák s papierom, nie stravník s telefónom.
