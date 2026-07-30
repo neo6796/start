@@ -337,9 +337,13 @@ Deň každého stravníka je v jednom z troch stavov. Systém ich musí **rozli�
 - **Po týždennej uzávierke má prechod na *bez obeda* iný význam:** to už nie je voľba, ale **odhlásenie** (`ODHLÁSENÉ`), lebo dodávateľ počet dostal. Stav vyzerá rovnako, líši sa história — a tá rozhoduje o účtovaní (6.4). Audit log tieto dva prípady odlišuje.
 - **Nerozhodnuté dni v momente uzávierky** ostávajú nerozhodnuté: dodávateľovi sa neposielajú a človek obed nemá. V zozname po uzávierke sú viditeľné, aby bolo jasné, kto vypadol.
 
-Na obrazovke to znamená, že nerozhodnutá bunka **nemá zvýraznenú žiadnu možnosť** a má červenkastý podklad, kým *bez obeda* je vyplnený krížik na tmavom podklade. Rozhodnutie má vyzerať ako rozhodnutie.
+Na obrazovke sa to rieši **papierovou metaforou**: kým sa nič nezvolí, sú všetky možnosti len bledo orámované a bunka pôsobí prázdno — presne ako nevyplnené políčko na hárku. *Bez obeda* je naopak vyplnený krížik na tmavom podklade. Rozhodnutie má vyzerať ako rozhodnutie, nerozhodnutosť ako prázdne miesto.
 
-Na zbernom hárku je to rovnaké: prázdne políčko znamená „nevyjadril sa", `×` znamená „nechcem obed".
+Aby sa pritom nerozhodnutí nestratili, sú dve tiché pomôcky:
+- pri mene v riadku je **malé počítadlo nerozhodnutých dní**,
+- tlačidlo **„Zvýrazniť nerozhodnuté"** podfarbí všetky prázdne bunky naraz. V pokoji je tabuľka čistá, pri kontrolnom prechode pred uzávierkou sa dá rozsvietiť.
+
+Na zbernom hárku platí to isté pravidlo: prázdne políčko znamená „nevyjadril sa", `×` znamená „nechcem obed".
 
 ---
 
@@ -358,9 +362,10 @@ Poradie dôležitosti je dané tým, kto appku reálne otvorí: **matica predák
 Keďže objednávky za väčšinu ľudí zadáva predák, toto nie je prehľad — **je to zadávacia obrazovka** a musí zvládnuť 20 ľudí za dve minúty.
 
 Matica **ľudia × dni** (riadky = podriadení, stĺpce Po–Pia). V bunke sú **všetky dostupné jedlá vedľa seba** plus krížik „nechce obed" — voľba je jeden klik, nie preklikávanie dokola, a zároveň je vidieť, z čoho sa vyberá.
-- tri stavy podľa 4.6: nezvýraznené nič + červenkastý podklad = nerozhodnuté · vyplnené označenie = objednané · vyplnený krížik = bez obeda
-- opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na nerozhodnutú
+- tri stavy podľa 4.6: bledo orámované možnosti = nerozhodnuté · vyplnené označenie = objednané · vyplnený krížik = bez obeda
+- opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na prázdnu
 - hore: *„3 ľudia nerozhodnutí, uzávierka o 5 h"* — krížiky sa nepočítajú
+- počítadlo nerozhodnutých dní pri mene + tlačidlo *Zvýrazniť nerozhodnuté* na kontrolný prechod pred uzávierkou
 - **prepis z papiera musí byť bleskový:** šípky vľavo/vpravo prechádzajú medzi možnosťami, medzerník volí; alebo priamo `A`/`B`/`C` pre jedlo, `0` pre krížik, `Backspace` pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni, šípky hore/dole tiež. Bez myši, bez dialógov, bez potvrdzovania. Toto je jediná vec, ktorá rozhodne, či predáka appka baví alebo otravuje.
 - pri ponuke nad šesť jedál sa možnosti v bunke zalomia do dvoch riadkov, tabuľka sa nerozbije
 - na tablete to isté prstom: dosť veľké dotykové plochy priamo v riadku

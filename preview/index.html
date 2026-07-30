@@ -28,6 +28,9 @@
     --bar-sel:#E0A233;
     --bar-sel-fg:#1A1206;
 
+    --faint-line:#E3E2DB;
+    --faint-ink:#8E9593;
+
     --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     --mono:ui-monospace,SFMono-Regular,"SF Mono","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
 
@@ -62,6 +65,9 @@
       --bar-hover:rgba(255,255,255,.09);
       --bar-sel:#E0A233;
       --bar-sel-fg:#1A1206;
+
+      --faint-line:#28322F;
+      --faint-ink:#727C7A;
     }
   }
 
@@ -91,6 +97,9 @@
     --bar-hover:rgba(255,255,255,.09);
     --bar-sel:#E0A233;
     --bar-sel-fg:#1A1206;
+
+    --faint-line:#28322F;
+    --faint-ink:#727C7A;
   }
 
   :root[data-theme="light"]{
@@ -119,6 +128,9 @@
     --bar-hover:rgba(255,255,255,.12);
     --bar-sel:#E0A233;
     --bar-sel-fg:#1A1206;
+
+    --faint-line:#E3E2DB;
+    --faint-ink:#8E9593;
   }
 
   *{box-sizing:border-box}
@@ -327,6 +339,7 @@
     border-color:var(--petrol);
   }
   .btn.primary:hover{background:var(--petrol-2);border-color:var(--petrol-2)}
+  .btn[aria-pressed="true"]{background:var(--petrol);color:var(--on-petrol);border-color:var(--petrol)}
   .btn.wide{width:100%;justify-content:center;text-align:center}
   .btn-row{display:flex;gap:8px;flex-wrap:wrap}
 
@@ -391,10 +404,10 @@
   .opt-b{
     min-width:27px;height:28px;
     display:inline-flex;align-items:center;justify-content:center;
-    font-family:var(--mono);font-size:13px;font-weight:600;
+    font-family:var(--mono);font-size:13px;font-weight:500;
     background:transparent;
-    color:var(--ink-3);
-    border:1px solid var(--line);
+    color:var(--faint-ink);
+    border:1px solid var(--faint-line);
     border-radius:2px;
     cursor:pointer;
     padding:0 5px;
@@ -411,10 +424,23 @@
     background:var(--ink);
     color:var(--surface);
     border-color:var(--ink);
+    font-weight:700;
   }
   .opt-b:focus-visible{outline:2px solid var(--petrol);outline-offset:1px}
+
   td.self{background:var(--ok-soft)}
-  td.gap{background:var(--miss-soft)}
+  /* nerozhodnutá bunka ostáva prázdna ako políčko na papieri;
+     zvýrazniť sa dá jedným tlačidlom pred uzávierkou */
+  .hl-gaps td.gap{background:var(--miss-soft)}
+
+  .gapn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:18px;height:18px;margin-left:7px;
+    font-family:var(--mono);font-size:10.5px;font-weight:700;
+    background:var(--miss-soft);color:var(--miss);
+    border:1px solid var(--miss);border-radius:2px;
+    vertical-align:middle;
+  }
 
   .team-block{margin-bottom:22px}
   .team-head{
@@ -655,6 +681,7 @@
     <span class="pill neutral" id="pd-none">—</span>
     <span class="pill neutral" id="pd-provider">Reštaurácia U Jeleňa · A B C</span>
     <div class="btn-row" style="margin-left:auto">
+      <button class="btn" id="btn-hl" aria-pressed="false">Zvýrazniť nerozhodnuté</button>
       <button class="btn" id="btn-copy">Kopírovať minulý týždeň</button>
       <button class="btn" id="btn-clear">Vyprázdniť</button>
     </div>
@@ -690,7 +717,8 @@
   <div class="legend">
     <span><span class="opt-b" aria-checked="true" aria-hidden="true" style="cursor:default">B</span> zvolené jedlo</span>
     <span><span class="opt-b none" aria-checked="true" aria-hidden="true" style="cursor:default">×</span> nechce obed — rozhodnuté</span>
-    <span><i class="sw miss"></i> nerozhodnuté, treba doriešiť</span>
+    <span><span class="opt-b" aria-hidden="true" style="cursor:default">B</span> nezvolené, prázdne políčko</span>
+    <span><span class="gapn" aria-hidden="true">2</span> koľko dní ostáva nerozhodnutých</span>
     <span><i class="sw self"></i> objednal si sám v appke</span>
   </div>
 
@@ -703,7 +731,8 @@
   <div class="note">
     <p class="eyebrow">Prečo takto</p>
     <p><strong>Všetky možnosti sú vidieť naraz a klikne sa priamo na tú správnu</strong> — jeden klik, žiadne preklikávanie dokola.</p>
-    <p><strong>Tri stavy, nie dva.</strong> Kým sa nič nezvolí, nesvieti nič a bunka má červenkastý podklad — nikto sa nerozhodol, treba doriešiť. Krížik <code>×</code> je naopak <strong>rozhodnutie</strong>, že dotyčný obed nechce (dovolenka, služobka, nechce jesť) — vyplní sa tmavo a podklad zbledne. Počítadlo hore preto počíta iba nerozhodnutých; kto má krížik, je vybavený a upomienka mu nechodí. Opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na nerozhodnutú.</p>
+    <p><strong>Tri stavy, nie dva — a bunka sa správa ako políčko na papieri.</strong> Kým sa nič nezvolí, sú všetky možnosti len bledo orámované a bunka pôsobí prázdno; presne ako nevyplnené políčko na hárku. Krížik <code>×</code> je naopak <strong>rozhodnutie</strong>, že dotyčný obed nechce (dovolenka, služobka, nechce jesť) — vyplní sa tmavo. Počítadlo hore preto počíta iba nerozhodnutých; kto má krížik, je vybavený a upomienka mu nechodí. Opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na prázdnu.</p>
+    <p>Aby sa nerozhodnutí nestratili, má každý riadok pri mene <strong>malé počítadlo chýbajúcich dní</strong>, a pred uzávierkou sa dá tlačidlom <strong>Zvýrazniť nerozhodnuté</strong> podfarbiť všetky prázdne bunky naraz. V pokoji je tabuľka čistá, pri finálnom kontrolnom prechode sa dá rozsvietiť.</p>
     <p>Klávesnicou to ide rýchlejšie: <code>Tab</code> vojde do bunky, <strong>šípky vľavo a vpravo</strong> prechádzajú medzi možnosťami, <strong>medzerník</strong> zvolí. Alebo rovno stlač <code>A</code>, <code>B</code>, <code>C</code> pre jedlo, <code>0</code> pre krížik, <code>Backspace</code> pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni. Šípky <strong>hore a dole</strong> sa medzi ľuďmi pohybujú tiež.</p>
     <p>V ukážke má Bezáková celý týždeň krížiky (dovolenka), Tóth a Slaný sa zatiaľ nevyjadrili vôbec.</p>
     <p>Zastupovaný tím je <strong>samostatný blok</strong>, nie zliaty s vlastným — zlievanie tímov spôsobuje omyly typu „objednal som to tomu druhému Kováčovi". Riadky so zeleným pozadím sú ľudia, ktorí si objednali sami; predák ich nemusí prepisovať.</p>
@@ -1315,6 +1344,18 @@
     return person.self ? "self" : "";
   }
 
+  function thHTML(person){
+    const g = person.o.filter(undecided).length;
+    return person.n +
+      (g ? '<span class="gapn" title="nerozhodnutých dní">' + g + "</span>" : "") +
+      '<span class="pn">' + person.p + "</span>";
+  }
+
+  function refreshRow(tblId, r){
+    const th = document.querySelector("#" + tblId + " tbody tr:nth-child(" + (r+1) + ") th");
+    if (th) th.innerHTML = thHTML(rowsOf(tblId)[r]);
+  }
+
   function renderTable(tblId, rows){
     const tb = document.getElementById(tblId).querySelector("tbody");
     tb.innerHTML = "";
@@ -1322,7 +1363,7 @@
       const tr = document.createElement("tr");
       const th = document.createElement("th");
       th.scope = "row";
-      th.innerHTML = person.n + '<span class="pn">' + person.p + "</span>";
+      th.innerHTML = thHTML(person);
       tr.appendChild(th);
       person.o.forEach((v, ci) => {
         const td = document.createElement("td");
@@ -1341,6 +1382,7 @@
     const person = rowsOf(tblId)[r];
     td.className = tdClass(person, c);
     td.innerHTML = cellHTML(person, r, c, tblId);
+    refreshRow(tblId, r);
   }
 
   function focusOpt(tblId, r, c, v){
@@ -1446,6 +1488,13 @@
     });
     renderAll();
   });
+  const bh = document.getElementById("btn-hl");
+  if (bh) bh.addEventListener("click", function(){
+    const on = bh.getAttribute("aria-pressed") !== "true";
+    bh.setAttribute("aria-pressed", String(on));
+    document.getElementById("s-predak").classList.toggle("hl-gaps", on);
+  });
+
   const bx = document.getElementById("btn-clear");
   if (bx) bx.addEventListener("click", function(){
     own.concat(deleg).forEach(p => { p.o = [null,null,null,null,null]; });
