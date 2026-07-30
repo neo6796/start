@@ -192,7 +192,18 @@ Admin nastavuje **1 až 5** aktívnych poskytovateľov. Pre každého samostatne
 **Číslovanie sa generuje automaticky z poradia** — admin len zvolí štýl. Názvy jedál sú voliteľné; ak chýbajú, zobrazí sa iba označenie („B"). Ak sú vyplnené, zobrazí sa `B — Vyprážaný syr, hranolky, tatárska`.
 
 ### 3.1 Pridelenie poskytovateľa stravníkovi
-Poskytovateľ je **pevne pridelený adminom**, stravník si ho nevyberá — vidí len menu svojho poskytovateľa. Zjednodušuje to obrazovku aj počty pre dodávateľa.
+**Prideľuje výhradne admin.** Stravník si poskytovateľa nevyberá a predák ho meniť nemôže — rôzni poskytovatelia majú rôzne ceny, takže by to bol zásah do mzdového podkladu.
+
+Osoba má **zoznam pridelených poskytovateľov**, spravidla jedného:
+
+| Pridelené | Čo vidí stravník | Ako to vyzerá v matici predáka |
+|---|---|---|
+| **jeden** (odporúčaný default) | rovno ponuku jedál | jedna sada označení, napr. `A B C` |
+| **viac** | ponuku zoskupenú po poskytovateľoch | obe sady za tenkou čiarou, napr. `A B C │ 1 2 3 4` |
+
+Model „jeden alebo viac" nestojí navyše nič v prípade, keď má každý jedného — obrazovka vyzerá presne tak ako doteraz. Zložitosť sa objaví len u ľudí, ktorí naozaj majú na výber.
+
+> **Ak sa prideľuje viac poskytovateľov, dajte každému iný typ číslovania.** Práve na to je to nastavenie dobré: keď má U Jeleňa `A B C` a Sever `1 2 3 4`, je „áčko" a „trojka" jednoznačné v celom závode. Ak by mali obaja `A B C`, stravník aj predák vidia dve rôzne „áčka" a musí sa k nim dopisovať meno dodávateľa. Appka na zhodné číslovanie dvoch aktívnych poskytovateľov upozorní.
 
 - Pridelenie je vlastnosť **osoby**, nie tímu (človek môže prejsť do iného tímu bez zmeny stravy), ale admin má nástroj *„prideliť celému tímu naraz"*.
 - **Zmena poskytovateľa platí od najbližšieho neuzamknutého týždňa.** Už uzamknuté týždne sa nemenia — dodávateľ má počty odoslané.

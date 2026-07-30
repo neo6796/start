@@ -442,6 +442,13 @@
   /* pred uzávierkou sa dajú prázdne bunky jedným tlačidlom rozsvietiť */
   .hl-gaps td.gap{background:var(--miss-soft)}
 
+  .catsep{
+    width:1px;
+    align-self:stretch;
+    margin:2px 4px;
+    background:var(--line-2);
+  }
+
   .cattag{
     font-family:var(--mono);
     color:var(--by-lead-line);
@@ -754,6 +761,7 @@
     <p><strong>Tri stavy, nie dva.</strong> Označenie jedla horčicovo, krížik <code>×</code> sivo. Krížik znamená, že dotyčný obed <strong>nechce</strong> (dovolenka, služobka, nechce jesť) — je to rozhodnutie, takže sa nepočíta medzi chýbajúcich a upomienka mu nechodí. Opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na nezafarbenú.</p>
     <p>Diery sa tým pádom hľadajú ako <strong>nezafarbené miesta</strong>. Pomáha aj počítadlo pri mene a tlačidlo <strong>Zvýrazniť nerozhodnuté</strong>, ktoré ich pred uzávierkou rozsvieti.</p>
     <p><strong>Rôzni poskytovatelia v jednom tíme.</strong> Krajčí a Bezáková majú pridelenú Školskú jedáleň Sever, preto majú v riadku <code>1 2 3 4</code> namiesto <code>A B C</code> — a pri osobnom čísle sa im ukáže značka poskytovateľa. Zastupovaný tím Lisovňa je celý na Severe. Predák tak obsluhuje oboch dodávateľov v jednej tabuľke a nemusí nikam prepínať; každý riadok ponúka presne to, čo daný človek môže dostať.</p>
+    <p><strong>Šimko má pridelených oboch</strong> — v jeho riadku sú za tenkou čiarou obe ponuky, <code>A B C</code> aj <code>1 2 3 4</code>, a v piatok si dal jedlo od Severu. Pridelenie sa mení v Admine, v tabuľke „Pridelenie stravníkov"; skús to prehodiť niekomu ďalšiemu a pozri sa, čo to v matici spraví.</p>
     <p>Klávesnicou to ide rýchlejšie: <code>Tab</code> vojde do bunky, <strong>šípky vľavo a vpravo</strong> prechádzajú medzi možnosťami, <strong>medzerník</strong> zvolí. Alebo rovno stlač <code>A</code>, <code>B</code>, <code>C</code> pre jedlo, <code>0</code> pre krížik, <code>Backspace</code> pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni. Šípky <strong>hore a dole</strong> sa medzi ľuďmi pohybujú tiež.</p>
     <p>V ukážke má Bezáková celý týždeň krížiky (dovolenka), Tóth a Slaný sa zatiaľ nevyjadrili vôbec.</p>
     <p>Zastupovaný tím je <strong>samostatný blok</strong>, nie zliaty s vlastným — zlievanie tímov spôsobuje omyly typu „objednal som to tomu druhému Kováčovi". Riadky so zeleným pozadím sú ľudia, ktorí si objednali sami; predák ich nemusí prepisovať.</p>
@@ -837,13 +845,31 @@
       <button data-cat="1" aria-pressed="false">Školská jedáleň Sever</button>
       <button id="a-cat-add">+ pridať</button>
     </div>
-    <p class="hint" style="margin-top:10px">Každý poskytovateľ má vlastné číslovanie, počet jedál, skladbu, cenník aj termín na odhlásenie. <strong>Stravník si poskytovateľa nevyberá</strong> — prideľuje mu ho admin (koncept 3.1) a v aplikácii vidí len ponuku toho svojho.</p>
+    <p class="hint" style="margin-top:10px">Každý poskytovateľ má vlastné číslovanie, počet jedál, skladbu, cenník aj termín na odhlásenie. <strong>Poskytovateľa prideľuje stravníkovi admin</strong> — sám si ho nevyberá (koncept 3.1).</p>
+    <p class="hint" id="a-style-warn" hidden style="color:var(--miss)"></p>
     <div class="scroll-x" style="margin-top:14px;border:0">
       <table class="data" style="min-width:640px">
         <thead><tr><th>Poskytovateľ</th><th>Jedlá</th><th>Skladba</th><th>Odhlásenie do</th><th>Doobjednanie</th><th class="num">Stravníkov</th></tr></thead>
         <tbody id="a-cat-list"></tbody>
       </table>
     </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Pridelenie stravníkov</h3>
+      <span class="pill neutral">prideľuje výhradne admin</span>
+    </div>
+    <div class="scroll-x" style="border:0">
+      <table class="data" style="min-width:560px">
+        <thead><tr><th>Meno</th><th>Os. č.</th><th>Tím</th><th>Pridelený poskytovateľ</th></tr></thead>
+        <tbody id="a-assign"></tbody>
+      </table>
+    </div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn">Prideliť celému tímu naraz…</button>
+    </div>
+    <p class="hint" style="margin-top:10px">Zmena platí <strong>od najbližšieho neuzamknutého týždňa</strong> — už odoslané objednávky sa nemenia. Predák pridelenie meniť nemôže: rôzni poskytovatelia majú rôzne ceny, takže je to zásah do mzdového podkladu.</p>
   </div>
 
   <div class="grid-2">
@@ -1324,28 +1350,34 @@
   const NONE = -1;   /* zámerne bez obeda */
                      /* null = nerozhodnuté, chýba objednávka */
 
+  /* cs = poskytovatelia, ktorých má stravník pridelených (prideľuje admin)
+     oc = ktorého poskytovateľa sa týka voľba v danom dni */
   const own = [
-    {n:"Kováč Jozef",      p:"4009", c:0, self:false, o:[0,1,0,null,2],   last:[0,1,0,1,2]},
-    {n:"Horváth Peter",    p:"4021", c:0, self:true,  o:[0,0,1,1,null],   last:[0,0,1,1,0]},
-    {n:"Baláž Marián",     p:"4038", c:0, self:false, o:[1,1,1,1,1],      last:[1,1,1,1,1]},
-    {n:"Tóth Ľuboš",       p:"4110", c:0, self:false, o:[null,null,null,null,null], last:[2,0,2,0,2]},
-    {n:"Nagyová Zuzana",   p:"4102", c:0, self:true,  o:[2,2,NONE,2,0],   last:[2,2,0,2,0]},
-    {n:"Šimko Martin",     p:"4127", c:0, self:false, o:[0,1,null,1,0],   last:[0,1,1,1,0]},
-    {n:"Krajčí Ondrej",    p:"4133", c:1, self:false, o:[1,0,3,0,1],      last:[1,0,3,0,1]},
-    {n:"Bezáková Iveta",   p:"4141", c:1, self:false, o:[NONE,NONE,NONE,NONE,NONE], last:[0,0,0,0,0]},
-    {n:"Danko Radoslav",   p:"4158", c:0, self:false, o:[2,null,2,2,NONE], last:[2,1,2,2,1]}
+    {n:"Kováč Jozef",      p:"4009", cs:[0],   self:false, o:[0,1,0,null,2],   last:[0,1,0,1,2]},
+    {n:"Horváth Peter",    p:"4021", cs:[0],   self:true,  o:[0,0,1,1,null],   last:[0,0,1,1,0]},
+    {n:"Baláž Marián",     p:"4038", cs:[0],   self:false, o:[1,1,1,1,1],      last:[1,1,1,1,1]},
+    {n:"Tóth Ľuboš",       p:"4110", cs:[0],   self:false, o:[null,null,null,null,null], last:[2,0,2,0,2]},
+    {n:"Nagyová Zuzana",   p:"4102", cs:[0],   self:true,  o:[2,2,NONE,2,0],   last:[2,2,0,2,0]},
+    {n:"Šimko Martin",     p:"4127", cs:[0,1], self:false, o:[0,1,null,1,0],   last:[0,1,1,1,0]},
+    {n:"Krajčí Ondrej",    p:"4133", cs:[1],   self:false, o:[1,0,3,0,1],      last:[1,0,3,0,1]},
+    {n:"Bezáková Iveta",   p:"4141", cs:[1],   self:false, o:[NONE,NONE,NONE,NONE,NONE], last:[0,0,0,0,0]},
+    {n:"Danko Radoslav",   p:"4158", cs:[0],   self:false, o:[2,null,2,2,NONE], last:[2,1,2,2,1]}
   ];
 
   const deleg = [
-    {n:"Sedláková Jana",   p:"4204", c:1, self:false, o:[0,0,null,1,3],   last:[0,0,1,1,3]},
-    {n:"Mrva Pavol",       p:"4217", c:1, self:false, o:[1,1,2,NONE,0],   last:[1,1,2,0,0]},
-    {n:"Slaný Erik",       p:"4229", c:1, self:false, o:[null,null,null,null,null], last:[0,2,0,2,0]}
+    {n:"Sedláková Jana",   p:"4204", cs:[1],   self:false, o:[0,0,null,1,3],   last:[0,0,1,1,3]},
+    {n:"Mrva Pavol",       p:"4217", cs:[1],   self:false, o:[1,1,2,NONE,0],   last:[1,1,2,0,0]},
+    {n:"Slaný Erik",       p:"4229", cs:[1],   self:false, o:[null,null,null,null,null], last:[0,2,0,2,0]}
   ];
 
-  /* kto voľbu zadal: "self" = stravník sám, "lead" = predák, null = nikto */
+  /* by = kto voľbu zadal: "self" stravník sám, "lead" predák, null nikto */
   own.concat(deleg).forEach(p => {
     p.by = p.o.map(v => undecided(v) ? null : (p.self ? "self" : "lead"));
+    p.oc = p.o.map(() => p.cs[0]);
   });
+  /* Šimko má oboch — v stredu si dal jedlo od druhého dodávateľa */
+  const simko = own[5];
+  simko.o[4] = 2; simko.oc[4] = 1;
 
   /* ---------- prepínanie obrazoviek ---------- */
   const tabs = Array.from(document.querySelectorAll(".tab"));
@@ -1391,16 +1423,25 @@
 
   function cellHTML(person, ri, ci, tblId){
     const v = person.o[ci];
-    const n = CATERERS[person.c].count;
-    const tabAt = undecided(v) ? 0 : v;
+    const vc = person.oc[ci];
+    let first = true, tabSet = false;
     let h = '<div class="opts" role="radiogroup" aria-label="' + person.n + ", " + DAYS[ci] + '">';
-    for (let j = 0; j < n; j++){
-      h += '<button type="button" class="opt-b" role="radio"' +
-           ' aria-checked="' + (v === j) + '"' +
-           ' tabindex="' + (j === tabAt ? 0 : -1) + '"' +
-           ' data-t="' + tblId + '" data-r="' + ri + '" data-c="' + ci + '" data-v="' + j + '"' +
-           ' aria-label="jedlo ' + label(j, person.c) + '">' + label(j, person.c) + "</button>";
-    }
+
+    person.cs.forEach(c => {
+      if (!first) h += '<span class="catsep" aria-hidden="true"></span>';
+      first = false;
+      for (let j = 0; j < CATERERS[c].count; j++){
+        const on = (!undecided(v) && v !== NONE && v === j && vc === c);
+        let tab = -1;
+        if (on){ tab = 0; tabSet = true; }
+        else if (!tabSet && undecided(v) && c === person.cs[0] && j === 0){ tab = 0; tabSet = true; }
+        h += '<button type="button" class="opt-b" role="radio"' +
+             ' aria-checked="' + on + '" tabindex="' + tab + '"' +
+             ' data-t="' + tblId + '" data-r="' + ri + '" data-c="' + ci + '" data-v="' + c + ":" + j + '"' +
+             ' aria-label="' + CATERERS[c].name + ", jedlo " + label(j, c) + '">' + label(j, c) + "</button>";
+      }
+    });
+
     h += '<button type="button" class="opt-b none" role="radio"' +
          ' aria-checked="' + (v === NONE) + '" tabindex="-1"' +
          ' data-t="' + tblId + '" data-r="' + ri + '" data-c="' + ci + '" data-v="x"' +
@@ -1413,13 +1454,15 @@
     return person.by[ci] === "self" ? "by-self" : "by-lead";
   }
 
+  function catsOf(p){ return p.cs.map(c => CATERERS[c].short).join(" + "); }
+
   function thHTML(person, rows){
     const g = person.o.filter(undecided).length;
-    const mixed = rows.some(x => x.c !== rows[0].c);
+    const mixed = rows.some(x => catsOf(x) !== catsOf(rows[0]));
     return person.n +
       (g ? '<span class="gapn" title="dní bez voľby">' + g + "</span>" : "") +
       '<span class="pn">' + person.p +
-        (mixed ? ' · <span class="cattag">' + CATERERS[person.c].short + "</span>" : "") +
+        (mixed ? ' · <span class="cattag">' + catsOf(person) + "</span>" : "") +
       "</span>";
   }
 
@@ -1465,9 +1508,10 @@
     return !!el;
   }
 
-  function setValue(tblId, r, c, v){
+  function setValue(tblId, r, c, v, vc){
     const p = rowsOf(tblId)[r];
     p.o[c] = v;
+    if (vc !== undefined) p.oc[c] = vc;
     /* na tejto obrazovke koná predák */
     p.by[c] = (v === null) ? null : "lead";
     refreshCell(tblId, r, c);
@@ -1501,10 +1545,17 @@
     const b = e.target.closest(".opt-b");
     if (!b || !b.dataset.t) return;
     const t = b.dataset.t, r = +b.dataset.r, c = +b.dataset.c;
-    const want = b.dataset.v === "x" ? NONE : +b.dataset.v;
-    const cur = rowsOf(t)[r].o[c];
-    /* opätovný klik na už zvolené vráti bunku späť na nerozhodnuté */
-    setValue(t, r, c, cur === want ? null : want);
+    const p = rowsOf(t)[r];
+
+    if (b.dataset.v === "x"){
+      setValue(t, r, c, p.o[c] === NONE ? null : NONE, p.cs[0]);
+    } else {
+      const parts = b.dataset.v.split(":");
+      const wc = +parts[0], wm = +parts[1];
+      const same = (p.o[c] === wm && p.oc[c] === wc);
+      /* opätovný klik na už zvolené vráti bunku späť na nerozhodnutú */
+      setValue(t, r, c, same ? null : wm, wc);
+    }
     focusOpt(t, r, c, b.dataset.v);
   });
 
@@ -1539,20 +1590,23 @@
 
     /* priama voľba: písmeno alebo číslo = jedlo, 0 alebo − = bez obeda,
        Backspace = späť na nerozhodnuté */
-    let v;
+    let v, vc;
     /* najprv jedlá — inak by pri rímskom číslovaní X znamenalo aj desiate jedlo */
-    const pc = rows[r].c;
-    for (let i = 0; i < CATERERS[pc].count; i++){
-      if (k.toUpperCase() === label(i, pc).toUpperCase()){ v = i; break; }
+    const p = rows[r];
+    for (let ci = 0; ci < p.cs.length && v === undefined; ci++){
+      const cc = p.cs[ci];
+      for (let i = 0; i < CATERERS[cc].count; i++){
+        if (k.toUpperCase() === label(i, cc).toUpperCase()){ v = i; vc = cc; break; }
+      }
     }
     if (v === undefined){
-      if (k === "0" || k === "-" || k.toUpperCase() === "X") v = NONE;
-      else if (k === "Backspace" || k === "Delete") v = null;
+      if (k === "0" || k === "-" || k.toUpperCase() === "X"){ v = NONE; vc = p.cs[0]; }
+      else if (k === "Backspace" || k === "Delete"){ v = null; vc = p.cs[0]; }
       else return;
     }
     e.preventDefault();
-    setValue(t, r, c, v);
-    const target = (v === null || v === NONE) ? "x" : String(v);
+    setValue(t, r, c, v, vc);
+    const target = (v === null || v === NONE) ? "x" : (vc + ":" + v);
     const nextRow = r + 1;
     if (nextRow < rows.length) focusOpt(t, nextRow, c, target);
     else focusOpt(t, r, c, target);
@@ -1561,7 +1615,8 @@
   const bc = document.getElementById("btn-copy");
   if (bc) bc.addEventListener("click", function(){
     own.concat(deleg).forEach(p => {
-      p.o = p.last.map(v => (v === NONE) ? NONE : (v >= CATERERS[p.c].count ? null : v));
+      p.o = p.last.map(v => (v === NONE) ? NONE : (v >= CATERERS[p.cs[0]].count ? null : v));
+      p.oc = p.o.map(() => p.cs[0]);
       p.by = p.o.map(v => undecided(v) ? null : "lead");
     });
     renderAll();
@@ -1578,6 +1633,7 @@
     own.concat(deleg).forEach(p => {
       p.o = [null,null,null,null,null];
       p.by = [null,null,null,null,null];
+      p.oc = p.o.map(() => p.cs[0]);
     });
     renderAll();
   });
@@ -1730,7 +1786,7 @@
     if (!tb) return;
     tb.innerHTML = "";
     CATERERS.forEach((A, i) => {
-      const n = own.concat(deleg).filter(p => p.c === i).length;
+      const n = own.concat(deleg).filter(p => p.cs.indexOf(i) !== -1).length;
       const tr = document.createElement("tr");
       if (i === adminCat) tr.style.background = "var(--surface-2)";
       tr.innerHTML =
@@ -1742,6 +1798,51 @@
         '<td class="num">'+n+"</td>";
       tb.appendChild(tr);
     });
+  }
+
+  function renderAssign(){
+    const tb = document.getElementById("a-assign");
+    if (!tb) return;
+    tb.innerHTML = "";
+    const rows = own.map(p => [p, "Údržba", "m-own"]).concat(deleg.map(p => [p, "Lisovňa", "m-deleg"]));
+    rows.forEach(([p, team]) => {
+      const cur = p.cs.join(",");
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>"+p.n+'</td><td class="num">'+p.p+"</td><td>"+team+"</td>" +
+        '<td><select data-assign="'+p.p+'" style="width:100%;max-width:250px;padding:5px 8px;' +
+        'border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink);font-size:13px">' +
+          '<option value="0"'   + (cur === "0"   ? " selected" : "") + ">Reštaurácia U Jeleňa</option>" +
+          '<option value="1"'   + (cur === "1"   ? " selected" : "") + ">Školská jedáleň Sever</option>" +
+          '<option value="0,1"' + (cur === "0,1" ? " selected" : "") + ">oba — stravník si volí</option>" +
+        "</select></td>";
+      tb.appendChild(tr);
+    });
+  }
+
+  document.addEventListener("change", function(e){
+    const sel = e.target.closest("[data-assign]");
+    if (!sel) return;
+    const p = own.concat(deleg).filter(x => x.p === sel.dataset.assign)[0];
+    if (!p) return;
+    p.cs = sel.value.split(",").map(Number);
+    /* voľby u odobraného poskytovateľa strácajú platnosť */
+    p.o = p.o.map((v,i) => (v === NONE || undecided(v) || p.cs.indexOf(p.oc[i]) !== -1) ? v : null);
+    p.oc = p.oc.map(c => p.cs.indexOf(c) !== -1 ? c : p.cs[0]);
+    p.by = p.o.map((v,i) => undecided(v) ? null : p.by[i]);
+    renderAll();
+  });
+
+  function checkStyleClash(){
+    const el = document.getElementById("a-style-warn");
+    if (!el) return;
+    const clash = CATERERS.length > 1 && CATERERS[0].style === CATERERS[1].style;
+    el.hidden = !clash;
+    if (clash){
+      el.textContent = "Pozor: obaja poskytovatelia používajú rovnaké číslovanie (" +
+        labelsOf(0).join(" ") + "). Kto má pridelených oboch, uvidí dve rovnaké označenia — " +
+        "odporúčam dať každému poskytovateľovi iný typ.";
+    }
   }
 
   function loadCaterer(){
@@ -1819,8 +1920,8 @@
     document.getElementById("a-count-val").textContent = A.count;
     /* voľby mimo novej ponuky sa u dotknutého poskytovateľa zrušia */
     own.concat(deleg).forEach(p => {
-      if (p.c !== adminCat) return;
-      p.o = p.o.map(v => (v !== null && v !== NONE && v >= A.count) ? null : v);
+      if (p.cs.indexOf(adminCat) === -1) return;
+      p.o = p.o.map((v,i) => (v !== null && v !== NONE && p.oc[i] === adminCat && v >= A.count) ? null : v);
       p.by = p.o.map((v,i) => undecided(v) ? null : p.by[i]);
     });
     if (adminCat === DINER_CAT){
@@ -1847,7 +1948,7 @@
       for (let i = 0; i < 5; i++){
         const v = p.o[i];
         tds += (p.by[i] === "self")
-          ? '<td class="box"><span class="pre">' + (v === NONE ? "×" : label(v, p.c)) + "</span></td>"
+          ? '<td class="box"><span class="pre">' + (v === NONE ? "×" : label(v, p.oc[i])) + "</span></td>"
           : '<td class="box"></td>';
       }
       tr.innerHTML = tds;
@@ -1861,7 +1962,8 @@
     const el = document.getElementById("pd-provider");
     if (!el) return;
     const used = [];
-    own.concat(deleg).forEach(p => { if (used.indexOf(p.c) === -1) used.push(p.c); });
+    own.concat(deleg).forEach(p => p.cs.forEach(c => { if (used.indexOf(c) === -1) used.push(c); }));
+    used.sort();
     el.textContent = used.map(c => CATERERS[c].short + " " + labelsOf(c).join("")).join(" + ");
     el.title = used.map(c => CATERERS[c].name).join(" · ");
   }
@@ -1876,6 +1978,8 @@
     renderStravnik();
     renderCurrent();
     renderCatList();
+    renderAssign();
+    checkStyleClash();
     renderAdminMenu();
     renderPrices();
     renderSheet();
