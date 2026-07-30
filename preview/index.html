@@ -1,0 +1,1530 @@
+<title>Obedár — preview</title>
+
+<style>
+  :root{
+    --paper:#F3F2EE;
+    --surface:#FFFFFF;
+    --surface-2:#EBEAE4;
+    --ink:#17201F;
+    --ink-2:#4A5654;
+    --ink-3:#7C8785;
+    --line:#D9D8D1;
+    --line-2:#C3C2B9;
+    --petrol:#12403F;
+    --petrol-2:#1D5C5A;
+    --on-petrol:#EFF3F2;
+    --mustard:#B06E05;
+    --mustard-soft:#F7E7CA;
+    --ok:#2C7355;
+    --ok-soft:#DDEBE3;
+    --miss:#A8402F;
+    --miss-soft:#F5DFDA;
+
+    --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
+
+    --r:3px;
+    --pad:clamp(16px,4vw,32px);
+  }
+
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#0F1514;
+      --surface:#18201F;
+      --surface-2:#222C2A;
+      --ink:#E9E8E2;
+      --ink-2:#AAB5B3;
+      --ink-3:#7C8785;
+      --line:#2C3735;
+      --line-2:#3B4744;
+      --petrol:#6FB3AD;
+      --petrol-2:#8FC9C4;
+      --on-petrol:#0F1514;
+      --mustard:#E0A233;
+      --mustard-soft:#3B2E16;
+      --ok:#57AC82;
+      --ok-soft:#1C3329;
+      --miss:#D4705E;
+      --miss-soft:#361F1C;
+    }
+  }
+
+  :root[data-theme="dark"]{
+    --paper:#0F1514;
+    --surface:#18201F;
+    --surface-2:#222C2A;
+    --ink:#E9E8E2;
+    --ink-2:#AAB5B3;
+    --ink-3:#7C8785;
+    --line:#2C3735;
+    --line-2:#3B4744;
+    --petrol:#6FB3AD;
+    --petrol-2:#8FC9C4;
+    --on-petrol:#0F1514;
+    --mustard:#E0A233;
+    --mustard-soft:#3B2E16;
+    --ok:#57AC82;
+    --ok-soft:#1C3329;
+    --miss:#D4705E;
+    --miss-soft:#361F1C;
+  }
+
+  :root[data-theme="light"]{
+    --paper:#F3F2EE;
+    --surface:#FFFFFF;
+    --surface-2:#EBEAE4;
+    --ink:#17201F;
+    --ink-2:#4A5654;
+    --ink-3:#7C8785;
+    --line:#D9D8D1;
+    --line-2:#C3C2B9;
+    --petrol:#12403F;
+    --petrol-2:#1D5C5A;
+    --on-petrol:#EFF3F2;
+    --mustard:#B06E05;
+    --mustard-soft:#F7E7CA;
+    --ok:#2C7355;
+    --ok-soft:#DDEBE3;
+    --miss:#A8402F;
+    --miss-soft:#F5DFDA;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3,h4{margin:0;text-wrap:balance;line-height:1.2}
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    margin:0;
+  }
+
+  .wrap{max-width:1160px;margin:0 auto;padding:0 var(--pad)}
+
+  /* ---------- shell ---------- */
+
+  .topbar{
+    background:var(--petrol);
+    color:var(--on-petrol);
+    border-bottom:1px solid var(--line);
+  }
+  :root[data-theme="dark"] .topbar,
+  .topbar{background:var(--petrol)}
+  @media (prefers-color-scheme:dark){
+    .topbar{background:#14201F}
+  }
+  :root[data-theme="dark"] .topbar{background:#14201F}
+  :root[data-theme="light"] .topbar{background:#12403F}
+
+  .topbar .wrap{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    padding-top:14px;
+    padding-bottom:14px;
+  }
+
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand svg{display:block}
+  .brand-name{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:17px;
+    letter-spacing:-.01em;
+  }
+  .brand-tag{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    opacity:.65;
+    padding-left:10px;
+    border-left:1px solid currentColor;
+    margin-left:2px;
+  }
+
+  .tabs{
+    display:flex;
+    gap:2px;
+    flex-wrap:wrap;
+    margin-left:auto;
+  }
+  .tab{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.04em;
+    background:transparent;
+    color:inherit;
+    border:1px solid transparent;
+    border-radius:var(--r);
+    padding:6px 11px;
+    cursor:pointer;
+    opacity:.72;
+  }
+  .tab:hover{opacity:1;background:rgba(255,255,255,.08)}
+  .tab[aria-selected="true"]{
+    opacity:1;
+    background:var(--mustard);
+    color:#1A1206;
+    font-weight:700;
+  }
+  :root[data-theme="dark"] .tab[aria-selected="true"]{color:#161110}
+  .tab:focus-visible{outline:2px solid var(--mustard);outline-offset:2px}
+
+  main{padding:32px 0 72px}
+
+  .screen[hidden]{display:none}
+
+  .screen-head{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:22px;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--line);
+  }
+  .screen-head h2{font-size:clamp(20px,3vw,26px);letter-spacing:-.015em}
+  .screen-head .who{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-3);
+    letter-spacing:.05em;
+  }
+
+  /* ---------- cards ---------- */
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--r);
+    padding:20px;
+  }
+  .card + .card{margin-top:18px}
+  .card-head{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .card-head h3{font-size:15px;letter-spacing:-.005em}
+
+  .grid-2{display:grid;grid-template-columns:1fr;gap:18px}
+  @media (min-width:900px){.grid-2{grid-template-columns:1fr 1fr}}
+
+  .note{
+    margin-top:20px;
+    border-left:2px solid var(--mustard);
+    padding:2px 0 2px 16px;
+    color:var(--ink-2);
+    font-size:13.5px;
+    max-width:66ch;
+  }
+  .note p{margin:6px 0 0}
+  .note p:first-of-type{margin-top:4px}
+
+  /* ---------- chip ---------- */
+
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:30px;
+    height:30px;
+    padding:0 7px;
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:15px;
+    line-height:1;
+    border-radius:2px;
+    background:var(--mustard-soft);
+    color:var(--mustard);
+    border:1.5px solid var(--mustard);
+  }
+  .chip.lg{min-width:44px;height:44px;font-size:20px}
+  .chip.sm{min-width:24px;height:24px;font-size:12px;border-width:1px}
+  .chip.ghost{
+    background:transparent;
+    color:var(--ink-3);
+    border-style:dashed;
+    border-color:var(--line-2);
+    font-weight:400;
+  }
+
+  /* ---------- pills ---------- */
+
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border-radius:2px;
+    border:1px solid;
+  }
+  .pill.ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+  .pill.miss{background:var(--miss-soft);color:var(--miss);border-color:var(--miss)}
+  .pill.neutral{background:var(--surface-2);color:var(--ink-2);border-color:var(--line-2)}
+
+  /* ---------- buttons ---------- */
+
+  .btn{
+    font-family:var(--sans);
+    font-size:13.5px;
+    font-weight:600;
+    background:var(--surface-2);
+    color:var(--ink);
+    border:1px solid var(--line-2);
+    border-radius:var(--r);
+    padding:8px 14px;
+    cursor:pointer;
+  }
+  .btn:hover{border-color:var(--ink-3)}
+  .btn:focus-visible{outline:2px solid var(--mustard);outline-offset:2px}
+  .btn.primary{
+    background:var(--petrol);
+    color:var(--on-petrol);
+    border-color:var(--petrol);
+  }
+  .btn.primary:hover{background:var(--petrol-2);border-color:var(--petrol-2)}
+  .btn.wide{width:100%;justify-content:center;text-align:center}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap}
+
+  /* ---------- countdown strip ---------- */
+
+  .deadline{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-left:3px solid var(--mustard);
+    border-radius:var(--r);
+    padding:11px 16px;
+    margin-bottom:18px;
+  }
+  .deadline .lbl{
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-3);
+  }
+  .deadline .val{font-family:var(--mono);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+  .deadline .sep{color:var(--line-2)}
+
+  /* ---------- matrix ---------- */
+
+  .scroll-x{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+
+  table.matrix{border-collapse:collapse;width:100%;min-width:620px;font-size:14px}
+  table.matrix th,table.matrix td{border-bottom:1px solid var(--line);text-align:left;padding:0}
+  table.matrix thead th{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    font-weight:400;
+    padding:10px 12px;
+    background:var(--surface-2);
+    white-space:nowrap;
+  }
+  table.matrix thead th .dnum{color:var(--ink-2);font-weight:700;letter-spacing:0}
+  table.matrix tbody th{
+    font-weight:500;
+    padding:0 12px;
+    white-space:nowrap;
+    position:sticky;
+    left:0;
+    background:var(--surface);
+    border-right:1px solid var(--line);
+    font-size:14px;
+  }
+  table.matrix tbody tr:hover th,
+  table.matrix tbody tr:hover td{background:var(--surface-2)}
+  table.matrix tbody th .pn{
+    display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3);
+  }
+  .cell{
+    width:100%;height:52px;
+    display:flex;align-items:center;justify-content:center;
+    background:transparent;border:0;
+    cursor:pointer;
+    border-right:1px solid var(--line);
+  }
+  .cell:focus-visible{outline:2px solid var(--mustard);outline-offset:-3px}
+  td.self{background:var(--ok-soft)}
+
+  .team-block{margin-bottom:22px}
+  .team-head{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+  .team-head h3{font-size:15px}
+  .deleg{
+    border-left:3px solid var(--petrol);
+    padding-left:14px;
+  }
+
+  .stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+
+  /* ---------- phone frame ---------- */
+
+  .phone{
+    max-width:390px;
+    margin:0;
+    border:1px solid var(--line-2);
+    border-radius:14px;
+    background:var(--surface);
+    overflow:hidden;
+  }
+  .phone-bar{
+    background:var(--surface-2);
+    border-bottom:1px solid var(--line);
+    padding:8px 14px;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.08em;
+    color:var(--ink-3);
+    display:flex;justify-content:space-between;
+  }
+  .phone-body{padding:16px}
+
+  .day{
+    display:flex;align-items:center;gap:13px;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .day:last-child{border-bottom:0}
+  .day .dname{flex:1;min-width:0}
+  .day .dname .dn{font-weight:600;font-size:14px}
+  .day .dname .dd{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+  .day .dname .meal{font-size:12.5px;color:var(--ink-2);margin-top:1px}
+  .day-btn{
+    background:transparent;border:0;padding:0;cursor:pointer;
+    display:flex;align-items:center;gap:13px;width:100%;text-align:left;
+  }
+  .day-btn:focus-visible{outline:2px solid var(--mustard);outline-offset:3px}
+
+  .menu-sheet{
+    margin-top:14px;
+    border:1px solid var(--line);
+    border-radius:var(--r);
+    background:var(--surface-2);
+    padding:14px;
+  }
+  .opt{
+    display:flex;align-items:flex-start;gap:12px;
+    padding:9px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .opt:last-child{border-bottom:0}
+  .opt .txt{flex:1}
+  .opt .nm{font-size:13.5px;line-height:1.35}
+  .opt .pr{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+
+  /* ---------- generic table ---------- */
+
+  table.data{border-collapse:collapse;width:100%;font-size:13.5px}
+  table.data th,table.data td{
+    text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);
+  }
+  table.data thead th{
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-3);font-weight:400;
+    background:var(--surface-2);
+  }
+  table.data td.num,table.data th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+  table.data tfoot td{font-weight:700;border-top:2px solid var(--line-2);border-bottom:0}
+
+  /* ---------- form bits ---------- */
+
+  .field{margin-bottom:14px}
+  .field label{
+    display:block;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    margin-bottom:5px;
+  }
+  .field input[type="text"],
+  .field input[type="password"],
+  .field input[type="number"],
+  .field select{
+    width:100%;
+    font-family:var(--sans);
+    font-size:15px;
+    padding:10px 12px;
+    background:var(--surface);
+    color:var(--ink);
+    border:1px solid var(--line-2);
+    border-radius:var(--r);
+  }
+  .field input:focus,.field select:focus{outline:2px solid var(--mustard);outline-offset:-1px;border-color:var(--mustard)}
+  .field .hint{font-size:12px;color:var(--ink-3);margin-top:5px}
+
+  .seg{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;width:fit-content}
+  .seg button{
+    font-family:var(--mono);font-size:12.5px;
+    background:var(--surface);color:var(--ink-2);
+    border:0;border-right:1px solid var(--line-2);
+    padding:7px 13px;cursor:pointer;
+  }
+  .seg button:last-child{border-right:0}
+  .seg button[aria-pressed="true"]{background:var(--petrol);color:var(--on-petrol);font-weight:700}
+  .seg button:focus-visible{outline:2px solid var(--mustard);outline-offset:-2px}
+
+  .check{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--ink-2);cursor:pointer}
+  .check input{width:17px;height:17px;accent-color:var(--petrol)}
+
+  /* ---------- print sheet mock ---------- */
+
+  .sheet{
+    background:#FFFFFF;
+    color:#17201F;
+    border:1px solid var(--line-2);
+    border-radius:2px;
+    padding:22px;
+    font-size:12.5px;
+  }
+  .sheet h4{font-size:15px;margin-bottom:2px}
+  .sheet .meta{font-family:var(--mono);font-size:10.5px;color:#6B7573;margin-bottom:14px;letter-spacing:.04em}
+  .sheet table{border-collapse:collapse;width:100%}
+  .sheet th,.sheet td{border:1px solid #C9C8C1;padding:5px 7px;text-align:left}
+  .sheet thead th{background:#EFEEE8;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:400}
+  .sheet td.box{height:28px;width:44px}
+  .sheet .pre{font-family:var(--mono);color:#9A9A93;text-decoration:line-through}
+  .sheet .cnt{font-family:var(--mono);font-weight:700;text-align:right}
+
+  /* ---------- logo lab ---------- */
+
+  .logo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+  .logo-card{
+    border:1px solid var(--line);border-radius:var(--r);
+    background:var(--surface);
+    padding:0;overflow:hidden;
+  }
+  .logo-stage{
+    display:flex;align-items:center;justify-content:center;
+    gap:14px;
+    padding:34px 20px;
+    background:var(--surface-2);
+    border-bottom:1px solid var(--line);
+  }
+  .logo-stage.dark{background:#12403F}
+  .logo-stage.dark .lw{color:#EFF3F2}
+  .lw{font-family:var(--mono);font-weight:700;font-size:20px;letter-spacing:-.01em;color:var(--ink)}
+  .logo-meta{padding:14px 16px}
+  .logo-meta h4{font-size:14px;margin-bottom:4px}
+  .logo-meta p{margin:0;font-size:12.5px;color:var(--ink-2)}
+  .favi{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line);color:var(--ink-3);font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2);margin-top:12px}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .sw{width:13px;height:13px;border-radius:2px;border:1px solid}
+  .sw.ok{background:var(--ok-soft);border-color:var(--ok)}
+  .sw.miss{background:var(--miss-soft);border-color:var(--miss)}
+  .sw.self{background:var(--ok-soft);border-color:var(--line-2)}
+
+  footer{
+    border-top:1px solid var(--line);
+    padding:26px 0 40px;
+    color:var(--ink-3);
+    font-size:12.5px;
+  }
+  footer .wrap{display:flex;gap:14px;flex-wrap:wrap;justify-content:space-between}
+  footer code{font-family:var(--mono);font-size:12px}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="24" fill="none" stroke="#EFF3F2" stroke-width="3"/>
+        <path d="M32,32 L32,8 A24,24 0 0,1 54.83,24.58 Z" fill="#E0A233"/>
+        <g stroke="#EFF3F2" stroke-width="3" stroke-linecap="round">
+          <line x1="32" y1="32" x2="32" y2="8"/>
+          <line x1="32" y1="32" x2="54.83" y2="24.58"/>
+          <line x1="32" y1="32" x2="46.10" y2="51.42"/>
+          <line x1="32" y1="32" x2="17.90" y2="51.42"/>
+          <line x1="32" y1="32" x2="9.17" y2="24.58"/>
+        </g>
+      </svg>
+      <span class="brand-name">Obedár</span>
+      <span class="brand-tag">preview</span>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Obrazovky">
+      <button class="tab" role="tab" aria-selected="true" data-screen="predak">Predák</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="stravnik">Stravník</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="admin">Admin</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="zostavy">Zostavy</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="login">Prihlásenie</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="logo">Logo</button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ============ PREDÁK ============ -->
+<section class="screen wrap" id="s-predak">
+  <div class="screen-head">
+    <h2>Môj tím</h2>
+    <span class="who">Jozef Kováč · predák · Tím Údržba</span>
+  </div>
+
+  <div class="deadline">
+    <span class="lbl">Objednávky na týždeň</span>
+    <span class="val" id="pd-week">—</span>
+    <span class="sep">·</span>
+    <span class="lbl">Uzávierka</span>
+    <span class="val" id="pd-deadline">—</span>
+    <span class="sep">·</span>
+    <span class="val" id="pd-countdown" style="color:var(--mustard)">—</span>
+  </div>
+
+  <div class="stat-row">
+    <span class="pill miss" id="pd-missing">—</span>
+    <span class="pill neutral" id="pd-provider">Reštaurácia U Jeleňa · A B C</span>
+    <div class="btn-row" style="margin-left:auto">
+      <button class="btn" id="btn-copy">Kopírovať minulý týždeň</button>
+      <button class="btn" id="btn-clear">Vyprázdniť</button>
+    </div>
+  </div>
+
+  <div class="team-block">
+    <div class="team-head">
+      <h3>Tím Údržba</h3>
+      <span class="pill neutral">9 ľudí</span>
+    </div>
+    <div class="scroll-x">
+      <table class="matrix" id="m-own">
+        <thead><tr id="th-own"></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="team-block deleg">
+    <div class="team-head">
+      <h3>Zastupujem: Tím Lisovňa</h3>
+      <span class="pill neutral">do 15. 8.</span>
+      <span class="pill neutral">za Milana Urbana</span>
+    </div>
+    <div class="scroll-x">
+      <table class="matrix" id="m-deleg">
+        <thead><tr id="th-deleg"></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><i class="sw ok"></i> objednané</span>
+    <span><i class="sw miss"></i> chýba objednávka</span>
+    <span><i class="sw self"></i> objednal si sám v appke</span>
+  </div>
+
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn primary">Vytlačiť zberný hárok</button>
+    <button class="btn">Vytlačiť zoznam chýbajúcich</button>
+    <button class="btn">Hromadné odhlásenie (dovolenka)</button>
+  </div>
+
+  <div class="note">
+    <p class="eyebrow">Prečo takto</p>
+    <p><strong>Skús klikať do buniek</strong> — každý klik posunie voľbu na ďalšie jedlo a prázdne. Bunka sa dá aj zamerať tabulátorom a stlačiť <code>A</code>, <code>B</code>, <code>C</code> alebo <code>0</code>; kurzor potom skočí na ďalší riadok. Prepis dvadsiatich ľudí zo zberného hárku je tak otázka pol minúty bez jediného dialógu.</p>
+    <p>Zastupovaný tím je <strong>samostatný blok</strong>, nie zliaty s vlastným — zlievanie tímov spôsobuje omyly typu „objednal som to tomu druhému Kováčovi". Riadky so zeleným pozadím sú ľudia, ktorí si objednali sami; predák ich nemusí prepisovať.</p>
+  </div>
+</section>
+
+<!-- ============ STRAVNÍK ============ -->
+<section class="screen wrap" id="s-stravnik" hidden>
+  <div class="screen-head">
+    <h2>Môj týždeň</h2>
+    <span class="who">Peter Horváth · stravník · os. č. 4021</span>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="phone">
+        <div class="phone-bar"><span>Obedár</span><span id="sv-cd">—</span></div>
+        <div class="phone-body">
+          <p class="eyebrow" style="margin-bottom:2px">Budúci týždeň</p>
+          <h3 id="sv-week" style="font-size:16px;margin-bottom:12px">—</h3>
+          <div id="sv-days"></div>
+          <div style="margin-top:16px" class="btn-row">
+            <button class="btn wide" id="sv-copy">Ako minulý týždeň</button>
+          </div>
+          <div class="menu-sheet" style="margin-top:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px">
+              <p class="eyebrow" style="margin:0">Reštaurácia U Jeleňa</p>
+              <button class="btn" style="padding:4px 9px;font-size:12px">Zobraziť menu</button>
+            </div>
+            <p style="margin:0;font-size:12.5px;color:var(--ink-2)">Papierové menu na týždeň — fotka od dodávateľa, nahral admin 27. 7. o 08:14.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-head"><h3>Tento týždeň</h3><span class="pill neutral">zamknuté</span></div>
+        <div id="sv-current"></div>
+        <p style="font-size:12.5px;color:var(--ink-3);margin:12px 0 0">Voľbu už meniť nemožno. Odhlásiť sa dá do <strong style="font-family:var(--mono)">07:30</strong> daného dňa.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Môj prehľad — júl</h3></div>
+        <table class="data">
+          <tbody>
+            <tr><td>Obedy</td><td class="num">18</td></tr>
+            <tr><td>Cena spolu</td><td class="num">110,80 €</td></tr>
+            <tr><td>Príspevok zamestnávateľa</td><td class="num">−60,94 €</td></tr>
+            <tr><td>Sociálny fond</td><td class="num">−9,00 €</td></tr>
+            <tr><td>Neodhlásený obed (14. 7.)</td><td class="num">6,20 €</td></tr>
+          </tbody>
+          <tfoot><tr><td>Zrážka zo mzdy</td><td class="num">47,06 €</td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <p class="eyebrow">Prečo takto</p>
+    <p>Ťuknutie na deň otvorí ponuku, ťuknutie na jedlo ju zavrie a uloží — <strong>žiadne tlačidlo „Potvrdiť"</strong>. Hore beží odpočet do uzávierky, aby bolo jasné, dokedy sa to dá zmeniť, nie iba že „v piatok".</p>
+    <p>Tlačidlo <strong>Zobraziť menu</strong> otvorí fotku papierového lístka. Vďaka nemu nemusí admin prepisovať názvy jedál a zároveň existuje doklad o tom, čo v ten týždeň znamenalo „B".</p>
+  </div>
+</section>
+
+<!-- ============ ADMIN ============ -->
+<section class="screen wrap" id="s-admin" hidden>
+  <div class="screen-head">
+    <h2>Nastavenia</h2>
+    <span class="who">správca · zmeny sa prejavia na ostatných obrazovkách</span>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head"><h3>Poskytovateľ — Reštaurácia U Jeleňa</h3></div>
+
+      <div class="field">
+        <label for="a-style">Typ číslovania</label>
+        <div class="seg" role="group" id="a-style">
+          <button data-style="upper" aria-pressed="true">A B C</button>
+          <button data-style="lower" aria-pressed="false">a b c</button>
+          <button data-style="arabic" aria-pressed="false">1 2 3</button>
+          <button data-style="roman" aria-pressed="false">I II III</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="a-count">Počet jedál v ponuke — <span id="a-count-val" style="font-family:var(--mono);color:var(--ink)">3</span></label>
+        <input type="range" id="a-count" min="1" max="10" value="3" style="width:100%;accent-color:var(--petrol)">
+        <p class="hint">1 až 10. Označenia sa dopĺňajú automaticky podľa zvoleného typu.</p>
+      </div>
+
+      <div class="field">
+        <label>Skladba jedla</label>
+        <div class="seg" role="group" id="a-compose">
+          <button data-c="komplet" aria-pressed="true">Komplet</button>
+          <button data-c="casti" aria-pressed="false">Po častiach</button>
+        </div>
+        <p class="hint" id="a-compose-hint">Polievka aj dezert sú v cene jedla, objednáva sa jedna položka.</p>
+      </div>
+
+      <div class="field">
+        <label>Denné odhlásenie</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select style="flex:1;min-width:190px">
+            <option>v deň obeda</option>
+            <option>predchádzajúci pracovný deň</option>
+            <option>2 pracovné dni vopred</option>
+          </select>
+          <input type="text" value="07:30" style="width:88px;font-family:var(--mono);text-align:center">
+        </div>
+        <p class="hint">Pri voľbe „predchádzajúci pracovný deň" sa pondelok počíta od piatku — víkendy a sviatky sa preskakujú.</p>
+      </div>
+
+      <label class="check" style="margin-top:4px">
+        <input type="checkbox"> Predák môže doobjednať v deň obeda
+      </label>
+      <label class="check" style="margin-top:9px">
+        <input type="checkbox" checked> Vypĺňať názvy jedál
+      </label>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-head"><h3>Menu — budúci týždeň</h3><span class="pill ok">zadané</span></div>
+        <table class="data">
+          <thead><tr><th>Deň</th><th>Jedlá</th></tr></thead>
+          <tbody id="a-menu"></tbody>
+        </table>
+        <div class="btn-row" style="margin-top:14px">
+          <button class="btn">Kopírovať minulý týždeň</button>
+          <button class="btn">Pripnúť fotku menu</button>
+        </div>
+        <p class="hint" style="margin-top:10px">Názvy sú voliteľné. Bez nich appka pracuje len s označením a na nástenku ide papierové menu od dodávateľa.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Cenník a príspevky</h3></div>
+        <div class="field">
+          <label>Model príspevku zamestnávateľa</label>
+          <div class="seg" role="group" id="a-contrib">
+            <button data-m="pct" aria-pressed="true">Percentom</button>
+            <button data-m="fix" aria-pressed="false">Pevnou sumou</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+          <div style="flex:1;min-width:120px">
+            <label class="eyebrow" style="display:block;margin-bottom:5px" id="a-lbl">Percento</label>
+            <input type="number" id="a-val" value="55" step="1" style="width:100%;font-family:var(--mono);padding:9px 11px;border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink)">
+          </div>
+          <div style="flex:1;min-width:120px">
+            <label class="eyebrow" style="display:block;margin-bottom:5px">Sociálny fond (€)</label>
+            <input type="number" id="a-sf" value="0.50" step="0.10" style="width:100%;font-family:var(--mono);padding:9px 11px;border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink)">
+          </div>
+        </div>
+        <table class="data">
+          <thead><tr><th>Jedlo</th><th class="num">Cena</th><th class="num">Zamestnávateľ</th><th class="num">SF</th><th class="num">Zo mzdy</th></tr></thead>
+          <tbody id="a-price"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <p class="eyebrow">Prečo takto</p>
+    <p><strong>Prepni typ číslovania alebo posuň počet jedál</strong> a potom sa vráť na obrazovku predáka — označenia sa zmenia všade. Admin nastavuje štýl, nie jednotlivé písmená.</p>
+    <p>Cenník má oba modely príspevku vedľa seba, aby sa mzdové oddelenie mohlo pozrieť na konkrétne čísla a povedať, ktorý sedí. Zákonné limity sa menia niekoľkokrát ročne, preto sú to nastavenia s platnosťou od dátumu, nie hodnoty v kóde.</p>
+  </div>
+</section>
+
+<!-- ============ ZOSTAVY ============ -->
+<section class="screen wrap" id="s-zostavy" hidden>
+  <div class="screen-head">
+    <h2>Tlačové zostavy a exporty</h2>
+    <span class="who">ukážky výstupov</span>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head"><h3>Zberný hárok</h3><span class="pill neutral">A4 · na nástenku</span></div>
+      <div class="sheet">
+        <h4>Objednávka obedov — Tím Údržba</h4>
+        <p class="meta" id="z-week">—</p>
+        <table>
+          <thead><tr><th>Meno</th><th>Po</th><th>Ut</th><th>St</th><th>Št</th><th>Pi</th></tr></thead>
+          <tbody id="z-sheet"></tbody>
+        </table>
+        <p style="margin:12px 0 0;font-size:11px;color:#6B7573">Sivé prečiarknuté políčka si už objednali sami v aplikácii — nevypĺňajte ich.</p>
+      </div>
+      <p class="hint" style="margin-top:12px">Hárok slúži aj ako doklad: pri spore „ja som chcel B" ukáže voľbu vlastnou rukou.</p>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-head"><h3>Objednávka pre dodávateľa</h3><span class="pill neutral">PDF + XLSX e-mailom</span></div>
+        <div class="sheet">
+          <h4>Reštaurácia U Jeleňa</h4>
+          <p class="meta">Objednávka na 3. – 7. 8. 2026 · odoslané 31. 7. 2026 o 12:00</p>
+          <table>
+            <thead><tr><th>Deň</th><th class="cnt">A</th><th class="cnt">B</th><th class="cnt">C</th><th class="cnt">Spolu</th></tr></thead>
+            <tbody>
+              <tr><td>Po 3. 8.</td><td class="cnt">21</td><td class="cnt">17</td><td class="cnt">9</td><td class="cnt">47</td></tr>
+              <tr><td>Ut 4. 8.</td><td class="cnt">18</td><td class="cnt">22</td><td class="cnt">8</td><td class="cnt">48</td></tr>
+              <tr><td>St 5. 8.</td><td class="cnt">24</td><td class="cnt">14</td><td class="cnt">7</td><td class="cnt">45</td></tr>
+              <tr><td>Št 6. 8.</td><td class="cnt">19</td><td class="cnt">19</td><td class="cnt">10</td><td class="cnt">48</td></tr>
+              <tr><td>Pi 7. 8.</td><td class="cnt">23</td><td class="cnt">16</td><td class="cnt">6</td><td class="cnt">45</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Korekcia v deň obeda</h3><span class="pill neutral">pri dennom deadline</span></div>
+        <div class="sheet">
+          <h4>Streda 5. 8. 2026 — korekcia k 07:30</h4>
+          <p class="meta">Pôvodne 45 · storná 3 · doobjednávky 2</p>
+          <table>
+            <thead><tr><th>Jedlo</th><th class="cnt">Pôvodne</th><th class="cnt">Zmena</th><th class="cnt">Platí</th></tr></thead>
+            <tbody>
+              <tr><td>A</td><td class="cnt">24</td><td class="cnt">−2</td><td class="cnt">22</td></tr>
+              <tr><td>B</td><td class="cnt">14</td><td class="cnt">+1</td><td class="cnt">15</td></tr>
+              <tr><td>C</td><td class="cnt">7</td><td class="cnt">0</td><td class="cnt">7</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="hint" style="margin-top:12px">Presne to, čo dnes predák vybavuje telefonátom do kuchyne — len písomne a dohľadateľne.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Mesačný podklad pre mzdy</h3><span class="pill neutral">XLSX + CSV</span></div>
+    <div class="scroll-x">
+      <table class="data" style="min-width:680px">
+        <thead>
+          <tr><th>Os. č.</th><th>Meno</th><th>Tím</th><th class="num">Obedov</th><th class="num">Cena</th><th class="num">Zamestnávateľ</th><th class="num">SF</th><th class="num">Zrážka</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>4021</td><td>Horváth Peter</td><td>Údržba</td><td class="num">18</td><td class="num">110,80</td><td class="num">60,94</td><td class="num">9,00</td><td class="num">47,06</td></tr>
+          <tr><td>4038</td><td>Baláž Marián</td><td>Údržba</td><td class="num">21</td><td class="num">129,40</td><td class="num">71,17</td><td class="num">10,50</td><td class="num">54,93</td></tr>
+          <tr><td>4102</td><td>Nagyová Zuzana</td><td>Údržba</td><td class="num">19</td><td class="num">115,20</td><td class="num">63,36</td><td class="num">9,50</td><td class="num">48,54</td></tr>
+          <tr><td>4110</td><td>Tóth Ľuboš</td><td>Údržba</td><td class="num">15</td><td class="num">92,40</td><td class="num">50,82</td><td class="num">7,50</td><td class="num">39,08</td></tr>
+        </tbody>
+        <tfoot><tr><td colspan="3">Spolu — 94 stravníkov</td><td class="num">1 782</td><td class="num">10 968,40</td><td class="num">6 032,62</td><td class="num">891,00</td><td class="num">4 044,78</td></tr></tfoot>
+      </table>
+    </div>
+    <p class="hint" style="margin-top:12px">V XLSX sú dátumy dátumami a sumy číslami — export, v ktorom sa nedá počítať, je na nič. CSV v UTF-8 s BOM a bodkočiarkou, inak slovenský Excel rozsype diakritiku aj stĺpce.</p>
+  </div>
+
+  <div class="note">
+    <p class="eyebrow">Čo z toho platí za appku</p>
+    <p>Denná objednávka dodávateľovi a mesačný podklad pre mzdy sú dva výstupy, kvôli ktorým celý systém existuje. Kontrola faktúry navyše ukáže nielen rozdiel oproti fakturovanej sume, ale aj deň, v ktorom vzniká.</p>
+  </div>
+</section>
+
+<!-- ============ PRIHLÁSENIE ============ -->
+<section class="screen wrap" id="s-login" hidden>
+  <div class="screen-head">
+    <h2>Prihlásenie</h2>
+    <span class="who">jedno pole na meno, jedno na PIN — žiadny výber roly</span>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="phone" style="max-width:360px">
+        <div class="phone-body" style="padding:30px 22px 26px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:26px">
+            <svg width="52" height="52" viewBox="0 0 64 64" aria-hidden="true">
+              <circle cx="32" cy="32" r="24" fill="none" stroke="currentColor" stroke-width="3" style="color:var(--petrol)"/>
+              <path d="M32,32 L32,8 A24,24 0 0,1 54.83,24.58 Z" fill="var(--mustard)"/>
+              <g stroke="var(--surface)" stroke-width="3" stroke-linecap="round">
+                <line x1="32" y1="32" x2="32" y2="8"/>
+                <line x1="32" y1="32" x2="54.83" y2="24.58"/>
+              </g>
+              <g stroke="var(--petrol)" stroke-width="3" stroke-linecap="round">
+                <line x1="32" y1="32" x2="46.10" y2="51.42"/>
+                <line x1="32" y1="32" x2="17.90" y2="51.42"/>
+                <line x1="32" y1="32" x2="9.17" y2="24.58"/>
+              </g>
+            </svg>
+            <span class="lw" style="font-size:22px">Obedár</span>
+          </div>
+
+          <div class="field">
+            <label for="l-user">Osobné číslo alebo meno</label>
+            <input type="text" id="l-user" value="4021" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label for="l-pin">PIN</label>
+            <input type="password" id="l-pin" value="••••" inputmode="numeric">
+          </div>
+          <label class="check" style="margin:4px 0 18px">
+            <input type="checkbox" checked> Ostať prihlásený
+          </label>
+          <button class="btn primary wide">Prihlásiť sa</button>
+          <p style="text-align:center;font-size:12.5px;color:var(--ink-3);margin:16px 0 0">Zabudnuté PIN? Kontaktuj správcu — kl. 123</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-head"><h3>Sila prihlasovacieho údaja podľa roly</h3></div>
+        <table class="data">
+          <thead><tr><th>Rola</th><th>Údaj</th><th>Prihlásený</th></tr></thead>
+          <tbody>
+            <tr><td>Stravník</td><td>PIN, min. 4 číslice</td><td>trvale</td></tr>
+            <tr><td>Predák</td><td>heslo, min. 8 znakov</td><td>90 dní</td></tr>
+            <tr><td>Admin</td><td>heslo, min. 10 znakov</td><td>30 dní</td></tr>
+            <tr><td>Superadmin</td><td>heslo, min. 12 znakov</td><td>30 dní</td></tr>
+          </tbody>
+        </table>
+        <p class="hint" style="margin-top:12px">Pole je pre všetkých rovnaké, líši sa len minimálna požiadavka. Pri uzavretí mesiaca a zmene cenníka si appka vypýta heslo znova, aj keď je používateľ prihlásený.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Prečo tam nie je rozbaľovací zoznam</h3></div>
+        <p style="margin:0;font-size:13.5px;color:var(--ink-2)">Zoznam adminov a vedúcich na prihlasovacej stránke by zverejňoval organizačnú štruktúru a menoval privilegované účty — presne zoznam, ktorý útočník potrebuje. Rola je vlastnosť účtu: systém po overení hesla sám vie, kto sa prihlásil. Kto má viac rolí, dostane prepínač <code style="font-family:var(--mono);font-size:12.5px">Moje obedy · Môj tím · Správa</code> až po prihlásení.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOGO ============ -->
+<section class="screen wrap" id="s-logo" hidden>
+  <div class="screen-head">
+    <h2>Logo — tri smery</h2>
+    <span class="who">SVG · funguje od 16 px po veľkú ikonu</span>
+  </div>
+
+  <div class="logo-grid">
+
+    <div class="logo-card">
+      <div class="logo-stage">
+        <svg width="60" height="60" viewBox="0 0 64 64" aria-label="Tanier-týždeň">
+          <circle cx="32" cy="32" r="24" fill="none" stroke="var(--ink)" stroke-width="3"/>
+          <path d="M32,32 L32,8 A24,24 0 0,1 54.83,24.58 Z" fill="var(--mustard)"/>
+          <g stroke="var(--ink)" stroke-width="3" stroke-linecap="round">
+            <line x1="32" y1="32" x2="32" y2="8"/>
+            <line x1="32" y1="32" x2="54.83" y2="24.58"/>
+            <line x1="32" y1="32" x2="46.10" y2="51.42"/>
+            <line x1="32" y1="32" x2="17.90" y2="51.42"/>
+            <line x1="32" y1="32" x2="9.17" y2="24.58"/>
+          </g>
+        </svg>
+        <span class="lw">Obedár</span>
+      </div>
+      <div class="logo-stage dark">
+        <svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="24" fill="none" stroke="#EFF3F2" stroke-width="3"/>
+          <path d="M32,32 L32,8 A24,24 0 0,1 54.83,24.58 Z" fill="#E0A233"/>
+          <g stroke="#EFF3F2" stroke-width="3" stroke-linecap="round">
+            <line x1="32" y1="32" x2="32" y2="8"/><line x1="32" y1="32" x2="54.83" y2="24.58"/>
+            <line x1="32" y1="32" x2="46.10" y2="51.42"/><line x1="32" y1="32" x2="17.90" y2="51.42"/>
+            <line x1="32" y1="32" x2="9.17" y2="24.58"/>
+          </g>
+        </svg>
+        <span class="lw">Obedár</span>
+      </div>
+      <div class="logo-meta">
+        <h4>Tanier-týždeň</h4>
+        <p>Tanier delený na päť dielov — päť pracovných dní, jeden objednaný. Najlepšie drží v malých veľkostiach.</p>
+      </div>
+      <div class="favi">
+        <svg width="16" height="16" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="26" fill="none" stroke="currentColor" stroke-width="5"/>
+          <path d="M32,32 L32,6 A26,26 0 0,1 56.73,23.96 Z" fill="var(--mustard)"/>
+        </svg>
+        16 px · favicon
+      </div>
+    </div>
+
+    <div class="logo-card">
+      <div class="logo-stage">
+        <svg width="60" height="60" viewBox="0 0 64 64" aria-label="Obedár">
+          <path d="M23,20 C23,11 41,11 41,20" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+          <rect x="13" y="20" width="38" height="14" rx="2.5" fill="none" stroke="var(--ink)" stroke-width="3"/>
+          <rect x="13" y="36" width="38" height="16" rx="2.5" fill="var(--mustard)" stroke="var(--mustard)" stroke-width="3"/>
+          <path d="M22,44 l5,5 l10,-11" fill="none" stroke="var(--surface)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="lw">Obedár</span>
+      </div>
+      <div class="logo-stage dark">
+        <svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M23,20 C23,11 41,11 41,20" fill="none" stroke="#EFF3F2" stroke-width="3" stroke-linecap="round"/>
+          <rect x="13" y="20" width="38" height="14" rx="2.5" fill="none" stroke="#EFF3F2" stroke-width="3"/>
+          <rect x="13" y="36" width="38" height="16" rx="2.5" fill="#E0A233" stroke="#E0A233" stroke-width="3"/>
+          <path d="M22,44 l5,5 l10,-11" fill="none" stroke="#12403F" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="lw">Obedár</span>
+      </div>
+      <div class="logo-meta">
+        <h4>Obedár</h4>
+        <p>Dvojposchodový obedár s držadlom, v spodnej časti fajka „objednané". Najdoslovnejšie a najteplejšie zo všetkých troch.</p>
+      </div>
+      <div class="favi">
+        <svg width="16" height="16" viewBox="0 0 64 64" aria-hidden="true">
+          <rect x="10" y="16" width="44" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="5"/>
+          <rect x="10" y="36" width="44" height="18" rx="3" fill="var(--mustard)"/>
+        </svg>
+        16 px · favicon
+      </div>
+    </div>
+
+    <div class="logo-card">
+      <div class="logo-stage">
+        <svg width="60" height="60" viewBox="0 0 64 64" aria-label="Vidlička-kalendár">
+          <g fill="var(--ink)">
+            <rect x="15" y="8" width="4" height="16" rx="1.5"/>
+            <rect x="24" y="8" width="4" height="16" rx="1.5"/>
+            <rect x="33" y="8" width="4" height="16" rx="1.5"/>
+            <rect x="42" y="8" width="4" height="16" rx="1.5"/>
+          </g>
+          <rect x="12" y="26" width="40" height="30" rx="3" fill="none" stroke="var(--ink)" stroke-width="3"/>
+          <line x1="12" y1="38" x2="52" y2="38" stroke="var(--ink)" stroke-width="2.5"/>
+          <line x1="12" y1="47" x2="52" y2="47" stroke="var(--ink)" stroke-width="2.5"/>
+          <rect x="32" y="38" width="10" height="9" fill="var(--mustard)"/>
+        </svg>
+        <span class="lw">Obedár</span>
+      </div>
+      <div class="logo-stage dark">
+        <svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true">
+          <g fill="#EFF3F2">
+            <rect x="15" y="8" width="4" height="16" rx="1.5"/><rect x="24" y="8" width="4" height="16" rx="1.5"/>
+            <rect x="33" y="8" width="4" height="16" rx="1.5"/><rect x="42" y="8" width="4" height="16" rx="1.5"/>
+          </g>
+          <rect x="12" y="26" width="40" height="30" rx="3" fill="none" stroke="#EFF3F2" stroke-width="3"/>
+          <line x1="12" y1="38" x2="52" y2="38" stroke="#EFF3F2" stroke-width="2.5"/>
+          <line x1="12" y1="47" x2="52" y2="47" stroke="#EFF3F2" stroke-width="2.5"/>
+          <rect x="32" y="38" width="10" height="9" fill="#E0A233"/>
+        </svg>
+        <span class="lw">Obedár</span>
+      </div>
+      <div class="logo-meta">
+        <h4>Vidlička-kalendár</h4>
+        <p>Hroty vidličky prechádzajú do stĺpcov kalendára, jedna bunka je vybraná. Najviac „systémové" z troch.</p>
+      </div>
+      <div class="favi">
+        <svg width="16" height="16" viewBox="0 0 64 64" aria-hidden="true">
+          <g fill="currentColor">
+            <rect x="14" y="6" width="6" height="18" rx="2"/><rect x="29" y="6" width="6" height="18" rx="2"/><rect x="44" y="6" width="6" height="18" rx="2"/>
+          </g>
+          <rect x="10" y="30" width="44" height="26" rx="3" fill="var(--mustard)"/>
+        </svg>
+        16 px · favicon
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="card-head"><h3>Farby a písmo</h3></div>
+    <div style="display:flex;gap:22px;flex-wrap:wrap">
+      <div><div style="width:74px;height:46px;background:#12403F;border-radius:2px;border:1px solid var(--line)"></div><p class="eyebrow" style="margin-top:6px">Petrolejová<br>#12403F</p></div>
+      <div><div style="width:74px;height:46px;background:#B06E05;border-radius:2px;border:1px solid var(--line)"></div><p class="eyebrow" style="margin-top:6px">Horčicová<br>#B06E05</p></div>
+      <div><div style="width:74px;height:46px;background:#F3F2EE;border-radius:2px;border:1px solid var(--line-2)"></div><p class="eyebrow" style="margin-top:6px">Papier<br>#F3F2EE</p></div>
+      <div><div style="width:74px;height:46px;background:#2C7355;border-radius:2px;border:1px solid var(--line)"></div><p class="eyebrow" style="margin-top:6px">Objednané<br>#2C7355</p></div>
+      <div><div style="width:74px;height:46px;background:#A8402F;border-radius:2px;border:1px solid var(--line)"></div><p class="eyebrow" style="margin-top:6px">Chýba<br>#A8402F</p></div>
+    </div>
+    <p class="hint" style="margin-top:16px">Petrolejová je zo smaltovaných jedálenských tabúľ, horčicová nesie teplo jedla a používa sa výhradne na označenia jedál. Zelená a červená sú vyhradené pre stav objednávky, aby nikdy nesúperili s akcentom. Označenia jedál, časy a všetky čísla sú v neproporcionálnom písme — písmeno jedla je hlavný motív celej appky, tak nech je aj rozpoznateľné.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Obedár — klikací preview podľa konceptu <code>docs/01-koncept.md</code> (v0.8). Bez databázy, dáta sú vzorové.</span>
+    <span>Ešte sa nekóduje.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- dátumy ---------- */
+  const DAYS = ["Pondelok","Utorok","Streda","Štvrtok","Piatok"];
+  const DAYS_S = ["Po","Ut","St","Št","Pi"];
+  const MON = ["januára","februára","marca","apríla","mája","júna","júla","augusta","septembra","októbra","novembra","decembra"];
+
+  function mondayOf(d){
+    const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const wd = (x.getDay() + 6) % 7;
+    x.setDate(x.getDate() - wd);
+    return x;
+  }
+  function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+  function dm(d){ return d.getDate()+". "+(d.getMonth()+1)+"."; }
+  function dmy(d){ return d.getDate()+". "+(d.getMonth()+1)+". "+d.getFullYear(); }
+
+  const now = new Date();
+  const thisMon = mondayOf(now);
+  const nextMon = addDays(thisMon, 7);
+  const nextDays = [0,1,2,3,4].map(i => addDays(nextMon, i));
+  const thisDays = [0,1,2,3,4].map(i => addDays(thisMon, i));
+
+  let deadline = new Date(thisMon.getFullYear(), thisMon.getMonth(), thisMon.getDate()+4, 12, 0, 0);
+  if (deadline <= now) deadline = new Date(deadline.getTime() + 7*24*3600*1000);
+
+  const weekLabel = dm(nextDays[0]) + " – " + nextDays[4].getDate() + ". " + (nextDays[4].getMonth()+1) + ". " + nextDays[4].getFullYear();
+
+  /* ---------- označenia ---------- */
+  const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
+  let style = "upper";
+  let mealCount = 3;
+
+  function label(i){
+    if (style === "upper")  return String.fromCharCode(65+i);
+    if (style === "lower")  return String.fromCharCode(97+i);
+    if (style === "arabic") return String(i+1);
+    return ROMAN[i];
+  }
+
+  /* ---------- dáta ---------- */
+  const MENU = [
+    ["Držková polievka, vyprážaný syr, hranolky, tatárska","Slepačí vývar, kuracie prsia na masle, ryža","Šošovicová polievka, pirohy s bryndzou"],
+    ["Zeleninová polievka, sviečková na smotane, knedľa","Fazuľová polievka, vyprážaný rezeň, zemiaky","Paradajková polievka, špagety s bazalkou"],
+    ["Hovädzí vývar, guláš, knedľa","Kapustnica, pečené kuracie stehno, ryža","Cesnaková polievka, zeleninové rizoto"],
+    ["Hrachová polievka, bravčový rezeň s broskyňou, zemiaky","Slepačí vývar, dusené hovädzie, ryža","Brokolicová polievka, palacinky s džemom"],
+    ["Rybacia polievka, vyprážaná ryba, zemiakový šalát","Zeleninový vývar, morčacie prsia, dusená ryža","Šampiňónová polievka, halušky s kapustou"]
+  ];
+  const PRICES = [6.20, 6.20, 5.80, 6.40, 5.90, 6.10, 6.30, 5.70, 6.00, 6.50];
+
+  const own = [
+    {n:"Kováč Jozef",      p:"4009", self:false, o:[0,1,0,null,2], last:[0,1,0,1,2]},
+    {n:"Horváth Peter",    p:"4021", self:true,  o:[0,0,1,1,null], last:[0,0,1,1,0]},
+    {n:"Baláž Marián",     p:"4038", self:false, o:[1,1,1,1,1],    last:[1,1,1,1,1]},
+    {n:"Tóth Ľuboš",       p:"4110", self:false, o:[null,null,null,null,null], last:[2,0,2,0,2]},
+    {n:"Nagyová Zuzana",   p:"4102", self:true,  o:[2,2,0,2,0],    last:[2,2,0,2,0]},
+    {n:"Šimko Martin",     p:"4127", self:false, o:[0,1,null,1,0], last:[0,1,1,1,0]},
+    {n:"Krajčí Ondrej",    p:"4133", self:false, o:[1,0,1,0,1],    last:[1,0,1,0,1]},
+    {n:"Bezáková Iveta",   p:"4141", self:false, o:[null,null,null,null,null], last:[0,0,0,0,0]},
+    {n:"Danko Radoslav",   p:"4158", self:false, o:[2,null,2,2,null], last:[2,1,2,2,1]}
+  ];
+
+  const deleg = [
+    {n:"Sedláková Jana",   p:"4204", self:false, o:[0,0,null,1,1], last:[0,0,1,1,1]},
+    {n:"Mrva Pavol",       p:"4217", self:false, o:[1,1,1,null,0], last:[1,1,1,0,0]},
+    {n:"Slaný Erik",       p:"4229", self:false, o:[null,null,null,null,null], last:[0,2,0,2,0]}
+  ];
+
+  /* ---------- prepínanie obrazoviek ---------- */
+  const tabs = Array.from(document.querySelectorAll(".tab"));
+  tabs.forEach(t => t.addEventListener("click", () => {
+    tabs.forEach(x => x.setAttribute("aria-selected", String(x === t)));
+    document.querySelectorAll(".screen").forEach(s => { s.hidden = true; });
+    document.getElementById("s-" + t.dataset.screen).hidden = false;
+    window.scrollTo({top:0, behavior:"instant"});
+  }));
+
+  /* ---------- odpočet ---------- */
+  function tick(){
+    const ms = deadline - new Date();
+    let txt;
+    if (ms <= 0) { txt = "uzavreté"; }
+    else {
+      const h = Math.floor(ms/3600000);
+      const m = Math.floor(ms/60000) % 60;
+      const s = Math.floor(ms/1000) % 60;
+      txt = (h > 0 ? h + " h " : "") + m + " min " + (h === 0 ? s + " s" : "");
+    }
+    setText("pd-countdown", "ostáva " + txt);
+    setText("sv-cd", "ostáva " + txt);
+  }
+  function setText(id, v){ const el = document.getElementById(id); if (el) el.textContent = v; }
+
+  /* ---------- matica ---------- */
+  function head(tr){
+    tr.innerHTML = "";
+    const th0 = document.createElement("th");
+    th0.textContent = "Meno";
+    tr.appendChild(th0);
+    nextDays.forEach((d,i) => {
+      const th = document.createElement("th");
+      th.innerHTML = DAYS_S[i] + ' <span class="dnum">' + dm(d) + "</span>";
+      tr.appendChild(th);
+    });
+  }
+
+  function chipFor(v){
+    if (v === null || v >= mealCount) return '<span class="chip ghost">·</span>';
+    return '<span class="chip">' + label(v) + "</span>";
+  }
+
+  function renderTable(tblId, rows){
+    const tbl = document.getElementById(tblId);
+    const tb = tbl.querySelector("tbody");
+    tb.innerHTML = "";
+    rows.forEach((person, ri) => {
+      const tr = document.createElement("tr");
+      const th = document.createElement("th");
+      th.scope = "row";
+      th.innerHTML = person.n + '<span class="pn">' + person.p + "</span>";
+      tr.appendChild(th);
+      person.o.forEach((v, ci) => {
+        const td = document.createElement("td");
+        if (person.self) td.className = "self";
+        const btn = document.createElement("button");
+        btn.className = "cell";
+        btn.type = "button";
+        btn.dataset.r = ri; btn.dataset.c = ci; btn.dataset.t = tblId;
+        btn.innerHTML = chipFor(v);
+        btn.setAttribute("aria-label", person.n + ", " + DAYS[ci] + ", " + (v === null ? "neobjednané" : "jedlo " + label(v)));
+        td.appendChild(btn);
+        tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+  }
+
+  function rowsOf(id){ return id === "m-own" ? own : deleg; }
+
+  function refreshCell(tblId, r, c){
+    const btn = document.querySelector('.cell[data-t="'+tblId+'"][data-r="'+r+'"][data-c="'+c+'"]');
+    if (!btn) return;
+    const v = rowsOf(tblId)[r].o[c];
+    btn.innerHTML = chipFor(v);
+    btn.setAttribute("aria-label", rowsOf(tblId)[r].n + ", " + DAYS[c] + ", " + (v === null ? "neobjednané" : "jedlo " + label(v)));
+  }
+
+  function countMissing(){
+    let miss = 0;
+    own.concat(deleg).forEach(p => p.o.forEach(v => { if (v === null) miss++; }));
+    const people = own.concat(deleg).filter(p => p.o.some(v => v === null)).length;
+    const el = document.getElementById("pd-missing");
+    if (!el) return;
+    if (miss === 0){
+      el.className = "pill ok";
+      el.textContent = "všetci majú objednané";
+    } else {
+      el.className = "pill miss";
+      el.textContent = people + " ľudí nemá objednané · " + miss + " chýbajúcich dní";
+    }
+  }
+
+  document.addEventListener("click", function(e){
+    const btn = e.target.closest(".cell");
+    if (!btn) return;
+    const rows = rowsOf(btn.dataset.t);
+    const r = +btn.dataset.r, c = +btn.dataset.c;
+    const cur = rows[r].o[c];
+    rows[r].o[c] = (cur === null) ? 0 : (cur + 1 >= mealCount ? null : cur + 1);
+    refreshCell(btn.dataset.t, r, c);
+    countMissing();
+  });
+
+  document.addEventListener("keydown", function(e){
+    const btn = document.activeElement;
+    if (!btn || !btn.classList || !btn.classList.contains("cell")) return;
+    const rows = rowsOf(btn.dataset.t);
+    const r = +btn.dataset.r, c = +btn.dataset.c;
+    const k = e.key;
+    let v;
+    if (k === "0" || k === "Backspace" || k === "Delete") v = null;
+    else {
+      for (let i = 0; i < mealCount; i++){
+        if (k.toUpperCase() === label(i).toUpperCase()){ v = i; break; }
+      }
+      if (v === undefined) return;
+    }
+    e.preventDefault();
+    rows[r].o[c] = v;
+    refreshCell(btn.dataset.t, r, c);
+    countMissing();
+    const next = document.querySelector('.cell[data-t="'+btn.dataset.t+'"][data-r="'+(r+1)+'"][data-c="'+c+'"]');
+    if (next) next.focus();
+  });
+
+  const bc = document.getElementById("btn-copy");
+  if (bc) bc.addEventListener("click", function(){
+    own.concat(deleg).forEach(p => { p.o = p.last.map(v => v >= mealCount ? null : v); });
+    renderAll();
+  });
+  const bx = document.getElementById("btn-clear");
+  if (bx) bx.addEventListener("click", function(){
+    own.concat(deleg).forEach(p => { p.o = [null,null,null,null,null]; });
+    renderAll();
+  });
+
+  /* ---------- stravník ---------- */
+  const svOrders = [0, 1, null, 1, null];
+  let openDay = null;
+
+  function renderStravnik(){
+    const box = document.getElementById("sv-days");
+    if (!box) return;
+    box.innerHTML = "";
+    nextDays.forEach((d,i) => {
+      const row = document.createElement("div");
+      row.className = "day";
+      const v = svOrders[i];
+      const nm = (v !== null && v < mealCount && MENU[i][v]) ? MENU[i][v] : "";
+      row.innerHTML =
+        '<button class="day-btn" data-d="'+i+'">' +
+          (v === null || v >= mealCount ? '<span class="chip ghost lg">·</span>' : '<span class="chip lg">'+label(v)+"</span>") +
+          '<span class="dname">' +
+            '<span class="dn">'+DAYS[i]+'</span> <span class="dd">'+dm(d)+"</span>" +
+            '<div class="meal">' + (v === null || v >= mealCount ? "neobjednané" : (nm || "jedlo " + label(v))) + "</div>" +
+          "</span>" +
+        "</button>";
+      box.appendChild(row);
+
+      if (openDay === i){
+        const sheet = document.createElement("div");
+        sheet.className = "menu-sheet";
+        let h = '<p class="eyebrow" style="margin-bottom:8px">'+DAYS[i]+" "+dm(d)+"</p>";
+        for (let j = 0; j < mealCount; j++){
+          h += '<div class="opt"><button class="day-btn" data-pick="'+i+'" data-v="'+j+'">' +
+               '<span class="chip">'+label(j)+"</span>" +
+               '<span class="txt"><div class="nm">'+(MENU[i][j] || "jedlo "+label(j))+'</div>' +
+               '<div class="pr">'+PRICES[j].toFixed(2).replace(".",",")+" €</div></span></button></div>";
+        }
+        h += '<div class="opt"><button class="day-btn" data-pick="'+i+'" data-v="x">' +
+             '<span class="chip ghost">·</span><span class="txt"><div class="nm">Nechcem obed</div></span></button></div>';
+        sheet.innerHTML = h;
+        box.appendChild(sheet);
+      }
+    });
+  }
+
+  document.addEventListener("click", function(e){
+    const pick = e.target.closest("[data-pick]");
+    if (pick){
+      const i = +pick.dataset.pick;
+      svOrders[i] = pick.dataset.v === "x" ? null : +pick.dataset.v;
+      openDay = null;
+      renderStravnik();
+      return;
+    }
+    const day = e.target.closest(".day-btn[data-d]");
+    if (day){
+      const i = +day.dataset.d;
+      openDay = (openDay === i) ? null : i;
+      renderStravnik();
+    }
+  });
+
+  function renderCurrent(){
+    const box = document.getElementById("sv-current");
+    if (!box) return;
+    const cur = [0,1,1,2,0];
+    box.innerHTML = "";
+    thisDays.forEach((d,i) => {
+      const past = d < new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const row = document.createElement("div");
+      row.className = "day";
+      row.innerHTML =
+        (cur[i] >= mealCount ? '<span class="chip ghost">·</span>' : '<span class="chip">'+label(cur[i])+"</span>") +
+        '<span class="dname"><span class="dn">'+DAYS[i]+'</span> <span class="dd">'+dm(d)+"</span></span>" +
+        (past ? '<span class="pill neutral">prevzaté</span>'
+              : '<button class="btn" style="padding:5px 10px;font-size:12.5px">Odhlásiť sa</button>');
+      box.appendChild(row);
+    });
+  }
+
+  const svc = document.getElementById("sv-copy");
+  if (svc) svc.addEventListener("click", function(){
+    const last = [0,1,1,1,2];
+    for (let i = 0; i < 5; i++) svOrders[i] = last[i] >= mealCount ? null : last[i];
+    openDay = null;
+    renderStravnik();
+  });
+
+  /* ---------- admin ---------- */
+  function renderAdminMenu(){
+    const tb = document.getElementById("a-menu");
+    if (!tb) return;
+    tb.innerHTML = "";
+    nextDays.forEach((d,i) => {
+      const tr = document.createElement("tr");
+      let chips = "";
+      for (let j = 0; j < mealCount; j++){
+        chips += '<div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:5px">' +
+                 '<span class="chip sm">'+label(j)+"</span>" +
+                 '<span style="font-size:12.5px;color:var(--ink-2)">'+(MENU[i][j] || '<em style="color:var(--ink-3)">bez názvu</em>')+"</span></div>";
+      }
+      tr.innerHTML = '<td style="white-space:nowrap;vertical-align:top"><strong>'+DAYS_S[i]+"</strong> "+dm(d)+"</td><td>"+chips+"</td>";
+      tb.appendChild(tr);
+    });
+  }
+
+  function renderPrices(){
+    const tb = document.getElementById("a-price");
+    if (!tb) return;
+    const mode = document.querySelector('#a-contrib button[aria-pressed="true"]').dataset.m;
+    const val = parseFloat(document.getElementById("a-val").value) || 0;
+    const sf = parseFloat(document.getElementById("a-sf").value) || 0;
+    tb.innerHTML = "";
+    for (let j = 0; j < mealCount; j++){
+      const price = PRICES[j];
+      const emp = mode === "pct" ? price * val / 100 : Math.min(val, price);
+      const own_ = Math.max(0, price - emp - sf);
+      const tr = document.createElement("tr");
+      tr.innerHTML = '<td><span class="chip sm">'+label(j)+"</span></td>" +
+        '<td class="num">'+price.toFixed(2).replace(".",",")+"</td>" +
+        '<td class="num">'+emp.toFixed(2).replace(".",",")+"</td>" +
+        '<td class="num">'+sf.toFixed(2).replace(".",",")+"</td>" +
+        '<td class="num"><strong>'+own_.toFixed(2).replace(".",",")+"</strong></td>";
+      tb.appendChild(tr);
+    }
+  }
+
+  document.querySelectorAll("#a-style button").forEach(b => b.addEventListener("click", function(){
+    document.querySelectorAll("#a-style button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    style = b.dataset.style;
+    renderAll();
+  }));
+
+  document.querySelectorAll("#a-contrib button").forEach(b => b.addEventListener("click", function(){
+    document.querySelectorAll("#a-contrib button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    const pct = b.dataset.m === "pct";
+    document.getElementById("a-lbl").textContent = pct ? "Percento" : "Suma na obed (€)";
+    document.getElementById("a-val").value = pct ? "55" : "3.50";
+    document.getElementById("a-val").step = pct ? "1" : "0.10";
+    renderPrices();
+  }));
+
+  document.querySelectorAll("#a-compose button").forEach(b => b.addEventListener("click", function(){
+    document.querySelectorAll("#a-compose button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    document.getElementById("a-compose-hint").textContent = b.dataset.c === "komplet"
+      ? "Polievka aj dezert sú v cene jedla, objednáva sa jedna položka."
+      : "Polievka a dezert sa objednávajú samostatne a majú vlastnú cenu.";
+  }));
+
+  const ac = document.getElementById("a-count");
+  if (ac) ac.addEventListener("input", function(){
+    mealCount = +ac.value;
+    document.getElementById("a-count-val").textContent = mealCount;
+    own.concat(deleg).forEach(p => p.o = p.o.map(v => (v !== null && v >= mealCount) ? null : v));
+    for (let i = 0; i < 5; i++) if (svOrders[i] !== null && svOrders[i] >= mealCount) svOrders[i] = null;
+    renderAll();
+  });
+
+  ["a-val","a-sf"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", renderPrices);
+  });
+
+  /* ---------- zberný hárok ---------- */
+  function renderSheet(){
+    const tb = document.getElementById("z-sheet");
+    if (!tb) return;
+    tb.innerHTML = "";
+    own.slice(0,6).forEach(p => {
+      const tr = document.createElement("tr");
+      let tds = "<td>"+p.n+"</td>";
+      for (let i = 0; i < 5; i++){
+        const v = p.o[i];
+        tds += (p.self && v !== null && v < mealCount)
+          ? '<td class="box"><span class="pre">'+label(v)+"</span></td>"
+          : '<td class="box"></td>';
+      }
+      tr.innerHTML = tds;
+      tb.appendChild(tr);
+    });
+    setText("z-week", "Týždeň " + weekLabel + " · vytlačené " + dmy(now));
+  }
+
+  /* ---------- render ---------- */
+  function renderAll(){
+    head(document.getElementById("th-own"));
+    head(document.getElementById("th-deleg"));
+    renderTable("m-own", own);
+    renderTable("m-deleg", deleg);
+    countMissing();
+    renderStravnik();
+    renderCurrent();
+    renderAdminMenu();
+    renderPrices();
+    renderSheet();
+  }
+
+  setText("pd-week", weekLabel);
+  setText("pd-deadline", "piatok " + dm(addDays(thisMon,4)) + " o 12:00");
+  setText("sv-week", weekLabel);
+  renderAll();
+  tick();
+  setInterval(tick, 1000);
+})();
+</script>
