@@ -1,8 +1,14 @@
-# Objednávanie obedov — koncept (v0.1)
+# Objednávanie obedov — koncept (v0.2)
 
 Pracovný názov: **Obedár**
 Rozsah: 50–100 stravníkov, 1–5 poskytovateľov stravy, interná firemná appka.
 Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a následne klikací preview.
+
+**Rozhodnuté v v0.2:**
+1. Predák za podriadených **objednáva, mení aj odhlasuje**.
+2. Poskytovateľa **prideľuje admin pevne**, stravník si ho nevyberá.
+3. Appka **rieši ceny aj podklad pre mzdové zrážky**.
+4. **Bez zmien** — všetci obedujú v rovnakom režime.
 
 ---
 
@@ -10,40 +16,38 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 
 | Rola | Vidí | Môže |
 |---|---|---|
-| **Stravník** | seba | objednať/zmeniť do týždňového deadlinu, odhlásiť sa na deň do denného deadlinu, história a mesačný prehľad |
-| **Predák** | seba + pridelených podriadených | to isté za seba; za podriadených podľa nastaveného oprávnenia (viď 1.1) |
-| **Admin** | všetkých | plná konfigurácia, výnimky po deadline, exporty, audit |
-| *(voliteľne)* **Výdaj / jedáleň** | denný zoznam | odškrtnutie prevzatia obeda |
-| *(voliteľne)* **Dodávateľ** | len svoje súhrny | stiahnutie denného počtu porcií |
+| **Stravník** | seba | objednať/zmeniť do týždňového deadlinu, odhlásiť sa na deň do denného deadlinu, história a mesačný prehľad so sumou |
+| **Predák** | seba + pridelených podriadených | za seba aj za každého podriadeného: objednať, zmeniť, odhlásiť na deň, hromadne odhlásiť rozsah dní (dovolenka, PN) |
+| **Admin** | všetkých | plná konfigurácia, výnimky po deadline, cenník a príspevky, exporty, audit |
+| *(voliteľne, fáza 3)* **Výdaj** | denný zoznam | odškrtnutie prevzatia obeda |
+| *(voliteľne, fáza 3)* **Dodávateľ** | len svoje súhrny | stiahnutie denného počtu porcií |
 
-**Prideľovanie podriadených robí výhradne admin.**
+Prideľovanie podriadených robí výhradne admin.
 
-### 1.1 Oprávnenie predáka — konfigurovateľné
-Tri úrovne, admin nastavuje globálne aj individuálne per predák:
-- `VIEW` — len vidí, kto nemá objednané (a upozorní ho)
-- `ORDER` — môže objednávať a meniť za podriadeného (odporúčaný default)
-- `ORDER+CANCEL` — plus odhlasovanie na deň (dovolenka, PN, služobka)
+### 1.1 Predák — plné oprávnenie, ale s dohľadateľnosťou
+Predák má nad svojím tímom rovnaké práva ako stravník nad sebou. Aby to nevytváralo spory, platí:
+- každý zásah je v audit logu ako *„Novák J. (predák) zmenil objednávku pre Kováč P. — streda: B → A"*,
+- podriadený dostane o zmene notifikáciu,
+- predák **nevidí ani nemení** ceny a mzdové údaje podriadených, len objednávky.
 
-Každý zásah predáka je v audit logu ako „*Novák J. (predák) zmenil objednávku pre Kováč P.*" a podriadený o tom dostane notifikáciu. Bez tohto vznikajú spory.
+Vedľajší efekt: ľudia bez smartfónu majú riešenie — objedná im predák.
 
 ### 1.2 Tím a zastupovanie
-Tím = entita s prideleným predákom, nie priame pole `nadriadený` na osobe.
+Tím = entita s prideleným predákom, nie pole „nadriadený" na osobe.
 Dôvod: výmena predáka je jedna zmena, nie 15 zmien.
 Tím má **hlavného predáka + voliteľného zástupcu** (dovolenka predáka je istota, nie výnimka).
 Osoba patrí práve do jedného tímu. Osoba bez tímu = „Bez zaradenia", vidí ju len admin.
 
 ---
 
-## 2. Prihlasovanie — posúdenie tvojho návrhu
+## 2. Prihlasovanie — posúdenie pôvodného návrhu
 
-**Tvoj návrh:** pole meno → drop-down pre admina a vedúcich → heslo/PIN.
+**Pôvodný návrh:** pole meno → drop-down pre admina a vedúcich → heslo/PIN.
 
 **Neodporúčam**, z troch dôvodov:
 1. **Bezpečnosť** — drop-down so zoznamom adminov a predákov zverejňuje na verejnej prihlasovacej stránke organizačnú štruktúru a rovno menuje privilegované účty. To je presne zoznam, ktorý útočník potrebuje.
 2. **Zbytočný krok** — rola je vlastnosť účtu, nie voľba pri prihlásení. Systém po overení hesla sám vie, kto si.
-3. **Chybovosť** — používatelia si vyberú zlú položku a hlásia „nedá sa prihlásiť".
-
-Ak bol zámerom drop-downu „stravník si zvolí, pod koho patrí" — to je údaj, ktorý prideľuje admin (bod 1), nie voľba pri logine.
+3. **Chybovosť** — ľudia si vyberú zlú položku a hlásia „nedá sa prihlásiť".
 
 ### 2.1 Odporúčané riešenie
 Jedna obrazovka, dve polia:
@@ -60,15 +64,15 @@ Jedna obrazovka, dve polia:
 ```
 
 - **Stravník:** osobné číslo + 6-miestny PIN (numerická klávesnica na mobile, funguje aj v rukaviciach).
-- **Predák / admin:** to isté meno, ale **heslo min. 10 znakov** (nie PIN) + pre admina voliteľne 2FA (TOTP). Silnejšie oprávnenie = silnejší secret.
+- **Predák / admin:** to isté prihlasovacie pole, ale **heslo min. 10 znakov** (nie PIN) + pre admina voliteľne 2FA (TOTP). Silnejšie oprávnenie = silnejší secret. Predák navyše vidí osobné údaje iných ľudí, takže PIN by tu bol slabý.
 - **Prvé prihlásenie:** admin vydá dočasný PIN, appka vynúti zmenu.
 - **Reset:** len cez admina (žiadny e-mail nie je potrebný — časť ľudí firemný e-mail nemá).
 - **Ochrana:** 5 neúspešných pokusov → zámok na 15 minút, log pokusov. Pri 6-miestnom PIN nevyhnutné.
 - **Viac rolí naraz** (predák je aj stravník): po prihlásení prepínač v hlavičke `Moje obedy | Môj tím | Správa`. Nie pred prihlásením.
 
-### 2.2 Rozšírenia (neskôr, nie do MVP)
-- **SSO cez Microsoft Entra ID / Google Workspace**, ak firma má účty pre všetkých → nulová správa hesiel. Odporúčam ako fázu 3, návrh systému na to musí byť pripravený.
-- **Kiosk pri jedálni** (tablet) pre ľudí bez smartfónu: osobné číslo + PIN, automatický odhlas po 20 s nečinnosti. Alternatíva: objedná predák (bod 1.1).
+### 2.2 Rozšírenia (fáza 3)
+- **SSO cez Microsoft Entra ID / Google Workspace**, ak firma má účty pre všetkých → nulová správa hesiel. Návrh systému na to musí byť pripravený od začiatku.
+- **Kiosk pri jedálni** (tablet): osobné číslo + PIN, automatický odhlas po 20 s nečinnosti.
 - Čítačka firemných kariet (NFC) — len ak už existuje dochádzkový systém, z ktorého sa dá čítať.
 
 ---
@@ -87,10 +91,17 @@ Admin nastavuje **1 až 5** aktívnych poskytovateľov. Pre každého samostatne
 | Denný deadline na odhlásenie | viď 4.2 | v deň obeda 07:30 |
 | Kapacita/deň (voliteľné) | max. počet porcií, prípadne limit na jedlo | bez limitu |
 | Dni, kedy varí | Po–Pia (možno vypnúť konkrétny deň) | Po–Pia |
+| Cenník | viď kapitola 6 | — |
 
 **Číslovanie sa generuje automaticky z poradia** — admin len zvolí štýl. Názvy jedál sú voliteľné; ak chýbajú, zobrazí sa iba označenie („B"). Ak sú vyplnené, zobrazí sa `B — Vyprážaný syr, hranolky, tatárska`.
 
-**Otvorená otázka:** vyberá si stravník poskytovateľa slobodne každý deň, alebo mu je pridelený (per osoba / per tím)? Viď bod 11.
+### 3.1 Pridelenie poskytovateľa stravníkovi
+Poskytovateľ je **pevne pridelený adminom**, stravník si ho nevyberá — vidí len menu svojho poskytovateľa. Zjednodušuje to obrazovku aj počty pre dodávateľa.
+
+- Pridelenie je vlastnosť **osoby**, nie tímu (človek môže prejsť do iného tímu bez zmeny stravy), ale admin má nástroj *„prideliť celému tímu naraz"*.
+- **Zmena poskytovateľa platí od najbližšieho neuzamknutého týždňa.** Už uzamknuté týždne sa nemenia — dodávateľ má počty odoslané.
+- Pri deaktivácii poskytovateľa appka upozorní *„27 stravníkov nemá poskytovateľa"* a ponúkne hromadný presun.
+- Nový zamestnanec bez prideleného poskytovateľa nemôže objednávať a je v zozname „na doriešenie".
 
 ---
 
@@ -102,7 +113,7 @@ Všetky časy v zóne **Europe/Bratislava**, v databáze UTC. Deadline platí na
 - Menu na týždeň **W+1** sa otvára v **pondelok 00:00 týždňa W**.
 - Uzatvára sa v **piatok 12:00 týždňa W** (admin mení deň aj čas).
 - Po uzávierke je týždeň **zamknutý** — nedá sa meniť voľba jedla, dá sa už len **odhlásiť na deň** (bod 4.2).
-- Admin môže voliteľne otvoriť aj dlhší horizont (napr. 4 týždne dopredu, ak je menu známe) — každý týždeň sa zamkne vo svojom termíne. Užitočné pred dovolenkami.
+- Admin môže voliteľne otvoriť dlhší horizont (napr. 4 týždne dopredu, ak je menu známe) — každý týždeň sa zamkne vo svojom termíne. Užitočné pred dovolenkami.
 - **Doobjednanie po uzávierke:** default zakázané (dodávateľ už má počty). Per poskytovateľa sa dá povoliť „doobjednanie do <čas>" — treba dohodu s dodávateľom.
 
 ### 4.2 Denné odhlásenie
@@ -122,43 +133,80 @@ Používateľovi sa nikdy nezobrazí len „07:30", ale konkrétny dátum a čas
 ### 4.3 Kalendár neobedových dní
 - Slovenské štátne sviatky (predvyplnené, ročne aktualizované).
 - Celozávodná dovolenka / odstávka — admin uzavrie rozsah dní.
-- Jednorazové zatvorenie („dodávateľ nevarí 14. 8.") — admin, s automatickou notifikáciou dotknutým.
+- Jednorazové zatvorenie („dodávateľ nevarí 14. 8.") — admin, s automatickou notifikáciou dotknutým a hromadným zrušením objednávok bez účtovania.
 
 ### 4.4 Výnimky po deadline
-Admin (a len admin) môže zrušiť objednávku aj po termíne — povinne s dôvodom a s príznakom **„účtovať napriek odhláseniu"** (áno/nie), lebo dodávateľ už porciu uvaril. Bez tohto poľa sa účtovanie rozchádza s realitou.
+Admin (a len admin) môže zrušiť objednávku aj po termíne — povinne s dôvodom a s príznakom **„účtovať napriek odhláseniu"** (áno/nie), lebo dodávateľ už porciu uvaril. Bez tohto poľa sa účtovanie rozíde s realitou. Viď aj 6.4.
 
 ---
 
 ## 5. Obrazovky
 
 ### 5.1 Stravník (mobile-first)
-1. **Budúci týždeň** — hlavná obrazovka. 5 kariet Po–Pia, každá ukazuje voľbu alebo „neobjednané". Hore odpočet do uzávierky. Ťuk na deň → výber poskytovateľa a jedla → uložené (bez tlačidla „Potvrdiť", ukladá sa priebežne, s undo).
+1. **Budúci týždeň** — hlavná obrazovka. 5 kariet Po–Pia, každá ukazuje voľbu alebo „neobjednané". Hore odpočet do uzávierky. Ťuk na deň → zoznam jedál môjho poskytovateľa → ťuk na jedlo → uložené (bez tlačidla „Potvrdiť", ukladá sa priebežne, s undo).
 2. **Tento týždeň** — len na čítanie + tlačidlo *Odhlásiť sa* pri dňoch, kde ešte beží denný deadline.
 3. **Kopírovať minulý týždeň** — jedno tlačidlo, doplní rovnaké voľby (ak dané jedlo v novom menu neexistuje, nechá deň prázdny a označí ho). Pri 100 ľuďoch to je rozdiel medzi „appka funguje" a „appka nefunguje".
-4. **Môj prehľad** — mesiac, počet obedov, suma, čo mi ide zo mzdy.
+4. **Môj prehľad** — mesiac, počet obedov, cena spolu, príspevok zamestnávateľa, **koľko mi ide zo mzdy**.
 5. **Profil** — zmena PIN, notifikácie, jazyk.
 
 ### 5.2 Predák — „Môj tím"
 Matica **ľudia × dni** (riadky = podriadení, stĺpce Po–Pia), v bunke označenie jedla.
 - zelená = objednané, sivá = neobjednané, prečiarknuté = odhlásené
 - hore: *„3 ľudia nemajú objednané, uzávierka o 5 h"*
-- hromadné akcie: kopírovať minulý týždeň celému tímu, hromadné odhlásenie na rozsah dní (dovolenka), tlač zoznamu
+- ťuk do bunky = zmena voľby za podriadeného
+- hromadné akcie: kopírovať minulý týždeň celému tímu, hromadné odhlásenie na rozsah dní (dovolenka/PN), tlač zoznamu
 
 ### 5.3 Admin
-Poskytovatelia · Menu (týždenný editor, kopírovanie predchádzajúceho týždňa, neskôr import z XLSX/CSV) · Používatelia a tímy · Termíny a sviatky · Zostavy a exporty · Audit log · Notifikácie.
+Poskytovatelia · Cenník a príspevky · Menu (týždenný editor, kopírovanie predchádzajúceho týždňa) · Používatelia a tímy · Termíny a sviatky · Zostavy a exporty · Mesačná uzávierka · Audit log · Notifikácie.
 
 ---
 
-## 6. Výstupy a integrácie
+## 6. Ceny, príspevky a mzdy
+
+Toto je vrstva, ktorá appku spája s účtovníctvom, a zároveň jediná časť, kde chyba stojí peniaze. Preto:
+
+### 6.1 Cenník
+- Cena je vlastnosť **položky menu** (jedlá jedného poskytovateľa môžu mať rôznu cenu; polievka a dezert majú vlastnú cenu, ak sa objednávajú samostatne).
+- Cenník má **platnosť od dátumu**. Zmena ceny nikdy nemení už uzamknuté týždne.
+- **Cena sa odfotí na objednávku** v momente zamknutia týždňa. Retroaktívna zmena cenníka nesmie prepísať históriu — inak sa mesačná uzávierka rozíde s tým, čo ľudia videli.
+- Všetky sumy sú v **centoch ako celé čísla**, nikdy `float`. Zaokrúhľovanie definované na jednom mieste.
+
+### 6.2 Príspevky
+Konfigurovateľné per poskytovateľ (alebo globálne):
+
+| Zložka | Model |
+|---|---|
+| Príspevok zamestnávateľa | percento z ceny jedla (Zákonník práce žiada min. 55 %) **alebo** pevná suma na obed, so **stropom** naviazaným na hodnotu stravného pri pracovnej ceste 5–12 h |
+| Príspevok zo sociálneho fondu | pevná suma na obed (voliteľné, môže byť 0) |
+| **Doplatok zamestnanca** | `cena − príspevok ZL − sociálny fond` → **suma na zrážku zo mzdy** |
+
+Konkrétne percentá, sumy a strop sú **nastavenia**, nie konštanty v kóde — zákonné limity a hodnota stravného sa menia opatrením MPSVR aj niekoľkokrát ročne. Presné hodnoty potvrdí mzdové oddelenie pred spustením.
+
+### 6.3 Mesačná uzávierka a export
+- Admin **uzavrie mesiac** → čísla sa zafixujú, ďalšie zmeny len ako opravná položka v ďalšom mesiaci (aby sa nemenil už odovzdaný podklad pre mzdy).
+- **Export pre mzdy** (XLSX/CSV): osobné číslo, meno, stredisko/tím, počet obedov, cena spolu, príspevok ZL, sociálny fond, **zrážka zo mzdy**. Formát doladíme podľa toho, čo vie načítať mzdový softvér.
+- **Kontrola faktúry dodávateľa**: mesačný súhrn per poskytovateľ — počet porcií × cena, na porovnanie s faktúrou. Nezriedka sa nezhodujú a bez tohto listu sa to nedá ustrážiť.
+
+### 6.4 Neodhlásené obedy
+Ak sa človek neodhlási včas a obed si neprevezme, porcia je uvarená a vyfakturovaná. Politika je **nastavenie**:
+- `účtovať zamestnancovi v plnej cene bez príspevku ZL` (najčastejšie),
+- `účtovať štandardne s príspevkom`,
+- `neúčtovať` (znáša firma).
+
+To isté pravidlo sa použije pri odhlásení po termíne cez admina (4.4).
+
+---
+
+## 7. Výstupy a integrácie
 
 - **Denný súhrn pre dodávateľa** — počty na jedlo (`A: 12, B: 7, C: 3`), automatický e-mail v momente uzávierky (PDF + XLSX). Toto appku ospravedlňuje.
 - **Zoznam pre výdaj** — kto čo má, tlačiteľné, prípadne odškrtávanie prevzatia (fáza 3).
-- **Mesačný podklad pre mzdy** — na osobu: počet obedov, cena, príspevok zamestnávateľa, zrážka zo mzdy. Export XLSX/CSV vo formáte, ktorý vezme mzdový softvér.
+- **Podklad pre mzdy** a **kontrola faktúry** — viď 6.3.
 - **Zoznam pre predáka** — jeho tím, tlačiteľné.
 
 ---
 
-## 7. Notifikácie
+## 8. Notifikácie
 
 | Kedy | Komu | Obsah |
 |---|---|---|
@@ -168,12 +216,13 @@ Poskytovatelia · Menu (týždenný editor, kopírovanie predchádzajúceho tý�
 | Pia 12:05 | všetkým | potvrdenie: čo mám objednané na budúci týždeň |
 | pri zmene predákom | dotknutému stravníkovi | „Tvoju objednávku na stredu zmenil J. Novák" |
 | pri uzavretí dňa adminom | dotknutým | „Vo štvrtok 14. 8. sa nevarí" |
+| začiatkom mesiaca | všetkým | „Za júl: 18 obedov, zo mzdy ti ide 32,40 €" |
 
 Kanály: **v appke** (vždy), **e-mail** (kto má), **web push v PWA** (na iPhone funguje len po pridaní na plochu, iOS 16.4+). SMS neodporúčam — platené a pri 100 ľuďoch zbytočné.
 
 ---
 
-## 8. Architektúra a hosting — možnosti
+## 9. Architektúra a hosting — možnosti
 
 Záťaž je triviálna: ~100 používateľov, špička pár desiatok súčasne v piatok pred 12:00, jednotky tisíc requestov denne.
 
@@ -186,37 +235,39 @@ Záťaž je triviálna: ~100 používateľov, špička pár desiatok súčasne v
 
 **Odporúčanie: možnosť 1.** Jeden VPS v EÚ, všetko v Dockeri, denné zálohy databázy mimo servera + týždenný test obnovy. Ak firma neskôr povie „chceme to u nás", ten istý `docker compose up` beží na ich VM. Celkové náklady vrátane domény pod **150 €/rok**.
 
-### 8.1 Technológie (návrh, ladíme pred kódom)
+### 9.1 Technológie (návrh, ladíme pred kódom)
 - **Frontend + backend v jednom:** Next.js (React) + TypeScript, inštalovateľná **PWA** (ikona na ploche, offline zobrazenie „čo mám objednané").
-- **Databáza:** PostgreSQL. Peniaze v centoch ako celé čísla, nikdy `float`.
+- **Databáza:** PostgreSQL.
 - **Auth:** vlastné session cookies, hash PIN/hesiel cez argon2id, rate limiting. Pripravené na neskoršie SSO.
 - **Plánované úlohy:** cron worker — notifikácie, zamykanie týždňa, odoslanie objednávky dodávateľovi.
 - **E-mail:** firemné SMTP alebo Resend/Postmark.
-- **Alternatíva:** Django alebo Laravel — administrácia „zadarmo" z frameworku, čo pri množstve admin nastavení ušetrí čas. Rozhodneme pred kódovaním.
+- **Alternatíva:** Django alebo Laravel — administrácia „zadarmo" z frameworku, čo pri množstve admin nastavení a exportov ušetrí čas. Rozhodneme pred kódovaním.
 
 Aplikácia musí byť **mobile-first**: veľké dotykové plochy (rukavice), vysoký kontrast (denné svetlo v hale), čitateľné písmo, funguje na 4-ročnom Androide.
 
 ---
 
-## 9. Dátový model (hrubý náčrt)
+## 10. Dátový model (hrubý náčrt)
 
 ```
-Osoba        (osobné číslo, meno, tím, roly, hash PIN/hesla, aktívna, jazyk)
+Osoba        (osobné číslo, meno, tím, poskytovateľ, roly, hash PIN/hesla, aktívna, jazyk)
 Tím          (názov, predák, zástupca)
-Poskytovateľ (názov, číslovanie, skladba jedla, kapacita, pravidlo odhlásenia, e-mail)
+Poskytovateľ (názov, číslovanie, skladba jedla, kapacita, pravidlo odhlásenia, e-mail, príspevky)
 MenuDňa      (poskytovateľ, dátum, položky[])
 Položka      (poradie → označenie, názov, zložka: polievka|hlavné|dezert|komplet, cena, alergény)
-Objednávka   (osoba, dátum, poskytovateľ, položky[], stav, vytvoril, zmenil, kedy)
+Objednávka   (osoba, dátum, poskytovateľ, položky[], stav, cena_snapshot, príspevok_snapshot,
+              vytvoril, zmenil, kedy)
                 stav: OBJEDNANÉ | ODHLÁSENÉ | ODHLÁSENÉ_PO_TERMÍNE(účtované)
-Nastavenia   (týždenná uzávierka, horizont, sviatky, uzavreté dni)
+MesačnáUzávierka (mesiac, uzavretá kým, kedy, zafixované sumy)
+Nastavenia   (týždenná uzávierka, horizont, sviatky, uzavreté dni, príspevky, politika neodhlásených)
 Audit        (kto, čo, kedy, stará → nová hodnota, IP)
 ```
 
-Objednávka sa **nikdy nemaže**, len mení stav — inak sa spory „ja som sa odhlásil" nedajú rozhodnúť.
+Objednávka sa **nikdy nemaže**, len mení stav — inak sa spory „ja som sa odhlásil" nedajú rozhodnúť a mesačná uzávierka nemá čo auditovať.
 
 ---
 
-## 10. Logo a vizuál
+## 11. Logo a vizuál
 
 Tri smery, vo fáze preview ich nakreslím ako SVG:
 
@@ -232,26 +283,36 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 
 ---
 
-## 11. Otvorené otázky (treba rozhodnúť pred kódovaním)
+## 12. Ochrana údajov
 
-1. **Predák** — len vidí, alebo aj objednáva/odhlasuje za podriadených? *(návrh: konfigurovateľné, default „objednáva")*
-2. **Poskytovateľ** — vyberá si ho stravník každý deň slobodne, alebo je pridelený osobe/tímu?
-3. **Peniaze** — rieši appka ceny, príspevok zamestnávateľa a podklad na zrážky zo mzdy, alebo len počty jedál?
-4. **Zmeny** — obedujú všetci v rovnakom čase, alebo treba riešiť ranná/poobedná/nočná (mení to denné deadliny)?
-5. **Menu od dodávateľa** — v akej podobe chodí (papier, e-mail, PDF, Excel)? Určuje, či stačí ručné zadávanie, alebo treba import.
-6. **E-mail** — majú všetci stravníci firemný e-mail? Ak nie, notifikácie sú len v appke/push.
-7. **Hostia a návštevy** — treba objednávať obed pre návštevu?
-8. **Jazyky** — stačí slovenčina, alebo treba aj CZ/UA/EN?
-9. **Prevzatie obeda** — treba evidovať, kto si obed reálne vyzdvihol?
-10. **Existujúci systém** — je odkiaľ preberať zoznam zamestnancov (dochádzka, personalistika)?
+- Osobné údaje v minimálnom rozsahu: meno, osobné číslo, tím, poskytovateľ, e-mail (ak je).
+- Voľba jedla môže nepriamo naznačiť zdravotný stav alebo vyznanie (diabetická, bezmäsitá, halal) → nezverejňovať mimo nutného okruhu; predák vidí označenie jedla, nie dôvod.
+- Retencia: objednávky a mzdové podklady podľa účtovných lehôt, audit log 1 rok, potom anonymizácia.
+- Prístup k mzdovým údajom má len admin, nie predák.
 
 ---
 
-## 12. Fázy
+## 13. Otvorené otázky
+
+**Rozhodnuté:** predák objednáva aj odhlasuje · poskytovateľ pridelený adminom · appka rieši ceny a mzdový podklad · bez zmien.
+
+Zostáva:
+1. **Menu od dodávateľa** — v akej podobe chodí (papier, e-mail, PDF, Excel)? Určuje, či stačí ručné zadávanie, alebo sa oplatí import.
+2. **Príspevok zamestnávateľa** — percentom z ceny alebo pevnou sumou? A prispieva sa aj zo sociálneho fondu?
+3. **E-mail** — majú všetci stravníci firemný e-mail? Ak nie, notifikácie budú len v appke a cez push.
+4. **Jazyky** — stačí slovenčina, alebo treba aj CZ/UA/EN?
+5. **Hostia a návštevy** — treba objednávať obed pre návštevu?
+6. **Prevzatie obeda** — treba evidovať, kto si obed reálne vyzdvihol?
+7. **Zoznam zamestnancov** — je odkiaľ ho preberať (dochádzka, personalistika), alebo sa zadá ručne?
+8. **Mzdový softvér** — ktorý, aby export sedel formátom?
+
+---
+
+## 14. Fázy
 
 | Fáza | Obsah |
 |---|---|
 | **0 — Koncept** | tento dokument, odsúhlasenie |
-| **1 — Preview** | klikací prototyp (bez databázy): login, týždeň stravníka, matica predáka, admin nastavenia, 3 varianty loga |
-| **2 — MVP** | prihlásenie a roly, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, konfigurácia poskytovateľov a menu, matica predáka, denný súhrn pre dodávateľa, audit, nasadenie |
-| **3 — Rozšírenia** | podklad pre mzdy, push notifikácie, import menu, evidencia prevzatia, SSO, kiosk, zmeny, viacjazyčnosť |
+| **1 — Preview** | klikací prototyp bez databázy: login, týždeň stravníka, matica predáka, admin nastavenia, cenník, 3 varianty loga |
+| **2 — MVP** | prihlásenie a roly, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, konfigurácia poskytovateľov a menu, matica predáka, ceny a mesačný export pre mzdy, denný súhrn pre dodávateľa, audit, nasadenie |
+| **3 — Rozšírenia** | push notifikácie, import menu, evidencia prevzatia, SSO, kiosk, viacjazyčnosť, rola dodávateľa |
