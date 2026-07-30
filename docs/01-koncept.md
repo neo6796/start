@@ -26,6 +26,7 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 19. **Trvale prihlásený** je predvolené, s kratšou platnosťou pre admina a opätovným overením hesla pri zásahoch do peňazí.
 20. **SMS zatiaľ nie** — pripraví sa len voliteľné pole „telefón", aby sa dala kedykoľvek zapnúť za pol dňa.
 21. **Exporty, história a zálohy sú súčasťou MVP** (kapitola 7), vrátane kompletného exportu dát na jedno kliknutie. Grafy až vo fáze 3.
+22. **Deň má tri stavy, nie dva** (4.6): nerozhodnuté · bez obeda · objednané. Upomienky a počítadlá pracujú len s nerozhodnutými.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -320,6 +321,26 @@ Obmedzenia doobjednávky: len z jedál, ktoré sú v ten deň v menu, a v rámci
 ### 4.5 Výnimky po deadline
 Admin (a len admin) môže zrušiť objednávku aj po termíne — povinne s dôvodom a s príznakom **„účtovať napriek odhláseniu"** (áno/nie), lebo dodávateľ už porciu uvaril. Bez tohto poľa sa účtovanie rozíde s realitou. Viď aj 6.4.
 
+### 4.6 Tri stavy dňa
+Deň každého stravníka je v jednom z troch stavov. Systém ich musí **rozlišovať**, inak chodia upomienky ľuďom, ktorí sa už rozhodli, a predák naháňa niekoho, kto je na dovolenke.
+
+| Stav | Čo znamená | Záznam | Počíta sa medzi chýbajúce | Ide dodávateľovi |
+|---|---|---|---|---|
+| **Nerozhodnuté** | nikto sa nevyjadril — východiskový stav | žiadny | **áno** | nie |
+| **Bez obeda** `×` | vedomé rozhodnutie: dovolenka, služobka, nechce jesť | `BEZ_OBEDA` | **nie** | nie |
+| **Objednané** `A/B/C` | zvolené jedlo | `OBJEDNANÉ` | nie | **áno** |
+
+Čo z toho plynie:
+- **Upomienky (kapitola 8) chodia len na nerozhodnuté dni.** Kto má krížik, je vybavený a nikto ho neotravuje.
+- **Počítadlo predáka aj zoznam chýbajúcich krížiky ignorujú.**
+- **Hromadné odhlásenie na dovolenku** nastaví celý rozsah dní na *bez obeda*, nie na prázdno — práve preto, aby na tie dni nechodili výzvy.
+- **Po týždennej uzávierke má prechod na *bez obeda* iný význam:** to už nie je voľba, ale **odhlásenie** (`ODHLÁSENÉ`), lebo dodávateľ počet dostal. Stav vyzerá rovnako, líši sa história — a tá rozhoduje o účtovaní (6.4). Audit log tieto dva prípady odlišuje.
+- **Nerozhodnuté dni v momente uzávierky** ostávajú nerozhodnuté: dodávateľovi sa neposielajú a človek obed nemá. V zozname po uzávierke sú viditeľné, aby bolo jasné, kto vypadol.
+
+Na obrazovke to znamená, že nerozhodnutá bunka **nemá zvýraznenú žiadnu možnosť** a má červenkastý podklad, kým *bez obeda* je vyplnený krížik na tmavom podklade. Rozhodnutie má vyzerať ako rozhodnutie.
+
+Na zbernom hárku je to rovnaké: prázdne políčko znamená „nevyjadril sa", `×` znamená „nechcem obed".
+
 ---
 
 ## 5. Obrazovky
@@ -336,11 +357,13 @@ Poradie dôležitosti je dané tým, kto appku reálne otvorí: **matica predák
 ### 5.2 Predák — „Môj tím" (hlavná obrazovka systému)
 Keďže objednávky za väčšinu ľudí zadáva predák, toto nie je prehľad — **je to zadávacia obrazovka** a musí zvládnuť 20 ľudí za dve minúty.
 
-Matica **ľudia × dni** (riadky = podriadení, stĺpce Po–Pia), v bunke označenie jedla.
-- zelená = objednané, sivá = neobjednané, prečiarknuté = odhlásené
-- hore: *„3 ľudia nemajú objednané, uzávierka o 5 h"*
-- **prepis z papiera musí byť bleskový:** klik do bunky a stlačenie `A`/`B`/`C` (alebo `1`/`2`/`3`) zapíše voľbu a skočí na ďalší riadok. Bez myši, bez dialógov, bez potvrdzovania. Toto je jediná vec, ktorá rozhodne, či predáka appka baví alebo otravuje.
-- na tablete to isté prstom: veľké tlačidlá s označením jedla priamo v riadku
+Matica **ľudia × dni** (riadky = podriadení, stĺpce Po–Pia). V bunke sú **všetky dostupné jedlá vedľa seba** plus krížik „nechce obed" — voľba je jeden klik, nie preklikávanie dokola, a zároveň je vidieť, z čoho sa vyberá.
+- tri stavy podľa 4.6: nezvýraznené nič + červenkastý podklad = nerozhodnuté · vyplnené označenie = objednané · vyplnený krížik = bez obeda
+- opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na nerozhodnutú
+- hore: *„3 ľudia nerozhodnutí, uzávierka o 5 h"* — krížiky sa nepočítajú
+- **prepis z papiera musí byť bleskový:** šípky vľavo/vpravo prechádzajú medzi možnosťami, medzerník volí; alebo priamo `A`/`B`/`C` pre jedlo, `0` pre krížik, `Backspace` pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni, šípky hore/dole tiež. Bez myši, bez dialógov, bez potvrdzovania. Toto je jediná vec, ktorá rozhodne, či predáka appka baví alebo otravuje.
+- pri ponuke nad šesť jedál sa možnosti v bunke zalomia do dvoch riadkov, tabuľka sa nerozbije
+- na tablete to isté prstom: dosť veľké dotykové plochy priamo v riadku
 - hromadné akcie: kopírovať minulý týždeň celému tímu, nastaviť celý riadok na jedno jedlo, hromadné odhlásenie na rozsah dní (dovolenka/PN)
 - tlač: zberný hárok, zoznam chýbajúcich, potvrdenie tímu (5.4)
 - **zastupované tímy** ako samostatné bloky pod vlastným tímom, zreteľne odlíšené (1.3)
@@ -492,7 +515,7 @@ Jediné, čo treba spraviť **hneď od začiatku**: mať na osobe **voliteľné 
 | Kedy | Komu | Obsah | Kanál |
 |---|---|---|---|
 | Po 08:00 | adminovi | „Menu na budúci týždeň ešte nie je zadané" (len ak chýba) | push + e-mail |
-| Št 13:00 | predákovi | „V tíme Údržba nemá objednané 6 ľudí. Uzávierka zajtra o 12:00." | push + e-mail |
+| Št 13:00 | predákovi | „V tíme Údržba sa 6 ľudí nevyjadrilo. Uzávierka zajtra o 12:00." — počítajú sa len nerozhodnutí (4.6) | push + e-mail |
 | Pia 09:00 | predákovi | posledná výzva + tlačiteľný zoznam chýbajúcich | push + e-mail |
 | Pia 09:00 | 1. zástupcovi **a adminovi** | eskalácia, ak tím stále nemá objednané (1.3) | push + e-mail |
 | Pia 12:05 | predákovi | potvrdenie tímu na tlač na nástenku | v appke |
@@ -552,7 +575,8 @@ MenuDňa      (poskytovateľ, dátum, položky[])
 Položka      (poradie → označenie, názov, zložka: polievka|hlavné|dezert|komplet, cena, alergény)
 Objednávka   (osoba, dátum, poskytovateľ, položky[], stav, cena_snapshot, príspevok_snapshot,
               vytvoril, zmenil, kedy)
-                stav: OBJEDNANÉ | ODHLÁSENÉ | ODHLÁSENÉ_PO_TERMÍNE(účtované)
+                stav: OBJEDNANÉ | BEZ_OBEDA | ODHLÁSENÉ | ODHLÁSENÉ_PO_TERMÍNE(účtované)
+                nerozhodnuté = žiadny záznam (4.6)
 MesačnáUzávierka (mesiac, uzavretá kým, kedy, zafixované sumy)
 Nastavenia   (týždenná uzávierka, horizont, sviatky, uzavreté dni, príspevky, politika neodhlásených)
 Audit        (kto, čo, kedy, stará → nová hodnota, IP)

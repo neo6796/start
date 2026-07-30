@@ -284,6 +284,11 @@
     border-color:var(--line-2);
     font-weight:400;
   }
+  .chip.none{
+    background:var(--ink);
+    color:var(--surface);
+    border-color:var(--ink);
+  }
 
   /* ---------- pills ---------- */
 
@@ -395,18 +400,17 @@
     padding:0 5px;
   }
   .opt-b:hover{color:var(--ink);border-color:var(--ink-3);background:var(--surface-2)}
-  .opt-b.clear{border-style:dashed}
+  .opt-b.none{font-size:15px;line-height:1}
   .opt-b[aria-checked="true"]{
     background:var(--mustard-soft);
     color:var(--mustard);
     border-color:var(--mustard);
     font-weight:700;
   }
-  .opt-b.clear[aria-checked="true"]{
-    background:transparent;
-    color:var(--ink-2);
-    border-color:var(--ink-3);
-    border-style:solid;
+  .opt-b.none[aria-checked="true"]{
+    background:var(--ink);
+    color:var(--surface);
+    border-color:var(--ink);
   }
   .opt-b:focus-visible{outline:2px solid var(--petrol);outline-offset:1px}
   td.self{background:var(--ok-soft)}
@@ -648,6 +652,7 @@
 
   <div class="stat-row">
     <span class="pill miss" id="pd-missing">—</span>
+    <span class="pill neutral" id="pd-none">—</span>
     <span class="pill neutral" id="pd-provider">Reštaurácia U Jeleňa · A B C</span>
     <div class="btn-row" style="margin-left:auto">
       <button class="btn" id="btn-copy">Kopírovať minulý týždeň</button>
@@ -683,10 +688,10 @@
   </div>
 
   <div class="legend">
-    <span><i class="sw pick"></i> zvolené jedlo</span>
-    <span><i class="sw miss"></i> chýba objednávka</span>
+    <span><span class="opt-b" aria-checked="true" aria-hidden="true" style="cursor:default">B</span> zvolené jedlo</span>
+    <span><span class="opt-b none" aria-checked="true" aria-hidden="true" style="cursor:default">×</span> nechce obed — rozhodnuté</span>
+    <span><i class="sw miss"></i> nerozhodnuté, treba doriešiť</span>
     <span><i class="sw self"></i> objednal si sám v appke</span>
-    <span><span class="opt-b clear" style="cursor:default">·</span> bez obeda</span>
   </div>
 
   <div class="btn-row" style="margin-top:16px">
@@ -697,9 +702,10 @@
 
   <div class="note">
     <p class="eyebrow">Prečo takto</p>
-    <p><strong>Všetky možnosti sú vidieť naraz a klikne sa priamo na tú správnu</strong> — jeden klik, žiadne preklikávanie dokola. Bodka na konci znamená „bez obeda".</p>
-    <p>Klávesnicou to ide ešte rýchlejšie: <code>Tab</code> vojde do bunky, <strong>šípky vľavo a vpravo</strong> prechádzajú medzi jedlami, <strong>medzerník</strong> zvolí. Alebo rovno stlač <code>A</code>, <code>B</code>, <code>C</code> či <code>0</code> a kurzor sám skočí na ďalšieho človeka v tom istom dni — šípky <strong>hore a dole</strong> sa medzi ľuďmi pohybujú tiež. Prepis dvadsiatich ľudí zo zberného hárku je tak otázka pol minúty bez jediného dialógu.</p>
-    <p>Prázdne dni majú <strong>červenkastý podklad</strong>, takže chýbajúce objednávky vidno na prvý pohľad aj bez čítania počítadla.</p>
+    <p><strong>Všetky možnosti sú vidieť naraz a klikne sa priamo na tú správnu</strong> — jeden klik, žiadne preklikávanie dokola.</p>
+    <p><strong>Tri stavy, nie dva.</strong> Kým sa nič nezvolí, nesvieti nič a bunka má červenkastý podklad — nikto sa nerozhodol, treba doriešiť. Krížik <code>×</code> je naopak <strong>rozhodnutie</strong>, že dotyčný obed nechce (dovolenka, služobka, nechce jesť) — vyplní sa tmavo a podklad zbledne. Počítadlo hore preto počíta iba nerozhodnutých; kto má krížik, je vybavený a upomienka mu nechodí. Opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na nerozhodnutú.</p>
+    <p>Klávesnicou to ide rýchlejšie: <code>Tab</code> vojde do bunky, <strong>šípky vľavo a vpravo</strong> prechádzajú medzi možnosťami, <strong>medzerník</strong> zvolí. Alebo rovno stlač <code>A</code>, <code>B</code>, <code>C</code> pre jedlo, <code>0</code> pre krížik, <code>Backspace</code> pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni. Šípky <strong>hore a dole</strong> sa medzi ľuďmi pohybujú tiež.</p>
+    <p>V ukážke má Bezáková celý týždeň krížiky (dovolenka), Tóth a Slaný sa zatiaľ nevyjadrili vôbec.</p>
     <p>Zastupovaný tím je <strong>samostatný blok</strong>, nie zliaty s vlastným — zlievanie tímov spôsobuje omyly typu „objednal som to tomu druhému Kováčovi". Riadky so zeleným pozadím sú ľudia, ktorí si objednali sami; predák ich nemusí prepisovať.</p>
   </div>
 </section>
@@ -885,7 +891,7 @@
           <thead><tr><th>Meno</th><th>Po</th><th>Ut</th><th>St</th><th>Št</th><th>Pi</th></tr></thead>
           <tbody id="z-sheet"></tbody>
         </table>
-        <p style="margin:12px 0 0;font-size:11px;color:#6B7573">Sivé prečiarknuté políčka si už objednali sami v aplikácii — nevypĺňajte ich.</p>
+        <p style="margin:12px 0 0;font-size:11px;color:#6B7573">Napíšte označenie jedla, alebo <strong>×</strong> ak obed nechcete. Prázdne políčko znamená, že ste sa nevyjadrili — predák sa vás bude musieť pýtať. Sivé prečiarknuté políčka si už objednali sami v aplikácii, tie nevypĺňajte.</p>
       </div>
       <p class="hint" style="margin-top:12px">Hárok slúži aj ako doklad: pri spore „ja som chcel B" ukáže voľbu vlastnou rukou.</p>
     </div>
@@ -1222,21 +1228,24 @@
   ];
   const PRICES = [6.20, 6.20, 5.80, 6.40, 5.90, 6.10, 6.30, 5.70, 6.00, 6.50];
 
+  const NONE = -1;   /* zámerne bez obeda */
+                     /* null = nerozhodnuté, chýba objednávka */
+
   const own = [
-    {n:"Kováč Jozef",      p:"4009", self:false, o:[0,1,0,null,2], last:[0,1,0,1,2]},
-    {n:"Horváth Peter",    p:"4021", self:true,  o:[0,0,1,1,null], last:[0,0,1,1,0]},
-    {n:"Baláž Marián",     p:"4038", self:false, o:[1,1,1,1,1],    last:[1,1,1,1,1]},
+    {n:"Kováč Jozef",      p:"4009", self:false, o:[0,1,0,null,2],   last:[0,1,0,1,2]},
+    {n:"Horváth Peter",    p:"4021", self:true,  o:[0,0,1,1,null],   last:[0,0,1,1,0]},
+    {n:"Baláž Marián",     p:"4038", self:false, o:[1,1,1,1,1],      last:[1,1,1,1,1]},
     {n:"Tóth Ľuboš",       p:"4110", self:false, o:[null,null,null,null,null], last:[2,0,2,0,2]},
-    {n:"Nagyová Zuzana",   p:"4102", self:true,  o:[2,2,0,2,0],    last:[2,2,0,2,0]},
-    {n:"Šimko Martin",     p:"4127", self:false, o:[0,1,null,1,0], last:[0,1,1,1,0]},
-    {n:"Krajčí Ondrej",    p:"4133", self:false, o:[1,0,1,0,1],    last:[1,0,1,0,1]},
-    {n:"Bezáková Iveta",   p:"4141", self:false, o:[null,null,null,null,null], last:[0,0,0,0,0]},
-    {n:"Danko Radoslav",   p:"4158", self:false, o:[2,null,2,2,null], last:[2,1,2,2,1]}
+    {n:"Nagyová Zuzana",   p:"4102", self:true,  o:[2,2,NONE,2,0],   last:[2,2,0,2,0]},
+    {n:"Šimko Martin",     p:"4127", self:false, o:[0,1,null,1,0],   last:[0,1,1,1,0]},
+    {n:"Krajčí Ondrej",    p:"4133", self:false, o:[1,0,1,0,1],      last:[1,0,1,0,1]},
+    {n:"Bezáková Iveta",   p:"4141", self:false, o:[NONE,NONE,NONE,NONE,NONE], last:[0,0,0,0,0]},
+    {n:"Danko Radoslav",   p:"4158", self:false, o:[2,null,2,2,NONE], last:[2,1,2,2,1]}
   ];
 
   const deleg = [
-    {n:"Sedláková Jana",   p:"4204", self:false, o:[0,0,null,1,1], last:[0,0,1,1,1]},
-    {n:"Mrva Pavol",       p:"4217", self:false, o:[1,1,1,null,0], last:[1,1,1,0,0]},
+    {n:"Sedláková Jana",   p:"4204", self:false, o:[0,0,null,1,1],   last:[0,0,1,1,1]},
+    {n:"Mrva Pavol",       p:"4217", self:false, o:[1,1,1,NONE,0],   last:[1,1,1,0,0]},
     {n:"Slaný Erik",       p:"4229", self:false, o:[null,null,null,null,null], last:[0,2,0,2,0]}
   ];
 
@@ -1280,28 +1289,29 @@
 
   function rowsOf(id){ return id === "m-own" ? own : deleg; }
 
+  function undecided(v){ return v === null || v >= mealCount; }
+
   function cellHTML(person, ri, ci, tblId){
     const v = person.o[ci];
-    const tabAt = (v === null || v >= mealCount) ? 0 : v;
+    const tabAt = undecided(v) ? 0 : v;
     let h = '<div class="opts" role="radiogroup" aria-label="' + person.n + ", " + DAYS[ci] + '">';
     for (let j = 0; j < mealCount; j++){
-      const on = (v === j);
       h += '<button type="button" class="opt-b" role="radio"' +
-           ' aria-checked="' + on + '"' +
+           ' aria-checked="' + (v === j) + '"' +
            ' tabindex="' + (j === tabAt ? 0 : -1) + '"' +
            ' data-t="' + tblId + '" data-r="' + ri + '" data-c="' + ci + '" data-v="' + j + '"' +
            ' aria-label="jedlo ' + label(j) + '">' + label(j) + "</button>";
     }
-    h += '<button type="button" class="opt-b clear" role="radio"' +
-         ' aria-checked="' + (v === null || v >= mealCount) + '" tabindex="-1"' +
+    h += '<button type="button" class="opt-b none" role="radio"' +
+         ' aria-checked="' + (v === NONE) + '" tabindex="-1"' +
          ' data-t="' + tblId + '" data-r="' + ri + '" data-c="' + ci + '" data-v="x"' +
-         ' aria-label="bez obeda">·</button>';
+         ' aria-label="nechce obed">×</button>';
     return h + "</div>";
   }
 
   function tdClass(person, ci){
     const v = person.o[ci];
-    if (v === null || v >= mealCount) return "gap";
+    if (undecided(v)) return "gap";
     return person.self ? "self" : "";
   }
 
@@ -1348,26 +1358,36 @@
 
   function countMissing(){
     const all = own.concat(deleg);
-    let miss = 0;
-    all.forEach(p => p.o.forEach(v => { if (v === null || v >= mealCount) miss++; }));
-    const people = all.filter(p => p.o.some(v => v === null || v >= mealCount)).length;
+    let miss = 0, none = 0;
+    all.forEach(p => p.o.forEach(v => {
+      if (undecided(v)) miss++;
+      else if (v === NONE) none++;
+    }));
+    const people = all.filter(p => p.o.some(undecided)).length;
+
     const el = document.getElementById("pd-missing");
-    if (!el) return;
-    if (miss === 0){
-      el.className = "pill ok";
-      el.textContent = "všetci majú objednané";
-    } else {
-      el.className = "pill miss";
-      el.textContent = people + " ľudí nemá objednané · " + miss + " chýbajúcich dní";
+    if (el){
+      if (miss === 0){
+        el.className = "pill ok";
+        el.textContent = "všetci rozhodnutí";
+      } else {
+        el.className = "pill miss";
+        el.textContent = people + " ľudí nerozhodnutých · " + miss + " chýbajúcich dní";
+      }
     }
+    const el2 = document.getElementById("pd-none");
+    if (el2) el2.textContent = none + "× bez obeda";
   }
 
   document.addEventListener("click", function(e){
     const b = e.target.closest(".opt-b");
-    if (!b) return;
-    const v = b.dataset.v === "x" ? null : +b.dataset.v;
-    setValue(b.dataset.t, +b.dataset.r, +b.dataset.c, v);
-    focusOpt(b.dataset.t, +b.dataset.r, +b.dataset.c, b.dataset.v);
+    if (!b || !b.dataset.t) return;
+    const t = b.dataset.t, r = +b.dataset.r, c = +b.dataset.c;
+    const want = b.dataset.v === "x" ? NONE : +b.dataset.v;
+    const cur = rowsOf(t)[r].o[c];
+    /* opätovný klik na už zvolené vráti bunku späť na nerozhodnuté */
+    setValue(t, r, c, cur === want ? null : want);
+    focusOpt(t, r, c, b.dataset.v);
   });
 
   document.addEventListener("keydown", function(e){
@@ -1399,25 +1419,31 @@
       return;
     }
 
-    /* priama voľba písmenom alebo číslom */
+    /* priama voľba: písmeno alebo číslo = jedlo, 0 alebo − = bez obeda,
+       Backspace = späť na nerozhodnuté */
     let v;
-    if (k === "0" || k === "Backspace" || k === "Delete" || k === "." ) v = null;
-    else {
-      for (let i = 0; i < mealCount; i++){
-        if (k.toUpperCase() === label(i).toUpperCase()){ v = i; break; }
-      }
-      if (v === undefined) return;
+    /* najprv jedlá — inak by pri rímskom číslovaní X znamenalo aj desiate jedlo */
+    for (let i = 0; i < mealCount; i++){
+      if (k.toUpperCase() === label(i).toUpperCase()){ v = i; break; }
+    }
+    if (v === undefined){
+      if (k === "0" || k === "-" || k.toUpperCase() === "X") v = NONE;
+      else if (k === "Backspace" || k === "Delete") v = null;
+      else return;
     }
     e.preventDefault();
     setValue(t, r, c, v);
+    const target = (v === null || v === NONE) ? "x" : String(v);
     const nextRow = r + 1;
-    if (nextRow < rows.length) focusOpt(t, nextRow, c, v === null ? "x" : String(v));
-    else focusOpt(t, r, c, v === null ? "x" : String(v));
+    if (nextRow < rows.length) focusOpt(t, nextRow, c, target);
+    else focusOpt(t, r, c, target);
   });
 
   const bc = document.getElementById("btn-copy");
   if (bc) bc.addEventListener("click", function(){
-    own.concat(deleg).forEach(p => { p.o = p.last.map(v => v >= mealCount ? null : v); });
+    own.concat(deleg).forEach(p => {
+      p.o = p.last.map(v => (v === NONE) ? NONE : (v >= mealCount ? null : v));
+    });
     renderAll();
   });
   const bx = document.getElementById("btn-clear");
@@ -1427,7 +1453,7 @@
   });
 
   /* ---------- stravník ---------- */
-  const svOrders = [0, 1, null, 1, null];
+  const svOrders = [0, 1, null, NONE, null];
   let openDay = null;
 
   function renderStravnik(){
@@ -1438,13 +1464,22 @@
       const row = document.createElement("div");
       row.className = "day";
       const v = svOrders[i];
-      const nm = (v !== null && v < mealCount && MENU[i][v]) ? MENU[i][v] : "";
+      let chip, text;
+      if (v === NONE){
+        chip = '<span class="chip none lg">×</span>';
+        text = "nechcem obed";
+      } else if (undecided(v)){
+        chip = '<span class="chip ghost lg">·</span>';
+        text = "zatiaľ nerozhodnuté";
+      } else {
+        chip = '<span class="chip lg">' + label(v) + "</span>";
+        text = MENU[i][v] || "jedlo " + label(v);
+      }
       row.innerHTML =
-        '<button class="day-btn" data-d="'+i+'">' +
-          (v === null || v >= mealCount ? '<span class="chip ghost lg">·</span>' : '<span class="chip lg">'+label(v)+"</span>") +
+        '<button class="day-btn" data-d="'+i+'">' + chip +
           '<span class="dname">' +
             '<span class="dn">'+DAYS[i]+'</span> <span class="dd">'+dm(d)+"</span>" +
-            '<div class="meal">' + (v === null || v >= mealCount ? "neobjednané" : (nm || "jedlo " + label(v))) + "</div>" +
+            '<div class="meal">' + text + "</div>" +
           "</span>" +
         "</button>";
       box.appendChild(row);
@@ -1460,7 +1495,8 @@
                '<div class="pr">'+PRICES[j].toFixed(2).replace(".",",")+" €</div></span></button></div>";
         }
         h += '<div class="opt"><button class="day-btn" data-pick="'+i+'" data-v="x">' +
-             '<span class="chip ghost">·</span><span class="txt"><div class="nm">Nechcem obed</div></span></button></div>';
+             '<span class="chip none">×</span><span class="txt"><div class="nm">Nechcem obed</div>' +
+             '<div class="pr">dovolenka, služobka, nechcem jesť</div></span></button></div>';
         sheet.innerHTML = h;
         box.appendChild(sheet);
       }
@@ -1471,7 +1507,7 @@
     const pick = e.target.closest("[data-pick]");
     if (pick){
       const i = +pick.dataset.pick;
-      svOrders[i] = pick.dataset.v === "x" ? null : +pick.dataset.v;
+      svOrders[i] = pick.dataset.v === "x" ? NONE : +pick.dataset.v;
       openDay = null;
       renderStravnik();
       return;
@@ -1595,8 +1631,9 @@
       let tds = "<td>"+p.n+"</td>";
       for (let i = 0; i < 5; i++){
         const v = p.o[i];
-        tds += (p.self && v !== null && v < mealCount)
-          ? '<td class="box"><span class="pre">'+label(v)+"</span></td>"
+        const decided = !undecided(v);
+        tds += (p.self && decided)
+          ? '<td class="box"><span class="pre">' + (v === NONE ? "×" : label(v)) + "</span></td>"
           : '<td class="box"></td>';
       }
       tr.innerHTML = tds;
