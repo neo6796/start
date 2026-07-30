@@ -30,6 +30,8 @@
 
     --faint-line:#E3E2DB;
     --faint-ink:#8E9593;
+    --by-lead:#D8E6EC;
+    --by-lead-line:#8FB3BF;
 
     --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     --mono:ui-monospace,SFMono-Regular,"SF Mono","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
@@ -68,6 +70,8 @@
 
       --faint-line:#28322F;
       --faint-ink:#727C7A;
+      --by-lead:#16282F;
+      --by-lead-line:#3E6470;
     }
   }
 
@@ -100,6 +104,8 @@
 
     --faint-line:#28322F;
     --faint-ink:#727C7A;
+    --by-lead:#16282F;
+    --by-lead-line:#3E6470;
   }
 
   :root[data-theme="light"]{
@@ -131,6 +137,8 @@
 
     --faint-line:#E3E2DB;
     --faint-ink:#8E9593;
+    --by-lead:#D8E6EC;
+    --by-lead-line:#8FB3BF;
   }
 
   *{box-sizing:border-box}
@@ -428,10 +436,10 @@
   }
   .opt-b:focus-visible{outline:2px solid var(--petrol);outline-offset:1px}
 
-  td.self{background:var(--ok-soft)}
-  /* nerozhodnutá bunka = bledošedé nevyplnené políčko;
-     pred uzávierkou sa dá jedným tlačidlom prepnúť na výrazné */
-  td.gap{background:var(--surface-2)}
+  /* podfarbenie = niekto konal. Bez voľby = bez podfarbenia. */
+  td.by-self{background:var(--ok-soft)}
+  td.by-lead{background:var(--by-lead)}
+  /* pred uzávierkou sa dajú prázdne bunky jedným tlačidlom rozsvietiť */
   .hl-gaps td.gap{background:var(--miss-soft)}
 
   .gapn{
@@ -615,7 +623,8 @@
   .sw.pick{background:var(--mustard-soft);border-color:var(--mustard)}
   .sw.miss{background:var(--miss-soft);border-color:var(--miss)}
   .sw.self{background:var(--ok-soft);border-color:var(--ok)}
-  .sw.empty{background:var(--surface-2);border-color:var(--line-2)}
+  .sw.empty{background:var(--surface);border-color:var(--line-2)}
+  .sw.lead{background:var(--by-lead);border-color:var(--by-lead-line)}
 
   footer{
     border-top:1px solid var(--line);
@@ -718,10 +727,11 @@
 
   <div class="legend">
     <span><span class="opt-b" aria-checked="true" aria-hidden="true" style="cursor:default">B</span> zvolené jedlo</span>
-    <span><span class="opt-b none" aria-checked="true" aria-hidden="true" style="cursor:default">×</span> nechce obed — rozhodnuté</span>
-    <span><i class="sw empty"></i> nerozhodnuté — nevyplnené políčko</span>
-    <span><i class="sw self"></i> objednal si sám v appke</span>
-    <span><span class="gapn" aria-hidden="true">2</span> koľko dní ostáva nerozhodnutých</span>
+    <span><span class="opt-b none" aria-checked="true" aria-hidden="true" style="cursor:default">×</span> nechce obed</span>
+    <span><i class="sw empty"></i> bez voľby — nikto nekonal</span>
+    <span><i class="sw self"></i> zadal si stravník sám</span>
+    <span><i class="sw lead"></i> zadal predák</span>
+    <span><span class="gapn" aria-hidden="true">2</span> dní bez voľby</span>
   </div>
 
   <div class="btn-row" style="margin-top:16px">
@@ -733,9 +743,9 @@
   <div class="note">
     <p class="eyebrow">Prečo takto</p>
     <p><strong>Všetky možnosti sú vidieť naraz a klikne sa priamo na tú správnu</strong> — jeden klik, žiadne preklikávanie dokola.</p>
-    <p><strong>Tri stavy, nie dva — a bunka sa správa ako políčko na papieri.</strong> Nerozhodnutá bunka je <strong>bledošedá a jej možnosti len bledo orámované</strong>: nevyplnené políčko. Rozhodnutie sa vyplní — označenie jedla horčicovo, krížik <code>×</code> tmavo. Krížik znamená, že dotyčný obed <strong>nechce</strong> (dovolenka, služobka, nechce jesť), takže sa nepočíta medzi chýbajúcich a upomienka mu nechodí. Opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na prázdnu.</p>
-    <p>Podfarbenie bunky tak nesie jednu informáciu: <strong>šedá = nikto sa nevyjadril, biela = vybavené, zelená = objednal si sám v appke.</strong> Naprieč riadkom vidno diery bez toho, aby tabuľka svietila.</p>
-    <p>Navyše má každý riadok pri mene <strong>počítadlo nerozhodnutých dní</strong> a pred uzávierkou sa dá tlačidlom <strong>Zvýrazniť nerozhodnuté</strong> prepnúť šedá na výraznú — na posledný kontrolný prechod v piatok ráno.</p>
+    <p><strong>Podfarbenie znamená akciu.</strong> Kde nikto nekonal, nie je podfarbenie žiadne — bunka je čistá, možnosti len bledo orámované. Až voľba bunku zafarbí, a farba hovorí <strong>kto ju urobil</strong>: <span style="border-bottom:2px solid var(--ok)">zelenkavá</span> = zadal si stravník sám, <span style="border-bottom:2px solid var(--by-lead-line)">modrozelenkavá</span> = zadal predák. Skús klikať a uvidíš, ako sa bunky farbia pod tebou.</p>
+    <p><strong>Tri stavy, nie dva.</strong> Označenie jedla horčicovo, krížik <code>×</code> tmavo. Krížik znamená, že dotyčný obed <strong>nechce</strong> (dovolenka, služobka, nechce jesť) — je to rozhodnutie, takže sa nepočíta medzi chýbajúcich a upomienka mu nechodí. Opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na nezafarbenú.</p>
+    <p>Diery sa tým pádom hľadajú ako <strong>nezafarbené miesta</strong>. Pomáha aj počítadlo pri mene a tlačidlo <strong>Zvýrazniť nerozhodnuté</strong>, ktoré ich pred uzávierkou rozsvieti.</p>
     <p>Klávesnicou to ide rýchlejšie: <code>Tab</code> vojde do bunky, <strong>šípky vľavo a vpravo</strong> prechádzajú medzi možnosťami, <strong>medzerník</strong> zvolí. Alebo rovno stlač <code>A</code>, <code>B</code>, <code>C</code> pre jedlo, <code>0</code> pre krížik, <code>Backspace</code> pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni. Šípky <strong>hore a dole</strong> sa medzi ľuďmi pohybujú tiež.</p>
     <p>V ukážke má Bezáková celý týždeň krížiky (dovolenka), Tóth a Slaný sa zatiaľ nevyjadrili vôbec.</p>
     <p>Zastupovaný tím je <strong>samostatný blok</strong>, nie zliaty s vlastným — zlievanie tímov spôsobuje omyly typu „objednal som to tomu druhému Kováčovi". Riadky so zeleným pozadím sú ľudia, ktorí si objednali sami; predák ich nemusí prepisovať.</p>
@@ -1281,6 +1291,11 @@
     {n:"Slaný Erik",       p:"4229", self:false, o:[null,null,null,null,null], last:[0,2,0,2,0]}
   ];
 
+  /* kto voľbu zadal: "self" = stravník sám, "lead" = predák, null = nikto */
+  own.concat(deleg).forEach(p => {
+    p.by = p.o.map(v => undecided(v) ? null : (p.self ? "self" : "lead"));
+  });
+
   /* ---------- prepínanie obrazoviek ---------- */
   const tabs = Array.from(document.querySelectorAll(".tab"));
   tabs.forEach(t => t.addEventListener("click", () => {
@@ -1342,9 +1357,8 @@
   }
 
   function tdClass(person, ci){
-    const v = person.o[ci];
-    if (undecided(v)) return "gap";
-    return person.self ? "self" : "";
+    if (undecided(person.o[ci])) return "gap";
+    return person.by[ci] === "self" ? "by-self" : "by-lead";
   }
 
   function thHTML(person){
@@ -1396,7 +1410,10 @@
   }
 
   function setValue(tblId, r, c, v){
-    rowsOf(tblId)[r].o[c] = v;
+    const p = rowsOf(tblId)[r];
+    p.o[c] = v;
+    /* na tejto obrazovke koná predák */
+    p.by[c] = (v === null) ? null : "lead";
     refreshCell(tblId, r, c);
     countMissing();
   }
@@ -1488,6 +1505,7 @@
   if (bc) bc.addEventListener("click", function(){
     own.concat(deleg).forEach(p => {
       p.o = p.last.map(v => (v === NONE) ? NONE : (v >= mealCount ? null : v));
+      p.by = p.o.map(v => undecided(v) ? null : "lead");
     });
     renderAll();
   });
@@ -1500,7 +1518,10 @@
 
   const bx = document.getElementById("btn-clear");
   if (bx) bx.addEventListener("click", function(){
-    own.concat(deleg).forEach(p => { p.o = [null,null,null,null,null]; });
+    own.concat(deleg).forEach(p => {
+      p.o = [null,null,null,null,null];
+      p.by = [null,null,null,null,null];
+    });
     renderAll();
   });
 
@@ -1663,7 +1684,10 @@
   if (ac) ac.addEventListener("input", function(){
     mealCount = +ac.value;
     document.getElementById("a-count-val").textContent = mealCount;
-    own.concat(deleg).forEach(p => p.o = p.o.map(v => (v !== null && v >= mealCount) ? null : v));
+    own.concat(deleg).forEach(p => {
+      p.o = p.o.map(v => (v !== null && v >= mealCount) ? null : v);
+      p.by = p.o.map((v,i) => undecided(v) ? null : p.by[i]);
+    });
     for (let i = 0; i < 5; i++) if (svOrders[i] !== null && svOrders[i] >= mealCount) svOrders[i] = null;
     renderAll();
   });
@@ -1683,8 +1707,7 @@
       let tds = "<td>"+p.n+"</td>";
       for (let i = 0; i < 5; i++){
         const v = p.o[i];
-        const decided = !undecided(v);
-        tds += (p.self && decided)
+        tds += (p.by[i] === "self")
           ? '<td class="box"><span class="pre">' + (v === NONE ? "×" : label(v)) + "</span></td>"
           : '<td class="box"></td>';
       }

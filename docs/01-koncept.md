@@ -337,19 +337,21 @@ Deň každého stravníka je v jednom z troch stavov. Systém ich musí **rozli�
 - **Po týždennej uzávierke má prechod na *bez obeda* iný význam:** to už nie je voľba, ale **odhlásenie** (`ODHLÁSENÉ`), lebo dodávateľ počet dostal. Stav vyzerá rovnako, líši sa história — a tá rozhoduje o účtovaní (6.4). Audit log tieto dva prípady odlišuje.
 - **Nerozhodnuté dni v momente uzávierky** ostávajú nerozhodnuté: dodávateľovi sa neposielajú a človek obed nemá. V zozname po uzávierke sú viditeľné, aby bolo jasné, kto vypadol.
 
-Na obrazovke sa to rieši **papierovou metaforou**: nerozhodnutá bunka je **bledošedá a jej možnosti len bledo orámované** — nevyplnené políčko. Rozhodnutie sa vyplní: označenie jedla horčicovo, *bez obeda* tmavým krížikom. Rozhodnutie má vyzerať ako rozhodnutie, nerozhodnutosť ako prázdne miesto.
-
-Podfarbenie bunky tak nesie práve jednu informáciu:
+Na obrazovke platí jedno pravidlo: **podfarbenie bunky znamená akciu.** Kde nikto nekonal, nie je podfarbenie žiadne — bunka je čistá a jej možnosti len bledo orámované. Až voľba bunku zafarbí, a farba hovorí, **kto ju urobil**:
 
 | Podklad | Význam |
 |---|---|
-| **bledošedý** | nikto sa nevyjadril |
-| **biely** | vybavené — objednané alebo vedome bez obeda |
-| **zelenkastý** | stravník si objednal sám v aplikácii |
+| **žiadny** | nikto nekonal — bez voľby |
+| **zelenkavý** | zadal si stravník sám v aplikácii |
+| **modrozelenkavý** | zadal predák za neho |
 
-Naprieč riadkom tak vidno diery bez toho, aby tabuľka svietila. Navyše:
-- pri mene v riadku je **počítadlo nerozhodnutých dní**,
-- tlačidlo **„Zvýrazniť nerozhodnuté"** prepne šedú na výraznú — na posledný kontrolný prechod pred uzávierkou.
+Rozlíšenie „sám / predák" nie je ozdoba: pri spore je hneď vidieť, či si voľbu urobil človek sám, alebo mu ju niekto zadal — a to je prvá otázka, ktorá pri reklamácii padne. Podrobnosti (kto presne a kedy) sú v audit logu.
+
+Vnútri bunky sa rozhodnutie vyplní: označenie jedla horčicovo, *bez obeda* tmavým krížikom.
+
+Diery sa tak hľadajú ako **nezafarbené miesta**. Pomáhajú aj:
+- **počítadlo dní bez voľby** pri mene v riadku,
+- tlačidlo **„Zvýrazniť nerozhodnuté"**, ktoré prázdne bunky pred uzávierkou rozsvieti.
 
 Na zbernom hárku platí to isté pravidlo: prázdne políčko znamená „nevyjadril sa", `×` znamená „nechcem obed".
 
@@ -370,10 +372,11 @@ Poradie dôležitosti je dané tým, kto appku reálne otvorí: **matica predák
 Keďže objednávky za väčšinu ľudí zadáva predák, toto nie je prehľad — **je to zadávacia obrazovka** a musí zvládnuť 20 ľudí za dve minúty.
 
 Matica **ľudia × dni** (riadky = podriadení, stĺpce Po–Pia). V bunke sú **všetky dostupné jedlá vedľa seba** plus krížik „nechce obed" — voľba je jeden klik, nie preklikávanie dokola, a zároveň je vidieť, z čoho sa vyberá.
-- tri stavy podľa 4.6: bledošedá bunka = nerozhodnuté · vyplnené označenie = objednané · vyplnený krížik = bez obeda
-- opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na prázdnu
+- **podfarbenie bunky = akcia** (4.6): bez podfarbenia = nikto nekonal · zelenkavé = zadal si stravník sám · modrozelenkavé = zadal predák
+- vnútri bunky: vyplnené označenie = objednané · vyplnený krížik = bez obeda
+- opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na nezafarbenú
 - hore: *„3 ľudia nerozhodnutí, uzávierka o 5 h"* — krížiky sa nepočítajú
-- počítadlo nerozhodnutých dní pri mene + tlačidlo *Zvýrazniť nerozhodnuté* na kontrolný prechod pred uzávierkou
+- počítadlo dní bez voľby pri mene + tlačidlo *Zvýrazniť nerozhodnuté* na kontrolný prechod pred uzávierkou
 - **prepis z papiera musí byť bleskový:** šípky vľavo/vpravo prechádzajú medzi možnosťami, medzerník volí; alebo priamo `A`/`B`/`C` pre jedlo, `0` pre krížik, `Backspace` pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni, šípky hore/dole tiež. Bez myši, bez dialógov, bez potvrdzovania. Toto je jediná vec, ktorá rozhodne, či predáka appka baví alebo otravuje.
 - pri ponuke nad šesť jedál sa možnosti v bunke zalomia do dvoch riadkov, tabuľka sa nerozbije
 - na tablete to isté prstom: dosť veľké dotykové plochy priamo v riadku
