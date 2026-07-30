@@ -199,6 +199,8 @@ Poskytovateľ je **pevne pridelený adminom**, stravník si ho nevyberá — vid
 - Pri deaktivácii poskytovateľa appka upozorní *„27 stravníkov nemá poskytovateľa"* a ponúkne hromadný presun.
 - Nový zamestnanec bez prideleného poskytovateľa nemôže objednávať a je v zozname „na doriešenie".
 
+**Ak sú v jednom tíme ľudia od rôznych poskytovateľov**, matica predáka ich zvládne v jednej tabuľke: každý riadok ponúka **označenia svojho poskytovateľa** (jeden má `A B C`, druhý `1 2 3 4`) a pri osobnom čísle sa zobrazí značka poskytovateľa. Predák nikam neprepína a nemôže omylom objednať jedlo, ktoré daný človek nemôže dostať.
+
 ### 3.2 Zadávanie menu — každý poskytovateľ inak
 Menu chodí od každého dodávateľa v inej podobe, preto je spôsob zadávania **nastavenie poskytovateľa**:
 

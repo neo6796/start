@@ -442,6 +442,12 @@
   /* pred uzávierkou sa dajú prázdne bunky jedným tlačidlom rozsvietiť */
   .hl-gaps td.gap{background:var(--miss-soft)}
 
+  .cattag{
+    font-family:var(--mono);
+    color:var(--by-lead-line);
+    font-weight:600;
+  }
+
   .gapn{
     display:inline-flex;align-items:center;justify-content:center;
     min-width:18px;height:18px;margin-left:7px;
@@ -570,6 +576,7 @@
   }
   .seg button:last-child{border-right:0}
   .seg button[aria-pressed="true"]{background:var(--petrol);color:var(--on-petrol);font-weight:700}
+  .seg button#a-cat-add{color:var(--ink-3)}
   .seg button:focus-visible{outline:2px solid var(--mustard);outline-offset:-2px}
 
   .check{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--ink-2);cursor:pointer}
@@ -746,6 +753,7 @@
     <p><strong>Podfarbenie znamená akciu.</strong> Kde nikto nekonal, nie je podfarbenie žiadne — bunka je čistá, možnosti len bledo orámované. Až voľba bunku zafarbí, a farba hovorí <strong>kto ju urobil</strong>: <span style="border-bottom:2px solid var(--ok)">zelenkavá</span> = zadal si stravník sám, <span style="border-bottom:2px solid var(--by-lead-line)">modrozelenkavá</span> = zadal predák. Skús klikať a uvidíš, ako sa bunky farbia pod tebou.</p>
     <p><strong>Tri stavy, nie dva.</strong> Označenie jedla horčicovo, krížik <code>×</code> tmavo. Krížik znamená, že dotyčný obed <strong>nechce</strong> (dovolenka, služobka, nechce jesť) — je to rozhodnutie, takže sa nepočíta medzi chýbajúcich a upomienka mu nechodí. Opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na nezafarbenú.</p>
     <p>Diery sa tým pádom hľadajú ako <strong>nezafarbené miesta</strong>. Pomáha aj počítadlo pri mene a tlačidlo <strong>Zvýrazniť nerozhodnuté</strong>, ktoré ich pred uzávierkou rozsvieti.</p>
+    <p><strong>Rôzni poskytovatelia v jednom tíme.</strong> Krajčí a Bezáková majú pridelenú Školskú jedáleň Sever, preto majú v riadku <code>1 2 3 4</code> namiesto <code>A B C</code> — a pri osobnom čísle sa im ukáže značka poskytovateľa. Zastupovaný tím Lisovňa je celý na Severe. Predák tak obsluhuje oboch dodávateľov v jednej tabuľke a nemusí nikam prepínať; každý riadok ponúka presne to, čo daný človek môže dostať.</p>
     <p>Klávesnicou to ide rýchlejšie: <code>Tab</code> vojde do bunky, <strong>šípky vľavo a vpravo</strong> prechádzajú medzi možnosťami, <strong>medzerník</strong> zvolí. Alebo rovno stlač <code>A</code>, <code>B</code>, <code>C</code> pre jedlo, <code>0</code> pre krížik, <code>Backspace</code> pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni. Šípky <strong>hore a dole</strong> sa medzi ľuďmi pohybujú tiež.</p>
     <p>V ukážke má Bezáková celý týždeň krížiky (dovolenka), Tóth a Slaný sa zatiaľ nevyjadrili vôbec.</p>
     <p>Zastupovaný tím je <strong>samostatný blok</strong>, nie zliaty s vlastným — zlievanie tímov spôsobuje omyly typu „objednal som to tomu druhému Kováčovi". Riadky so zeleným pozadím sú ľudia, ktorí si objednali sami; predák ich nemusí prepisovať.</p>
@@ -772,10 +780,11 @@
           </div>
           <div class="menu-sheet" style="margin-top:16px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px">
-              <p class="eyebrow" style="margin:0">Reštaurácia U Jeleňa</p>
+              <p class="eyebrow" style="margin:0" id="sv-cat">—</p>
               <button class="btn" style="padding:4px 9px;font-size:12px">Zobraziť menu</button>
             </div>
-            <p style="margin:0;font-size:12.5px;color:var(--ink-2)">Papierové menu na týždeň — fotka od dodávateľa, nahral admin 27. 7. o 08:14.</p>
+            <p style="margin:0 0 6px;font-size:12.5px;color:var(--ink-2)">Papierové menu na týždeň — fotka od dodávateľa, nahral admin 27. 7. o 08:14.</p>
+            <p style="margin:0;font-size:12px;color:var(--ink-3)">Tvojho poskytovateľa prideľuje správca. Ak potrebuješ zmenu, ozvi sa mu.</p>
           </div>
         </div>
       </div>
@@ -818,9 +827,28 @@
     <span class="who">správca · zmeny sa prejavia na ostatných obrazovkách</span>
   </div>
 
+  <div class="card">
+    <div class="card-head">
+      <h3>Poskytovatelia stravy</h3>
+      <span class="pill neutral">2 z 5 aktívnych</span>
+    </div>
+    <div class="seg" role="group" id="a-cat" aria-label="Výber poskytovateľa">
+      <button data-cat="0" aria-pressed="true">Reštaurácia U Jeleňa</button>
+      <button data-cat="1" aria-pressed="false">Školská jedáleň Sever</button>
+      <button id="a-cat-add">+ pridať</button>
+    </div>
+    <p class="hint" style="margin-top:10px">Každý poskytovateľ má vlastné číslovanie, počet jedál, skladbu, cenník aj termín na odhlásenie. <strong>Stravník si poskytovateľa nevyberá</strong> — prideľuje mu ho admin (koncept 3.1) a v aplikácii vidí len ponuku toho svojho.</p>
+    <div class="scroll-x" style="margin-top:14px;border:0">
+      <table class="data" style="min-width:640px">
+        <thead><tr><th>Poskytovateľ</th><th>Jedlá</th><th>Skladba</th><th>Odhlásenie do</th><th>Doobjednanie</th><th class="num">Stravníkov</th></tr></thead>
+        <tbody id="a-cat-list"></tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="grid-2">
     <div class="card">
-      <div class="card-head"><h3>Poskytovateľ — Reštaurácia U Jeleňa</h3></div>
+      <div class="card-head"><h3>Nastavenie — <span id="a-cat-name">Reštaurácia U Jeleňa</span></h3></div>
 
       <div class="field">
         <label for="a-style">Typ číslovania</label>
@@ -848,29 +876,29 @@
       </div>
 
       <div class="field">
-        <label>Denné odhlásenie</label>
+        <label for="a-cancel">Denné odhlásenie</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <select style="flex:1;min-width:190px">
+          <select id="a-cancel" style="flex:1;min-width:190px">
             <option>v deň obeda</option>
             <option>predchádzajúci pracovný deň</option>
             <option>2 pracovné dni vopred</option>
           </select>
-          <input type="text" value="07:30" style="width:88px;font-family:var(--mono);text-align:center">
+          <input type="text" id="a-cancel-t" value="07:30" style="width:88px;font-family:var(--mono);text-align:center">
         </div>
         <p class="hint">Pri voľbe „predchádzajúci pracovný deň" sa pondelok počíta od piatku — víkendy a sviatky sa preskakujú.</p>
       </div>
 
       <label class="check" style="margin-top:4px">
-        <input type="checkbox"> Predák môže doobjednať v deň obeda
+        <input type="checkbox" id="a-late"> Predák môže doobjednať v deň obeda
       </label>
       <label class="check" style="margin-top:9px">
-        <input type="checkbox" checked> Vypĺňať názvy jedál
+        <input type="checkbox" id="a-names" checked> Vypĺňať názvy jedál
       </label>
     </div>
 
     <div>
       <div class="card">
-        <div class="card-head"><h3>Menu — budúci týždeň</h3><span class="pill ok">zadané</span></div>
+        <div class="card-head"><h3>Menu — budúci týždeň</h3><span class="pill ok" id="a-menu-state">zadané</span></div>
         <table class="data">
           <thead><tr><th>Deň</th><th>Jedlá</th></tr></thead>
           <tbody id="a-menu"></tbody>
@@ -911,7 +939,8 @@
 
   <div class="note">
     <p class="eyebrow">Prečo takto</p>
-    <p><strong>Prepni typ číslovania alebo posuň počet jedál</strong> a potom sa vráť na obrazovku predáka — označenia sa zmenia všade. Admin nastavuje štýl, nie jednotlivé písmená.</p>
+    <p><strong>Prepni poskytovateľa hore</strong> a uvidíš, že každý má vlastný svet: U Jeleňa má tri jedlá <code>A B C</code> v komplete a odhlasuje sa v deň obeda do 07:30, Sever má štyri jedlá <code>1 2 3 4</code> po častiach, odhlasuje sa už predchádzajúci pracovný deň do 14:00 a názvy jedál nemá vyplnené vôbec.</p>
+    <p><strong>Prepni typ číslovania alebo posuň počet jedál</strong> a potom sa vráť na obrazovku predáka — označenia sa zmenia, ale <strong>len u ľudí prideleného poskytovateľa</strong>. Admin nastavuje štýl, nie jednotlivé písmená.</p>
     <p>Cenník má oba modely príspevku vedľa seba, aby sa mzdové oddelenie mohlo pozrieť na konkrétne čísla a povedať, ktorý sedí. Zákonné limity sa menia niekoľkokrát ročne, preto sú to nastavenia s platnosťou od dátumu, nie hodnoty v kóde.</p>
   </div>
 </section>
@@ -1248,47 +1277,69 @@
 
   const weekLabel = dm(nextDays[0]) + " – " + nextDays[4].getDate() + ". " + (nextDays[4].getMonth()+1) + ". " + nextDays[4].getFullYear();
 
-  /* ---------- označenia ---------- */
+  /* ---------- poskytovatelia ---------- */
   const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
-  let style = "upper";
-  let mealCount = 3;
 
-  function label(i){
-    if (style === "upper")  return String.fromCharCode(65+i);
-    if (style === "lower")  return String.fromCharCode(97+i);
-    if (style === "arabic") return String(i+1);
+  const CATERERS = [
+    {
+      name:"Reštaurácia U Jeleňa", short:"U Jeleňa",
+      style:"upper", count:3, compose:"komplet",
+      cancelWhen:0, cancelTime:"07:30", late:true, names:true,
+      prices:[6.20, 6.20, 5.80, 6.40, 5.90, 6.10, 6.30, 5.70, 6.00, 6.50],
+      menu:[
+        ["Držková polievka, vyprážaný syr, hranolky, tatárska","Slepačí vývar, kuracie prsia na masle, ryža","Šošovicová polievka, pirohy s bryndzou"],
+        ["Zeleninová polievka, sviečková na smotane, knedľa","Fazuľová polievka, vyprážaný rezeň, zemiaky","Paradajková polievka, špagety s bazalkou"],
+        ["Hovädzí vývar, guláš, knedľa","Kapustnica, pečené kuracie stehno, ryža","Cesnaková polievka, zeleninové rizoto"],
+        ["Hrachová polievka, bravčový rezeň s broskyňou, zemiaky","Slepačí vývar, dusené hovädzie, ryža","Brokolicová polievka, palacinky s džemom"],
+        ["Rybacia polievka, vyprážaná ryba, zemiakový šalát","Zeleninový vývar, morčacie prsia, dusená ryža","Šampiňónová polievka, halušky s kapustou"]
+      ]
+    },
+    {
+      name:"Školská jedáleň Sever", short:"Sever",
+      style:"arabic", count:4, compose:"casti",
+      cancelWhen:1, cancelTime:"14:00", late:false, names:false,
+      prices:[5.40, 5.40, 5.90, 5.20, 5.60, 5.60, 5.80, 5.30, 5.50, 5.70],
+      menu:[[ "","","","" ],[ "","","","" ],[ "","","","" ],[ "","","","" ],[ "","","","" ]]
+    }
+  ];
+  const CANCEL_RULES = ["v deň obeda", "predchádzajúci pracovný deň", "2 pracovné dni vopred"];
+
+  let adminCat = 0;              /* ktorého poskytovateľa admin práve nastavuje */
+  const DINER_CAT = 0;           /* poskytovateľ prihláseného stravníka */
+
+  function cat(i){ return CATERERS[i]; }
+  function label(i, c){
+    const st = CATERERS[c].style;
+    if (st === "upper")  return String.fromCharCode(65+i);
+    if (st === "lower")  return String.fromCharCode(97+i);
+    if (st === "arabic") return String(i+1);
     return ROMAN[i];
   }
-
-  /* ---------- dáta ---------- */
-  const MENU = [
-    ["Držková polievka, vyprážaný syr, hranolky, tatárska","Slepačí vývar, kuracie prsia na masle, ryža","Šošovicová polievka, pirohy s bryndzou"],
-    ["Zeleninová polievka, sviečková na smotane, knedľa","Fazuľová polievka, vyprážaný rezeň, zemiaky","Paradajková polievka, špagety s bazalkou"],
-    ["Hovädzí vývar, guláš, knedľa","Kapustnica, pečené kuracie stehno, ryža","Cesnaková polievka, zeleninové rizoto"],
-    ["Hrachová polievka, bravčový rezeň s broskyňou, zemiaky","Slepačí vývar, dusené hovädzie, ryža","Brokolicová polievka, palacinky s džemom"],
-    ["Rybacia polievka, vyprážaná ryba, zemiakový šalát","Zeleninový vývar, morčacie prsia, dusená ryža","Šampiňónová polievka, halušky s kapustou"]
-  ];
-  const PRICES = [6.20, 6.20, 5.80, 6.40, 5.90, 6.10, 6.30, 5.70, 6.00, 6.50];
+  function labelsOf(c){
+    const out = [];
+    for (let i = 0; i < CATERERS[c].count; i++) out.push(label(i, c));
+    return out;
+  }
 
   const NONE = -1;   /* zámerne bez obeda */
                      /* null = nerozhodnuté, chýba objednávka */
 
   const own = [
-    {n:"Kováč Jozef",      p:"4009", self:false, o:[0,1,0,null,2],   last:[0,1,0,1,2]},
-    {n:"Horváth Peter",    p:"4021", self:true,  o:[0,0,1,1,null],   last:[0,0,1,1,0]},
-    {n:"Baláž Marián",     p:"4038", self:false, o:[1,1,1,1,1],      last:[1,1,1,1,1]},
-    {n:"Tóth Ľuboš",       p:"4110", self:false, o:[null,null,null,null,null], last:[2,0,2,0,2]},
-    {n:"Nagyová Zuzana",   p:"4102", self:true,  o:[2,2,NONE,2,0],   last:[2,2,0,2,0]},
-    {n:"Šimko Martin",     p:"4127", self:false, o:[0,1,null,1,0],   last:[0,1,1,1,0]},
-    {n:"Krajčí Ondrej",    p:"4133", self:false, o:[1,0,1,0,1],      last:[1,0,1,0,1]},
-    {n:"Bezáková Iveta",   p:"4141", self:false, o:[NONE,NONE,NONE,NONE,NONE], last:[0,0,0,0,0]},
-    {n:"Danko Radoslav",   p:"4158", self:false, o:[2,null,2,2,NONE], last:[2,1,2,2,1]}
+    {n:"Kováč Jozef",      p:"4009", c:0, self:false, o:[0,1,0,null,2],   last:[0,1,0,1,2]},
+    {n:"Horváth Peter",    p:"4021", c:0, self:true,  o:[0,0,1,1,null],   last:[0,0,1,1,0]},
+    {n:"Baláž Marián",     p:"4038", c:0, self:false, o:[1,1,1,1,1],      last:[1,1,1,1,1]},
+    {n:"Tóth Ľuboš",       p:"4110", c:0, self:false, o:[null,null,null,null,null], last:[2,0,2,0,2]},
+    {n:"Nagyová Zuzana",   p:"4102", c:0, self:true,  o:[2,2,NONE,2,0],   last:[2,2,0,2,0]},
+    {n:"Šimko Martin",     p:"4127", c:0, self:false, o:[0,1,null,1,0],   last:[0,1,1,1,0]},
+    {n:"Krajčí Ondrej",    p:"4133", c:1, self:false, o:[1,0,3,0,1],      last:[1,0,3,0,1]},
+    {n:"Bezáková Iveta",   p:"4141", c:1, self:false, o:[NONE,NONE,NONE,NONE,NONE], last:[0,0,0,0,0]},
+    {n:"Danko Radoslav",   p:"4158", c:0, self:false, o:[2,null,2,2,NONE], last:[2,1,2,2,1]}
   ];
 
   const deleg = [
-    {n:"Sedláková Jana",   p:"4204", self:false, o:[0,0,null,1,1],   last:[0,0,1,1,1]},
-    {n:"Mrva Pavol",       p:"4217", self:false, o:[1,1,1,NONE,0],   last:[1,1,1,0,0]},
-    {n:"Slaný Erik",       p:"4229", self:false, o:[null,null,null,null,null], last:[0,2,0,2,0]}
+    {n:"Sedláková Jana",   p:"4204", c:1, self:false, o:[0,0,null,1,3],   last:[0,0,1,1,3]},
+    {n:"Mrva Pavol",       p:"4217", c:1, self:false, o:[1,1,2,NONE,0],   last:[1,1,2,0,0]},
+    {n:"Slaný Erik",       p:"4229", c:1, self:false, o:[null,null,null,null,null], last:[0,2,0,2,0]}
   ];
 
   /* kto voľbu zadal: "self" = stravník sám, "lead" = predák, null = nikto */
@@ -1336,18 +1387,19 @@
 
   function rowsOf(id){ return id === "m-own" ? own : deleg; }
 
-  function undecided(v){ return v === null || v >= mealCount; }
+  function undecided(v){ return v === null; }
 
   function cellHTML(person, ri, ci, tblId){
     const v = person.o[ci];
+    const n = CATERERS[person.c].count;
     const tabAt = undecided(v) ? 0 : v;
     let h = '<div class="opts" role="radiogroup" aria-label="' + person.n + ", " + DAYS[ci] + '">';
-    for (let j = 0; j < mealCount; j++){
+    for (let j = 0; j < n; j++){
       h += '<button type="button" class="opt-b" role="radio"' +
            ' aria-checked="' + (v === j) + '"' +
            ' tabindex="' + (j === tabAt ? 0 : -1) + '"' +
            ' data-t="' + tblId + '" data-r="' + ri + '" data-c="' + ci + '" data-v="' + j + '"' +
-           ' aria-label="jedlo ' + label(j) + '">' + label(j) + "</button>";
+           ' aria-label="jedlo ' + label(j, person.c) + '">' + label(j, person.c) + "</button>";
     }
     h += '<button type="button" class="opt-b none" role="radio"' +
          ' aria-checked="' + (v === NONE) + '" tabindex="-1"' +
@@ -1361,16 +1413,20 @@
     return person.by[ci] === "self" ? "by-self" : "by-lead";
   }
 
-  function thHTML(person){
+  function thHTML(person, rows){
     const g = person.o.filter(undecided).length;
+    const mixed = rows.some(x => x.c !== rows[0].c);
     return person.n +
-      (g ? '<span class="gapn" title="nerozhodnutých dní">' + g + "</span>" : "") +
-      '<span class="pn">' + person.p + "</span>";
+      (g ? '<span class="gapn" title="dní bez voľby">' + g + "</span>" : "") +
+      '<span class="pn">' + person.p +
+        (mixed ? ' · <span class="cattag">' + CATERERS[person.c].short + "</span>" : "") +
+      "</span>";
   }
 
   function refreshRow(tblId, r){
     const th = document.querySelector("#" + tblId + " tbody tr:nth-child(" + (r+1) + ") th");
-    if (th) th.innerHTML = thHTML(rowsOf(tblId)[r]);
+    const rows = rowsOf(tblId);
+    if (th) th.innerHTML = thHTML(rows[r], rows);
   }
 
   function renderTable(tblId, rows){
@@ -1380,7 +1436,7 @@
       const tr = document.createElement("tr");
       const th = document.createElement("th");
       th.scope = "row";
-      th.innerHTML = thHTML(person);
+      th.innerHTML = thHTML(person, rows);
       tr.appendChild(th);
       person.o.forEach((v, ci) => {
         const td = document.createElement("td");
@@ -1485,8 +1541,9 @@
        Backspace = späť na nerozhodnuté */
     let v;
     /* najprv jedlá — inak by pri rímskom číslovaní X znamenalo aj desiate jedlo */
-    for (let i = 0; i < mealCount; i++){
-      if (k.toUpperCase() === label(i).toUpperCase()){ v = i; break; }
+    const pc = rows[r].c;
+    for (let i = 0; i < CATERERS[pc].count; i++){
+      if (k.toUpperCase() === label(i, pc).toUpperCase()){ v = i; break; }
     }
     if (v === undefined){
       if (k === "0" || k === "-" || k.toUpperCase() === "X") v = NONE;
@@ -1504,7 +1561,7 @@
   const bc = document.getElementById("btn-copy");
   if (bc) bc.addEventListener("click", function(){
     own.concat(deleg).forEach(p => {
-      p.o = p.last.map(v => (v === NONE) ? NONE : (v >= mealCount ? null : v));
+      p.o = p.last.map(v => (v === NONE) ? NONE : (v >= CATERERS[p.c].count ? null : v));
       p.by = p.o.map(v => undecided(v) ? null : "lead");
     });
     renderAll();
@@ -1537,6 +1594,7 @@
       const row = document.createElement("div");
       row.className = "day";
       const v = svOrders[i];
+      const D = CATERERS[DINER_CAT];
       let chip, text;
       if (v === NONE){
         chip = '<span class="chip none lg">×</span>';
@@ -1545,8 +1603,8 @@
         chip = '<span class="chip ghost lg">·</span>';
         text = "zatiaľ nerozhodnuté";
       } else {
-        chip = '<span class="chip lg">' + label(v) + "</span>";
-        text = MENU[i][v] || "jedlo " + label(v);
+        chip = '<span class="chip lg">' + label(v, DINER_CAT) + "</span>";
+        text = D.menu[i][v] || "jedlo " + label(v, DINER_CAT);
       }
       row.innerHTML =
         '<button class="day-btn" data-d="'+i+'">' + chip +
@@ -1560,12 +1618,12 @@
       if (openDay === i){
         const sheet = document.createElement("div");
         sheet.className = "menu-sheet";
-        let h = '<p class="eyebrow" style="margin-bottom:8px">'+DAYS[i]+" "+dm(d)+"</p>";
-        for (let j = 0; j < mealCount; j++){
+        let h = '<p class="eyebrow" style="margin-bottom:8px">'+DAYS[i]+" "+dm(d)+" · "+D.name+"</p>";
+        for (let j = 0; j < D.count; j++){
           h += '<div class="opt"><button class="day-btn" data-pick="'+i+'" data-v="'+j+'">' +
-               '<span class="chip">'+label(j)+"</span>" +
-               '<span class="txt"><div class="nm">'+(MENU[i][j] || "jedlo "+label(j))+'</div>' +
-               '<div class="pr">'+PRICES[j].toFixed(2).replace(".",",")+" €</div></span></button></div>";
+               '<span class="chip">'+label(j, DINER_CAT)+"</span>" +
+               '<span class="txt"><div class="nm">'+(D.menu[i][j] || "jedlo "+label(j, DINER_CAT))+'</div>' +
+               '<div class="pr">'+D.prices[j].toFixed(2).replace(".",",")+" €</div></span></button></div>";
         }
         h += '<div class="opt"><button class="day-btn" data-pick="'+i+'" data-v="x">' +
              '<span class="chip none">×</span><span class="txt"><div class="nm">Nechcem obed</div>' +
@@ -1603,7 +1661,7 @@
       const row = document.createElement("div");
       row.className = "day";
       row.innerHTML =
-        (cur[i] >= mealCount ? '<span class="chip ghost">·</span>' : '<span class="chip">'+label(cur[i])+"</span>") +
+        (cur[i] >= CATERERS[DINER_CAT].count ? '<span class="chip ghost">·</span>' : '<span class="chip">'+label(cur[i], DINER_CAT)+"</span>") +
         '<span class="dname"><span class="dn">'+DAYS[i]+'</span> <span class="dd">'+dm(d)+"</span></span>" +
         (past ? '<span class="pill neutral">prevzaté</span>'
               : '<button class="btn" style="padding:5px 10px;font-size:12.5px">Odhlásiť sa</button>');
@@ -1614,7 +1672,7 @@
   const svc = document.getElementById("sv-copy");
   if (svc) svc.addEventListener("click", function(){
     const last = [0,1,1,1,2];
-    for (let i = 0; i < 5; i++) svOrders[i] = last[i] >= mealCount ? null : last[i];
+    for (let i = 0; i < 5; i++) svOrders[i] = last[i] >= CATERERS[DINER_CAT].count ? null : last[i];
     openDay = null;
     renderStravnik();
   });
@@ -1623,14 +1681,22 @@
   function renderAdminMenu(){
     const tb = document.getElementById("a-menu");
     if (!tb) return;
+    const A = CATERERS[adminCat];
+    const st = document.getElementById("a-menu-state");
+    if (st){
+      const has = A.menu.some(day => day.some(x => x));
+      st.className = has ? "pill ok" : "pill neutral";
+      st.textContent = has ? "zadané s názvami" : "len označenia";
+    }
     tb.innerHTML = "";
     nextDays.forEach((d,i) => {
       const tr = document.createElement("tr");
       let chips = "";
-      for (let j = 0; j < mealCount; j++){
+      for (let j = 0; j < A.count; j++){
         chips += '<div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:5px">' +
-                 '<span class="chip sm">'+label(j)+"</span>" +
-                 '<span style="font-size:12.5px;color:var(--ink-2)">'+(MENU[i][j] || '<em style="color:var(--ink-3)">bez názvu</em>')+"</span></div>";
+                 '<span class="chip sm">'+label(j, adminCat)+"</span>" +
+                 '<span style="font-size:12.5px;color:var(--ink-2)">' +
+                 ((A.menu[i] && A.menu[i][j]) || '<em style="color:var(--ink-3)">bez názvu</em>') + "</span></div>";
       }
       tr.innerHTML = '<td style="white-space:nowrap;vertical-align:top"><strong>'+DAYS_S[i]+"</strong> "+dm(d)+"</td><td>"+chips+"</td>";
       tb.appendChild(tr);
@@ -1640,16 +1706,17 @@
   function renderPrices(){
     const tb = document.getElementById("a-price");
     if (!tb) return;
+    const A = CATERERS[adminCat];
     const mode = document.querySelector('#a-contrib button[aria-pressed="true"]').dataset.m;
     const val = parseFloat(document.getElementById("a-val").value) || 0;
     const sf = parseFloat(document.getElementById("a-sf").value) || 0;
     tb.innerHTML = "";
-    for (let j = 0; j < mealCount; j++){
-      const price = PRICES[j];
+    for (let j = 0; j < A.count; j++){
+      const price = A.prices[j];
       const emp = mode === "pct" ? price * val / 100 : Math.min(val, price);
       const own_ = Math.max(0, price - emp - sf);
       const tr = document.createElement("tr");
-      tr.innerHTML = '<td><span class="chip sm">'+label(j)+"</span></td>" +
+      tr.innerHTML = '<td><span class="chip sm">'+label(j, adminCat)+"</span></td>" +
         '<td class="num">'+price.toFixed(2).replace(".",",")+"</td>" +
         '<td class="num">'+emp.toFixed(2).replace(".",",")+"</td>" +
         '<td class="num">'+sf.toFixed(2).replace(".",",")+"</td>" +
@@ -1658,11 +1725,74 @@
     }
   }
 
-  document.querySelectorAll("#a-style button").forEach(b => b.addEventListener("click", function(){
-    document.querySelectorAll("#a-style button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
-    style = b.dataset.style;
+  function renderCatList(){
+    const tb = document.getElementById("a-cat-list");
+    if (!tb) return;
+    tb.innerHTML = "";
+    CATERERS.forEach((A, i) => {
+      const n = own.concat(deleg).filter(p => p.c === i).length;
+      const tr = document.createElement("tr");
+      if (i === adminCat) tr.style.background = "var(--surface-2)";
+      tr.innerHTML =
+        "<td><strong>"+A.name+"</strong></td>" +
+        "<td>"+A.count+" · "+labelsOf(i).join(" ")+"</td>" +
+        "<td>"+(A.compose === "komplet" ? "komplet" : "po častiach")+"</td>" +
+        "<td>"+CANCEL_RULES[A.cancelWhen]+" o "+A.cancelTime+"</td>" +
+        "<td>"+(A.late ? "áno" : "nie")+"</td>" +
+        '<td class="num">'+n+"</td>";
+      tb.appendChild(tr);
+    });
+  }
+
+  function loadCaterer(){
+    const A = CATERERS[adminCat];
+    document.getElementById("a-cat-name").textContent = A.name;
+    document.querySelectorAll("#a-style button").forEach(x =>
+      x.setAttribute("aria-pressed", String(x.dataset.style === A.style)));
+    document.getElementById("a-count").value = A.count;
+    document.getElementById("a-count-val").textContent = A.count;
+    document.querySelectorAll("#a-compose button").forEach(x =>
+      x.setAttribute("aria-pressed", String(x.dataset.c === A.compose)));
+    document.getElementById("a-compose-hint").textContent = A.compose === "komplet"
+      ? "Polievka aj dezert sú v cene jedla, objednáva sa jedna položka."
+      : "Polievka a dezert sa objednávajú samostatne a majú vlastnú cenu.";
+    document.getElementById("a-cancel").selectedIndex = A.cancelWhen;
+    document.getElementById("a-cancel-t").value = A.cancelTime;
+    document.getElementById("a-late").checked = A.late;
+    document.getElementById("a-names").checked = A.names;
+  }
+
+  document.querySelectorAll("#a-cat button[data-cat]").forEach(b => b.addEventListener("click", function(){
+    document.querySelectorAll("#a-cat button[data-cat]").forEach(x =>
+      x.setAttribute("aria-pressed", String(x === b)));
+    adminCat = +b.dataset.cat;
+    loadCaterer();
     renderAll();
   }));
+
+  const addBtn = document.getElementById("a-cat-add");
+  if (addBtn) addBtn.addEventListener("click", function(){
+    alert("V preview sú dvaja poskytovatelia. V ostrej verzii tu admin pridá ďalšieho, celkovo až päť.");
+  });
+
+  document.querySelectorAll("#a-style button").forEach(b => b.addEventListener("click", function(){
+    document.querySelectorAll("#a-style button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    CATERERS[adminCat].style = b.dataset.style;
+    renderAll();
+  }));
+
+  ["a-cancel","a-cancel-t","a-late","a-names"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("change", function(){
+      const A = CATERERS[adminCat];
+      if (id === "a-cancel")   A.cancelWhen = el.selectedIndex;
+      if (id === "a-cancel-t") A.cancelTime = el.value;
+      if (id === "a-late")     A.late = el.checked;
+      if (id === "a-names")    A.names = el.checked;
+      renderCatList();
+    });
+  });
 
   document.querySelectorAll("#a-contrib button").forEach(b => b.addEventListener("click", function(){
     document.querySelectorAll("#a-contrib button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
@@ -1675,20 +1805,29 @@
 
   document.querySelectorAll("#a-compose button").forEach(b => b.addEventListener("click", function(){
     document.querySelectorAll("#a-compose button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    CATERERS[adminCat].compose = b.dataset.c;
     document.getElementById("a-compose-hint").textContent = b.dataset.c === "komplet"
       ? "Polievka aj dezert sú v cene jedla, objednáva sa jedna položka."
       : "Polievka a dezert sa objednávajú samostatne a majú vlastnú cenu.";
+    renderCatList();
   }));
 
   const ac = document.getElementById("a-count");
   if (ac) ac.addEventListener("input", function(){
-    mealCount = +ac.value;
-    document.getElementById("a-count-val").textContent = mealCount;
+    const A = CATERERS[adminCat];
+    A.count = +ac.value;
+    document.getElementById("a-count-val").textContent = A.count;
+    /* voľby mimo novej ponuky sa u dotknutého poskytovateľa zrušia */
     own.concat(deleg).forEach(p => {
-      p.o = p.o.map(v => (v !== null && v >= mealCount) ? null : v);
+      if (p.c !== adminCat) return;
+      p.o = p.o.map(v => (v !== null && v !== NONE && v >= A.count) ? null : v);
       p.by = p.o.map((v,i) => undecided(v) ? null : p.by[i]);
     });
-    for (let i = 0; i < 5; i++) if (svOrders[i] !== null && svOrders[i] >= mealCount) svOrders[i] = null;
+    if (adminCat === DINER_CAT){
+      for (let i = 0; i < 5; i++){
+        if (svOrders[i] !== null && svOrders[i] !== NONE && svOrders[i] >= A.count) svOrders[i] = null;
+      }
+    }
     renderAll();
   });
 
@@ -1708,7 +1847,7 @@
       for (let i = 0; i < 5; i++){
         const v = p.o[i];
         tds += (p.by[i] === "self")
-          ? '<td class="box"><span class="pre">' + (v === NONE ? "×" : label(v)) + "</span></td>"
+          ? '<td class="box"><span class="pre">' + (v === NONE ? "×" : label(v, p.c)) + "</span></td>"
           : '<td class="box"></td>';
       }
       tr.innerHTML = tds;
@@ -1718,14 +1857,25 @@
   }
 
   /* ---------- render ---------- */
+  function renderProviderPill(){
+    const el = document.getElementById("pd-provider");
+    if (!el) return;
+    const used = [];
+    own.concat(deleg).forEach(p => { if (used.indexOf(p.c) === -1) used.push(p.c); });
+    el.textContent = used.map(c => CATERERS[c].short + " " + labelsOf(c).join("")).join(" + ");
+    el.title = used.map(c => CATERERS[c].name).join(" · ");
+  }
+
   function renderAll(){
     head(document.getElementById("th-own"));
     head(document.getElementById("th-deleg"));
     renderTable("m-own", own);
     renderTable("m-deleg", deleg);
     countMissing();
+    renderProviderPill();
     renderStravnik();
     renderCurrent();
+    renderCatList();
     renderAdminMenu();
     renderPrices();
     renderSheet();
@@ -1734,6 +1884,8 @@
   setText("pd-week", weekLabel);
   setText("pd-deadline", "piatok " + dm(addDays(thisMon,4)) + " o 12:00");
   setText("sv-week", weekLabel);
+  setText("sv-cat", CATERERS[DINER_CAT].name);
+  loadCaterer();
   renderAll();
   tick();
   setInterval(tick, 1000);
