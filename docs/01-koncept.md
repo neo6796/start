@@ -505,6 +505,19 @@ Bez tohto je celá automatizácia krehká: dodávateľ uvarí zlý počet a nikt
 - ak zlyhajú všetky, **admin dostane okamžite upozornenie s priloženým PDF**, aby objednávku poslal ručne alebo nadiktoval telefonicky,
 - admin môže ktorúkoľvek objednávku **poslať znova** (dodávateľ tvrdí, že ju nedostal) — kópia je označená ako kópia, aby sa počty nezdvojili.
 
+#### Doplnkové SMS dodávateľom
+SMS je **doplnok, nie náhrada** — neunesie prílohu a do jednej správy sa zmestí len krátky súhrn. Nastavuje sa per poskytovateľ (telefón + ktoré udalosti):
+
+| Udalosť | Odporúčanie | Prečo |
+|---|---|---|
+| **Zlyhanie e-mailu** | **zapnúť vždy** | keď spadne SMTP, ďalší e-mail nepomôže — ide tou istou cestou. SMS je jediný naozaj **nezávislý kanál**. |
+| **Denná korekcia** | podľa dodávateľa | ráno o 07:30 je kuchár pri sporáku, nie pri počítači. Krátka správa „streda: A 22, B 15, C 7, spolu 44" sa mu hodí viac než mail. |
+| **Týždenná objednávka** | spravidla netreba | do SMS sa nezmestí, poslúži nanajvýš ako upozornenie „objednávka odoslaná, detail v maili". |
+
+**Text sa posiela zámerne bez diakritiky.** So slovenskými mäkčeňmi prechádza SMS z kódovania GSM-7 na UCS-2 a limit padá zo **160 znakov na 70** — jedna správa by sa rozpadla na tri, s trojnásobnou cenou a rizikom, že prídu v zlom poradí. Appka pri zostavovaní textu ukáže počet znakov a upozorní, ak by sa správa delila.
+
+**Náklady** sú zanedbateľné: ~0,03–0,05 € za správu, pri dvoch dodávateľoch a dennej korekcii rádovo **2 € mesačne**. Potrebný je účet u SMS brány (slovenský poskytovateľ alebo Twilio) — to je jediný dôvod, prečo to nie je hneď v MVP. Doručenky z brány sa logujú rovnako ako e-maily (7.2.1).
+
 ### 7.3 Účtovníctvo a mzdy
 - **Mesačný podklad pre mzdy** — per osoba: osobné číslo, meno, tím, počet obedov, cena spolu, príspevok zamestnávateľa, sociálny fond, **zrážka zo mzdy**. XLSX + CSV, formát doladený podľa mzdového softvéru.
 - **Kontrola faktúry dodávateľa** — per poskytovateľ: počty porcií po dňoch × cena a súčet. Po zadaní fakturovanej sumy appka ukáže **rozdiel a deň, v ktorom vzniká**. Toto je najrýchlejšia cesta k odhaleniu, že dodávateľ fakturuje inak, než sa objednalo.

@@ -950,6 +950,26 @@
       <label class="check">
         <input type="checkbox" id="a-empty"> Poslať korekciu aj keď sa nič nezmenilo
       </label>
+
+      <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+
+      <p class="eyebrow" style="margin-bottom:12px">Doplnkové SMS</p>
+
+      <div class="field">
+        <label for="a-sms">Telefón dodávateľa</label>
+        <input type="text" id="a-sms" value="">
+        <p class="hint">SMS je <strong>doplnok, nie náhrada</strong> — neunesie prílohu, posiela sa v nej len krátky súhrn.</p>
+      </div>
+
+      <label class="check"><input type="checkbox" id="a-sms-f"> Pri zlyhaní e-mailu <em style="color:var(--ink-3);font-style:normal">— nezávislý kanál</em></label>
+      <label class="check" style="margin-top:9px"><input type="checkbox" id="a-sms-d"> Denná korekcia</label>
+      <label class="check" style="margin-top:9px"><input type="checkbox" id="a-sms-w"> Týždenná objednávka <em style="color:var(--ink-3);font-style:normal">— len upozornenie</em></label>
+
+      <div class="menu-sheet" style="margin-top:14px">
+        <p class="eyebrow" style="margin-bottom:6px">Ukážka správy</p>
+        <p style="font-family:var(--mono);font-size:12.5px;margin:0 0 8px;line-height:1.5" id="a-sms-demo">—</p>
+        <p class="hint" style="margin:0" id="a-sms-len">—</p>
+      </div>
     </div>
 
     <div>
@@ -1000,23 +1020,25 @@
     </div>
     <div class="scroll-x" style="border:0">
       <table class="data" style="min-width:620px">
-        <thead><tr><th>Kedy</th><th>Komu</th><th>Čo</th><th>Stav</th><th></th></tr></thead>
+        <thead><tr><th>Kedy</th><th>Kanál</th><th>Komu</th><th>Čo</th><th>Stav</th><th></th></tr></thead>
         <tbody>
-          <tr><td>dnes 07:30</td><td>kuchyna@ujelena.sk</td><td>Korekcia na dnes — storná 3, doobj. 2</td><td><span class="pill ok">doručené</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
-          <tr><td>včera 14:30</td><td>objednavky@jedalen-sever.sk</td><td>Korekcia na dnes — storná 1</td><td><span class="pill ok">doručené</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
-          <tr><td>včera 07:30</td><td>kuchyna@ujelena.sk</td><td>Korekcia na včera — bez zmien</td><td><span class="pill ok">doručené</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
-          <tr><td>pi 12:00</td><td>kuchyna@ujelena.sk</td><td>Objednávka na 3.–7. 8. — 233 porcií</td><td><span class="pill ok">doručené</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
-          <tr><td>pi 12:30</td><td>objednavky@jedalen-sever.sk</td><td>Objednávka na 3.–7. 8. — 96 porcií</td><td><span class="pill miss">zlyhalo · 3 pokusy</span></td><td><button class="btn primary" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>dnes 07:30</td><td><span class="pill neutral">SMS</span></td><td>+421 903 118 240</td><td>Korekcia na dnes — 44 porcií</td><td><span class="pill ok">doručené</span></td><td></td></tr>
+          <tr><td>dnes 07:30</td><td><span class="pill neutral">e-mail</span></td><td>kuchyna@ujelena.sk</td><td>Korekcia na dnes — storná 3, doobj. 2</td><td><span class="pill ok">doručené</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>včera 14:30</td><td><span class="pill neutral">e-mail</span></td><td>objednavky@jedalen-sever.sk</td><td>Korekcia na dnes — storná 1</td><td><span class="pill ok">doručené</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>pi 12:00</td><td><span class="pill neutral">e-mail</span></td><td>kuchyna@ujelena.sk</td><td>Objednávka na 3.–7. 8. — 233 porcií</td><td><span class="pill ok">doručené</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>pi 12:31</td><td><span class="pill neutral">SMS</span></td><td>+421 911 604 375</td><td>Náhrada za zlyhaný e-mail — ozvite sa</td><td><span class="pill ok">doručené</span></td><td></td></tr>
+          <tr><td>pi 12:30</td><td><span class="pill neutral">e-mail</span></td><td>objednavky@jedalen-sever.sk</td><td>Objednávka na 3.–7. 8. — 96 porcií</td><td><span class="pill miss">zlyhalo · 3 pokusy</span></td><td><button class="btn primary" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
         </tbody>
       </table>
     </div>
-    <p class="hint" style="margin-top:12px"><strong>Pri zlyhaní dostane admin okamžite upozornenie s priloženým PDF</strong>, aby mohol objednávku poslať ručne alebo nadiktovať telefonicky. Mlčanie by znamenalo, že dodávateľ uvarí zlý počet a nikto sa to nedozvie až do obeda.</p>
+    <p class="hint" style="margin-top:12px"><strong>Pri zlyhaní dostane admin okamžite upozornenie s priloženým PDF</strong>, aby mohol objednávku poslať ručne alebo nadiktovať telefonicky. Mlčanie by znamenalo, že dodávateľ uvarí zlý počet a nikto sa to nedozvie až do obeda. Všimni si posledné dva riadky: e-mail Severu zlyhal a o minútu neskôr odišla <strong>SMS ako nezávislý kanál</strong>.</p>
   </div>
 
   <div class="note">
     <p class="eyebrow">Prečo takto</p>
     <p><strong>Prepni poskytovateľa hore</strong> a uvidíš, že každý má vlastný svet: U Jeleňa má tri jedlá <code>A B C</code> v komplete a odhlasuje sa v deň obeda do 07:30, Sever má štyri jedlá <code>1 2 3 4</code> po častiach, odhlasuje sa už predchádzajúci pracovný deň do 14:00 a názvy jedál nemá vyplnené vôbec.</p>
     <p><strong>Prepni typ číslovania alebo posuň počet jedál</strong> a potom sa vráť na obrazovku predáka — označenia sa zmenia, ale <strong>len u ľudí prideleného poskytovateľa</strong>. Admin nastavuje štýl, nie jednotlivé písmená.</p>
+    <p><strong>SMS je doplnok, nie náhrada.</strong> Neunesie prílohu, takže týždennú objednávku ňou poslať nemožno — do 160 znakov sa zmestí len denná korekcia alebo upozornenie. Najsilnejší dôvod ju mať je <strong>zlyhanie e-mailu</strong>: keď spadne SMTP, ďalší e-mail už nepomôže, lebo ide tou istou cestou. Preto to mám zapnuté u oboch dodávateľov aj vtedy, keď bežné SMS nechcú. U Jeleňa má navyše zapnutú dennú korekciu — ráno o pol ôsmej je kuchár pri sporáku, nie pri počítači.</p>
     <p><strong>Odosielanie objednávok</strong> je tiež per poskytovateľ a časy sa počítajú z jeho vlastných uzávierok — všimni si, že U Jeleňa posiela dennú korekciu ráno o 07:30 na ten istý deň, kým Sever ju posiela o 14:30 <strong>predchádzajúci</strong> pracovný deň. „Ráno po dennej uzávierke" teda platí len pre niektorých dodávateľov; appka to nemôže mať napevno.</p>
     <p>Cenník má oba modely príspevku vedľa seba, aby sa mzdové oddelenie mohlo pozrieť na konkrétne čísla a povedať, ktorý sedí. Zákonné limity sa menia niekoľkokrát ročne, preto sú to nastavenia s platnosťou od dátumu, nie hodnoty v kóde.</p>
   </div>
@@ -1363,6 +1385,7 @@
       style:"upper", count:3, compose:"komplet",
       cancelWhen:0, cancelTime:"07:30", late:true, names:true,
       emails:"kuchyna@ujelena.sk, fakturacia@ujelena.sk", sendOffset:0, sendEmpty:true,
+      phone:"+421 903 118 240", smsWeekly:false, smsDaily:true, smsFail:true,
       prices:[6.20, 6.20, 5.80, 6.40, 5.90, 6.10, 6.30, 5.70, 6.00, 6.50],
       menu:[
         ["Držková polievka, vyprážaný syr, hranolky, tatárska","Slepačí vývar, kuracie prsia na masle, ryža","Šošovicová polievka, pirohy s bryndzou"],
@@ -1377,6 +1400,7 @@
       style:"arabic", count:4, compose:"casti",
       cancelWhen:1, cancelTime:"14:00", late:false, names:false,
       emails:"objednavky@jedalen-sever.sk", sendOffset:30, sendEmpty:false,
+      phone:"+421 911 604 375", smsWeekly:false, smsDaily:false, smsFail:true,
       prices:[5.40, 5.40, 5.90, 5.20, 5.60, 5.60, 5.80, 5.30, 5.50, 5.70],
       menu:[[ "","","","" ],[ "","","","" ],[ "","","","" ],[ "","","","" ],[ "","","","" ]]
     }
@@ -1926,6 +1950,24 @@
         ? "každý pracovný deň " + t + " (na ten istý deň)"
         : "každý pracovný deň " + t + " (na nasledujúci pracovný deň)";
     }
+    renderSmsDemo();
+  }
+
+  function renderSmsDemo(){
+    const el = document.getElementById("a-sms-demo");
+    const ln = document.getElementById("a-sms-len");
+    if (!el || !ln) return;
+    const L = labelsOf(adminCat);
+    const counts = [22, 15, 7, 4, 6, 5, 3, 4, 2, 3];
+    let body = "ZAVOD SK, streda 5.8. korekcia: ";
+    const parts = [];
+    let total = 0;
+    for (let i = 0; i < L.length; i++){ parts.push(L[i] + " " + counts[i]); total += counts[i]; }
+    body += parts.join(", ") + ", spolu " + total + " (bolo " + (total + 1) + ")";
+    el.textContent = body;
+    const seg = body.length <= 160 ? 1 : Math.ceil(body.length / 153);
+    ln.innerHTML = body.length + " znakov · " + seg + (seg === 1 ? " správa" : " správy") +
+      " — <strong>zámerne bez diakritiky</strong>: s mäkčeňmi sa limit láme zo 160 na 70 znakov a jedna správa by sa rozpadla na tri.";
   }
 
   function loadCaterer(){
@@ -1934,6 +1976,10 @@
     document.getElementById("a-mail").value = A.emails;
     document.getElementById("a-offset").value = String(A.sendOffset);
     document.getElementById("a-empty").checked = A.sendEmpty;
+    document.getElementById("a-sms").value = A.phone;
+    document.getElementById("a-sms-f").checked = A.smsFail;
+    document.getElementById("a-sms-d").checked = A.smsDaily;
+    document.getElementById("a-sms-w").checked = A.smsWeekly;
     renderSendTimes();
     document.querySelectorAll("#a-style button").forEach(x =>
       x.setAttribute("aria-pressed", String(x.dataset.style === A.style)));
@@ -1969,7 +2015,8 @@
     renderAll();
   }));
 
-  ["a-cancel","a-cancel-t","a-late","a-names","a-mail","a-offset","a-empty"].forEach(id => {
+  ["a-cancel","a-cancel-t","a-late","a-names","a-mail","a-offset","a-empty",
+   "a-sms","a-sms-f","a-sms-d","a-sms-w"].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener("change", function(){
@@ -1981,6 +2028,10 @@
       if (id === "a-mail")     A.emails = el.value;
       if (id === "a-offset")   A.sendOffset = +el.value;
       if (id === "a-empty")    A.sendEmpty = el.checked;
+      if (id === "a-sms")      A.phone = el.value;
+      if (id === "a-sms-f")    A.smsFail = el.checked;
+      if (id === "a-sms-d")    A.smsDaily = el.checked;
+      if (id === "a-sms-w")    A.smsWeekly = el.checked;
       renderSendTimes();
       renderCatList();
     });
