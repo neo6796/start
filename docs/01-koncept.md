@@ -1,14 +1,18 @@
-# Objednávanie obedov — koncept (v0.2)
+# Objednávanie obedov — koncept (v0.3)
 
 Pracovný názov: **Obedár**
 Rozsah: 50–100 stravníkov, 1–5 poskytovateľov stravy, interná firemná appka.
 Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a následne klikací preview.
 
-**Rozhodnuté v v0.2:**
+**Rozhodnuté:**
 1. Predák za podriadených **objednáva, mení aj odhlasuje**.
 2. Poskytovateľa **prideľuje admin pevne**, stravník si ho nevyberá.
 3. Appka **rieši ceny aj podklad pre mzdové zrážky**.
 4. **Bez zmien** — všetci obedujú v rovnakom režime.
+5. Menu sa zadáva **spôsobom nastaveným per poskytovateľ** (ručne / import / prilepenie textu).
+6. Príspevok zamestnávateľa je **nastavenie**, oba modely (percento aj pevná suma) sú v systéme; čísla potvrdí mzdové oddelenie.
+7. **Väčšina stravníkov nemá firemný e-mail** → hlavné kanály sú appka, push a predák.
+8. **Len slovenčina.**
 
 ---
 
@@ -91,6 +95,7 @@ Admin nastavuje **1 až 5** aktívnych poskytovateľov. Pre každého samostatne
 | Denný deadline na odhlásenie | viď 4.2 | v deň obeda 07:30 |
 | Kapacita/deň (voliteľné) | max. počet porcií, prípadne limit na jedlo | bez limitu |
 | Dni, kedy varí | Po–Pia (možno vypnúť konkrétny deň) | Po–Pia |
+| Spôsob zadávania menu | ručne / import XLSX-CSV / prilepenie textu (viď 3.2) | ručne |
 | Cenník | viď kapitola 6 | — |
 
 **Číslovanie sa generuje automaticky z poradia** — admin len zvolí štýl. Názvy jedál sú voliteľné; ak chýbajú, zobrazí sa iba označenie („B"). Ak sú vyplnené, zobrazí sa `B — Vyprážaný syr, hranolky, tatárska`.
@@ -102,6 +107,21 @@ Poskytovateľ je **pevne pridelený adminom**, stravník si ho nevyberá — vid
 - **Zmena poskytovateľa platí od najbližšieho neuzamknutého týždňa.** Už uzamknuté týždne sa nemenia — dodávateľ má počty odoslané.
 - Pri deaktivácii poskytovateľa appka upozorní *„27 stravníkov nemá poskytovateľa"* a ponúkne hromadný presun.
 - Nový zamestnanec bez prideleného poskytovateľa nemôže objednávať a je v zozname „na doriešenie".
+
+### 3.2 Zadávanie menu — každý poskytovateľ inak
+Menu chodí od každého dodávateľa v inej podobe, preto je spôsob zadávania **nastavenie poskytovateľa**:
+
+| Spôsob | Ako to funguje | Kedy |
+|---|---|---|
+| **Ručne** (vždy dostupné) | týždenný editor 5 dní × N jedál, tlačidlo *kopírovať minulý týždeň*, našepkávač už použitých názvov | menu chodí papierom, telefonicky alebo v tele e-mailu |
+| **Import XLSX/CSV** | admin nahrá súbor, appka predvyplní menu, admin skontroluje a potvrdí; mapovanie stĺpcov sa uloží pre daného dodávateľa | dodávateľ posiela tabuľku |
+| **Prilepenie textu** | admin skopíruje menu do textového poľa, appka sa pokúsi rozpoznať dni a jedlá, admin opraví a potvrdí | menu chodí ako PDF alebo v tele e-mailu |
+
+Spoločné pravidlo: **žiadny import sa neuloží bez potvrdenia človekom.** Rozpoznávanie zlyhá vždy, keď dodávateľ zmení formát, a nepovšimnutá chyba v menu znamená zlé počty pre kuchyňu.
+
+Ručný editor musí byť dobrý, lebo je to fallback pre všetkých. Pri 3 jedlách × 5 dní × 2 dodávateľov je to ~5 minút týždenne — import sa oplatí až pri väčších ponukách.
+
+**Do MVP ide ručný editor + kopírovanie minulého týždňa.** Import a prilepenie textu prídu ako druhý krok, keď uvidíme reálne súbory od konkrétnych dodávateľov — bez vzorky by som ich robil naslepo.
 
 ---
 
@@ -172,15 +192,26 @@ Toto je vrstva, ktorá appku spája s účtovníctvom, a zároveň jediná čas�
 - Všetky sumy sú v **centoch ako celé čísla**, nikdy `float`. Zaokrúhľovanie definované na jednom mieste.
 
 ### 6.2 Príspevky
-Konfigurovateľné per poskytovateľ (alebo globálne):
+V systéme budú **oba modely** ako nastavenie (per poskytovateľ alebo globálne), aby sa dalo prepnúť bez zásahu do kódu:
 
 | Zložka | Model |
 |---|---|
-| Príspevok zamestnávateľa | percento z ceny jedla (Zákonník práce žiada min. 55 %) **alebo** pevná suma na obed, so **stropom** naviazaným na hodnotu stravného pri pracovnej ceste 5–12 h |
+| Príspevok zamestnávateľa | **percento z ceny jedla** (Zákonník práce žiada min. 55 %) **alebo** **pevná suma na obed**, v oboch prípadoch s voliteľným **stropom** naviazaným na hodnotu stravného pri pracovnej ceste 5–12 h |
 | Príspevok zo sociálneho fondu | pevná suma na obed (voliteľné, môže byť 0) |
 | **Doplatok zamestnanca** | `cena − príspevok ZL − sociálny fond` → **suma na zrážku zo mzdy** |
 
-Konkrétne percentá, sumy a strop sú **nastavenia**, nie konštanty v kóde — zákonné limity a hodnota stravného sa menia opatrením MPSVR aj niekoľkokrát ročne. Presné hodnoty potvrdí mzdové oddelenie pred spustením.
+Percentá, sumy a strop sú **nastavenia, nie konštanty v kóde** — zákonné limity a hodnota stravného sa menia opatrením MPSVR aj niekoľkokrát ročne. Nastavenie má platnosť od dátumu, rovnako ako cenník (6.1).
+
+#### Čo treba potvrdiť s mzdovým oddelením pred spustením
+- [ ] percento alebo pevná suma, a v akej výške
+- [ ] či sa uplatňuje strop a aký
+- [ ] či sa prispieva aj zo sociálneho fondu a koľko
+- [ ] ako sa zaokrúhľuje (na cent, matematicky/nadol)
+- [ ] politika neodhlásených obedov (6.4)
+- [ ] formát, v akom mzdový softvér vie načítať export (6.3)
+- [ ] dokedy v mesiaci musí byť podklad odovzdaný → z toho vyplynie termín mesačnej uzávierky
+
+Do preview dám obe varianty vedľa seba s modelovými číslami, aby sa mzdár mohol pozrieť a povedať, ktorá sedí.
 
 ### 6.3 Mesačná uzávierka a export
 - Admin **uzavrie mesiac** → čísla sa zafixujú, ďalšie zmeny len ako opravná položka v ďalšom mesiaci (aby sa nemenil už odovzdaný podklad pre mzdy).
@@ -206,19 +237,28 @@ To isté pravidlo sa použije pri odhlásení po termíne cez admina (4.4).
 
 ---
 
-## 8. Notifikácie
+## 8. Notifikácie a pripomienky
 
-| Kedy | Komu | Obsah |
-|---|---|---|
-| Št 13:00 | kto nemá kompletne objednané | „Chýba ti objednávka na Po a Št. Uzávierka zajtra o 12:00." |
-| Pia 09:00 | predákovi | zoznam členov tímu bez objednávky |
-| Pia 10:00 | posledná výzva | ako vyššie |
-| Pia 12:05 | všetkým | potvrdenie: čo mám objednané na budúci týždeň |
-| pri zmene predákom | dotknutému stravníkovi | „Tvoju objednávku na stredu zmenil J. Novák" |
-| pri uzavretí dňa adminom | dotknutým | „Vo štvrtok 14. 8. sa nevarí" |
-| začiatkom mesiaca | všetkým | „Za júl: 18 obedov, zo mzdy ti ide 32,40 €" |
+**Väčšina stravníkov nemá firemný e-mail**, takže e-mail nemôže byť hlavný kanál. To má tri dôsledky:
 
-Kanály: **v appke** (vždy), **e-mail** (kto má), **web push v PWA** (na iPhone funguje len po pridaní na plochu, iOS 16.4+). SMS neodporúčam — platené a pri 100 ľuďoch zbytočné.
+1. **Web push v PWA sa presúva do MVP**, nie do rozšírení — je to jediný kanál, ktorý oslovuje človeka, keď appku nemá otvorenú. Podmienka: používateľ si musí pridať appku na plochu (na iPhone to platí od iOS 16.4) a povoliť notifikácie. Súčasťou nasadenia bude krátky návod s obrázkami — bez neho si ju pridá 20 % ľudí.
+2. **Predák je plnohodnotný kanál.** Dostáva zoznam ľudí bez objednávky a má právo objednať za nich. Toto je najspoľahlivejšia cesta k tomu, aby v piatok o 12:00 nechýbal nikto.
+3. **Tlačiteľný zoznam na nástenku** — „kto nemá objednané na budúci týždeň", A4, generuje predák alebo admin. Nízkotechnologické, ale funguje aj u ľudí bez telefónu.
+
+| Kedy | Komu | Obsah | Kanál |
+|---|---|---|---|
+| Št 13:00 | kto nemá kompletne objednané | „Chýba ti objednávka na Po a Št. Uzávierka zajtra o 12:00." | push, v appke |
+| Št 13:00 | predákovi | zoznam členov tímu bez objednávky | push, v appke |
+| Pia 09:00 | predákovi | posledná výzva + tlačiteľný zoznam | push, v appke |
+| Pia 10:00 | kto stále nemá objednané | posledná výzva | push |
+| Pia 12:05 | všetkým | potvrdenie: čo mám objednané na budúci týždeň | v appke, push |
+| pri zmene predákom | dotknutému stravníkovi | „Tvoju objednávku na stredu zmenil J. Novák" | push, v appke |
+| pri uzavretí dňa adminom | dotknutým | „Vo štvrtok 14. 8. sa nevarí" | push, v appke |
+| začiatkom mesiaca | všetkým | „Za júl: 18 obedov, zo mzdy ti ide 32,40 €" | v appke |
+| pri uzávierke | dodávateľovi | počty porcií (PDF + XLSX) | e-mail |
+
+**E-mail je voliteľný údaj na osobe** — kto ho má vyplnený, dostane to isté aj mailom. Dodávateľom e-mail chodí vždy (tí ho majú).
+Odhlásené SMS — platené a pri 100 ľuďoch zbytočné.
 
 ---
 
@@ -240,7 +280,9 @@ Záťaž je triviálna: ~100 používateľov, špička pár desiatok súčasne v
 - **Databáza:** PostgreSQL.
 - **Auth:** vlastné session cookies, hash PIN/hesiel cez argon2id, rate limiting. Pripravené na neskoršie SSO.
 - **Plánované úlohy:** cron worker — notifikácie, zamykanie týždňa, odoslanie objednávky dodávateľovi.
-- **E-mail:** firemné SMTP alebo Resend/Postmark.
+- **Push:** Web Push (VAPID) priamo, bez externej služby.
+- **E-mail:** firemné SMTP alebo Resend/Postmark — hlavne pre dodávateľov.
+- **Jazyk:** len slovenčina, žiadny prekladový framework. Texty ale držím **na jednom mieste** (jeden modul), nie rozsypané po komponentoch — pridanie ukrajinčiny neskôr je potom deň práce namiesto týždňa. Stojí to teraz nula navyše.
 - **Alternatíva:** Django alebo Laravel — administrácia „zadarmo" z frameworku, čo pri množstve admin nastavení a exportov ušetrí čas. Rozhodneme pred kódovaním.
 
 Aplikácia musí byť **mobile-first**: veľké dotykové plochy (rukavice), vysoký kontrast (denné svetlo v hale), čitateľné písmo, funguje na 4-ročnom Androide.
@@ -294,17 +336,16 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 
 ## 13. Otvorené otázky
 
-**Rozhodnuté:** predák objednáva aj odhlasuje · poskytovateľ pridelený adminom · appka rieši ceny a mzdový podklad · bez zmien.
+**Rozhodnuté:** predák objednáva aj odhlasuje · poskytovateľ pridelený adminom · appka rieši ceny a mzdový podklad · bez zmien · menu per poskytovateľ (ručne + neskôr import) · príspevok ako nastavenie, čísla od mzdára · väčšina bez e-mailu → push + predák · len slovenčina.
 
-Zostáva:
-1. **Menu od dodávateľa** — v akej podobe chodí (papier, e-mail, PDF, Excel)? Určuje, či stačí ručné zadávanie, alebo sa oplatí import.
-2. **Príspevok zamestnávateľa** — percentom z ceny alebo pevnou sumou? A prispieva sa aj zo sociálneho fondu?
-3. **E-mail** — majú všetci stravníci firemný e-mail? Ak nie, notifikácie budú len v appke a cez push.
-4. **Jazyky** — stačí slovenčina, alebo treba aj CZ/UA/EN?
-5. **Hostia a návštevy** — treba objednávať obed pre návštevu?
-6. **Prevzatie obeda** — treba evidovať, kto si obed reálne vyzdvihol?
-7. **Zoznam zamestnancov** — je odkiaľ ho preberať (dochádzka, personalistika), alebo sa zadá ručne?
-8. **Mzdový softvér** — ktorý, aby export sedel formátom?
+Zostáva — nič z toho neblokuje preview, doriešime počas neho:
+1. **Čísla od mzdára** — checklist v kapitole 6.2.
+2. **Mzdový softvér** — ktorý, aby export sedel formátom.
+3. **Vzorky menu** od jednotlivých dodávateľov — podľa nich sa rozhodne, ktorým dodávateľom sa oplatí import a ktorým stačí ručné zadávanie.
+4. **Hostia a návštevy** — treba objednávať obed pre návštevu? (Ak áno, je to malé rozšírenie: objednávka bez väzby na osobu, účtovaná stredisku.)
+5. **Prevzatie obeda** — treba evidovať, kto si obed reálne vyzdvihol? Rieši spory typu „zaplatil som a nedostal".
+6. **Zoznam zamestnancov** — je odkiaľ ho preberať (dochádzka, personalistika), alebo sa 100 ľudí zadá ručne? Ručne je to jednorazovo pár hodín, čo je pri tejto veľkosti prijateľné.
+7. **Doména a certifikát** — pod akou adresou to má bežať (napr. `obedy.firma.sk`) a kto spravuje DNS.
 
 ---
 
@@ -313,6 +354,8 @@ Zostáva:
 | Fáza | Obsah |
 |---|---|
 | **0 — Koncept** | tento dokument, odsúhlasenie |
-| **1 — Preview** | klikací prototyp bez databázy: login, týždeň stravníka, matica predáka, admin nastavenia, cenník, 3 varianty loga |
-| **2 — MVP** | prihlásenie a roly, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, konfigurácia poskytovateľov a menu, matica predáka, ceny a mesačný export pre mzdy, denný súhrn pre dodávateľa, audit, nasadenie |
-| **3 — Rozšírenia** | push notifikácie, import menu, evidencia prevzatia, SSO, kiosk, viacjazyčnosť, rola dodávateľa |
+| **1 — Preview** | klikací prototyp bez databázy: login, týždeň stravníka, matica predáka, admin nastavenia, ručný editor menu, cenník s oboma modelmi príspevku, 3 varianty loga |
+| **2 — MVP** | prihlásenie a roly, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, konfigurácia poskytovateľov, **ručný editor menu + kopírovanie týždňa**, matica predáka, ceny a mesačný export pre mzdy, denný súhrn pre dodávateľa, **push notifikácie**, tlačiteľné zoznamy, audit, nasadenie |
+| **3 — Rozšírenia** | import menu (XLSX/CSV, prilepenie textu) podľa reálnych vzoriek, evidencia prevzatia, hostia, SSO, kiosk, rola dodávateľa, prípadná ukrajinčina |
+
+Push notifikácie sú v MVP, nie v rozšíreniach — bez e-mailu je to jediný kanál, ktorý človeka osloví mimo appky.
