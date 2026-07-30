@@ -389,8 +389,8 @@
     border-right:1px solid var(--line);
     font-size:14px;
   }
-  table.matrix tbody tr:hover th,
-  table.matrix tbody tr:hover td{background:var(--surface-2)}
+  /* hover len na mene — inak by prekryl významové podfarbenie buniek */
+  table.matrix tbody tr:hover th{background:var(--surface-2)}
   table.matrix tbody th .pn{
     display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3);
   }
@@ -429,8 +429,9 @@
   .opt-b:focus-visible{outline:2px solid var(--petrol);outline-offset:1px}
 
   td.self{background:var(--ok-soft)}
-  /* nerozhodnutá bunka ostáva prázdna ako políčko na papieri;
-     zvýrazniť sa dá jedným tlačidlom pred uzávierkou */
+  /* nerozhodnutá bunka = bledošedé nevyplnené políčko;
+     pred uzávierkou sa dá jedným tlačidlom prepnúť na výrazné */
+  td.gap{background:var(--surface-2)}
   .hl-gaps td.gap{background:var(--miss-soft)}
 
   .gapn{
@@ -614,6 +615,7 @@
   .sw.pick{background:var(--mustard-soft);border-color:var(--mustard)}
   .sw.miss{background:var(--miss-soft);border-color:var(--miss)}
   .sw.self{background:var(--ok-soft);border-color:var(--ok)}
+  .sw.empty{background:var(--surface-2);border-color:var(--line-2)}
 
   footer{
     border-top:1px solid var(--line);
@@ -717,9 +719,9 @@
   <div class="legend">
     <span><span class="opt-b" aria-checked="true" aria-hidden="true" style="cursor:default">B</span> zvolené jedlo</span>
     <span><span class="opt-b none" aria-checked="true" aria-hidden="true" style="cursor:default">×</span> nechce obed — rozhodnuté</span>
-    <span><span class="opt-b" aria-hidden="true" style="cursor:default">B</span> nezvolené, prázdne políčko</span>
-    <span><span class="gapn" aria-hidden="true">2</span> koľko dní ostáva nerozhodnutých</span>
+    <span><i class="sw empty"></i> nerozhodnuté — nevyplnené políčko</span>
     <span><i class="sw self"></i> objednal si sám v appke</span>
+    <span><span class="gapn" aria-hidden="true">2</span> koľko dní ostáva nerozhodnutých</span>
   </div>
 
   <div class="btn-row" style="margin-top:16px">
@@ -731,8 +733,9 @@
   <div class="note">
     <p class="eyebrow">Prečo takto</p>
     <p><strong>Všetky možnosti sú vidieť naraz a klikne sa priamo na tú správnu</strong> — jeden klik, žiadne preklikávanie dokola.</p>
-    <p><strong>Tri stavy, nie dva — a bunka sa správa ako políčko na papieri.</strong> Kým sa nič nezvolí, sú všetky možnosti len bledo orámované a bunka pôsobí prázdno; presne ako nevyplnené políčko na hárku. Krížik <code>×</code> je naopak <strong>rozhodnutie</strong>, že dotyčný obed nechce (dovolenka, služobka, nechce jesť) — vyplní sa tmavo. Počítadlo hore preto počíta iba nerozhodnutých; kto má krížik, je vybavený a upomienka mu nechodí. Opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na prázdnu.</p>
-    <p>Aby sa nerozhodnutí nestratili, má každý riadok pri mene <strong>malé počítadlo chýbajúcich dní</strong>, a pred uzávierkou sa dá tlačidlom <strong>Zvýrazniť nerozhodnuté</strong> podfarbiť všetky prázdne bunky naraz. V pokoji je tabuľka čistá, pri finálnom kontrolnom prechode sa dá rozsvietiť.</p>
+    <p><strong>Tri stavy, nie dva — a bunka sa správa ako políčko na papieri.</strong> Nerozhodnutá bunka je <strong>bledošedá a jej možnosti len bledo orámované</strong>: nevyplnené políčko. Rozhodnutie sa vyplní — označenie jedla horčicovo, krížik <code>×</code> tmavo. Krížik znamená, že dotyčný obed <strong>nechce</strong> (dovolenka, služobka, nechce jesť), takže sa nepočíta medzi chýbajúcich a upomienka mu nechodí. Opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na prázdnu.</p>
+    <p>Podfarbenie bunky tak nesie jednu informáciu: <strong>šedá = nikto sa nevyjadril, biela = vybavené, zelená = objednal si sám v appke.</strong> Naprieč riadkom vidno diery bez toho, aby tabuľka svietila.</p>
+    <p>Navyše má každý riadok pri mene <strong>počítadlo nerozhodnutých dní</strong> a pred uzávierkou sa dá tlačidlom <strong>Zvýrazniť nerozhodnuté</strong> prepnúť šedá na výraznú — na posledný kontrolný prechod v piatok ráno.</p>
     <p>Klávesnicou to ide rýchlejšie: <code>Tab</code> vojde do bunky, <strong>šípky vľavo a vpravo</strong> prechádzajú medzi možnosťami, <strong>medzerník</strong> zvolí. Alebo rovno stlač <code>A</code>, <code>B</code>, <code>C</code> pre jedlo, <code>0</code> pre krížik, <code>Backspace</code> pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni. Šípky <strong>hore a dole</strong> sa medzi ľuďmi pohybujú tiež.</p>
     <p>V ukážke má Bezáková celý týždeň krížiky (dovolenka), Tóth a Slaný sa zatiaľ nevyjadrili vôbec.</p>
     <p>Zastupovaný tím je <strong>samostatný blok</strong>, nie zliaty s vlastným — zlievanie tímov spôsobuje omyly typu „objednal som to tomu druhému Kováčovi". Riadky so zeleným pozadím sú ľudia, ktorí si objednali sami; predák ich nemusí prepisovať.</p>

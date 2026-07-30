@@ -337,11 +337,19 @@ Deň každého stravníka je v jednom z troch stavov. Systém ich musí **rozli�
 - **Po týždennej uzávierke má prechod na *bez obeda* iný význam:** to už nie je voľba, ale **odhlásenie** (`ODHLÁSENÉ`), lebo dodávateľ počet dostal. Stav vyzerá rovnako, líši sa história — a tá rozhoduje o účtovaní (6.4). Audit log tieto dva prípady odlišuje.
 - **Nerozhodnuté dni v momente uzávierky** ostávajú nerozhodnuté: dodávateľovi sa neposielajú a človek obed nemá. V zozname po uzávierke sú viditeľné, aby bolo jasné, kto vypadol.
 
-Na obrazovke sa to rieši **papierovou metaforou**: kým sa nič nezvolí, sú všetky možnosti len bledo orámované a bunka pôsobí prázdno — presne ako nevyplnené políčko na hárku. *Bez obeda* je naopak vyplnený krížik na tmavom podklade. Rozhodnutie má vyzerať ako rozhodnutie, nerozhodnutosť ako prázdne miesto.
+Na obrazovke sa to rieši **papierovou metaforou**: nerozhodnutá bunka je **bledošedá a jej možnosti len bledo orámované** — nevyplnené políčko. Rozhodnutie sa vyplní: označenie jedla horčicovo, *bez obeda* tmavým krížikom. Rozhodnutie má vyzerať ako rozhodnutie, nerozhodnutosť ako prázdne miesto.
 
-Aby sa pritom nerozhodnutí nestratili, sú dve tiché pomôcky:
-- pri mene v riadku je **malé počítadlo nerozhodnutých dní**,
-- tlačidlo **„Zvýrazniť nerozhodnuté"** podfarbí všetky prázdne bunky naraz. V pokoji je tabuľka čistá, pri kontrolnom prechode pred uzávierkou sa dá rozsvietiť.
+Podfarbenie bunky tak nesie práve jednu informáciu:
+
+| Podklad | Význam |
+|---|---|
+| **bledošedý** | nikto sa nevyjadril |
+| **biely** | vybavené — objednané alebo vedome bez obeda |
+| **zelenkastý** | stravník si objednal sám v aplikácii |
+
+Naprieč riadkom tak vidno diery bez toho, aby tabuľka svietila. Navyše:
+- pri mene v riadku je **počítadlo nerozhodnutých dní**,
+- tlačidlo **„Zvýrazniť nerozhodnuté"** prepne šedú na výraznú — na posledný kontrolný prechod pred uzávierkou.
 
 Na zbernom hárku platí to isté pravidlo: prázdne políčko znamená „nevyjadril sa", `×` znamená „nechcem obed".
 
@@ -362,7 +370,7 @@ Poradie dôležitosti je dané tým, kto appku reálne otvorí: **matica predák
 Keďže objednávky za väčšinu ľudí zadáva predák, toto nie je prehľad — **je to zadávacia obrazovka** a musí zvládnuť 20 ľudí za dve minúty.
 
 Matica **ľudia × dni** (riadky = podriadení, stĺpce Po–Pia). V bunke sú **všetky dostupné jedlá vedľa seba** plus krížik „nechce obed" — voľba je jeden klik, nie preklikávanie dokola, a zároveň je vidieť, z čoho sa vyberá.
-- tri stavy podľa 4.6: bledo orámované možnosti = nerozhodnuté · vyplnené označenie = objednané · vyplnený krížik = bez obeda
+- tri stavy podľa 4.6: bledošedá bunka = nerozhodnuté · vyplnené označenie = objednané · vyplnený krížik = bez obeda
 - opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na prázdnu
 - hore: *„3 ľudia nerozhodnutí, uzávierka o 5 h"* — krížiky sa nepočítajú
 - počítadlo nerozhodnutých dní pri mene + tlačidlo *Zvýrazniť nerozhodnuté* na kontrolný prechod pred uzávierkou
