@@ -403,11 +403,17 @@
     display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3);
   }
   .opts{
-    display:flex;flex-wrap:wrap;gap:3px;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
     align-items:center;justify-content:center;
     padding:8px 9px;
     min-height:52px;
     border-right:1px solid var(--line);
+  }
+  .opt-row{
+    display:flex;flex-wrap:wrap;gap:3px;
+    align-items:center;justify-content:center;
   }
   .opt-b{
     min-width:27px;height:28px;
@@ -441,13 +447,6 @@
   td.by-lead{background:var(--by-lead)}
   /* pred uzávierkou sa dajú prázdne bunky jedným tlačidlom rozsvietiť */
   .hl-gaps td.gap{background:var(--miss-soft)}
-
-  .catsep{
-    width:1px;
-    align-self:stretch;
-    margin:2px 4px;
-    background:var(--line-2);
-  }
 
   .cattag{
     font-family:var(--mono);
@@ -761,7 +760,7 @@
     <p><strong>Tri stavy, nie dva.</strong> Označenie jedla horčicovo, krížik <code>×</code> sivo. Krížik znamená, že dotyčný obed <strong>nechce</strong> (dovolenka, služobka, nechce jesť) — je to rozhodnutie, takže sa nepočíta medzi chýbajúcich a upomienka mu nechodí. Opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na nezafarbenú.</p>
     <p>Diery sa tým pádom hľadajú ako <strong>nezafarbené miesta</strong>. Pomáha aj počítadlo pri mene a tlačidlo <strong>Zvýrazniť nerozhodnuté</strong>, ktoré ich pred uzávierkou rozsvieti.</p>
     <p><strong>Rôzni poskytovatelia v jednom tíme.</strong> Krajčí a Bezáková majú pridelenú Školskú jedáleň Sever, preto majú v riadku <code>1 2 3 4</code> namiesto <code>A B C</code> — a pri osobnom čísle sa im ukáže značka poskytovateľa. Zastupovaný tím Lisovňa je celý na Severe. Predák tak obsluhuje oboch dodávateľov v jednej tabuľke a nemusí nikam prepínať; každý riadok ponúka presne to, čo daný človek môže dostať.</p>
-    <p><strong>Šimko má pridelených oboch</strong> — v jeho riadku sú za tenkou čiarou obe ponuky, <code>A B C</code> aj <code>1 2 3 4</code>, a v piatok si dal jedlo od Severu. Pridelenie sa mení v Admine, v tabuľke „Pridelenie stravníkov"; skús to prehodiť niekomu ďalšiemu a pozri sa, čo to v matici spraví.</p>
+    <p><strong>Šimko má pridelených oboch</strong> — jeho bunky majú ponuky <strong>pod sebou</strong>, <code>A B C</code> na prvom riadku a <code>1 2 3 4</code> na druhom, a v piatok si dal jedlo od Severu. Krížik je <strong>vždy jeden</strong> a má vlastný riadok naspodku: „nechcem obed" je rozhodnutie o dni, nie o dodávateľovi, takže nedáva zmysel mať ho pri každej jedálni. Pridelenie sa mení v Admine, v tabuľke „Pridelenie stravníkov" — skús to prehodiť niekomu ďalšiemu a pozri sa, čo to v matici spraví.</p>
     <p>Klávesnicou to ide rýchlejšie: <code>Tab</code> vojde do bunky, <strong>šípky vľavo a vpravo</strong> prechádzajú medzi možnosťami, <strong>medzerník</strong> zvolí. Alebo rovno stlač <code>A</code>, <code>B</code>, <code>C</code> pre jedlo, <code>0</code> pre krížik, <code>Backspace</code> pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni. Šípky <strong>hore a dole</strong> sa medzi ľuďmi pohybujú tiež.</p>
     <p>V ukážke má Bezáková celý týždeň krížiky (dovolenka), Tóth a Slaný sa zatiaľ nevyjadrili vôbec.</p>
     <p>Zastupovaný tím je <strong>samostatný blok</strong>, nie zliaty s vlastným — zlievanie tímov spôsobuje omyly typu „objednal som to tomu druhému Kováčovi". Riadky so zeleným pozadím sú ľudia, ktorí si objednali sami; predák ich nemusí prepisovať.</p>
@@ -1424,12 +1423,21 @@
   function cellHTML(person, ri, ci, tblId){
     const v = person.o[ci];
     const vc = person.oc[ci];
-    let first = true, tabSet = false;
+    const multi = person.cs.length > 1;
+    let tabSet = false;
+
+    /* jeden krížik na deň — „nechcem obed" je rozhodnutie o dni, nie o dodávateľovi.
+       Pri jednom poskytovateľovi visí na konci jeho riadku, pri viacerých má vlastný. */
+    const noneBtn =
+      '<button type="button" class="opt-b none" role="radio"' +
+      ' aria-checked="' + (v === NONE) + '" tabindex="-1"' +
+      ' data-t="' + tblId + '" data-r="' + ri + '" data-c="' + ci + '" data-v="x"' +
+      ' aria-label="nechce obed">×</button>';
+
     let h = '<div class="opts" role="radiogroup" aria-label="' + person.n + ", " + DAYS[ci] + '">';
 
-    person.cs.forEach(c => {
-      if (!first) h += '<span class="catsep" aria-hidden="true"></span>';
-      first = false;
+    person.cs.forEach((c, idx) => {
+      h += '<span class="opt-row">';
       for (let j = 0; j < CATERERS[c].count; j++){
         const on = (!undecided(v) && v !== NONE && v === j && vc === c);
         let tab = -1;
@@ -1440,12 +1448,11 @@
              ' data-t="' + tblId + '" data-r="' + ri + '" data-c="' + ci + '" data-v="' + c + ":" + j + '"' +
              ' aria-label="' + CATERERS[c].name + ", jedlo " + label(j, c) + '">' + label(j, c) + "</button>";
       }
+      if (!multi && idx === person.cs.length - 1) h += noneBtn;
+      h += "</span>";
     });
 
-    h += '<button type="button" class="opt-b none" role="radio"' +
-         ' aria-checked="' + (v === NONE) + '" tabindex="-1"' +
-         ' data-t="' + tblId + '" data-r="' + ri + '" data-c="' + ci + '" data-v="x"' +
-         ' aria-label="nechce obed">×</button>';
+    if (multi) h += '<span class="opt-row">' + noneBtn + "</span>";
     return h + "</div>";
   }
 

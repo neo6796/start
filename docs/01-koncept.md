@@ -196,12 +196,14 @@ Admin nastavuje **1 až 5** aktívnych poskytovateľov. Pre každého samostatne
 
 Osoba má **zoznam pridelených poskytovateľov**, spravidla jedného:
 
-| Pridelené | Čo vidí stravník | Ako to vyzerá v matici predáka |
+| Pridelené | Čo vidí stravník | Ako to vyzerá v bunke matice |
 |---|---|---|
-| **jeden** (odporúčaný default) | rovno ponuku jedál | jedna sada označení, napr. `A B C` |
-| **viac** | ponuku zoskupenú po poskytovateľoch | obe sady za tenkou čiarou, napr. `A B C │ 1 2 3 4` |
+| **jeden** (odporúčaný default) | rovno ponuku jedál | jeden riadok, napr. `A B C ×` |
+| **viac** | ponuku zoskupenú po poskytovateľoch | ponuky **pod sebou**, `A B C` / `1 2 3 4`, krížik na vlastnom riadku |
 
 Model „jeden alebo viac" nestojí navyše nič v prípade, keď má každý jedného — obrazovka vyzerá presne tak ako doteraz. Zložitosť sa objaví len u ľudí, ktorí naozaj majú na výber.
+
+**Krížik je vždy jeden, bez ohľadu na počet poskytovateľov.** „Nechcem obed" je rozhodnutie o dni, nie o dodávateľovi — „nechcem od U Jeleňa, ale možno od Severu" nedáva zmysel. Pri jednom poskytovateľovi visí na konci jeho riadku, pri viacerých má vlastný riadok naspodku, aby bolo vidieť, že nepatrí ani jednej jedálni.
 
 > **Ak sa prideľuje viac poskytovateľov, dajte každému iný typ číslovania.** Práve na to je to nastavenie dobré: keď má U Jeleňa `A B C` a Sever `1 2 3 4`, je „áčko" a „trojka" jednoznačné v celom závode. Ak by mali obaja `A B C`, stravník aj predák vidia dve rôzne „áčka" a musí sa k nim dopisovať meno dodávateľa. Appka na zhodné číslovanie dvoch aktívnych poskytovateľov upozorní.
 
