@@ -848,7 +848,7 @@
     <p class="hint" id="a-style-warn" hidden style="color:var(--miss)"></p>
     <div class="scroll-x" style="margin-top:14px;border:0">
       <table class="data" style="min-width:640px">
-        <thead><tr><th>Poskytovateľ</th><th>Jedlá</th><th>Skladba</th><th>Odhlásenie do</th><th>Doobjednanie</th><th class="num">Stravníkov</th></tr></thead>
+        <thead><tr><th>Poskytovateľ</th><th>Jedlá</th><th>Skladba</th><th>Odhlásenie do</th><th>Doobj.</th><th>Objednávky na</th><th class="num">Stravníkov</th></tr></thead>
         <tbody id="a-cat-list"></tbody>
       </table>
     </div>
@@ -919,6 +919,37 @@
       <label class="check" style="margin-top:9px">
         <input type="checkbox" id="a-names" checked> Vypĺňať názvy jedál
       </label>
+
+      <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+
+      <p class="eyebrow" style="margin-bottom:12px">Automatické odosielanie objednávok</p>
+
+      <div class="field">
+        <label for="a-mail">E-mail dodávateľa</label>
+        <input type="text" id="a-mail" value="">
+        <p class="hint">Viac adries oddeľ čiarkou. Kópia chodí vždy aj adminovi.</p>
+      </div>
+
+      <div class="field">
+        <label for="a-offset">Kedy odoslať po uzávierke</label>
+        <select id="a-offset">
+          <option value="0">hneď v momente uzávierky</option>
+          <option value="30">o 30 minút neskôr</option>
+          <option value="60">o hodinu neskôr</option>
+          <option value="120">o dve hodiny neskôr</option>
+        </select>
+      </div>
+
+      <table class="data" style="margin-bottom:12px">
+        <tbody>
+          <tr><td>Týždenná objednávka</td><td class="num" id="a-when-w">—</td></tr>
+          <tr><td>Denná korekcia</td><td class="num" id="a-when-d">—</td></tr>
+        </tbody>
+      </table>
+
+      <label class="check">
+        <input type="checkbox" id="a-empty"> Poslať korekciu aj keď sa nič nezmenilo
+      </label>
     </div>
 
     <div>
@@ -962,10 +993,31 @@
     </div>
   </div>
 
+  <div class="card">
+    <div class="card-head">
+      <h3>Odoslané objednávky</h3>
+      <span class="pill neutral">posledných 5</span>
+    </div>
+    <div class="scroll-x" style="border:0">
+      <table class="data" style="min-width:620px">
+        <thead><tr><th>Kedy</th><th>Komu</th><th>Čo</th><th>Stav</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>dnes 07:30</td><td>kuchyna@ujelena.sk</td><td>Korekcia na dnes — storná 3, doobj. 2</td><td><span class="pill ok">doručené</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>včera 14:30</td><td>objednavky@jedalen-sever.sk</td><td>Korekcia na dnes — storná 1</td><td><span class="pill ok">doručené</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>včera 07:30</td><td>kuchyna@ujelena.sk</td><td>Korekcia na včera — bez zmien</td><td><span class="pill ok">doručené</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>pi 12:00</td><td>kuchyna@ujelena.sk</td><td>Objednávka na 3.–7. 8. — 233 porcií</td><td><span class="pill ok">doručené</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>pi 12:30</td><td>objednavky@jedalen-sever.sk</td><td>Objednávka na 3.–7. 8. — 96 porcií</td><td><span class="pill miss">zlyhalo · 3 pokusy</span></td><td><button class="btn primary" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint" style="margin-top:12px"><strong>Pri zlyhaní dostane admin okamžite upozornenie s priloženým PDF</strong>, aby mohol objednávku poslať ručne alebo nadiktovať telefonicky. Mlčanie by znamenalo, že dodávateľ uvarí zlý počet a nikto sa to nedozvie až do obeda.</p>
+  </div>
+
   <div class="note">
     <p class="eyebrow">Prečo takto</p>
     <p><strong>Prepni poskytovateľa hore</strong> a uvidíš, že každý má vlastný svet: U Jeleňa má tri jedlá <code>A B C</code> v komplete a odhlasuje sa v deň obeda do 07:30, Sever má štyri jedlá <code>1 2 3 4</code> po častiach, odhlasuje sa už predchádzajúci pracovný deň do 14:00 a názvy jedál nemá vyplnené vôbec.</p>
     <p><strong>Prepni typ číslovania alebo posuň počet jedál</strong> a potom sa vráť na obrazovku predáka — označenia sa zmenia, ale <strong>len u ľudí prideleného poskytovateľa</strong>. Admin nastavuje štýl, nie jednotlivé písmená.</p>
+    <p><strong>Odosielanie objednávok</strong> je tiež per poskytovateľ a časy sa počítajú z jeho vlastných uzávierok — všimni si, že U Jeleňa posiela dennú korekciu ráno o 07:30 na ten istý deň, kým Sever ju posiela o 14:30 <strong>predchádzajúci</strong> pracovný deň. „Ráno po dennej uzávierke" teda platí len pre niektorých dodávateľov; appka to nemôže mať napevno.</p>
     <p>Cenník má oba modely príspevku vedľa seba, aby sa mzdové oddelenie mohlo pozrieť na konkrétne čísla a povedať, ktorý sedí. Zákonné limity sa menia niekoľkokrát ročne, preto sú to nastavenia s platnosťou od dátumu, nie hodnoty v kóde.</p>
   </div>
 </section>
@@ -1310,6 +1362,7 @@
       name:"Reštaurácia U Jeleňa", short:"U Jeleňa",
       style:"upper", count:3, compose:"komplet",
       cancelWhen:0, cancelTime:"07:30", late:true, names:true,
+      emails:"kuchyna@ujelena.sk, fakturacia@ujelena.sk", sendOffset:0, sendEmpty:true,
       prices:[6.20, 6.20, 5.80, 6.40, 5.90, 6.10, 6.30, 5.70, 6.00, 6.50],
       menu:[
         ["Držková polievka, vyprážaný syr, hranolky, tatárska","Slepačí vývar, kuracie prsia na masle, ryža","Šošovicová polievka, pirohy s bryndzou"],
@@ -1323,6 +1376,7 @@
       name:"Školská jedáleň Sever", short:"Sever",
       style:"arabic", count:4, compose:"casti",
       cancelWhen:1, cancelTime:"14:00", late:false, names:false,
+      emails:"objednavky@jedalen-sever.sk", sendOffset:30, sendEmpty:false,
       prices:[5.40, 5.40, 5.90, 5.20, 5.60, 5.60, 5.80, 5.30, 5.50, 5.70],
       menu:[[ "","","","" ],[ "","","","" ],[ "","","","" ],[ "","","","" ],[ "","","","" ]]
     }
@@ -1802,6 +1856,7 @@
         "<td>"+(A.compose === "komplet" ? "komplet" : "po častiach")+"</td>" +
         "<td>"+CANCEL_RULES[A.cancelWhen]+" o "+A.cancelTime+"</td>" +
         "<td>"+(A.late ? "áno" : "nie")+"</td>" +
+        "<td>"+A.emails.split(",")[0].trim()+"</td>" +
         '<td class="num">'+n+"</td>";
       tb.appendChild(tr);
     });
@@ -1852,9 +1907,34 @@
     }
   }
 
+  function addMinutes(hhmm, mins){
+    const parts = hhmm.split(":");
+    let t = (+parts[0]) * 60 + (+parts[1]) + mins;
+    t = ((t % 1440) + 1440) % 1440;
+    const h = Math.floor(t / 60), m = t % 60;
+    return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m;
+  }
+
+  function renderSendTimes(){
+    const A = CATERERS[adminCat];
+    const w = document.getElementById("a-when-w");
+    const d = document.getElementById("a-when-d");
+    if (w) w.textContent = "piatok " + addMinutes("12:00", A.sendOffset);
+    if (d){
+      const t = addMinutes(A.cancelTime, A.sendOffset);
+      d.textContent = A.cancelWhen === 0
+        ? "každý pracovný deň " + t + " (na ten istý deň)"
+        : "každý pracovný deň " + t + " (na nasledujúci pracovný deň)";
+    }
+  }
+
   function loadCaterer(){
     const A = CATERERS[adminCat];
     document.getElementById("a-cat-name").textContent = A.name;
+    document.getElementById("a-mail").value = A.emails;
+    document.getElementById("a-offset").value = String(A.sendOffset);
+    document.getElementById("a-empty").checked = A.sendEmpty;
+    renderSendTimes();
     document.querySelectorAll("#a-style button").forEach(x =>
       x.setAttribute("aria-pressed", String(x.dataset.style === A.style)));
     document.getElementById("a-count").value = A.count;
@@ -1889,7 +1969,7 @@
     renderAll();
   }));
 
-  ["a-cancel","a-cancel-t","a-late","a-names"].forEach(id => {
+  ["a-cancel","a-cancel-t","a-late","a-names","a-mail","a-offset","a-empty"].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener("change", function(){
@@ -1898,6 +1978,10 @@
       if (id === "a-cancel-t") A.cancelTime = el.value;
       if (id === "a-late")     A.late = el.checked;
       if (id === "a-names")    A.names = el.checked;
+      if (id === "a-mail")     A.emails = el.value;
+      if (id === "a-offset")   A.sendOffset = +el.value;
+      if (id === "a-empty")    A.sendEmpty = el.checked;
+      renderSendTimes();
       renderCatList();
     });
   });

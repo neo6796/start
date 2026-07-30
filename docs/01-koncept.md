@@ -484,6 +484,27 @@ To isté pravidlo sa použije pri odhlásení po termíne cez admina (4.5) aj pr
 | Denný zoznam pre výdaj | jedálni | ráno | PDF |
 | Zberný hárok, potvrdenie tímu, zoznam chýbajúcich (5.4) | predákovi | na požiadanie | PDF |
 
+### 7.2.1 Automatické odosielanie dodávateľom
+Nastavuje **admin, samostatne pre každého poskytovateľa**:
+
+| Nastavenie | Poznámka |
+|---|---|
+| **E-mailové adresy** | viac adries (kuchyňa + fakturácia). Kópia chodí vždy adminovi, aby existoval ľudský svedok. |
+| **Odstup od uzávierky** | *hneď · +30 min · +1 h · +2 h*. Skorší čas nedáva zmysel — pred uzávierkou počty ešte nie sú konečné. |
+| **Posielať korekciu aj bez zmien** | áno/nie. Odporúčam áno: mlčanie je nejednoznačné, kuchyňa nevie, či sa nič nezmenilo, alebo appka spadla. |
+
+**Časy sa počítajú z uzávierok daného poskytovateľa, nie z pevného rozvrhu.** To je dôvod, prečo to musí byť per poskytovateľ: kto má odhlasovanie *v deň obeda o 07:30*, dostane korekciu ráno na ten istý deň; kto má *predchádzajúci pracovný deň o 14:00*, dostane ju poobede na nasledujúci pracovný deň. „Ráno po dennej uzávierke" teda platí len pre časť dodávateľov.
+
+**V tele e-mailu sú počty aj ako čistý text**, nielen v prílohe — kuchyňa ho číta na telefóne a otvárať PDF je zbytočná prekážka. PDF a XLSX sú priložené pre archív a účtovníctvo.
+
+#### Čo sa stane, keď odoslanie zlyhá
+Bez tohto je celá automatizácia krehká: dodávateľ uvarí zlý počet a nikto sa to nedozvie do obeda.
+
+- appka **zaznamená každé odoslanie** so stavom (odoslané / doručené / zlyhalo) a admin ho vidí v prehľade,
+- pri zlyhaní **3 pokusy** s odstupom,
+- ak zlyhajú všetky, **admin dostane okamžite upozornenie s priloženým PDF**, aby objednávku poslal ručne alebo nadiktoval telefonicky,
+- admin môže ktorúkoľvek objednávku **poslať znova** (dodávateľ tvrdí, že ju nedostal) — kópia je označená ako kópia, aby sa počty nezdvojili.
+
 ### 7.3 Účtovníctvo a mzdy
 - **Mesačný podklad pre mzdy** — per osoba: osobné číslo, meno, tím, počet obedov, cena spolu, príspevok zamestnávateľa, sociálny fond, **zrážka zo mzdy**. XLSX + CSV, formát doladený podľa mzdového softvéru.
 - **Kontrola faktúry dodávateľa** — per poskytovateľ: počty porcií po dňoch × cena a súčet. Po zadaní fakturovanej sumy appka ukáže **rozdiel a deň, v ktorom vzniká**. Toto je najrýchlejšia cesta k odhaleniu, že dodávateľ fakturuje inak, než sa objednalo.
