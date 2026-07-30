@@ -22,7 +22,9 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 15. Pri spustení dostanú prístup **len predáci a admin**, stravníci na požiadanie.
 16. Zber volieb je **kombinovaný**: kto chce, objedná si sám v appke, zvyšok cez papierový zberný hárok.
 17. **Push notifikácie pre predákov a admina** sú v MVP (Android hneď, iPhone po pridaní na plochu), pre stravníkov až neskôr.
-18. **Názvy jedál sú voliteľné** — menu môže bežať len na `A/B/C`; namiesto písania sa dá pripnúť fotka papierového menu.
+18. **Názvy jedál sú voliteľné** — menu môže bežať len na `A/B/C`; namiesto písania sa dá pripnúť fotka, PDF alebo Word papierového menu, ktorý zároveň slúži ako dôkaz.
+19. **Trvale prihlásený** je predvolené, s kratšou platnosťou pre admina a opätovným overením hesla pri zásahoch do peňazí.
+20. **SMS zatiaľ nie** — pripraví sa len voliteľné pole „telefón", aby sa dala kedykoľvek zapnúť za pol dňa.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -129,6 +131,26 @@ Desaťmiestne číslo si nikto nezapamätá. Skončí to buď na lístku pod kl�
 - **Ochrana:** 5 neúspešných pokusov → zámok na 15 minút, log pokusov, limit na IP.
 - **Viac rolí naraz** (predák je aj stravník): po prihlásení prepínač v hlavičke `Moje obedy | Môj tím | Správa`. Nie pred prihlásením.
 
+#### Trvale prihlásený
+Áno, a odporúčam to mať zapnuté **predvolene** — človek, ktorý sa musí prihlasovať zakaždým, si appku neotvorí.
+
+Technicky to nie je „nikdy sa neodhlásiť", ale dlhodobý token v bezpečnostnej cookie (`httpOnly`, `Secure`, `SameSite`), ktorý sa **pri každom použití obnoví**. Kto appku používa pravidelne, ostáva prihlásený donekonečna; kto ju rok neotvorí, sa prihlási znova.
+
+Platnosť sa líši podľa toho, čo daný účet zmôže:
+
+| Rola | Trvale prihlásený | Prečo |
+|---|---|---|
+| Stravník | áno, prakticky natrvalo | v stávke je zmena obeda z A na B |
+| Predák | áno, obnova do 90 dní nečinnosti | vidí a mení údaje tímu |
+| Admin / superadmin | áno, ale **30 dní** | ceny, mzdové podklady, správa účtov |
+
+Poistky, ktoré k tomu patria:
+- tlačidlo **„Odhlásiť sa na všetkých zariadeniach"** — prvá pomoc pri stratenom telefóne,
+- admin vie **odhlásiť ktorýkoľvek účet** (odchod zamestnanca, požičaný mobil),
+- zmena hesla alebo PIN-u **zruší všetky ostatné relácie**,
+- pri citlivých úkonoch — **uzavretie mesiaca, zmena cenníka, zmena príspevkov** — si appka vypýta heslo znova, aj keď je používateľ prihlásený. Odomknutý mobil v šatni tak nestačí na zásah do mzdových podkladov.
+- v profile je zoznam zariadení („iPhone, naposledy dnes 07:12"), aby bolo vidno, kde všade je účet prihlásený.
+
 #### Obnova hesla cez e-mail
 Kto má na účte vyplnený e-mail (admin, superadmin, prípadne predák), môže si heslo obnoviť sám. Ostatným ho resetuje admin.
 
@@ -206,7 +228,28 @@ Ako to funguje v praxi:
 
 **Jediné, čo bez názvov nefunguje:** človek objednávajúci si cez víkend z domu nevie, čo je `B`. A pri reklamácii („objednal som B a dostal niečo, čo nejem") neexistuje záznam, čo `B` v ten deň bolo.
 
-**Riešenie bez písania — príloha týždňa:** admin odfotí papierové menu od dodávateľa telefónom a nahrá ho k danému týždňu (alebo pripne PDF, ktoré prišlo mailom). V appke sa pri výbere jedla objaví odkaz *„zobraziť menu"* s fotkou. Trvá to desať sekúnd, nič sa neprepisuje, a obe uvedené nevýhody padajú. **Toto odporúčam ako predvolený spôsob** pre toho, komu sa nechce písať.
+**Riešenie bez písania — príloha týždňa:** admin odfotí papierové menu od dodávateľa telefónom a nahrá ho k danému týždňu (alebo pripne súbor, ktorý prišiel mailom). V appke sa pri výbere jedla objaví tlačidlo *„zobraziť menu"*. Trvá to desať sekúnd, nič sa neprepisuje, a obe uvedené nevýhody padajú. **Toto je predvolený spôsob** pre toho, komu sa nechce písať.
+
+#### 3.3.1 Príloha menu — formáty a spracovanie
+Prijímame všetko, čo reálne chodí, a všetko sa zobrazí **priamo v appke** bez sťahovania:
+
+| Formát | Spracovanie |
+|---|---|
+| Fotka z telefónu (JPG, PNG, **HEIC** z iPhonu) | HEIC sa prevedie na JPEG (inak ho prehliadač nezobrazí), narovná sa podľa EXIF orientácie, zmenší sa na rozumné rozlíšenie pre mobilné dáta a originál sa uchová |
+| PDF | zobrazí sa priamo |
+| **Word (.docx), Excel (.xlsx)** | prevedú sa na PDF na serveri, aby sa dali otvoriť aj na telefóne — stiahnutie `.docx` do mobilu je pre používateľa slepá ulička |
+
+Prevod Office → PDF si vyžiada LibreOffice v serverovom obraze (~200 MB navyše). Za to, že admin nemusí nič prekonvertovávať a stravník nemusí nič sťahovať, to stojí.
+
+#### 3.3.2 Príloha ako dôkaz
+Aby príloha slúžila ako dôkaz, musí byť **nemenná a datovaná**:
+
+- príloha je viazaná na **konkrétny týždeň a poskytovateľa**, nie na „aktuálne menu",
+- pri nahradení sa stará verzia **nemaže, len archivuje** — vidno, kto ju nahral a kedy,
+- **objednávka odkazuje na tú verziu prílohy**, ktorá platila v čase jej vzniku (rovnaký princíp ako odfotenie ceny v 6.1),
+- prílohy sa uchovávajú spolu s objednávkami podľa účtovných lehôt.
+
+Tým vzniká úplná reťaz pri spore: **príloha** hovorí, čo `B` v ten týždeň bolo · **audit log** hovorí, kto objednávku zadal a kedy · **zberný hárok** hovorí, podľa čoho ju zadal.
 
 Ďalšie uľahčenie pre tých, čo názvy vypĺňať chcú: **našepkávač z histórie.** Dodávatelia väčšinou rotujú jedlá v cykle, takže po pár týždňoch stačí napísať „vypráž" a zvyšok sa doplní. Plus tlačidlo *kopírovať minulý týždeň*.
 
@@ -396,7 +439,11 @@ Inštalácia na plochu má zmysel pre predáka aj bez notifikácií: ikona na pl
 
 **Poistka:** každá notifikácia ide **súbežne aj e-mailom**. Ak predákovi push nefunguje, nezmešká nič — a naopak, kto e-mail nečíta, dostane push. Ani jeden kanál nie je jediný bod zlyhania.
 
-**Ak by sa push u predákov neosvedčil** (starý telefón, vypnuté notifikácie, iPhone bez ochoty inštalovať), existuje lacná náhrada: **SMS**. Pri ~10 predákoch a dvoch správach týždenne to vyjde na jednotky eur mesačne, funguje na akomkoľvek telefóne a nevyžaduje žiadne nastavovanie. Nedávam to do MVP, ale je to jednodňové doplnenie, ak sa ukáže potreba.
+**SMS — zatiaľ nie, ale pripravené.** Ak by sa push u predákov neosvedčil (starý telefón, vypnuté notifikácie, iPhone bez ochoty inštalovať), SMS je lacná náhrada: pri ~10 predákoch a dvoch správach týždenne jednotky eur mesačne, funguje na akomkoľvek telefóne, nulové nastavovanie.
+
+Nie je to komplikované — notifikácie posielam cez **jednotnú vrstvu kanálov**, kde je e-mail aj push len zapojený modul. Pridanie SMS je potom účet u brány (Twilio alebo slovenský poskytovateľ), kľúč do konfigurácie a napojenie modulu: **rádovo pol dňa až deň práce.** Preto to nemusí byť v MVP.
+
+Jediné, čo treba spraviť **hneď od začiatku**: mať na osobe **voliteľné pole „telefón"** a zbierať čísla predákov už pri zavádzaní. Inak sa pri zapínaní SMS bude o pol roka zháňať desať telefónnych čísel — a to je jediná časť, ktorá by naozaj zdržala.
 
 | Kedy | Komu | Obsah | Kanál |
 |---|---|---|---|
@@ -448,7 +495,10 @@ Aplikácia musí byť **mobile-first**: veľké dotykové plochy (rukavice), vys
 ```
 Osoba        (osobné číslo, meno, tím, poskytovateľ, roly[], hash PIN/hesla alebo NULL
               = bez prístupu do appky, e-mail — povinný pre admina a superadmina,
-              inak voliteľný, aktívna)
+              inak voliteľný, telefón — voliteľný, do zásoby pre SMS, aktívna)
+Relácia      (osoba, zariadenie, token, posledné použitie, platnosť) — trvalé prihlásenie
+PrílohaMenu  (poskytovateľ, týždeň, súbor, prevedená verzia, nahral, kedy, verzia)
+                staré verzie sa archivujú, nemažú
                 roly: STRAVNÍK | PREDÁK | ADMIN | SUPERADMIN (aj viac naraz)
 Tím          (názov, predák)
 Zástupca     (predák, poradie, osoba)                    — predvolená ponuka
