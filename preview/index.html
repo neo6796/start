@@ -20,6 +20,14 @@
     --miss:#A8402F;
     --miss-soft:#F5DFDA;
 
+    --bar-bg:#12403F;
+    --bar-fg:#F2F5F4;
+    --bar-dim:#AFC3C0;
+    --bar-line:#0C2E2D;
+    --bar-hover:rgba(255,255,255,.12);
+    --bar-sel:#E0A233;
+    --bar-sel-fg:#1A1206;
+
     --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     --mono:ui-monospace,SFMono-Regular,"SF Mono","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
 
@@ -33,10 +41,10 @@
       --surface:#18201F;
       --surface-2:#222C2A;
       --ink:#E9E8E2;
-      --ink-2:#AAB5B3;
-      --ink-3:#7C8785;
+      --ink-2:#B3BEBC;
+      --ink-3:#8E9A98;
       --line:#2C3735;
-      --line-2:#3B4744;
+      --line-2:#3F4B49;
       --petrol:#6FB3AD;
       --petrol-2:#8FC9C4;
       --on-petrol:#0F1514;
@@ -46,6 +54,14 @@
       --ok-soft:#1C3329;
       --miss:#D4705E;
       --miss-soft:#361F1C;
+
+      --bar-bg:#16211F;
+      --bar-fg:#E9E8E2;
+      --bar-dim:#9DAAA7;
+      --bar-line:#2C3735;
+      --bar-hover:rgba(255,255,255,.09);
+      --bar-sel:#E0A233;
+      --bar-sel-fg:#1A1206;
     }
   }
 
@@ -54,10 +70,10 @@
     --surface:#18201F;
     --surface-2:#222C2A;
     --ink:#E9E8E2;
-    --ink-2:#AAB5B3;
-    --ink-3:#7C8785;
+    --ink-2:#B3BEBC;
+    --ink-3:#8E9A98;
     --line:#2C3735;
-    --line-2:#3B4744;
+    --line-2:#3F4B49;
     --petrol:#6FB3AD;
     --petrol-2:#8FC9C4;
     --on-petrol:#0F1514;
@@ -67,6 +83,14 @@
     --ok-soft:#1C3329;
     --miss:#D4705E;
     --miss-soft:#361F1C;
+
+    --bar-bg:#16211F;
+    --bar-fg:#E9E8E2;
+    --bar-dim:#9DAAA7;
+    --bar-line:#2C3735;
+    --bar-hover:rgba(255,255,255,.09);
+    --bar-sel:#E0A233;
+    --bar-sel-fg:#1A1206;
   }
 
   :root[data-theme="light"]{
@@ -87,6 +111,14 @@
     --ok-soft:#DDEBE3;
     --miss:#A8402F;
     --miss-soft:#F5DFDA;
+
+    --bar-bg:#12403F;
+    --bar-fg:#F2F5F4;
+    --bar-dim:#AFC3C0;
+    --bar-line:#0C2E2D;
+    --bar-hover:rgba(255,255,255,.12);
+    --bar-sel:#E0A233;
+    --bar-sel-fg:#1A1206;
   }
 
   *{box-sizing:border-box}
@@ -117,17 +149,10 @@
   /* ---------- shell ---------- */
 
   .topbar{
-    background:var(--petrol);
-    color:var(--on-petrol);
-    border-bottom:1px solid var(--line);
+    background:var(--bar-bg);
+    color:var(--bar-fg);
+    border-bottom:1px solid var(--bar-line);
   }
-  :root[data-theme="dark"] .topbar,
-  .topbar{background:var(--petrol)}
-  @media (prefers-color-scheme:dark){
-    .topbar{background:#14201F}
-  }
-  :root[data-theme="dark"] .topbar{background:#14201F}
-  :root[data-theme="light"] .topbar{background:#12403F}
 
   .topbar .wrap{
     display:flex;
@@ -151,9 +176,9 @@
     font-size:11px;
     letter-spacing:.1em;
     text-transform:uppercase;
-    opacity:.65;
+    color:var(--bar-dim);
     padding-left:10px;
-    border-left:1px solid currentColor;
+    border-left:1px solid var(--bar-dim);
     margin-left:2px;
   }
 
@@ -165,25 +190,22 @@
   }
   .tab{
     font-family:var(--mono);
-    font-size:12px;
+    font-size:12.5px;
     letter-spacing:.04em;
     background:transparent;
-    color:inherit;
+    color:var(--bar-dim);
     border:1px solid transparent;
     border-radius:var(--r);
     padding:6px 11px;
     cursor:pointer;
-    opacity:.72;
   }
-  .tab:hover{opacity:1;background:rgba(255,255,255,.08)}
+  .tab:hover{color:var(--bar-fg);background:var(--bar-hover)}
   .tab[aria-selected="true"]{
-    opacity:1;
-    background:var(--mustard);
-    color:#1A1206;
+    background:var(--bar-sel);
+    color:var(--bar-sel-fg);
     font-weight:700;
   }
-  :root[data-theme="dark"] .tab[aria-selected="true"]{color:#161110}
-  .tab:focus-visible{outline:2px solid var(--mustard);outline-offset:2px}
+  .tab:focus-visible{outline:2px solid var(--bar-sel);outline-offset:2px}
 
   main{padding:32px 0 72px}
 
@@ -354,15 +376,41 @@
   table.matrix tbody th .pn{
     display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3);
   }
-  .cell{
-    width:100%;height:52px;
-    display:flex;align-items:center;justify-content:center;
-    background:transparent;border:0;
-    cursor:pointer;
+  .opts{
+    display:flex;flex-wrap:wrap;gap:3px;
+    align-items:center;justify-content:center;
+    padding:8px 9px;
+    min-height:52px;
     border-right:1px solid var(--line);
   }
-  .cell:focus-visible{outline:2px solid var(--mustard);outline-offset:-3px}
+  .opt-b{
+    min-width:27px;height:28px;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:13px;font-weight:600;
+    background:transparent;
+    color:var(--ink-3);
+    border:1px solid var(--line);
+    border-radius:2px;
+    cursor:pointer;
+    padding:0 5px;
+  }
+  .opt-b:hover{color:var(--ink);border-color:var(--ink-3);background:var(--surface-2)}
+  .opt-b.clear{border-style:dashed}
+  .opt-b[aria-checked="true"]{
+    background:var(--mustard-soft);
+    color:var(--mustard);
+    border-color:var(--mustard);
+    font-weight:700;
+  }
+  .opt-b.clear[aria-checked="true"]{
+    background:transparent;
+    color:var(--ink-2);
+    border-color:var(--ink-3);
+    border-style:solid;
+  }
+  .opt-b:focus-visible{outline:2px solid var(--petrol);outline-offset:1px}
   td.self{background:var(--ok-soft)}
+  td.gap{background:var(--miss-soft)}
 
   .team-block{margin-bottom:22px}
   .team-head{
@@ -533,9 +581,9 @@
   .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2);margin-top:12px}
   .legend span{display:inline-flex;align-items:center;gap:7px}
   .sw{width:13px;height:13px;border-radius:2px;border:1px solid}
-  .sw.ok{background:var(--ok-soft);border-color:var(--ok)}
+  .sw.pick{background:var(--mustard-soft);border-color:var(--mustard)}
   .sw.miss{background:var(--miss-soft);border-color:var(--miss)}
-  .sw.self{background:var(--ok-soft);border-color:var(--line-2)}
+  .sw.self{background:var(--ok-soft);border-color:var(--ok)}
 
   footer{
     border-top:1px solid var(--line);
@@ -635,9 +683,10 @@
   </div>
 
   <div class="legend">
-    <span><i class="sw ok"></i> objednané</span>
+    <span><i class="sw pick"></i> zvolené jedlo</span>
     <span><i class="sw miss"></i> chýba objednávka</span>
     <span><i class="sw self"></i> objednal si sám v appke</span>
+    <span><span class="opt-b clear" style="cursor:default">·</span> bez obeda</span>
   </div>
 
   <div class="btn-row" style="margin-top:16px">
@@ -648,7 +697,9 @@
 
   <div class="note">
     <p class="eyebrow">Prečo takto</p>
-    <p><strong>Skús klikať do buniek</strong> — každý klik posunie voľbu na ďalšie jedlo a prázdne. Bunka sa dá aj zamerať tabulátorom a stlačiť <code>A</code>, <code>B</code>, <code>C</code> alebo <code>0</code>; kurzor potom skočí na ďalší riadok. Prepis dvadsiatich ľudí zo zberného hárku je tak otázka pol minúty bez jediného dialógu.</p>
+    <p><strong>Všetky možnosti sú vidieť naraz a klikne sa priamo na tú správnu</strong> — jeden klik, žiadne preklikávanie dokola. Bodka na konci znamená „bez obeda".</p>
+    <p>Klávesnicou to ide ešte rýchlejšie: <code>Tab</code> vojde do bunky, <strong>šípky vľavo a vpravo</strong> prechádzajú medzi jedlami, <strong>medzerník</strong> zvolí. Alebo rovno stlač <code>A</code>, <code>B</code>, <code>C</code> či <code>0</code> a kurzor sám skočí na ďalšieho človeka v tom istom dni — šípky <strong>hore a dole</strong> sa medzi ľuďmi pohybujú tiež. Prepis dvadsiatich ľudí zo zberného hárku je tak otázka pol minúty bez jediného dialógu.</p>
+    <p>Prázdne dni majú <strong>červenkastý podklad</strong>, takže chýbajúce objednávky vidno na prvý pohľad aj bez čítania počítadla.</p>
     <p>Zastupovaný tím je <strong>samostatný blok</strong>, nie zliaty s vlastným — zlievanie tímov spôsobuje omyly typu „objednal som to tomu druhému Kováčovi". Riadky so zeleným pozadím sú ľudia, ktorí si objednali sami; predák ich nemusí prepisovať.</p>
   </div>
 </section>
@@ -1227,14 +1278,35 @@
     });
   }
 
-  function chipFor(v){
-    if (v === null || v >= mealCount) return '<span class="chip ghost">·</span>';
-    return '<span class="chip">' + label(v) + "</span>";
+  function rowsOf(id){ return id === "m-own" ? own : deleg; }
+
+  function cellHTML(person, ri, ci, tblId){
+    const v = person.o[ci];
+    const tabAt = (v === null || v >= mealCount) ? 0 : v;
+    let h = '<div class="opts" role="radiogroup" aria-label="' + person.n + ", " + DAYS[ci] + '">';
+    for (let j = 0; j < mealCount; j++){
+      const on = (v === j);
+      h += '<button type="button" class="opt-b" role="radio"' +
+           ' aria-checked="' + on + '"' +
+           ' tabindex="' + (j === tabAt ? 0 : -1) + '"' +
+           ' data-t="' + tblId + '" data-r="' + ri + '" data-c="' + ci + '" data-v="' + j + '"' +
+           ' aria-label="jedlo ' + label(j) + '">' + label(j) + "</button>";
+    }
+    h += '<button type="button" class="opt-b clear" role="radio"' +
+         ' aria-checked="' + (v === null || v >= mealCount) + '" tabindex="-1"' +
+         ' data-t="' + tblId + '" data-r="' + ri + '" data-c="' + ci + '" data-v="x"' +
+         ' aria-label="bez obeda">·</button>';
+    return h + "</div>";
+  }
+
+  function tdClass(person, ci){
+    const v = person.o[ci];
+    if (v === null || v >= mealCount) return "gap";
+    return person.self ? "self" : "";
   }
 
   function renderTable(tblId, rows){
-    const tbl = document.getElementById(tblId);
-    const tb = tbl.querySelector("tbody");
+    const tb = document.getElementById(tblId).querySelector("tbody");
     tb.innerHTML = "";
     rows.forEach((person, ri) => {
       const tr = document.createElement("tr");
@@ -1244,34 +1316,41 @@
       tr.appendChild(th);
       person.o.forEach((v, ci) => {
         const td = document.createElement("td");
-        if (person.self) td.className = "self";
-        const btn = document.createElement("button");
-        btn.className = "cell";
-        btn.type = "button";
-        btn.dataset.r = ri; btn.dataset.c = ci; btn.dataset.t = tblId;
-        btn.innerHTML = chipFor(v);
-        btn.setAttribute("aria-label", person.n + ", " + DAYS[ci] + ", " + (v === null ? "neobjednané" : "jedlo " + label(v)));
-        td.appendChild(btn);
+        td.className = tdClass(person, ci);
+        td.innerHTML = cellHTML(person, ri, ci, tblId);
         tr.appendChild(td);
       });
       tb.appendChild(tr);
     });
   }
 
-  function rowsOf(id){ return id === "m-own" ? own : deleg; }
-
   function refreshCell(tblId, r, c){
-    const btn = document.querySelector('.cell[data-t="'+tblId+'"][data-r="'+r+'"][data-c="'+c+'"]');
-    if (!btn) return;
-    const v = rowsOf(tblId)[r].o[c];
-    btn.innerHTML = chipFor(v);
-    btn.setAttribute("aria-label", rowsOf(tblId)[r].n + ", " + DAYS[c] + ", " + (v === null ? "neobjednané" : "jedlo " + label(v)));
+    const any = document.querySelector('.opt-b[data-t="'+tblId+'"][data-r="'+r+'"][data-c="'+c+'"]');
+    if (!any) return;
+    const td = any.closest("td");
+    const person = rowsOf(tblId)[r];
+    td.className = tdClass(person, c);
+    td.innerHTML = cellHTML(person, r, c, tblId);
+  }
+
+  function focusOpt(tblId, r, c, v){
+    const sel = '.opt-b[data-t="'+tblId+'"][data-r="'+r+'"][data-c="'+c+'"][data-v="'+v+'"]';
+    const el = document.querySelector(sel);
+    if (el) el.focus();
+    return !!el;
+  }
+
+  function setValue(tblId, r, c, v){
+    rowsOf(tblId)[r].o[c] = v;
+    refreshCell(tblId, r, c);
+    countMissing();
   }
 
   function countMissing(){
+    const all = own.concat(deleg);
     let miss = 0;
-    own.concat(deleg).forEach(p => p.o.forEach(v => { if (v === null) miss++; }));
-    const people = own.concat(deleg).filter(p => p.o.some(v => v === null)).length;
+    all.forEach(p => p.o.forEach(v => { if (v === null || v >= mealCount) miss++; }));
+    const people = all.filter(p => p.o.some(v => v === null || v >= mealCount)).length;
     const el = document.getElementById("pd-missing");
     if (!el) return;
     if (miss === 0){
@@ -1284,24 +1363,45 @@
   }
 
   document.addEventListener("click", function(e){
-    const btn = e.target.closest(".cell");
-    if (!btn) return;
-    const rows = rowsOf(btn.dataset.t);
-    const r = +btn.dataset.r, c = +btn.dataset.c;
-    const cur = rows[r].o[c];
-    rows[r].o[c] = (cur === null) ? 0 : (cur + 1 >= mealCount ? null : cur + 1);
-    refreshCell(btn.dataset.t, r, c);
-    countMissing();
+    const b = e.target.closest(".opt-b");
+    if (!b) return;
+    const v = b.dataset.v === "x" ? null : +b.dataset.v;
+    setValue(b.dataset.t, +b.dataset.r, +b.dataset.c, v);
+    focusOpt(b.dataset.t, +b.dataset.r, +b.dataset.c, b.dataset.v);
   });
 
   document.addEventListener("keydown", function(e){
-    const btn = document.activeElement;
-    if (!btn || !btn.classList || !btn.classList.contains("cell")) return;
-    const rows = rowsOf(btn.dataset.t);
-    const r = +btn.dataset.r, c = +btn.dataset.c;
+    const b = document.activeElement;
+    if (!b || !b.classList || !b.classList.contains("opt-b")) return;
+
+    const t = b.dataset.t, r = +b.dataset.r, c = +b.dataset.c;
+    const rows = rowsOf(t);
+    const cur = b.dataset.v;
     const k = e.key;
+
+    /* pohyb v rámci bunky */
+    if (k === "ArrowRight" || k === "ArrowLeft"){
+      e.preventDefault();
+      const list = Array.from(b.closest(".opts").querySelectorAll(".opt-b"));
+      const i = list.indexOf(b);
+      const n = list[(i + (k === "ArrowRight" ? 1 : list.length - 1)) % list.length];
+      list.forEach(x => x.tabIndex = -1);
+      n.tabIndex = 0;
+      n.focus();
+      return;
+    }
+
+    /* pohyb medzi ľuďmi */
+    if (k === "ArrowDown" || k === "ArrowUp"){
+      e.preventDefault();
+      const nr = r + (k === "ArrowDown" ? 1 : -1);
+      if (nr >= 0 && nr < rows.length) focusOpt(t, nr, c, cur);
+      return;
+    }
+
+    /* priama voľba písmenom alebo číslom */
     let v;
-    if (k === "0" || k === "Backspace" || k === "Delete") v = null;
+    if (k === "0" || k === "Backspace" || k === "Delete" || k === "." ) v = null;
     else {
       for (let i = 0; i < mealCount; i++){
         if (k.toUpperCase() === label(i).toUpperCase()){ v = i; break; }
@@ -1309,11 +1409,10 @@
       if (v === undefined) return;
     }
     e.preventDefault();
-    rows[r].o[c] = v;
-    refreshCell(btn.dataset.t, r, c);
-    countMissing();
-    const next = document.querySelector('.cell[data-t="'+btn.dataset.t+'"][data-r="'+(r+1)+'"][data-c="'+c+'"]');
-    if (next) next.focus();
+    setValue(t, r, c, v);
+    const nextRow = r + 1;
+    if (nextRow < rows.length) focusOpt(t, nextRow, c, v === null ? "x" : String(v));
+    else focusOpt(t, r, c, v === null ? "x" : String(v));
   });
 
   const bc = document.getElementById("btn-copy");
