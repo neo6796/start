@@ -13,10 +13,14 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 6. Príspevok zamestnávateľa je **nastavenie**, oba modely (percento aj pevná suma) sú v systéme; čísla potvrdí mzdové oddelenie.
 7. **Väčšina stravníkov nemá firemný e-mail** → hlavné kanály sú predák a nástenka.
 8. **Len slovenčina.**
-9. Pribúda rola **superadmin** s povinným 2FA; adminov môže byť viac.
+9. Pribúda rola **superadmin**; adminov môže byť viac.
 10. **Predák môže doobjednať aj v deň obeda** (do denného deadlinu), stravník už nie.
 11. Stravníci appku pravdepodobne používať nebudú → **hlavným používateľom je predák**, papierové výstupy sú prvotriedna súčasť.
 12. Zastupovanie predáka rieši **delegácia s obdobím + eskalácia na chýbajúce objednávky**, nie automatický reťazec.
+13. **Bez 2FA.** Superadmin má heslo min. 12 znakov, obnova prístupu cez e-mail.
+14. **Menu na budúci týždeň je známe do pondelka** → objednávacie okno Po–Pia 12:00 ostáva v plnom rozsahu.
+15. Pri spustení dostanú prístup **len predáci a admin**, stravníci na požiadanie.
+16. Zber volieb je **kombinovaný**: kto chce, objedná si sám v appke, zvyšok cez papierový zberný hárok.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -29,7 +33,7 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 | **Stravník** | seba | objednať/zmeniť do týždňového deadlinu, odhlásiť sa na deň do denného deadlinu, história a mesačný prehľad so sumou |
 | **Predák** | seba + pridelených podriadených | za seba aj za každého podriadeného: objednať, zmeniť, odhlásiť na deň, hromadne odhlásiť rozsah dní (dovolenka, PN) |
 | **Admin** (môže ich byť viac) | všetkých | plná konfigurácia, výnimky po deadline, cenník a príspevky, exporty, audit |
-| **Superadmin** | všetkých | to čo admin + vytvára a ruší adminov, mení systémové nastavenia; **povinné 2FA** |
+| **Superadmin** | všetkých | to čo admin + vytvára a ruší adminov, mení systémové nastavenia |
 | *(voliteľne, fáza 3)* **Výdaj** | denný zoznam | odškrtnutie prevzatia obeda |
 | *(voliteľne, fáza 3)* **Dodávateľ** | len svoje súhrny | stiahnutie denného počtu porcií |
 
@@ -100,8 +104,10 @@ Pole je pre všetkých rovnaké, líši sa len **minimálna požiadavka na silu*
 |---|---|---|
 | **Stravník** | PIN, min. 4 číslice (odporúčam default 6, admin vie znížiť) | pamätateľné, numerická klávesnica, funguje v rukaviciach |
 | **Predák** | min. 8 znakov | vidí a mení údaje iných ľudí |
-| **Admin** | min. 10 znakov + odporúčané 2FA | konfigurácia, ceny, mzdové podklady |
-| **Superadmin** | min. 12 znakov + **povinné 2FA (TOTP)** | vytvára a ruší adminov |
+| **Admin** | min. 10 znakov | konfigurácia, ceny, mzdové podklady |
+| **Superadmin** | min. 12 znakov | vytvára a ruší adminov |
+
+**Bez 2FA.** Appka ho mať nebude — pre nástroj na objednávanie obedov je to primerané rozhodnutie a ušetrí to všetkým otravu s aplikáciou v telefóne. Hashovanie hesiel (argon2id), zámky po neúspešných pokusoch a audit log platia rovnako.
 
 #### Prečo pre predáka a admina heslo, a nie dlhý PIN
 Desaťmiestne číslo si nikto nezapamätá. Skončí to buď na lístku pod klávesnicou, alebo to bude telefónne číslo či dátum narodenia — teda niečo, čo sa dá uhádnuť. Navyše 10 číslic má ~33 bitov entropie, kým 10 znakov s písmenami ~52 bitov: **dlhý PIN je slabší aj neprakticky zapamätateľný naraz.** Preto navrhujem heslo, pokojne ako tri slová (`modrykonpije`) — zapamätateľnejšie aj podstatne silnejšie. Kto chce, môže si zvoliť aj samé číslice, len ich musí byť dosť.
@@ -121,10 +127,16 @@ Desaťmiestne číslo si nikto nezapamätá. Skončí to buď na lístku pod kl�
 - **Ochrana:** 5 neúspešných pokusov → zámok na 15 minút, log pokusov, limit na IP.
 - **Viac rolí naraz** (predák je aj stravník): po prihlásení prepínač v hlavičke `Moje obedy | Môj tím | Správa`. Nie pred prihlásením.
 
-#### Obnova prístupu superadmina — vyriešiť skôr, než sa stane
-Ak superadmin stratí telefón s 2FA, **nemá ho kto odomknúť** a systém ostane bez najvyššieho prístupu natrvalo. Odporúčam obe poistky naraz:
-- **10 jednorazových záložných kódov**, vytlačených a uložených v trezore,
-- **druhý superadmin účet** pre dôveryhodnú osobu (alebo prihlasovacie údaje v zapečatenej obálke).
+#### Obnova hesla cez e-mail
+Kto má na účte vyplnený e-mail (admin, superadmin, prípadne predák), môže si heslo obnoviť sám. Ostatným ho resetuje admin.
+
+- **E-mail je povinný údaj pre admina a superadmina** — je to ich jediná cesta späť, superadmin nad sebou nikoho nemá.
+- Odkaz na obnovu: **platnosť 30 minút, jednorazový**, po použití sa odhlásia všetky ostatné relácie daného účtu.
+- Limit na počet žiadostí o obnovu (aby sa schránka nedala zaspamovať).
+- Každá obnova ide do audit logu a príde o nej informačný e-mail.
+- Odkaz na obnovu **nikdy neprezradí, či daný účet existuje** — odpoveď je vždy rovnaká.
+
+**Kde tým leží bezpečnosť:** ak sa heslo superadmina obnovuje cez schránku, tak kto ovláda tú schránku, ovláda celý systém — vrátane cenníka a mzdových podkladov. Tá schránka by teda mala byť dobre zabezpečená a nemala by byť zdieľaná (nie `info@`). Ak by sa neskôr ukázalo, že to je málo, dá sa doplniť vytlačený jednorazový kód do trezora bez zásahu do zvyšku systému.
 
 ### 2.2 Rozšírenia (fáza 3)
 - **SSO cez Microsoft Entra ID / Google Workspace**, ak firma má účty pre všetkých → nulová správa hesiel. Návrh systému na to musí byť pripravený od začiatku.
@@ -188,6 +200,11 @@ Všetky časy v zóne **Europe/Bratislava**, v databáze UTC. Deadline platí na
 - Po uzávierke je týždeň **zamknutý** — nedá sa meniť voľba jedla, dá sa už len **odhlásiť na deň** (bod 4.2).
 - Admin môže voliteľne otvoriť dlhší horizont (napr. 4 týždne dopredu, ak je menu známe) — každý týždeň sa zamkne vo svojom termíne. Užitočné pred dovolenkami.
 - **Doobjednanie po uzávierke:** pre stravníka zakázané. Pre predáka je to nastavenie poskytovateľa — viď 4.3.
+
+**Závislosť na menu:** okno je použiteľné len vtedy, keď je menu zadané. Dodávatelia ho posielajú tak, aby bolo do pondelka známe, takže plné päťdňové okno drží. Poistky:
+- ak menu na budúci týždeň v pondelok ráno chýba, admin dostane upozornenie,
+- kým menu nie je zadané, stravník aj predák vidia „*menu na budúci týždeň ešte nie je zverejnené*", nie prázdny týždeň,
+- ak menu mešká, admin môže uzávierku pre daný týždeň jednorazovo posunúť.
 
 ### 4.2 Denné odhlásenie
 Pravidlo sa nastavuje **per poskytovateľ**, tvar:
@@ -270,7 +287,8 @@ Navyše **prehľad stavu pred uzávierkou**: ktoré tímy majú koľko chýbajú
 Ak väčšina ľudí appku neotvorí, papier nie je ústupok — je to **hlavný kanál k stravníkovi**. Všetko na jedno kliknutie, A4/A3, veľké písmo, čitateľné z dvoch metrov:
 
 1. **Menu na nástenku** — budúci týždeň, per poskytovateľ, s označením jedál (A/B/C) a cenou. Generuje sa hneď po zadaní menu.
-2. **Zberný hárok** — tím v riadkoch, Po–Pia v stĺpcoch, prázdne políčka. Vytlačí sa, zavesí vedľa menu, ľudia si voľbu zapíšu perom, predák ju prepíše do appky. Takto to bude v skutočnosti fungovať, tak nech to appka podporuje priamo.
+2. **Zberný hárok** — tím v riadkoch, Po–Pia v stĺpcoch. Vytlačí sa, zavesí vedľa menu, ľudia si voľbu zapíšu perom, predák ju prepíše do appky. Takto to bude v skutočnosti fungovať, tak nech to appka podporuje priamo.
+   **Kombinovaný zber:** kto si už objednal sám v appke, má voľbu na hárku **predtlačenú sivou** a políčko prečiarknuté — aby ju nikto nezapisoval druhýkrát a predák nemusel rozmýšľať, čo je nové. Hárok sa dá vytlačiť kedykoľvek počas týždňa a vždy ukazuje aktuálny stav.
 3. **Potvrdenie tímu po uzávierke** — čo má kto objednané. Zavesí sa vedľa menu, aby si to ľudia mohli skontrolovať skôr, než bude neskoro.
 4. **Denný zoznam pre výdaj** — kto má dnes čo, zoradené podľa priezviska.
 5. **Zoznam chýbajúcich objednávok** — pre predáka pred uzávierkou.
@@ -343,6 +361,7 @@ Stravníci nepoužívajú e-mail a časť z nich nebude používať ani appku. P
 
 | Kedy | Komu | Obsah | Kanál |
 |---|---|---|---|
+| Po 08:00 | adminovi | „Menu na budúci týždeň ešte nie je zadané" (len ak chýba) | v appke + e-mail |
 | Št 13:00 | predákovi | „V tíme Údržba nemá objednané 6 ľudí. Uzávierka zajtra o 12:00." | v appke + e-mail |
 | Pia 09:00 | predákovi | posledná výzva + tlačiteľný zoznam chýbajúcich | v appke + e-mail |
 | Pia 09:00 | 1. zástupcovi **a adminovi** | eskalácia, ak tím stále nemá objednané (1.3) | v appke + e-mail |
@@ -391,7 +410,8 @@ Aplikácia musí byť **mobile-first**: veľké dotykové plochy (rukavice), vys
 
 ```
 Osoba        (osobné číslo, meno, tím, poskytovateľ, roly[], hash PIN/hesla alebo NULL
-              = bez prístupu do appky, 2FA secret, e-mail voliteľný, aktívna)
+              = bez prístupu do appky, e-mail — povinný pre admina a superadmina,
+              inak voliteľný, aktívna)
                 roly: STRAVNÍK | PREDÁK | ADMIN | SUPERADMIN (aj viac naraz)
 Tím          (názov, predák)
 Zástupca     (predák, poradie, osoba)                    — predvolená ponuka
@@ -438,18 +458,18 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 
 ## 13. Otvorené otázky
 
-**Rozhodnuté:** predák objednáva, mení aj odhlasuje · poskytovateľ pridelený adminom · ceny a mzdový podklad áno · bez zmien · menu per poskytovateľ (ručne + neskôr import) · príspevok ako nastavenie · väčšina bez e-mailu aj bez appky → predák + nástenka · len slovenčina · superadmin s 2FA · doobjednanie predákom v deň obeda · delegácia s obdobím + eskalácia.
+**Rozhodnuté:** predák objednáva, mení aj odhlasuje · poskytovateľ pridelený adminom · ceny a mzdový podklad áno · bez zmien · menu per poskytovateľ (ručne + neskôr import) · menu známe do pondelka · príspevok ako nastavenie · väčšina bez e-mailu aj bez appky → predák + nástenka · kombinovaný zber cez hárok · len slovenčina · superadmin bez 2FA, heslo 12 znakov, obnova cez e-mail · prístupy pri spustení len predáci a admin · doobjednanie predákom v deň obeda · delegácia s obdobím + eskalácia.
 
 **Otázky na dodávateľov** (obchodné, nie technické — appka sa prispôsobí):
-1. **Kedy chodí menu na budúci týždeň?** Ak príde až vo štvrtok, objednávacie okno sa reálne skráti z piatich dní na dva a týždenná uzávierka v piatok o 12:00 je na hrane. Toto môže zmeniť celý harmonogram.
-2. **Akceptujú doobjednanie v deň obeda a dokedy?** (4.3) Ak nie, u daného dodávateľa sa funkcia nezapne.
-3. **Vzorky menu** — v akom formáte reálne chodia, aby sa dalo rozhodnúť o importe (3.2).
+1. **Akceptujú doobjednanie v deň obeda a dokedy?** (4.3) Ak nie, u daného dodávateľa sa funkcia nezapne.
+2. **Vzorky menu** — v akom formáte reálne chodia, aby sa dalo rozhodnúť o importe (3.2).
+3. **Denný deadline na odhlásenie** — každý dodávateľ svoj (4.2). Treba ich pozbierať.
 
 **Otázky dovnútra firmy:**
 4. **Čísla od mzdára** — checklist v kapitole 6.2.
 5. **Mzdový softvér** — ktorý, aby export sedel formátom.
 6. **Zoznam zamestnancov** — je odkiaľ ho preberať (dochádzka, personalistika), alebo sa 100 ľudí zadá ručne? Ručne je to jednorazovo pár hodín, čo je pri tejto veľkosti prijateľné.
-7. **Doména a certifikát** — pod akou adresou to má bežať (napr. `obedy.firma.sk`) a kto spravuje DNS.
+7. **Doména a e-mailová schránka** — pod akou adresou to má bežať (napr. `obedy.firma.sk`), kto spravuje DNS a z akej schránky bude appka odosielať (kvôli obnove hesiel a objednávkam dodávateľom).
 8. **Hostia a návštevy** — treba objednávať obed pre návštevu? (Malé rozšírenie: objednávka bez väzby na osobu, účtovaná stredisku.)
 9. **Prevzatie obeda** — treba evidovať, kto si obed reálne vyzdvihol? Rieši spory typu „zaplatil som a nedostal".
 
@@ -461,7 +481,7 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 |---|---|
 | **0 — Koncept** | tento dokument, odsúhlasenie |
 | **1 — Preview** | klikací prototyp bez databázy: login, **matica predáka**, týždeň stravníka, admin nastavenia, ručný editor menu, cenník s oboma modelmi príspevku, ukážky tlačových zostáv, 3 varianty loga |
-| **2 — MVP** | prihlásenie a roly vrátane superadmina s 2FA, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov, ručný editor menu + kopírovanie týždňa, **matica predáka**, delegácia a eskalácia, ceny a mesačný export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.4)**, audit, nasadenie |
+| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov, ručný editor menu + kopírovanie týždňa, **matica predáka**, delegácia a eskalácia, ceny a mesačný export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.4)**, audit, nasadenie |
 | **3 — Rozšírenia** | push notifikácie, import menu (XLSX/CSV, prilepenie textu) podľa reálnych vzoriek, evidencia prevzatia, hostia, SSO, kiosk, rola dodávateľa, prípadná ukrajinčina |
 
 Oproti v0.3 sa **push presunul z MVP do rozšírení** a **tlačové zostavy naopak do MVP** — appku bude držať predák s papierom, nie stravník s telefónom. Rozsah MVP tým skôr klesol než narástol.
