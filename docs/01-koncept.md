@@ -21,6 +21,8 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 14. **Menu na budúci týždeň je známe do pondelka** → objednávacie okno Po–Pia 12:00 ostáva v plnom rozsahu.
 15. Pri spustení dostanú prístup **len predáci a admin**, stravníci na požiadanie.
 16. Zber volieb je **kombinovaný**: kto chce, objedná si sám v appke, zvyšok cez papierový zberný hárok.
+17. **Push notifikácie pre predákov a admina** sú v MVP (Android hneď, iPhone po pridaní na plochu), pre stravníkov až neskôr.
+18. **Názvy jedál sú voliteľné** — menu môže bežať len na `A/B/C`; namiesto písania sa dá pripnúť fotka papierového menu.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -188,6 +190,28 @@ Ručný editor musí byť dobrý, lebo je to fallback pre všetkých. Pri 3 jedl
 
 **Do MVP ide ručný editor + kopírovanie minulého týždňa.** Import a prilepenie textu prídu ako druhý krok, keď uvidíme reálne súbory od konkrétnych dodávateľov — bez vzorky by som ich robil naslepo.
 
+### 3.3 Menu bez názvov jedál — plnohodnotný režim
+Názvy jedál sú **vždy voliteľné**. Admin môže zadať len počet jedál a appka pracuje čisto s označením (`A`, `B`, `C` / `1`, `2`, `3` / …). Vypĺňanie „bravčový rezeň s broskyňou" nikto nevynucuje.
+
+Ako to funguje v praxi:
+
+| | Bez názvov | S názvami |
+|---|---|---|
+| Zadanie menu adminom | nastaví sa raz, ďalej sa nerobí nič | ~5 min týždenne |
+| Na nástenke | **papierové menu od dodávateľa** | tlač z appky (5.4) |
+| Objednávka v appke | tlačidlá `A` `B` `C` | `B — Vyprážaný syr, hranolky` |
+| Zberný hárok | funguje rovnako | funguje rovnako |
+| Podklad dodávateľovi | funguje rovnako | funguje rovnako |
+| Mzdy a ceny | funguje rovnako | funguje rovnako |
+
+**Jediné, čo bez názvov nefunguje:** človek objednávajúci si cez víkend z domu nevie, čo je `B`. A pri reklamácii („objednal som B a dostal niečo, čo nejem") neexistuje záznam, čo `B` v ten deň bolo.
+
+**Riešenie bez písania — príloha týždňa:** admin odfotí papierové menu od dodávateľa telefónom a nahrá ho k danému týždňu (alebo pripne PDF, ktoré prišlo mailom). V appke sa pri výbere jedla objaví odkaz *„zobraziť menu"* s fotkou. Trvá to desať sekúnd, nič sa neprepisuje, a obe uvedené nevýhody padajú. **Toto odporúčam ako predvolený spôsob** pre toho, komu sa nechce písať.
+
+Ďalšie uľahčenie pre tých, čo názvy vypĺňať chcú: **našepkávač z histórie.** Dodávatelia väčšinou rotujú jedlá v cykle, takže po pár týždňoch stačí napísať „vypráž" a zvyšok sa doplní. Plus tlačidlo *kopírovať minulý týždeň*.
+
+Nastavenie je per poskytovateľ aj per týždeň — jeden dodávateľ môže mať názvy, druhý len písmená, a v týždni, keď sa adminovi nechce, sa jednoducho nevyplnia. Appka si nikdy nepýta niečo, bez čoho vie fungovať.
+
 ---
 
 ## 4. Termíny a uzávierky
@@ -286,7 +310,7 @@ Navyše **prehľad stavu pred uzávierkou**: ktoré tímy majú koľko chýbajú
 ### 5.4 Papierové výstupy — plnohodnotná súčasť, nie doplnok
 Ak väčšina ľudí appku neotvorí, papier nie je ústupok — je to **hlavný kanál k stravníkovi**. Všetko na jedno kliknutie, A4/A3, veľké písmo, čitateľné z dvoch metrov:
 
-1. **Menu na nástenku** — budúci týždeň, per poskytovateľ, s označením jedál (A/B/C) a cenou. Generuje sa hneď po zadaní menu.
+1. **Menu na nástenku** — budúci týždeň, per poskytovateľ, s označením jedál (A/B/C) a cenou. Generuje sa hneď po zadaní menu. *(Má zmysel len ak sú vyplnené názvy — bez nich ide na nástenku papierové menu od dodávateľa, viď 3.3.)*
 2. **Zberný hárok** — tím v riadkoch, Po–Pia v stĺpcoch. Vytlačí sa, zavesí vedľa menu, ľudia si voľbu zapíšu perom, predák ju prepíše do appky. Takto to bude v skutočnosti fungovať, tak nech to appka podporuje priamo.
    **Kombinovaný zber:** kto si už objednal sám v appke, má voľbu na hárku **predtlačenú sivou** a políčko prečiarknuté — aby ju nikto nezapisoval druhýkrát a predák nemusel rozmýšľať, čo je nové. Hárok sa dá vytlačiť kedykoľvek počas týždňa a vždy ukazuje aktuálny stav.
 3. **Potvrdenie tímu po uzávierke** — čo má kto objednané. Zavesí sa vedľa menu, aby si to ľudia mohli skontrolovať skôr, než bude neskoro.
@@ -357,25 +381,38 @@ To isté pravidlo sa použije pri odhlásení po termíne cez admina (4.5) aj pr
 
 Stravníci nepoužívajú e-mail a časť z nich nebude používať ani appku. Preto **appka neprehovára k stravníkom — prehovára k predákom**, a k stravníkom sa dostane cez nástenku a cez predáka.
 
-**Dôsledok pre rozsah: push notifikácie idú z MVP von.** Kanál, ktorý si nikto nezapne, nie je kanál — a robiť ho pre 10 ľudí sa neoplatí. Zostane pripravený tak, aby sa dal zapnúť neskôr bez prestavby, keď (a ak) sa appka medzi ľuďmi ujme.
+**Rozsah push notifikácií: áno pre predákov a admina, nie pre stravníkov.** Rozdiel nie je v technológii, ale v počte — predákov je zopár a dá sa s každým osobne prejsť inštalácia, so stovkou stravníkov to nejde.
+
+### 8.1 Ako sa notifikácia dostane k predákovi
+
+| Platforma | Ako to funguje | Čo to vyžaduje |
+|---|---|---|
+| **Android** | Web push funguje spoľahlivo, dokonca aj bez inštalácie na plochu — stačí povoliť notifikácie v prehliadači | jedno ťuknutie na „Povoliť" |
+| **iPhone** | Web push funguje **od iOS 16.4**, ale **iba ak je appka pridaná na plochu**. V obyčajnej karte Safari push nefunguje vôbec | Safari → Zdieľať → *Pridať na plochu* → otvoriť z ikony → povoliť notifikácie |
+
+Na iPhone je to teda štyri kroky a používatelia ich sami spravidla nespravia správne. Pri desiatich predákoch je to ale päť minút na človeka, prípadne jedno spoločné posedenie pri nasadení — a appka ich prevedie sprievodcom podľa toho, aký telefón majú.
+
+Inštalácia na plochu má zmysel pre predáka aj bez notifikácií: ikona na ploche, otvorí sa na celú obrazovku, netreba pamätať adresu. Pre denného používateľa je to rozdiel medzi „nástroj" a „ďalšia webstránka".
+
+**Poistka:** každá notifikácia ide **súbežne aj e-mailom**. Ak predákovi push nefunguje, nezmešká nič — a naopak, kto e-mail nečíta, dostane push. Ani jeden kanál nie je jediný bod zlyhania.
+
+**Ak by sa push u predákov neosvedčil** (starý telefón, vypnuté notifikácie, iPhone bez ochoty inštalovať), existuje lacná náhrada: **SMS**. Pri ~10 predákoch a dvoch správach týždenne to vyjde na jednotky eur mesačne, funguje na akomkoľvek telefóne a nevyžaduje žiadne nastavovanie. Nedávam to do MVP, ale je to jednodňové doplnenie, ak sa ukáže potreba.
 
 | Kedy | Komu | Obsah | Kanál |
 |---|---|---|---|
-| Po 08:00 | adminovi | „Menu na budúci týždeň ešte nie je zadané" (len ak chýba) | v appke + e-mail |
-| Št 13:00 | predákovi | „V tíme Údržba nemá objednané 6 ľudí. Uzávierka zajtra o 12:00." | v appke + e-mail |
-| Pia 09:00 | predákovi | posledná výzva + tlačiteľný zoznam chýbajúcich | v appke + e-mail |
-| Pia 09:00 | 1. zástupcovi **a adminovi** | eskalácia, ak tím stále nemá objednané (1.3) | v appke + e-mail |
+| Po 08:00 | adminovi | „Menu na budúci týždeň ešte nie je zadané" (len ak chýba) | push + e-mail |
+| Št 13:00 | predákovi | „V tíme Údržba nemá objednané 6 ľudí. Uzávierka zajtra o 12:00." | push + e-mail |
+| Pia 09:00 | predákovi | posledná výzva + tlačiteľný zoznam chýbajúcich | push + e-mail |
+| Pia 09:00 | 1. zástupcovi **a adminovi** | eskalácia, ak tím stále nemá objednané (1.3) | push + e-mail |
 | Pia 12:05 | predákovi | potvrdenie tímu na tlač na nástenku | v appke |
 | Pia 12:05 | dodávateľovi | počty porcií (PDF + XLSX) | e-mail |
 | denný deadline | dodávateľovi | korekčný súhrn: storná a doobjednávky (4.3) | e-mail |
-| pri uzavretí dňa adminom | predákom | „Vo štvrtok 14. 8. sa nevarí" | v appke + e-mail |
-| začiatkom mesiaca | adminovi | podklad pre mzdy je pripravený na uzavretie | v appke + e-mail |
+| pri uzavretí dňa adminom | predákom | „Vo štvrtok 14. 8. sa nevarí" | push + e-mail |
+| začiatkom mesiaca | adminovi | podklad pre mzdy je pripravený na uzavretie | push + e-mail |
 
-Predpoklad: **predáci a admini firemný e-mail majú.** Ak nie, notifikácie ostanú v appke — predák sa do nej beztak prihlasuje, je to jeho pracovný nástroj.
+Predpoklad: **predáci a admini firemný e-mail majú.** Ak nie, ostáva push a stav v appke — predák sa do nej beztak prihlasuje, je to jeho pracovný nástroj.
 
-Pre stravníkov, ktorí appku používať budú: informácie vidia v appke pri prihlásení (čo mám objednané, koľko mi ide zo mzdy). E-mail je voliteľný údaj na osobe — kto ho má vyplnený, dostane pripomienku aj mailom.
-
-SMS neodporúčam — platené a pri 100 ľuďoch zbytočné.
+Pre stravníkov, ktorí appku používať budú: informácie vidia v appke pri prihlásení (čo mám objednané, koľko mi ide zo mzdy). E-mail je voliteľný údaj na osobe — kto ho má vyplnený, dostane pripomienku aj mailom. **Push pre stravníkov ostáva vo fáze 3** — technicky je to tá istá vec, len ju netreba naraz vysvetľovať stovke ľudí. Kto si appku pridá na plochu sám, dostane ju zapnutú aj tak.
 
 ---
 
@@ -481,7 +518,7 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 |---|---|
 | **0 — Koncept** | tento dokument, odsúhlasenie |
 | **1 — Preview** | klikací prototyp bez databázy: login, **matica predáka**, týždeň stravníka, admin nastavenia, ručný editor menu, cenník s oboma modelmi príspevku, ukážky tlačových zostáv, 3 varianty loga |
-| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov, ručný editor menu + kopírovanie týždňa, **matica predáka**, delegácia a eskalácia, ceny a mesačný export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.4)**, audit, nasadenie |
-| **3 — Rozšírenia** | push notifikácie, import menu (XLSX/CSV, prilepenie textu) podľa reálnych vzoriek, evidencia prevzatia, hostia, SSO, kiosk, rola dodávateľa, prípadná ukrajinčina |
+| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov, ručný editor menu + kopírovanie týždňa, **matica predáka**, delegácia a eskalácia, ceny a mesačný export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.4)**, **push notifikácie pre predákov a admina** + sprievodca inštaláciou na plochu, **príloha menu (fotka/PDF)**, audit, nasadenie |
+| **3 — Rozšírenia** | push pre stravníkov, SMS pre predákov ak treba, import menu (XLSX/CSV, prilepenie textu) podľa reálnych vzoriek, evidencia prevzatia, hostia, SSO, kiosk, rola dodávateľa, prípadná ukrajinčina |
 
-Oproti v0.3 sa **push presunul z MVP do rozšírení** a **tlačové zostavy naopak do MVP** — appku bude držať predák s papierom, nie stravník s telefónom. Rozsah MVP tým skôr klesol než narástol.
+Push je v MVP **len pre predákov a admina** (zopár ľudí, s každým sa dá inštalácia prejsť osobne), pre stravníkov ostáva vo fáze 3. Tlačové zostavy sú naopak plnohodnotnou súčasťou MVP — appku bude držať predák s papierom, nie stravník s telefónom.
