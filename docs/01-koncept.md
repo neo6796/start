@@ -557,7 +557,28 @@ SMS je **doplnok, nie náhrada** — neunesie prílohu a do jednej správy sa zm
 
 **Text sa posiela zámerne bez diakritiky.** So slovenskými mäkčeňmi prechádza SMS z kódovania GSM-7 na UCS-2 a limit padá zo **160 znakov na 70** — jedna správa by sa rozpadla na tri, s trojnásobnou cenou a rizikom, že prídu v zlom poradí. Appka pri zostavovaní textu ukáže počet znakov a upozorní, ak by sa správa delila.
 
-**Náklady** sú zanedbateľné: ~0,03–0,05 € za správu, pri dvoch dodávateľoch a dennej korekcii rádovo **2 € mesačne**. Potrebný je účet u SMS brány (slovenský poskytovateľ alebo Twilio) — to je jediný dôvod, prečo to nie je hneď v MVP. Doručenky z brány sa logujú rovnako ako e-maily (7.2.1).
+**Náklady** sú zanedbateľné: ~0,03–0,05 € za správu, pri dvoch dodávateľoch a dennej korekcii rádovo **2 € mesačne**.
+
+#### Cez koho posielať SMS
+Na slovenskom trhu je viacero brán s API (SMSgate, 123sms, EuroSMS, SMS-portal, O2 Business). Ceny sa pohybujú **od ~0,01 do 0,04 € za správu**. Pri našom objeme je cena za správu takmer jedno — vyberať treba podľa iných vecí:
+
+- [ ] **doručenky** (delivery reports) — bez nich nevieme, či SMS dorazila, a stratíme polovicu zmyslu,
+- [ ] **alfanumerický odosielateľ** — aby prišla od `OBEDY` alebo názvu firmy (max. 11 znakov), nie z neznámeho čísla. Kuchár neznáme číslo ignoruje,
+- [ ] **žiadny mesačný paušál ani minimálny odber** — posielame desiatky správ mesačne,
+- [ ] jednoduché HTTP API a **EÚ spracovanie údajov**.
+
+#### Prečo nie Viber, WhatsApp alebo Telegram
+| | Prekážka |
+|---|---|
+| **WhatsApp Business** | treba overený Meta Business účet, partnera (BSP) a **vopred schválené šablóny správ** — každá zmena textu ide znova na schválenie. Dni papierovania kvôli dvom správam denne. |
+| **Viber Business** | na Slovensku rozšírený, ale tiež cez agregátora, s overením firmy a schvaľovaním. Rovnaká réžia. |
+| **Telegram** | technicky najjednoduchší a **zadarmo**, ale príjemca musí mať Telegram a najprv sám napísať botovi. Medzi kuchármi je rozšírenie nízke. |
+
+Rozhodujúce je, že SMS **nevyžaduje žiadnu aplikáciu ani súhlas vopred a dorazí aj na tlačidlový telefón bez dát**. Práve to je pri správe typu „o hodinu uvaríte zlý počet" podstatné. Pri našom objeme by úspora z lacnejšieho kanála bola pár eur ročne — nestojí za ňu ani deň papierovania.
+
+**Telegram má ale zmysel pre admina.** Je zadarmo, okamžitý a **unesie prílohu** — upozornenie „e-mail zlyhal" môže prísť rovno aj s PDF objednávky, aby ju admin poslal ďalej z telefónu. Zapneme ho ako voliteľný kanál pre admina a predákov, ktorí Telegram majú; pre dodávateľov ostáva SMS.
+
+Doručenky z brány sa logujú rovnako ako e-maily (7.2.1).
 
 ### 7.3 Účtovníctvo a mzdy
 - **Mesačný podklad pre mzdy** — per osoba: osobné číslo, meno, tím, počet obedov, cena spolu, príspevok zamestnávateľa, sociálny fond, **zrážka zo mzdy**. XLSX + CSV, formát doladený podľa mzdového softvéru.
@@ -666,8 +687,16 @@ Ak by bola cena webhostingu rozhodujúca, existuje legitímna alternatíva: **pr
 - **Chýbajú webhooky o odrazoch.** Odrazy sa vracajú ako e-mail, takže by sme museli čítať schránku cez IMAP a parsovať ich. **Nemusíme** — práve preto, že sme sa rozhodli pre *aktívne potvrdenie* namiesto detekcie doručenia (7.2.1). Toto je konkrétny prípad, keď sa to rozhodnutie vypláca.
 - Odosielať treba zo **skutočnej schránky na tej istej doméne** (napr. `obedy@firma.sk`), nie z vymyslenej adresy — inak sa SPF a DKIM rozídu a správy pôjdu do spamu.
 
-#### Zálohy — jediná vec, ktorú takto nechať nemožno
-Ak sú appka, databáza aj zálohy na tom istom účte u toho istého poskytovateľa, jeden problém s účtom alebo poskytovateľom zmaže všetko naraz. **Nočná šifrovaná záloha musí odchádzať aj mimo Webglobe** — na úložisko iného poskytovateľa alebo sťahovaná na firemný NAS. Stojí to jednotky eur mesačne a je to rozdiel medzi nepríjemnosťou a katastrofou.
+#### Zálohy: firemný NAS — vyriešené, ale s dvomi podmienkami
+Appka beží u Webglobe, zálohy sa ukladajú na firemný server/NAS. To je presne to rozdelenie, ktoré chceme: jeden problém u poskytovateľa nezmaže dáta.
+
+**1. Sťahuje NAS, neposiela server.** Nočnú úlohu spúšťa **NAS**, ktorý sa prihlási na VPS a stiahne si zálohu. Nie naopak. Dôvod: keby zálohu posielal server, musel by poznať prístup na NAS — a útočník, ktorý sa dostane na server, by potom mohol zmazať aj zálohy. Pri sťahovaní pozná prístupové údaje len NAS a server o ňom nevie nič. Bonus: NAS nepotrebuje byť dostupný zvonku, stačí mu odchádzajúce spojenie.
+
+**2. Verzie, nie zrkadlo.** Jedna prepisovaná kópia nie je záloha — keby sa databáza poškodila, nočná synchronizácia by rozbitú verziu prepísala cez zdravú. Treba **datované snímky**: 30 denných + 12 mesačných (7.6). Nástroj typu `restic` alebo `borg` to rieši aj s dedupláciou, takže miesto to zaberie málo.
+
+Záloha sa **šifruje ešte na serveri**, než odíde — obsahuje osobné údaje aj mzdové sumy. A raz za štvrťrok **test obnovy**, inak nevieme, či záloha vôbec funguje.
+
+Poznámka k tomu, prečo appka nebeží rovno na firemnom serveri: ľudia budú objednávať cez víkend z domu, takže by ho bolo treba sprístupniť z internetu aj s certifikátom a dohľadom — a VPN pre stovku ľudí je nepraktická. Firemný server ako **úložisko záloh** je ale ideálne využitie.
 
 #### Čo ešte vybaviť pri objednávke
 - [ ] **Zmluva o spracúvaní osobných údajov** (GDPR čl. 28) — Webglobe by mal mať štandardnú.
