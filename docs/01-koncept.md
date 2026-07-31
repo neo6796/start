@@ -521,7 +521,30 @@ Preto je v prehľade **stav odoslania a potvrdenie dodávateľa oddelene** — s
 - pri zlyhaní **3 pokusy** s odstupom,
 - ak zlyhajú všetky, **admin dostane okamžite upozornenie s priloženým PDF**, aby objednávku poslal ručne alebo nadiktoval telefonicky,
 - admin môže ktorúkoľvek objednávku **poslať znova** — kópia je označená ako kópia, aby sa počty nezdvojili,
-- **SPF, DKIM a DMARC** na odosielacej doméne sú povinné, inak časť správ skončí v spame ešte skôr, než sa vôbec dostaneme k potvrdzovaniu. Odosielanie cez službu s webhookmi (Postmark, Resend, SES) dá navyše spoľahlivé hlásenia o odrazoch — vlastné SMTP ich vie tiež, ale treba naň nastaviť sledovanú návratovú adresu.
+- odosielanie cez službu s webhookmi (Postmark, Resend, SES) dá spoľahlivé hlásenia o odrazoch — vlastné SMTP ich vie tiež, ale treba naň nastaviť sledovanú návratovú adresu,
+- **SPF, DKIM a DMARC** na odosielacej doméne sú povinné — viď 7.2.2.
+
+### 7.2.2 SPF, DKIM a DMARC — čo to je a prečo to potrebujeme
+Sú to tri záznamy v DNS domény, z ktorej appka posiela poštu (napr. `obedy.firma.sk`). Bez nich sa naše maily nedostanú do schránky dodávateľa, ale do spamu — alebo ich prijímajúci server rovno zahodí.
+
+| | Čo robí | Prirovnanie |
+|---|---|---|
+| **SPF** | zoznam serverov, ktoré smú posielať poštu za našu doménu; príjemca si overí, či správa prišla od niektorého z nich | zoznam ľudí oprávnených podpisovať za firmu |
+| **DKIM** | ku každej správe pripojí digitálny podpis; verejný kľúč je v DNS, takže príjemca overí, že správa je naozaj naša a nikto ju cestou nezmenil | pečať na obálke |
+| **DMARC** | povie príjemcovi, čo robiť, keď SPF alebo DKIM neprejde (nič / do spamu / zahodiť), a kam posielať hlásenia | pokyn, ako naložiť s listom, ktorý má porušenú pečať |
+
+**Prečo to nie je voliteľné:** väčšina dodávateľov má poštu na Gmaile alebo Microsoft 365 a tie od roku 2024 vyžadujú SPF a DKIM aj DMARC. Bez nich sa objednávky jednoducho nedoručia a celá automatizácia je zbytočná.
+
+**Čo to reálne obnáša:** tri riadky pridané do DNS domény tým, kto ju spravuje (firemné IT alebo poskytovateľ hostingu). Ak sa použije odosielacia služba, tá vygeneruje presné znenie záznamov na skopírovanie. Práca **rádovo pol hodiny, jednorazovo**, plus overovací test. Potom sa raz za čas pozrieť na DMARC hlásenia, či niečo nezlyháva.
+
+### 7.2.3 Eskalácia pri nepotvrdení
+Ak dodávateľ nepotvrdí prijatie do času nastaveného v 7.2.1, appka nečaká:
+
+1. **SMS dodávateľovi** — krátka urgencia: *„Objednavka na 3.-7.8. nepotvrdena, prosim potvrdte odkazom v maili alebo zavolajte."*
+2. **Upozornenie adminovi** súčasne — nech vie, že treba zdvihnúť telefón, ak ani SMS nepomôže.
+3. Potvrdenie kedykoľvek potom eskaláciu **ukončí** a zapíše sa čas.
+
+Spúšťače SMS sú preto **dva samostatné** a nastavujú sa nezávisle: *zlyhalo odoslanie* (technická chyba) a *neprišlo potvrdenie* (mail odišiel, ale nikto naň nereaguje). Sú to rôzne situácie a dodávateľ môže chcieť len jednu z nich.
 
 #### Doplnkové SMS dodávateľom
 SMS je **doplnok, nie náhrada** — neunesie prílohu a do jednej správy sa zmestí len krátky súhrn. Nastavuje sa per poskytovateľ (telefón + ktoré udalosti):

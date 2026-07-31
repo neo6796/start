@@ -972,7 +972,8 @@
         <p class="hint">SMS je <strong>doplnok, nie náhrada</strong> — neunesie prílohu, posiela sa v nej len krátky súhrn.</p>
       </div>
 
-      <label class="check"><input type="checkbox" id="a-sms-f"> Pri zlyhaní e-mailu <em style="color:var(--ink-3);font-style:normal">— nezávislý kanál</em></label>
+      <label class="check"><input type="checkbox" id="a-sms-f"> Keď odoslanie e-mailu zlyhá <em style="color:var(--ink-3);font-style:normal">— nezávislý kanál</em></label>
+      <label class="check" style="margin-top:9px"><input type="checkbox" id="a-sms-u"> Keď <strong>nepotvrdia prijatie</strong> v stanovenom čase</label>
       <label class="check" style="margin-top:9px"><input type="checkbox" id="a-sms-d"> Denná korekcia</label>
       <label class="check" style="margin-top:9px"><input type="checkbox" id="a-sms-w"> Týždenná objednávka <em style="color:var(--ink-3);font-style:normal">— len upozornenie</em></label>
 
@@ -1036,13 +1037,14 @@
           <tr><td>dnes 07:30</td><td><span class="pill neutral">SMS</span></td><td>+421 903 118 240</td><td>Korekcia na dnes — 44 porcií</td><td><span class="pill ok">doručenka od operátora</span></td><td>—</td><td></td></tr>
           <tr><td>dnes 07:30</td><td><span class="pill neutral">e-mail</span></td><td>kuchyna@ujelena.sk</td><td>Korekcia na dnes — storná 3, doobj. 2</td><td><span class="pill ok">prijaté ich serverom</span></td><td><span class="pill ok">potvrdené 07:41</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
           <tr><td>včera 14:30</td><td><span class="pill neutral">e-mail</span></td><td>objednavky@jedalen-sever.sk</td><td>Korekcia na dnes — storná 1</td><td><span class="pill ok">prijaté ich serverom</span></td><td><span class="pill ok">potvrdené 14:52</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
-          <tr><td>pi 12:00</td><td><span class="pill neutral">e-mail</span></td><td>kuchyna@ujelena.sk</td><td>Objednávka na 3.–7. 8. — 233 porcií</td><td><span class="pill ok">prijaté ich serverom</span></td><td><span class="pill miss">nepotvrdené · eskalované</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>pi 13:01</td><td><span class="pill neutral">SMS</span></td><td>+421 903 118 240</td><td>Urgencia — objednávka nepotvrdená hodinu</td><td><span class="pill ok">doručenka od operátora</span></td><td><span class="pill ok">potvrdené 13:09</span></td><td></td></tr>
+          <tr><td>pi 12:00</td><td><span class="pill neutral">e-mail</span></td><td>kuchyna@ujelena.sk</td><td>Objednávka na 3.–7. 8. — 233 porcií</td><td><span class="pill ok">prijaté ich serverom</span></td><td><span class="pill miss">nepotvrdené do 13:00</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
           <tr><td>pi 12:31</td><td><span class="pill neutral">SMS</span></td><td>+421 911 604 375</td><td>Náhrada za zlyhaný e-mail — ozvite sa</td><td><span class="pill ok">doručenka od operátora</span></td><td>—</td><td></td></tr>
           <tr><td>pi 12:30</td><td><span class="pill neutral">e-mail</span></td><td>objednavky@jedalen-sever.sk</td><td>Objednávka na 3.–7. 8. — 96 porcií</td><td><span class="pill miss">odmietnuté · schránka plná</span></td><td>—</td><td><button class="btn primary" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
         </tbody>
       </table>
     </div>
-    <p class="hint" style="margin-top:12px"><strong>Dva rôzne stĺpce, lebo sú to dve rôzne veci.</strong> „Stav odoslania" hovorí len o tom, čo vieme technicky: či poštový server dodávateľa správu prijal alebo odmietol. To <em>nie je</em> dôkaz, že ju niekto videl — mohla skončiť v spame alebo v schránke, ktorú nikto neotvára. Dôkaz je až <strong>potvrdenie dodávateľa</strong>: v objednávke je odkaz „Potvrdiť prijatie", jeden klik bez prihlásenia. Pozri štvrtý riadok — e-mail prišiel na ich server, ale nikto ho nepotvrdil, tak to appka eskalovala.</p>
+    <p class="hint" style="margin-top:12px"><strong>Dva rôzne stĺpce, lebo sú to dve rôzne veci.</strong> „Stav odoslania" hovorí len o tom, čo vieme technicky: či poštový server dodávateľa správu prijal alebo odmietol. To <em>nie je</em> dôkaz, že ju niekto videl — mohla skončiť v spame alebo v schránke, ktorú nikto neotvára. Dôkaz je až <strong>potvrdenie dodávateľa</strong>: v objednávke je odkaz „Potvrdiť prijatie", jeden klik bez prihlásenia. Pozri posledné dva riadky odspodu: U Jeleňa nepotvrdila objednávku do hodiny, o 13:01 im odišla urgencia SMS-kou a o osem minút potvrdili.</p>
   </div>
 
   <div class="note">
@@ -1397,7 +1399,7 @@
       style:"upper", count:3, compose:"komplet",
       cancelWhen:0, cancelTime:"07:30", late:true, names:true,
       emails:"kuchyna@ujelena.sk, fakturacia@ujelena.sk", sendOffset:0, sendEmpty:true,
-      phone:"+421 903 118 240", smsWeekly:false, smsDaily:true, smsFail:true, confirmWithin:60,
+      phone:"+421 903 118 240", smsWeekly:false, smsDaily:true, smsFail:true, smsUnconf:true, confirmWithin:60,
       prices:[6.20, 6.20, 5.80, 6.40, 5.90, 6.10, 6.30, 5.70, 6.00, 6.50],
       menu:[
         ["Držková polievka, vyprážaný syr, hranolky, tatárska","Slepačí vývar, kuracie prsia na masle, ryža","Šošovicová polievka, pirohy s bryndzou"],
@@ -1412,7 +1414,7 @@
       style:"arabic", count:4, compose:"casti",
       cancelWhen:1, cancelTime:"14:00", late:false, names:false,
       emails:"objednavky@jedalen-sever.sk", sendOffset:30, sendEmpty:false,
-      phone:"+421 911 604 375", smsWeekly:false, smsDaily:false, smsFail:true, confirmWithin:30,
+      phone:"+421 911 604 375", smsWeekly:false, smsDaily:false, smsFail:true, smsUnconf:true, confirmWithin:30,
       prices:[5.40, 5.40, 5.90, 5.20, 5.60, 5.60, 5.80, 5.30, 5.50, 5.70],
       menu:[[ "","","","" ],[ "","","","" ],[ "","","","" ],[ "","","","" ],[ "","","","" ]]
     }
@@ -1991,6 +1993,7 @@
     document.getElementById("a-confirm").value = String(A.confirmWithin);
     document.getElementById("a-sms").value = A.phone;
     document.getElementById("a-sms-f").checked = A.smsFail;
+    document.getElementById("a-sms-u").checked = A.smsUnconf;
     document.getElementById("a-sms-d").checked = A.smsDaily;
     document.getElementById("a-sms-w").checked = A.smsWeekly;
     renderSendTimes();
@@ -2029,7 +2032,7 @@
   }));
 
   ["a-cancel","a-cancel-t","a-late","a-names","a-mail","a-offset","a-empty","a-confirm",
-   "a-sms","a-sms-f","a-sms-d","a-sms-w"].forEach(id => {
+   "a-sms","a-sms-f","a-sms-u","a-sms-d","a-sms-w"].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener("change", function(){
@@ -2044,6 +2047,7 @@
       if (id === "a-confirm")  A.confirmWithin = +el.value;
       if (id === "a-sms")      A.phone = el.value;
       if (id === "a-sms-f")    A.smsFail = el.checked;
+      if (id === "a-sms-u")    A.smsUnconf = el.checked;
       if (id === "a-sms-d")    A.smsDaily = el.checked;
       if (id === "a-sms-w")    A.smsWeekly = el.checked;
       renderSendTimes();
