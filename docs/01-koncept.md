@@ -647,9 +647,38 @@ Záťaž je triviálna: ~100 používateľov, špička pár desiatok súčasne v
 | 3 | **PaaS** (Railway / Render / Fly.io, alebo Vercel + Neon) | 0–20 € | najrýchlejší štart, žiadna správa servera | treba strážiť EÚ región kvôli GDPR, pri raste ceny rastú, čiastočný lock-in |
 | 4 | **Azure / AWS** | 20–60 € | dáva zmysel, ak firma už beží na Microsoft 365 → App Service + Entra ID SSO „zadarmo" | pre 100 ľudí prestrelené a zložité |
 
-**Odporúčanie: možnosť 1.** Jeden VPS v EÚ, všetko v Dockeri, denné zálohy databázy mimo servera + týždenný test obnovy. Ak firma neskôr povie „chceme to u nás", ten istý `docker compose up` beží na ich VM. Celkové náklady vrátane domény pod **150 €/rok**.
+**Rozhodnuté: možnosť 1 u Webglobe** (podrobnosti v 9.1). Jeden VPS v EÚ, všetko v Dockeri, denné zálohy databázy mimo servera + týždenný test obnovy. Ak firma neskôr povie „chceme to u nás", ten istý `docker compose up` beží na ich VM. Celkové náklady vrátane domény pod **150 €/rok**.
 
-### 9.1 Technológie (návrh, ladíme pred kódom)
+### 9.1 Rozhodnuté: Webglobe (server aj e-mail)
+Slovenský poskytovateľ, dáta v EÚ — z hľadiska GDPR aj dostupnosti dobrá voľba. Pár vecí ale treba pri objednávaní ustrážiť.
+
+#### Musí to byť VPS, nie webhosting
+Toto je jediná naozaj zásadná vec. Zdieľaný webhosting je PHP + MySQL bez root prístupu a **appka podľa tohto konceptu na ňom nepobeží**: nemá Docker, nedá sa na ňom držať bežiaci Node proces ani vlastný plánovač úloh, a hlavne tam nie je LibreOffice, ktorým prevádzame Word menu na PDF (3.3.1). Webglobe VPS s root prístupom a voľbou distribúcie tieto problémy nemá.
+
+Ak by bola cena webhostingu rozhodujúca, existuje legitímna alternatíva: **prepísať appku do PHP (Laravel) + MySQL**. Vtedy by bežala aj na zdieľanom hostingu za pár eur, ale stratíme prevod Word → PDF a časť prenositeľnosti. Rozhodnutie treba spraviť **pred kódovaním**, nie po ňom.
+
+**Ak sa nikomu vo firme nechce aktualizovať Linux**, Webglobe ponúka aj *Managed VPS*, kde údržbu operačného systému robia oni. Za pár eur navyše to je rozumný kompromis.
+
+#### E-mail — v poriadku, a náš návrh riziko sám znižuje
+- **SPF a DKIM** Webglobe podporuje, **DMARC** je obyčajný TXT záznam, ktorý si pridáme sami (7.2.2). ✔
+- Odosielací server `mail.webglobe.sk`, porty 465 alebo 587 s autentifikáciou. ✔
+- Limit **100 správ za minútu** — my pošleme rádovo desať za deň, takže nepodstatné. ✔
+- **Chýbajú webhooky o odrazoch.** Odrazy sa vracajú ako e-mail, takže by sme museli čítať schránku cez IMAP a parsovať ich. **Nemusíme** — práve preto, že sme sa rozhodli pre *aktívne potvrdenie* namiesto detekcie doručenia (7.2.1). Toto je konkrétny prípad, keď sa to rozhodnutie vypláca.
+- Odosielať treba zo **skutočnej schránky na tej istej doméne** (napr. `obedy@firma.sk`), nie z vymyslenej adresy — inak sa SPF a DKIM rozídu a správy pôjdu do spamu.
+
+#### Zálohy — jediná vec, ktorú takto nechať nemožno
+Ak sú appka, databáza aj zálohy na tom istom účte u toho istého poskytovateľa, jeden problém s účtom alebo poskytovateľom zmaže všetko naraz. **Nočná šifrovaná záloha musí odchádzať aj mimo Webglobe** — na úložisko iného poskytovateľa alebo sťahovaná na firemný NAS. Stojí to jednotky eur mesačne a je to rozdiel medzi nepríjemnosťou a katastrofou.
+
+#### Čo ešte vybaviť pri objednávke
+- [ ] **Zmluva o spracúvaní osobných údajov** (GDPR čl. 28) — Webglobe by mal mať štandardnú.
+- [ ] Písomné potvrdenie, **kde presne dátové centrum stojí**.
+- [ ] **SLA a okná plánovanej údržby** — bolestivé okno je piatok 11:00–12:00 a pracovné dni pred 07:30. Ak by údržba padla práve tam, treba to vedieť dopredu.
+- [ ] **Externý monitoring dostupnosti**, nie u Webglobe — inak sa o výpadku dozvieme od ich systému, ktorý je tiež mimo.
+- [ ] Certifikát: na VPS ho rieši Caddy cez Let's Encrypt automaticky, nič dokupovať netreba.
+
+Ak by server bol nedostupný tesne pred uzávierkou, admin má možnosť **uzávierku pre daný týždeň jednorazovo posunúť** (4.1) — výpadok teda neznamená, že ľudia ostanú bez obeda.
+
+### 9.2 Technológie (návrh, ladíme pred kódom)
 - **Frontend + backend v jednom:** Next.js (React) + TypeScript, inštalovateľná **PWA** (ikona na ploche, offline zobrazenie „čo mám objednané").
 - **Databáza:** PostgreSQL.
 - **Auth:** vlastné session cookies, hash PIN/hesiel cez argon2id, rate limiting. Pripravené na neskoršie SSO.
