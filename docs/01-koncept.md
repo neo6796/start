@@ -497,13 +497,31 @@ Nastavuje **admin, samostatne pre každého poskytovateľa**:
 
 **V tele e-mailu sú počty aj ako čistý text**, nielen v prílohe — kuchyňa ho číta na telefóne a otvárať PDF je zbytočná prekážka. PDF a XLSX sú priložené pre archív a účtovníctvo.
 
-#### Čo sa stane, keď odoslanie zlyhá
-Bez tohto je celá automatizácia krehká: dodávateľ uvarí zlý počet a nikto sa to nedozvie do obeda.
+#### Čo o doručení e-mailu naozaj vieme
+Toto treba povedať na rovinu, lebo na tom stojí celá poistka: **že si e-mail niekto prečítal, sa spoľahlivo zistiť nedá.**
 
-- appka **zaznamená každé odoslanie** so stavom (odoslané / doručené / zlyhalo) a admin ho vidí v prehľade,
+| Čo | Vieme? | Poznámka |
+|---|---|---|
+| Odoslanie zlyhalo (spojenie, odmietnutie) | **áno, isto** | server dodávateľa správu neprijal — okamžite a jednoznačne |
+| Odraz *(bounce)* — plná schránka, neexistujúca adresa | **áno** | vráti sa notifikácia; treba sledovanú návratovú adresu alebo odosielaciu službu s webhookmi |
+| Poštový server dodávateľa správu prijal | **áno** | ale to je maximum — hovorí o serveri, nie o človeku |
+| Správa skončila v spame | **nie** | nezistiteľné |
+| Človek ju otvoril | **prakticky nie** | otváracie pixely blokuje väčšina klientov a sú aj neslušné; žiadosť o potvrdenie prečítania takmer nikto nepotvrdí |
+
+Preto je v prehľade **stav odoslania a potvrdenie dodávateľa oddelene** — sú to dve rôzne veci a zlievať ich do jedného „doručené" by bolo klamlivé.
+
+#### Riešenie: aktívne potvrdenie namiesto detekcie
+- V objednávke je odkaz **„Potvrdiť prijatie"** — jeden klik, bez prihlásenia, jednorazový token.
+- Admin nastaví **per poskytovateľ, do kedy potvrdenie čakať** (nevyžadovať / 30 min / hodina / dve).
+- Ak potvrdenie nepríde včas, appka **eskaluje**: SMS dodávateľovi a upozornenie adminovi „Sever nepotvrdil objednávku, zavolajte im".
+- Neisté *„asi to dorazilo"* sa tým mení na jednoznačné *„potvrdili o 12:07"* — a to je zároveň **dôkaz pri spore o počty**.
+
+#### Ostatné poistky
+- appka **zaznamená každé odoslanie** so stavom a admin ho vidí v prehľade,
 - pri zlyhaní **3 pokusy** s odstupom,
 - ak zlyhajú všetky, **admin dostane okamžite upozornenie s priloženým PDF**, aby objednávku poslal ručne alebo nadiktoval telefonicky,
-- admin môže ktorúkoľvek objednávku **poslať znova** (dodávateľ tvrdí, že ju nedostal) — kópia je označená ako kópia, aby sa počty nezdvojili.
+- admin môže ktorúkoľvek objednávku **poslať znova** — kópia je označená ako kópia, aby sa počty nezdvojili,
+- **SPF, DKIM a DMARC** na odosielacej doméne sú povinné, inak časť správ skončí v spame ešte skôr, než sa vôbec dostaneme k potvrdzovaniu. Odosielanie cez službu s webhookmi (Postmark, Resend, SES) dá navyše spoľahlivé hlásenia o odrazoch — vlastné SMTP ich vie tiež, ale treba naň nastaviť sledovanú návratovú adresu.
 
 #### Doplnkové SMS dodávateľom
 SMS je **doplnok, nie náhrada** — neunesie prílohu a do jednej správy sa zmestí len krátky súhrn. Nastavuje sa per poskytovateľ (telefón + ktoré udalosti):
