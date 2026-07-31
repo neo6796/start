@@ -790,7 +790,7 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 4. **Čísla od mzdára** — checklist v kapitole 6.2.
 5. **Mzdový softvér** — ktorý, aby export sedel formátom.
 6. **Zoznam zamestnancov** — je odkiaľ ho preberať (dochádzka, personalistika), alebo sa 100 ľudí zadá ručne? Ručne je to jednorazovo pár hodín, čo je pri tejto veľkosti prijateľné.
-7. **Doména a e-mailová schránka** — pod akou adresou to má bežať (napr. `obedy.firma.sk`), kto spravuje DNS a z akej schránky bude appka odosielať (kvôli obnove hesiel a objednávkam dodávateľom).
+7. ~~**Doména a e-mailová schránka**~~ — **vyriešené:** podadresa `obedy.firma.sk` na firemnej doméne, pripraví firemný IT technik. Zadanie preňho je v `docs/02-zadanie-pre-it.md`.
 8. **Hostia a návštevy** — treba objednávať obed pre návštevu? (Malé rozšírenie: objednávka bez väzby na osobu, účtovaná stredisku.)
 9. **Prevzatie obeda** — treba evidovať, kto si obed reálne vyzdvihol? Rieši spory typu „zaplatil som a nedostal".
 
