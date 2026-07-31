@@ -237,7 +237,7 @@ Ako to funguje v praxi:
 | | Bez názvov | S názvami |
 |---|---|---|
 | Zadanie menu adminom | nastaví sa raz, ďalej sa nerobí nič | ~5 min týždenne |
-| Na nástenke | **papierové menu od dodávateľa** | tlač z appky (5.4) |
+| Na nástenke | **papierové menu od dodávateľa** | tlač z appky (5.5) |
 | Objednávka v appke | tlačidlá `A` `B` `C` | `B — Vyprážaný syr, hranolky` |
 | Zberný hárok | funguje rovnako | funguje rovnako |
 | Podklad dodávateľovi | funguje rovnako | funguje rovnako |
@@ -374,7 +374,7 @@ Na zbernom hárku platí to isté pravidlo: prázdne políčko znamená „nevyj
 
 ## 5. Obrazovky
 
-Poradie dôležitosti je dané tým, kto appku reálne otvorí: **matica predáka (5.2) je najdôležitejšia obrazovka celého systému**, hneď za ňou admin (5.3) a papierové výstupy (5.4). Obrazovka stravníka (5.1) je jednoduchá a lacná, robíme ju pre tú menšinu, ktorá ju používať bude — a tá časom porastie.
+Poradie dôležitosti je dané tým, kto appku reálne otvorí: **matica predáka (5.2) je najdôležitejšia obrazovka celého systému**, hneď za ňou admin (5.3) papierové výstupy (5.5) a tabuľa v jedálni (5.4). Obrazovka stravníka (5.1) je jednoduchá a lacná, robíme ju pre tú menšinu, ktorá ju používať bude — a tá časom porastie.
 
 ### 5.1 Stravník (mobile-first)
 1. **Budúci týždeň** — hlavná obrazovka. 5 kariet Po–Pia, každá ukazuje voľbu alebo „neobjednané". Hore odpočet do uzávierky. Ťuk na deň → zoznam jedál môjho poskytovateľa → ťuk na jedlo → uložené (bez tlačidla „Potvrdiť", ukladá sa priebežne, s undo).
@@ -396,7 +396,7 @@ Matica **ľudia × dni** (riadky = podriadení, stĺpce Po–Pia). V bunke sú *
 - pri ponuke nad šesť jedál sa možnosti v bunke zalomia do dvoch riadkov, tabuľka sa nerozbije
 - na tablete to isté prstom: dosť veľké dotykové plochy priamo v riadku
 - hromadné akcie: kopírovať minulý týždeň celému tímu, nastaviť celý riadok na jedno jedlo, hromadné odhlásenie na rozsah dní (dovolenka/PN)
-- tlač: zberný hárok, zoznam chýbajúcich, potvrdenie tímu (5.4)
+- tlač: zberný hárok, zoznam chýbajúcich, potvrdenie tímu (5.5)
 - **zastupované tímy** ako samostatné bloky pod vlastným tímom, zreteľne odlíšené (1.3)
 - v deň obeda sa v riadku dnešného dňa objaví možnosť **doobjednať** (ak to poskytovateľ dovoľuje, 4.3)
 
@@ -405,7 +405,16 @@ Poskytovatelia · Cenník a príspevky · Menu (týždenný editor, kopírovanie
 
 Navyše **prehľad stavu pred uzávierkou**: ktoré tímy majú koľko chýbajúcich objednávok, zoradené od najhoršieho. Admin tak vidí, kde treba zavolať predákovi — alebo že predák je preč a treba delegovať.
 
-### 5.4 Papierové výstupy — plnohodnotná súčasť, nie doplnok
+### 5.4 Tabuľa v jedálni
+Tablet alebo televízor pri výdaji, ktorý ukazuje **dnešné menu, počty porcií a odpočet do uzávierky**. Len na čítanie, bez ovládania.
+
+- **Žiadne mená.** Je to verejná stena, na ktorú vidí každý vrátane návštev, a čo kto je, sú osobné údaje. Na tabuli sú len jedlá a počty.
+- **Odpočet do uzávierky je hlavný dôvod, prečo tabuľu robiť.** Visí na mieste, kde každý deň stojí celý závod, a pripomína práve to, na čo sa najčastejšie zabúda. Pri stovke ľudí bez firemných mailov je to účinnejšia pripomienka než notifikácia v aplikácii, ktorú väčšina z nich nemá.
+- Zobrazuje sa aj **zajtrajšie menu** — ľudia sa vedia zariadiť.
+- Technicky je to **obyčajná adresa otvorená v prehliadači na celú obrazovku**, ktorá sa sama obnovuje. Bez prihlásenia — práve preto na nej nesmú byť osobné údaje — chránená nezverejnenou adresou.
+- **Home Assistant nie je potrebný.** Ak ho firma používa, tú istú stránku vie vložiť do svojho panelu ako okno, prípadne si vyžiadať počty a zobraziť ich po svojom. Je to voliteľná nadstavba, nie závislosť.
+
+### 5.5 Papierové výstupy — plnohodnotná súčasť, nie doplnok
 Ak väčšina ľudí appku neotvorí, papier nie je ústupok — je to **hlavný kanál k stravníkovi**. Všetko na jedno kliknutie, A4/A3, veľké písmo, čitateľné z dvoch metrov:
 
 1. **Menu na nástenku** — budúci týždeň, per poskytovateľ, s označením jedál (A/B/C) a cenou. Generuje sa hneď po zadaní menu. *(Má zmysel len ak sú vyplnené názvy — bez nich ide na nástenku papierové menu od dodávateľa, viď 3.3.)*
@@ -482,7 +491,7 @@ To isté pravidlo sa použije pri odhlásení po termíne cez admina (4.5) aj pr
 | Objednávka — počty na jedlo (`A: 12, B: 7, C: 3`) | dodávateľovi | automaticky pri týždennej uzávierke | PDF + XLSX, e-mailom |
 | Korekčný súhrn (storná a doobjednávky, 4.3) | dodávateľovi | pri dennom deadline | PDF, e-mailom |
 | Denný zoznam pre výdaj | jedálni | ráno | PDF |
-| Zberný hárok, potvrdenie tímu, zoznam chýbajúcich (5.4) | predákovi | na požiadanie | PDF |
+| Zberný hárok, potvrdenie tímu, zoznam chýbajúcich (5.5) | predákovi | na požiadanie | PDF |
 
 ### 7.2.1 Automatické odosielanie dodávateľom
 Nastavuje **admin, samostatne pre každého poskytovateľa**:
@@ -802,7 +811,7 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 |---|---|
 | **0 — Koncept** | tento dokument, odsúhlasenie |
 | **1 — Preview** | klikací prototyp bez databázy: login, **matica predáka**, týždeň stravníka, admin nastavenia, ručný editor menu, cenník s oboma modelmi príspevku, ukážky tlačových zostáv, 3 varianty loga |
-| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov, ručný editor menu + kopírovanie týždňa, **matica predáka**, delegácia a eskalácia, ceny a mesačný export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.4)**, **push notifikácie pre predákov a admina** + sprievodca inštaláciou na plochu, **príloha menu (fotka/PDF/Word)**, **exporty, história a zálohy (kapitola 7)**, audit, nasadenie |
+| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov, ručný editor menu + kopírovanie týždňa, **matica predáka**, delegácia a eskalácia, ceny a mesačný export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.5)**, **tabuľa v jedálni**, **push notifikácie pre predákov a admina** + sprievodca inštaláciou na plochu, **príloha menu (fotka/PDF/Word)**, **exporty, história a zálohy (kapitola 7)**, audit, nasadenie |
 | **3 — Rozšírenia** | grafy a dashboard, push pre stravníkov, SMS pre predákov ak treba, import menu (XLSX/CSV, prilepenie textu) podľa reálnych vzoriek, evidencia prevzatia, hostia, SSO, kiosk, rola dodávateľa, prípadná ukrajinčina |
 
 Push je v MVP **len pre predákov a admina** (zopár ľudí, s každým sa dá inštalácia prejsť osobne), pre stravníkov ostáva vo fáze 3. Tlačové zostavy sú naopak plnohodnotnou súčasťou MVP — appku bude držať predák s papierom, nie stravník s telefónom.

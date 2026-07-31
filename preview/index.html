@@ -648,6 +648,85 @@
   footer .wrap{display:flex;gap:14px;flex-wrap:wrap;justify-content:space-between}
   footer code{font-family:var(--mono);font-size:12px}
 
+  /* ---------- tabuľa v jedálni ---------- */
+
+  .board{
+    background:#0E2B2A;
+    color:#F2F5F4;
+    border:1px solid var(--line);
+    border-radius:var(--r);
+    padding:clamp(16px,2.2vw,30px);
+    font-size:clamp(13px,1.15vw,17px);
+    container-type:inline-size;
+  }
+  .board-top{
+    display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;
+    padding-bottom:.9em;
+    border-bottom:2px solid #235350;
+  }
+  .board-name{
+    font-family:var(--mono);font-weight:700;
+    font-size:1.7em;letter-spacing:.06em;
+  }
+  .board-date{font-size:1.15em;color:#9FC4C0}
+  .board-clock{
+    margin-left:auto;
+    font-family:var(--mono);font-weight:700;
+    font-size:1.9em;font-variant-numeric:tabular-nums;
+    color:#E0A233;
+  }
+
+  .board-cols{display:grid;grid-template-columns:1fr;gap:1.6em;padding:1.2em 0}
+  @container (min-width:640px){ .board-cols{grid-template-columns:2fr 1fr} }
+
+  .board-h{
+    font-family:var(--mono);font-size:.85em;letter-spacing:.2em;
+    text-transform:uppercase;color:#7FA9A5;margin:0 0 .7em;
+  }
+  .board-cat{
+    font-family:var(--mono);font-size:.95em;letter-spacing:.08em;
+    color:#9FC4C0;margin:1.1em 0 .5em;
+  }
+  .board-cat:first-of-type{margin-top:0}
+
+  .board-item{
+    display:flex;align-items:center;gap:.7em;
+    padding:.42em 0;
+    border-bottom:1px solid #1C4442;
+  }
+  .board-let{
+    flex:0 0 auto;
+    min-width:1.9em;height:1.9em;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-weight:700;font-size:1.5em;
+    color:#0E2B2A;background:#E0A233;border-radius:3px;
+  }
+  .board-meal{flex:1;min-width:0;font-size:1.25em;line-height:1.25}
+  .board-meal .noname{color:#7FA9A5}
+  .board-cnt{
+    font-family:var(--mono);font-weight:700;font-size:1.5em;
+    font-variant-numeric:tabular-nums;color:#F2F5F4;
+  }
+  .board-cnt span{font-size:.55em;color:#7FA9A5;font-weight:400;margin-left:.3em}
+
+  .board-next .board-item{padding:.3em 0}
+  .board-next .board-let{font-size:1.15em;min-width:1.7em;height:1.7em}
+  .board-next .board-meal{font-size:1em}
+
+  .board-foot{
+    display:flex;align-items:center;gap:1em;flex-wrap:wrap;
+    border-top:2px solid #235350;
+    padding-top:.9em;
+    font-size:1.15em;
+  }
+  .board-foot strong{color:#E0A233;font-family:var(--mono)}
+  .board-warn{
+    margin-left:auto;
+    font-family:var(--mono);font-weight:700;
+    background:#E0A233;color:#231705;
+    padding:.25em .7em;border-radius:3px;
+  }
+
   @media (prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important}
   }
@@ -675,6 +754,7 @@
       <button class="tab" role="tab" aria-selected="false" data-screen="stravnik">Stravník</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="admin">Admin</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="zostavy">Zostavy</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="tabula">Tabuľa</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="historia">História</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="login">Prihlásenie</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="logo">Logo</button>
@@ -1186,6 +1266,45 @@
   </div>
 </section>
 
+<!-- ============ TABUĽA ============ -->
+<section class="screen wrap" id="s-tabula" hidden>
+  <div class="screen-head">
+    <h2>Tabuľa v jedálni</h2>
+    <span class="who">tablet alebo televízor pri výdaji · len na čítanie</span>
+  </div>
+
+  <div class="board">
+    <div class="board-top">
+      <span class="board-name">JEDÁLEŇ</span>
+      <span class="board-date" id="b-date">—</span>
+      <span class="board-clock" id="b-clock">—</span>
+    </div>
+
+    <div class="board-cols">
+      <div>
+        <p class="board-h">Dnes na obed</p>
+        <div id="b-today"></div>
+      </div>
+      <div class="board-next">
+        <p class="board-h">Zajtra</p>
+        <div id="b-tomorrow"></div>
+      </div>
+    </div>
+
+    <div class="board-foot">
+      <span>Objednávky na budúci týždeň — uzávierka <strong id="b-deadline">—</strong></span>
+      <span class="board-warn" id="b-left">—</span>
+    </div>
+  </div>
+
+  <div class="note">
+    <p class="eyebrow">Prečo takto</p>
+    <p><strong>Žiadne mená.</strong> Je to verejná stena, na ktorú vidí každý vrátane návštev — a čo kto je, sú osobné údaje. Preto sú na tabuli len jedlá a počty porcií. Kto chce vedieť svoju objednávku, má ju v aplikácii alebo na potvrdení vyvesenom u predáka.</p>
+    <p><strong>Odpočet do uzávierky dole je hlavný dôvod, prečo tabuľu robiť.</strong> Visí na mieste, kde každý deň stojí celý závod, a pripomína práve tú vec, na ktorú sa najčastejšie zabúda. Pri stovke ľudí bez firemných mailov je to najúčinnejšia pripomienka, akú vieme dať — účinnejšia než notifikácia v aplikácii, ktorú väčšina ľudí nemá.</p>
+    <p><strong>Technicky netreba nič zvláštne:</strong> je to obyčajná adresa, ktorú tablet alebo televízor otvorí v prehliadači na celú obrazovku a sama sa obnovuje. Stránka je bez prihlásenia — práve preto na nej nie sú osobné údaje — a chránená nezverejnenou adresou. <strong>Home Assistant na to netreba;</strong> ak ho ale používaš, vieš tú istú stránku vložiť do panelu ako okno, alebo si nechať posielať počty a zobraziť ich po svojom.</p>
+  </div>
+</section>
+
 <!-- ============ HISTÓRIA ============ -->
 <section class="screen wrap" id="s-historia" hidden>
   <div class="screen-head">
@@ -1598,6 +1717,23 @@
     }
     setText("pd-countdown", "ostáva " + txt);
     setText("sv-cd", "ostáva " + txt);
+
+    const bl = document.getElementById("b-left");
+    if (bl){
+      if (ms <= 0) bl.textContent = "UZAVRETÉ";
+      else {
+        const h = Math.floor(ms/3600000), d = Math.floor(h/24);
+        bl.textContent = d >= 1
+          ? "ostáva " + d + (d === 1 ? " deň " : " dni ") + (h % 24) + " h"
+          : "ostáva " + h + " h " + (Math.floor(ms/60000) % 60) + " min";
+      }
+    }
+    const bc = document.getElementById("b-clock");
+    if (bc){
+      const n = new Date();
+      bc.textContent = (n.getHours() < 10 ? "0" : "") + n.getHours() + ":" +
+                       (n.getMinutes() < 10 ? "0" : "") + n.getMinutes();
+    }
   }
   function setText(id, v){ const el = document.getElementById(id); if (el) el.textContent = v; }
 
@@ -2321,6 +2457,46 @@
   }
 
   /* ---------- render ---------- */
+  /* ---------- tabuľa v jedálni ---------- */
+  function countsFor(dayIdx, c){
+    const out = [];
+    for (let j = 0; j < CATERERS[c].count; j++) out.push(0);
+    own.concat(deleg).forEach(p => {
+      if (p.oc[dayIdx] !== c) return;
+      const v = p.o[dayIdx];
+      if (v !== null && v !== NONE && v < out.length) out[v]++;
+    });
+    return out;
+  }
+
+  function boardBlock(dayIdx, withCounts){
+    let h = "";
+    CATERERS.forEach((A, c) => {
+      const counts = withCounts ? countsFor(dayIdx, c) : null;
+      if (withCounts && counts.reduce((a,b) => a+b, 0) === 0) return;
+      if (CATERERS.length > 1) h += '<p class="board-cat">' + A.name + "</p>";
+      for (let j = 0; j < A.count; j++){
+        const nm = (A.menu[dayIdx] && A.menu[dayIdx][j]) || "";
+        h += '<div class="board-item">' +
+             '<span class="board-let">' + label(j, c) + "</span>" +
+             '<span class="board-meal">' + (nm || '<span class="noname">jedlo ' + label(j, c) + "</span>") + "</span>" +
+             (withCounts ? '<span class="board-cnt">' + counts[j] + "<span>porcií</span></span>" : "") +
+             "</div>";
+      }
+    });
+    return h || '<p class="board-cat">Dnes sa nevarí</p>';
+  }
+
+  function renderBoard(){
+    const t = document.getElementById("b-today");
+    if (!t) return;
+    /* v ukážke berieme stredu budúceho týždňa ako „dnes" */
+    t.innerHTML = boardBlock(2, true);
+    document.getElementById("b-tomorrow").innerHTML = boardBlock(3, false);
+    document.getElementById("b-date").textContent = DAYS[2] + " " + dm(nextDays[2]);
+    document.getElementById("b-deadline").textContent = "piatok " + dm(addDays(thisMon,4)) + " o 12:00";
+  }
+
   function renderProviderPill(){
     const el = document.getElementById("pd-provider");
     if (!el) return;
@@ -2346,6 +2522,7 @@
     renderAdminMenu();
     renderPrices();
     renderSheet();
+    renderBoard();
   }
 
   setText("pd-week", weekLabel);
