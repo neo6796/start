@@ -708,6 +708,8 @@ Poznámka k tomu, prečo appka nebeží rovno na firemnom serveri: ľudia budú 
 Ak by server bol nedostupný tesne pred uzávierkou, admin má možnosť **uzávierku pre daný týždeň jednorazovo posunúť** (4.1) — výpadok teda neznamená, že ľudia ostanú bez obeda.
 
 ### 9.2 Technológie (návrh, ladíme pred kódom)
+**Rozhodnuté:** Next.js + PostgreSQL na VPS u Webglobe (viď 9.1).
+
 - **Frontend + backend v jednom:** Next.js (React) + TypeScript, inštalovateľná **PWA** (ikona na ploche, offline zobrazenie „čo mám objednané").
 - **Databáza:** PostgreSQL.
 - **Auth:** vlastné session cookies, hash PIN/hesiel cez argon2id, rate limiting. Pripravené na neskoršie SSO.
@@ -715,7 +717,7 @@ Ak by server bol nedostupný tesne pred uzávierkou, admin má možnosť **uzáv
 - **Push:** Web Push (VAPID) priamo, bez externej služby.
 - **E-mail:** firemné SMTP alebo Resend/Postmark — hlavne pre dodávateľov.
 - **Jazyk:** len slovenčina, žiadny prekladový framework. Texty ale držím **na jednom mieste** (jeden modul), nie rozsypané po komponentoch — pridanie ukrajinčiny neskôr je potom deň práce namiesto týždňa. Stojí to teraz nula navyše.
-- **Alternatíva:** Django alebo Laravel — administrácia „zadarmo" z frameworku, čo pri množstve admin nastavení a exportov ušetrí čas. Rozhodneme pred kódovaním.
+- ~~Alternatíva Django/Laravel~~ — zvážená a zamietnutá: na zdieľanom hostingu by odpadol prevod Word menu na PDF a stratila by sa prenositeľnosť cez Docker.
 
 Aplikácia musí byť **mobile-first**: veľké dotykové plochy (rukavice), vysoký kontrast (denné svetlo v hale), čitateľné písmo, funguje na 4-ročnom Androide.
 
@@ -752,9 +754,9 @@ Objednávka sa **nikdy nemaže**, len mení stav — inak sa spory „ja som sa 
 
 ## 11. Logo a vizuál
 
-Tri smery, vo fáze preview ich nakreslím ako SVG:
+**Zvolené: Tanier-týždeň.** Jediný z trojice, ktorý ostane čitateľný aj ako 16 px ikona v záložke prehliadača — stačia mu dva tvary, kruh a výsek. Zvyšné dva sa v malom rozpadnú na šedú škvrnu. Všetky tri sú nakreslené v preview na svetlom aj tmavom podklade.
 
-1. **Tanier-týždeň** — kruh rozdelený na 5 výsekov (Po–Pia), jeden vyplnený akcentom. Zrozumiteľné aj ako 32 px favicon aj ako 512 px PWA ikona.
+1. **Tanier-týždeň** ✔ — kruh rozdelený na 5 výsekov (Po–Pia), jeden vyplnený akcentom. Zrozumiteľné aj ako 32 px favicon aj ako 512 px PWA ikona.
 2. **Obedár** — štylizovaný dvojposchodový obedár, držadlo tvorí fajku ✓.
 3. **Vidlička-kalendár** — hroty vidličky prechádzajú do stĺpcov kalendárnej mriežky.
 

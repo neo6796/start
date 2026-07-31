@@ -675,6 +675,7 @@
       <button class="tab" role="tab" aria-selected="false" data-screen="stravnik">Stravník</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="admin">Admin</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="zostavy">Zostavy</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="historia">História</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="login">Prihlásenie</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="logo">Logo</button>
     </div>
@@ -750,7 +751,27 @@
   <div class="btn-row" style="margin-top:16px">
     <button class="btn primary">Vytlačiť zberný hárok</button>
     <button class="btn">Vytlačiť zoznam chýbajúcich</button>
-    <button class="btn">Hromadné odhlásenie (dovolenka)</button>
+    <button class="btn" id="btn-vac" aria-expanded="false">Hromadné odhlásenie (dovolenka, PN)</button>
+  </div>
+
+  <div class="card" id="vac-panel" hidden style="margin-top:16px">
+    <div class="card-head"><h3>Hromadné odhlásenie</h3></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+      <div class="field" style="flex:2;min-width:190px;margin:0">
+        <label for="vac-who">Koho</label>
+        <select id="vac-who"></select>
+      </div>
+      <div class="field" style="flex:1;min-width:120px;margin:0">
+        <label for="vac-from">Od</label>
+        <select id="vac-from"></select>
+      </div>
+      <div class="field" style="flex:1;min-width:120px;margin:0">
+        <label for="vac-to">Do</label>
+        <select id="vac-to"></select>
+      </div>
+      <button class="btn primary" id="vac-go">Označiť „bez obeda"</button>
+    </div>
+    <p class="hint" style="margin-top:12px">Nastaví vybrané dni na <strong>bez obeda</strong>, nie na prázdne. Keby ostali prázdne, appka by človeka celý týždeň naháňala upomienkami, hoci je na dovolenke.</p>
   </div>
 
   <div class="note">
@@ -987,15 +1008,13 @@
     <div>
       <div class="card">
         <div class="card-head"><h3>Menu — budúci týždeň</h3><span class="pill ok" id="a-menu-state">zadané</span></div>
-        <table class="data">
-          <thead><tr><th>Deň</th><th>Jedlá</th></tr></thead>
-          <tbody id="a-menu"></tbody>
-        </table>
+        <div id="a-menu"></div>
         <div class="btn-row" style="margin-top:14px">
-          <button class="btn">Kopírovať minulý týždeň</button>
-          <button class="btn">Pripnúť fotku menu</button>
+          <button class="btn" id="a-menu-copy">Kopírovať minulý týždeň</button>
+          <button class="btn" id="a-menu-clear">Vymazať názvy</button>
+          <button class="btn" id="a-menu-file">Pripnúť fotku menu</button>
         </div>
-        <p class="hint" style="margin-top:10px">Názvy sú voliteľné. Bez nich appka pracuje len s označením a na nástenku ide papierové menu od dodávateľa.</p>
+        <p class="hint" style="margin-top:10px" id="a-menu-file-note">Príloha: <strong>menu-32-tyzden.jpg</strong>, nahral admin 27. 7. o 08:14. Názvy sú voliteľné — bez nich appka pracuje len s označením a na nástenku ide papierové menu od dodávateľa.</p>
       </div>
 
       <div class="card">
@@ -1137,9 +1156,96 @@
     <p class="hint" style="margin-top:12px">V XLSX sú dátumy dátumami a sumy číslami — export, v ktorom sa nedá počítať, je na nič. CSV v UTF-8 s BOM a bodkočiarkou, inak slovenský Excel rozsype diakritiku aj stĺpce.</p>
   </div>
 
+  <div class="card">
+    <div class="card-head">
+      <h3>Čo vidí dodávateľ po kliknutí na odkaz</h3>
+      <span class="pill neutral">bez prihlásenia, jednorazový odkaz</span>
+    </div>
+    <div class="sheet" style="max-width:520px">
+      <h4>Objednávka obedov — ZÁVOD SK</h4>
+      <p class="meta">3. – 7. 8. 2026 · Reštaurácia U Jeleňa · odoslané 31. 7. o 12:00</p>
+      <table style="margin-bottom:16px">
+        <thead><tr><th>Deň</th><th class="cnt">A</th><th class="cnt">B</th><th class="cnt">C</th><th class="cnt">Spolu</th></tr></thead>
+        <tbody>
+          <tr><td>Po 3. 8.</td><td class="cnt">21</td><td class="cnt">17</td><td class="cnt">9</td><td class="cnt">47</td></tr>
+          <tr><td>Ut 4. 8.</td><td class="cnt">18</td><td class="cnt">22</td><td class="cnt">8</td><td class="cnt">48</td></tr>
+          <tr><td>St 5. 8.</td><td class="cnt">24</td><td class="cnt">14</td><td class="cnt">7</td><td class="cnt">45</td></tr>
+          <tr><td>Št 6. 8.</td><td class="cnt">19</td><td class="cnt">19</td><td class="cnt">10</td><td class="cnt">48</td></tr>
+          <tr><td>Pi 7. 8.</td><td class="cnt">23</td><td class="cnt">16</td><td class="cnt">6</td><td class="cnt">45</td></tr>
+        </tbody>
+      </table>
+      <button class="btn primary wide" style="font-size:15px;padding:12px">Potvrdzujem prijatie objednávky</button>
+      <p style="margin:12px 0 0;font-size:11px;color:#6B7573;text-align:center">Ak niečo nesedí, volajte na 0903 118 240 (Nováková, správca stravovania).</p>
+    </div>
+    <p class="hint" style="margin-top:12px">Jedno tlačidlo, žiadne prihlasovanie, žiadny účet. Čím menej krokov, tým vyššia šanca, že kuchár naozaj klikne — a bez toho kliknutia nevieme, či objednávku niekto videl (7.2.1).</p>
+  </div>
+
   <div class="note">
     <p class="eyebrow">Čo z toho platí za appku</p>
     <p>Denná objednávka dodávateľovi a mesačný podklad pre mzdy sú dva výstupy, kvôli ktorým celý systém existuje. Kontrola faktúry navyše ukáže nielen rozdiel oproti fakturovanej sume, ale aj deň, v ktorom vzniká.</p>
+  </div>
+</section>
+
+<!-- ============ HISTÓRIA ============ -->
+<section class="screen wrap" id="s-historia" hidden>
+  <div class="screen-head">
+    <h2>História a audit</h2>
+    <span class="who">„kto mi to zmenil" na dva kliky</span>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Karta osoby — Horváth Peter</h3>
+      <span class="pill neutral">os. č. 4021 · Údržba · U Jeleňa</span>
+    </div>
+    <div class="scroll-x" style="border:0">
+      <table class="data" style="min-width:660px">
+        <thead><tr><th>Dátum</th><th>Jedlo</th><th>Stav</th><th>Zadal</th><th class="num">Cena</th><th class="num">Zrážka</th></tr></thead>
+        <tbody>
+          <tr><td>Št 30. 7.</td><td><span class="chip sm">B</span></td><td>objednané</td><td>sám v aplikácii</td><td class="num">6,20</td><td class="num">2,29</td></tr>
+          <tr><td>St 29. 7.</td><td><span class="chip sm none">×</span></td><td>bez obeda</td><td>sám v aplikácii</td><td class="num">—</td><td class="num">—</td></tr>
+          <tr><td>Ut 28. 7.</td><td><span class="chip sm">A</span></td><td><span class="pill miss">odhlásené po termíne</span></td><td>Nováková (admin)</td><td class="num">6,20</td><td class="num">6,20</td></tr>
+          <tr><td>Po 27. 7.</td><td><span class="chip sm">A</span></td><td>objednané</td><td>Kováč (predák)</td><td class="num">6,20</td><td class="num">2,29</td></tr>
+          <tr><td>Pi 24. 7.</td><td><span class="chip sm">C</span></td><td>odhlásené včas</td><td>sám v aplikácii</td><td class="num">—</td><td class="num">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint" style="margin-top:12px">Utorok 28. 7. je typický sporný prípad: človek sa odhlásil neskoro, obed už bol uvarený, tak sa účtuje v plnej cene bez príspevku zamestnávateľa (6.4). V riadku je vidieť aj to, že odhlásenie robil admin, nie on sám.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Audit log</h3>
+      <span class="pill neutral">vyhľadávanie podľa osoby, dátumu a typu úkonu</span>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <input type="text" placeholder="Meno alebo osobné číslo" style="flex:2;min-width:180px;padding:8px 11px;border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink);font-size:14px">
+      <select style="flex:1;min-width:150px;padding:8px 11px;border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink);font-size:14px">
+        <option>všetky úkony</option><option>zmena objednávky</option><option>odhlásenie</option>
+        <option>zmena cenníka</option><option>uzavretie mesiaca</option><option>prihlásenie</option>
+      </select>
+      <button class="btn">Hľadať</button>
+    </div>
+    <div class="scroll-x" style="border:0">
+      <table class="data" style="min-width:700px">
+        <thead><tr><th>Kedy</th><th>Kto</th><th>Čo</th><th>Zmena</th></tr></thead>
+        <tbody>
+          <tr><td>30. 7. 09:14</td><td>Kováč J. (predák)</td><td>Objednávka — Horváth P., streda 5. 8.</td><td><span class="chip sm ghost">·</span> → <span class="chip sm">B</span></td></tr>
+          <tr><td>30. 7. 09:14</td><td>Kováč J. (predák)</td><td>Objednávka — Tóth Ľ., streda 5. 8.</td><td><span class="chip sm ghost">·</span> → <span class="chip sm">A</span></td></tr>
+          <tr><td>30. 7. 08:02</td><td>Novák M. <em>(zastupuje Urbana)</em></td><td>Objednávka — Sedláková J., pondelok 3. 8.</td><td><span class="chip sm">2</span> → <span class="chip sm">1</span></td></tr>
+          <tr><td>29. 7. 16:40</td><td>Nováková A. (admin)</td><td>Cenník U Jeleňa — platnosť od 1. 9.</td><td>6,20 → 6,50 €</td></tr>
+          <tr><td>28. 7. 08:12</td><td>Nováková A. (admin)</td><td>Odhlásenie po termíne — Horváth P., 28. 7.</td><td>dôvod: PN · <strong>účtovať</strong></td></tr>
+          <tr><td>27. 7. 08:14</td><td>Nováková A. (admin)</td><td>Príloha menu — U Jeleňa, 32. týždeň</td><td>nahraná verzia 1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint" style="margin-top:12px">Zmena cenníka z 29. 7. platí <strong>až od 1. 9.</strong> a júlové ani augustové objednávky neprepíše — na každej je odfotená cena, ktorá platila v čase jej vzniku (6.1).</p>
+  </div>
+
+  <div class="note">
+    <p class="eyebrow">Prečo takto</p>
+    <p>Objednávka sa <strong>nikdy nemaže</strong>, len mení stav. Bez toho sa spor „ja som sa odhlásil" nedá rozhodnúť a mesačná uzávierka nemá čo auditovať.</p>
+    <p>Každý riadok hovorí <strong>kto konal</strong>, vrátane zastupovania („Novák zastupuje Urbana"). Práve to je prvá otázka pri reklamácii a v matici to vidno aj farbou bunky, bez otvárania tejto obrazovky.</p>
   </div>
 </section>
 
@@ -1248,8 +1354,8 @@
         <span class="lw">Obedár</span>
       </div>
       <div class="logo-meta">
-        <h4>Tanier-týždeň</h4>
-        <p>Tanier delený na päť dielov — päť pracovných dní, jeden objednaný. Najlepšie drží v malých veľkostiach.</p>
+        <h4>Tanier-týždeň <span class="pill ok" style="vertical-align:middle;margin-left:6px">zvolené</span></h4>
+        <p>Tanier delený na päť dielov — päť pracovných dní, jeden objednaný. Jediný z trojice, ktorý ostane čitateľný aj ako 16 px ikona v záložke: stačia mu dva tvary, kruh a výsek. Zvyšné dva sa v malom rozpadnú na šedú škvrnu.</p>
       </div>
       <div class="favi">
         <svg width="16" height="16" viewBox="0 0 64 64" aria-hidden="true">
@@ -1720,6 +1826,46 @@
     });
     renderAll();
   });
+  /* ---------- hromadné odhlásenie ---------- */
+  const bv = document.getElementById("btn-vac");
+  if (bv) bv.addEventListener("click", function(){
+    const p = document.getElementById("vac-panel");
+    const open = p.hidden;
+    p.hidden = !open;
+    bv.setAttribute("aria-expanded", String(open));
+    if (open) fillVac();
+  });
+
+  function fillVac(){
+    const who = document.getElementById("vac-who");
+    const from = document.getElementById("vac-from");
+    const to = document.getElementById("vac-to");
+    if (!who || who.options.length) return;
+    who.innerHTML = own.map((p,i) => '<option value="own:'+i+'">'+p.n+" — Údržba</option>").join("") +
+                    deleg.map((p,i) => '<option value="deleg:'+i+'">'+p.n+" — Lisovňa</option>").join("");
+    const opts = nextDays.map((d,i) => '<option value="'+i+'">'+DAYS[i]+" "+dm(d)+"</option>").join("");
+    from.innerHTML = opts; to.innerHTML = opts;
+    to.selectedIndex = 4;
+  }
+
+  const vg = document.getElementById("vac-go");
+  if (vg) vg.addEventListener("click", function(){
+    const val = document.getElementById("vac-who").value.split(":");
+    const rows = val[0] === "own" ? own : deleg;
+    const tbl = val[0] === "own" ? "m-own" : "m-deleg";
+    const p = rows[+val[1]];
+    let a = +document.getElementById("vac-from").value;
+    let b = +document.getElementById("vac-to").value;
+    if (a > b){ const t = a; a = b; b = t; }
+    for (let i = a; i <= b; i++){ p.o[i] = NONE; p.oc[i] = p.cs[0]; p.by[i] = "lead"; }
+    renderAll();
+    document.getElementById("vac-panel").hidden = true;
+    document.getElementById("btn-vac").setAttribute("aria-expanded", "false");
+    const r = rows.indexOf(p);
+    const el = document.querySelector('#'+tbl+' tbody tr:nth-child('+(r+1)+')');
+    if (el) el.scrollIntoView({block:"center", behavior:"smooth"});
+  });
+
   const bh = document.getElementById("btn-hl");
   if (bh) bh.addEventListener("click", function(){
     const on = bh.getAttribute("aria-pressed") !== "true";
@@ -1833,9 +1979,17 @@
   });
 
   /* ---------- admin ---------- */
+  const MENU_LAST = [
+    ["Slepačí vývar, sviečková na smotane, knedľa","Kapustnica, vyprážaný rezeň, zemiaky","Zeleninová polievka, pirohy"],
+    ["Gulášová polievka, pečené kura, ryža","Hrachová polievka, špagety carbonara","Paradajková polievka, plnená paprika"],
+    ["Držková polievka, bravčové stehno, knedľa","Fazuľová polievka, vyprážaný syr, hranolky","Cesnaková polievka, halušky"],
+    ["Slepačí vývar, morčacie prsia, dusená ryža","Šampiňónová polievka, guláš, knedľa","Brokolicová polievka, palacinky"],
+    ["Rybacia polievka, vyprážaná ryba, šalát","Zeleninový vývar, kuracie soté, ryža","Šošovicová polievka, buchty na pare"]
+  ];
+
   function renderAdminMenu(){
-    const tb = document.getElementById("a-menu");
-    if (!tb) return;
+    const box = document.getElementById("a-menu");
+    if (!box) return;
     const A = CATERERS[adminCat];
     const st = document.getElementById("a-menu-state");
     if (st){
@@ -1843,20 +1997,69 @@
       st.className = has ? "pill ok" : "pill neutral";
       st.textContent = has ? "zadané s názvami" : "len označenia";
     }
-    tb.innerHTML = "";
+    box.innerHTML = "";
     nextDays.forEach((d,i) => {
-      const tr = document.createElement("tr");
-      let chips = "";
+      const wrap = document.createElement("div");
+      wrap.style.cssText = "padding:10px 0;border-bottom:1px solid var(--line)";
+      let rows = '<p class="eyebrow" style="margin-bottom:7px">' + DAYS_S[i] + " " + dm(d) + "</p>";
       for (let j = 0; j < A.count; j++){
-        chips += '<div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:5px">' +
-                 '<span class="chip sm">'+label(j, adminCat)+"</span>" +
-                 '<span style="font-size:12.5px;color:var(--ink-2)">' +
-                 ((A.menu[i] && A.menu[i][j]) || '<em style="color:var(--ink-3)">bez názvu</em>') + "</span></div>";
+        rows += '<div style="display:flex;gap:8px;align-items:center;margin-bottom:5px">' +
+                '<span class="chip sm">' + label(j, adminCat) + "</span>" +
+                '<input type="text" data-menu="' + i + ":" + j + '" value="' +
+                  ((A.menu[i] && A.menu[i][j]) || "").replace(/"/g, "&quot;") +
+                '" placeholder="bez názvu — stačí označenie" ' +
+                'style="flex:1;min-width:0;font-size:13px;padding:5px 8px;border:1px solid var(--line-2);' +
+                'border-radius:3px;background:var(--surface);color:var(--ink)">' +
+                '<span class="pr" style="font-family:var(--mono);font-size:12px;color:var(--ink-3);white-space:nowrap">' +
+                A.prices[j].toFixed(2).replace(".", ",") + " €</span></div>";
       }
-      tr.innerHTML = '<td style="white-space:nowrap;vertical-align:top"><strong>'+DAYS_S[i]+"</strong> "+dm(d)+"</td><td>"+chips+"</td>";
-      tb.appendChild(tr);
+      wrap.innerHTML = rows;
+      box.appendChild(wrap);
     });
   }
+
+  document.addEventListener("input", function(e){
+    const inp = e.target.closest("[data-menu]");
+    if (!inp) return;
+    const parts = inp.dataset.menu.split(":");
+    const A = CATERERS[adminCat];
+    while (A.menu.length < 5) A.menu.push([]);
+    A.menu[+parts[0]][+parts[1]] = inp.value;
+    const st = document.getElementById("a-menu-state");
+    if (st){
+      const has = A.menu.some(day => day.some(x => x));
+      st.className = has ? "pill ok" : "pill neutral";
+      st.textContent = has ? "zadané s názvami" : "len označenia";
+    }
+    renderStravnik();
+  });
+
+  const mc = document.getElementById("a-menu-copy");
+  if (mc) mc.addEventListener("click", function(){
+    const A = CATERERS[adminCat];
+    A.menu = MENU_LAST.map(day => {
+      const row = [];
+      for (let j = 0; j < A.count; j++) row.push(day[j] || "");
+      return row;
+    });
+    renderAll();
+  });
+
+  const mx = document.getElementById("a-menu-clear");
+  if (mx) mx.addEventListener("click", function(){
+    const A = CATERERS[adminCat];
+    A.menu = [0,1,2,3,4].map(() => {
+      const row = [];
+      for (let j = 0; j < A.count; j++) row.push("");
+      return row;
+    });
+    renderAll();
+  });
+
+  const mf = document.getElementById("a-menu-file");
+  if (mf) mf.addEventListener("click", function(){
+    alert("Tu sa otvorí výber súboru: fotka z telefónu, PDF alebo Word.\n\nHEIC z iPhonu sa prevedie na JPEG, Word a Excel na PDF, aby sa dali otvoriť priamo v aplikácii. Stará verzia sa nemaže, len archivuje.");
+  });
 
   function renderPrices(){
     const tb = document.getElementById("a-price");
