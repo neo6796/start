@@ -139,11 +139,11 @@ Prihlás sa ako root a spusti postupne:
 apt update && apt upgrade -y
 
 # vlastný používateľ namiesto roota
-adduser obedar
-usermod -aG sudo obedar
+adduser aha
+usermod -aG sudo aha
 
 # prenos SSH kľúča na nového používateľa
-rsync --archive --chown=obedar:obedar ~/.ssh /home/obedar
+rsync --archive --chown=aha:aha ~/.ssh /home/aha
 
 # firewall — poradie je dôležité, SSH povoľ PRED zapnutím
 apt install ufw -y
@@ -159,7 +159,7 @@ dpkg-reconfigure --priority=low unattended-upgrades
 
 ### ⚠️ Teraz otvor **druhé okno terminálu** a vyskúšaj:
 ```
-ssh obedar@obedy.ahafarma.sk
+ssh aha@obedy.ahafarma.sk
 ```
 **Až keď to funguje**, zakáž v prvom okne prihlásenie rootom a heslom:
 
@@ -180,7 +180,7 @@ systemctl restart ssh
 
 ### ✅ Kontrola
 ```
-ssh obedar@obedy.ahafarma.sk   # funguje
+ssh aha@obedy.ahafarma.sk   # funguje
 ssh root@obedy.ahafarma.sk     # odmietnuté — presne tak to má byť
 sudo ufw status                # aktívne, otvorené 22, 80, 443
 ```
@@ -193,7 +193,7 @@ sudo ufw status                # aktívne, otvorené 22, 80, 443
 
 ```bash
 curl -fsSL https://get.docker.com | sh
-usermod -aG docker obedar
+usermod -aG docker aha
 ```
 Odhlás sa a prihlás znova, aby sa členstvo v skupine prejavilo.
 
@@ -208,7 +208,7 @@ Vypíše „Hello from Docker!".
 ## 7. Čo mi pošli
 
 - [ ] **IP adresa** VPS
-- [ ] **SSH prístup** pre používateľa `obedar` (alebo pridaj môj verejný kľúč)
+- [ ] **SSH prístup** pre používateľa `aha` (alebo pridaj môj verejný kľúč)
 - [ ] **SMTP údaje**: server `mail.webglobe.sk`, port 465 alebo 587, používateľ `noreply@obedy.ahafarma.sk`, heslo
 - [ ] potvrdenie, že **trojitý PASS z kroku 4 prešiel**
 
