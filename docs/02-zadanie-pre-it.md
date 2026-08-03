@@ -15,7 +15,7 @@ Odporúčané parametre pre ~100 používateľov:
 |---|---|
 | CPU / RAM | 2 vCPU, 4 GB |
 | Disk | 40–80 GB SSD |
-| Systém | Debian 12 alebo Ubuntu 24.04 LTS |
+| Systém | Debian 13 alebo Ubuntu 26.04 LTS |
 | Poznámka | ak nikto nechce robiť aktualizácie systému, zvážiť *Managed VPS* |
 
 ---

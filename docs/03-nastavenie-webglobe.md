@@ -1,4 +1,6 @@
-# Nastavenie Webglobe — krok za krokom
+# Nastavenie servera — krok za krokom
+
+> Postup platí pre Webglobe aj Hetzner. Kroky 1 a 5–6 sa robia na serveri, kroky 2–4 v paneli, kde je spravovaná doména `ahafarma.sk` a pošta.
 
 Doména: **`obedy.ahafarma.sk`** · pošta: **`noreply@obedy.ahafarma.sk`**
 
@@ -16,7 +18,7 @@ V ponuke hľadaj **VPS s root prístupom**, nie webhosting.
 |---|---|
 | CPU / RAM | 2 vCPU, 4 GB |
 | Disk | 40–80 GB SSD |
-| Systém | **Debian 12** (alebo Ubuntu 24.04 LTS) |
+| Systém | **Debian 13** (alebo Ubuntu 26.04 LTS) |
 
 Pri objednávke **nahraj svoj SSH kľúč**, ak to ponúka. Ak nie, príde ti root heslo mailom — to je v poriadku, kľúč nastavíme v kroku 5.
 
