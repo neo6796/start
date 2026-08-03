@@ -98,42 +98,58 @@ Musí vrátiť `46.225.236.143`. Ak ešte nie, počkaj pár minút.
 
 ---
 
-## 3. Poštová schránka
+## 3. Odosielanie pošty — Brevo
 
-**Zistené v DNS `ahafarma.sk`:** MX smeruje na `mail.ahafarma.sk` → `62.169.176.222`, teda firemná pošta beží u Webglobe. Existuje SPF `v=spf1 a mx a:mail.ahafarma.sk ip4:62.169.176.222 ~all`, DKIM (`default._domainkey`) aj DMARC (`p=none`).
+**Prečo nie u Webglobe ani na firemnom serveri:**
 
-**Dôsledok: podadresa pre poštu nie je potrebná a v DNS sa nemení nič.** Appka odosiela cez tie isté servery Webglobe, ktoré firemný SPF už povoľuje. Pôvodný plán s `noreply@obedy.ahafarma.sk` mal chrániť SPF hlavnej domény pred úpravou — keď ju netreba upravovať, stráca zmysel.
+| Cesta | Prečo nie |
+|---|---|
+| Webglobe | e-mailová služba je pre doménu **vypnutá** a formulár ponúka len `@ahafarma.sk`; zapnutie by z Webglobe spravilo obsluhu pošty hlavnej domény, hoci MX smeruje na firemný server |
+| Firemný server v technickej miestnosti | naviazalo by odosielanie objednávok na prúd a internet v závode; navyše treba otvárať odosielací port pre IP aplikačného servera |
 
-Založ schránku **`obedy@ahafarma.sk`**:
+**Zvolené: Brevo** — francúzska služba, dáta v EÚ, bezplatné pásmo 300 správ denne (my pošleme 10–20), hlási odrazy.
 
-- heslo dlhé a náhodné, **odlož ho** — bude ho potrebovať aplikácia,
-- `obedy@` namiesto `noreply@` zámerne: dodávateľ vidí zmysluplného odosielateľa a jeho odpoveď („nedostali sme", „14. nevaríme") dorazí niekam, kde ju človek prečíta.
-
-SMTP: `mail.ahafarma.sk`, port 465 alebo 587, s autentifikáciou.
+Nastavenie:
+- odosielacia doména **`obedy.ahafarma.sk`** — overuje sa len podadresa, hlavná doména ostáva nedotknutá,
+- odosielateľ **`objednavky@obedy.ahafarma.sk`**, zobrazované meno `AHAfarma — objednávky obedov`,
+- **`Reply-To` na skutočnú firemnú schránku** — odosielacia služba vie len posielať, takže bez toho by odpovede dodávateľov zmizli,
+- **meranie preklikov vypnuté**, aby Brevo neprepisovalo odkaz „Potvrdiť prijatie" na svoju doménu.
 
 ### ✅ Kontrola
-Prihlás sa do webmailu ako `obedy@ahafarma.sk` a pošli testovací mail — viď kontrola v kroku 4.
+Doména musí byť v Brevo označená ako *authenticated*.
 
 ---
 
-## 4. SPF, DKIM a DMARC
+## 4. DKIM a DMARC pre podadresu
 
-Bez týchto troch záznamov Gmail aj Microsoft objednávky zahodia alebo hodia do spamu.
+Brevo overuje odosielanie cez **DKIM**, nie cez SPF — preto sa **SPF hlavnej domény vôbec nedotýkame**. To je oproti pôvodnému plánu podstatné zjednodušenie.
 
-**Všetky tri už na doméne existujú** (viď krok 3), takže sa nepridáva nič. Táto kapitola ostáva ako popis, čo to je a čo robiť, keby test neprešiel.
+Štyri záznamy, všetky na podadrese `obedy`:
 
-`p=none` v existujúcom DMARC znamená **„len hlás, nič nezahadzuj"**. Nechaj to tak niekoľko týždňov. Až keď z hlásení vidno, že všetko prechádza, dá sa sprísniť na `p=quarantine`. Keby si nastavil prísny režim hneď a niečo by nesedelo, objednávky by sa prestali doručovať a nikto by nevedel prečo.
+| # | Typ | Meno | Hodnota |
+|---|---|---|---|
+| 1 | `TXT` | `obedy` | `brevo-code:…` |
+| 2 | `CNAME` | `brevo1._domainkey.obedy` | `b1.obedy-ahafarma-sk.dkim.brevo.com` |
+| 3 | `CNAME` | `brevo2._domainkey.obedy` | `b2.obedy-ahafarma-sk.dkim.brevo.com` |
+| 4 | `TXT` | `_dmarc.obedy` | `v=DMARC1; p=none; rua=…` |
 
-### ✅ Kontrola — táto je najdôležitejšia z celého návodu
-Pošli z `obedy@ahafarma.sk` mail **na nejakú Gmail adresu**. V Gmaile ho otvor → tri bodky → **„Zobraziť originál"**.
+Poznámky z nasadzovania:
+- hodnoty **kopírovať tlačidlom**, na obrazovke sú skrátené,
+- Webglobe pri každom novom zázname vracia *Typ* na `A` — treba ho zakaždým prepnúť,
+- pri `CNAME` si Webglobe doplní bodku na koniec hodnoty sám,
+- `p=none` v DMARC znamená „len hlás, nič nezahadzuj"; sprísniť na `p=quarantine` až po pár týždňoch, keď z hlásení vidno, že všetko prechádza.
 
-Musíš vidieť **trikrát PASS**:
+### ✅ Kontrola
+Po pridaní záznamov v Brevo **Verify records** → **Authenticate domain**.
+
+Potom pošli skúšobnú správu **na Gmail adresu**, otvor ju → tri bodky → **„Zobraziť originál"**. Musíš vidieť:
+
 ```
-SPF:   PASS
 DKIM:  PASS
 DMARC: PASS
 ```
-Ak niektorý chýba alebo je FAIL, ďalej nechoď — presne toto rozhoduje o tom, či objednávky dorazia dodávateľom. Pri zlyhaní SPF sa do existujúceho záznamu **pridá** odosielacia adresa Webglobe; existujúci obsah sa nikdy neprepisuje.
+
+SPF sa bude vzťahovať na návratovú doménu Brevo, nie na našu — to je v poriadku. DMARC prejde vďaka DKIM.
 
 ---
 
