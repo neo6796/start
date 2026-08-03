@@ -3,6 +3,7 @@
 > Postup platí pre Webglobe aj Hetzner. Kroky 1 a 5–6 sa robia na serveri, kroky 2–4 v paneli, kde je spravovaná doména `ahafarma.sk` a pošta.
 
 Doména: **`obedy.ahafarma.sk`** · pošta: **`noreply@obedy.ahafarma.sk`**
+Server: **`aha-apps`** u Hetznera, CPX22, Debian 13, IP **`46.225.236.143`**
 
 Po každom kroku je **kontrola**. Nechoď ďalej, kým neprejde — chyba v treťom kroku sa hľadá oveľa horšie, keď je rozbitý aj prvý.
 
@@ -51,9 +52,9 @@ Keby si súkromný kľúč stratil, panel hostingu má webovú konzolu, ktorá f
 
 ### ✅ Kontrola
 ```
-ssh root@IP_ADRESA
+ssh root@46.225.236.143
 ```
-Prihlásiš sa. Ak nie, skontroluj IP a heslo v maile od Webglobe.
+Pri prvom pripojení potvrď odtlačok servera slovom `yes`. Ak si nahral SSH kľúč, nepýta si heslo.
 
 ---
 
@@ -65,7 +66,7 @@ Pridaj:
 
 | Typ | Názov | Hodnota | TTL |
 |---|---|---|---|
-| `A` | `obedy` | IP adresa VPS | 300 |
+| `A` | `obedy` | `46.225.236.143` | 300 |
 
 Do políčka *Názov* píš len **`obedy`**, nie celé `obedy.ahafarma.sk` — panel si zvyšok doplní sám. Ak má server aj IPv6, pridaj rovnako záznam `AAAA`.
 
@@ -78,7 +79,7 @@ Na svojom počítači (alebo na [dnschecker.org](https://dnschecker.org)):
 ```
 nslookup obedy.ahafarma.sk
 ```
-Musí vrátiť IP tvojho VPS. Ak ešte nie, počkaj pár minút.
+Musí vrátiť `46.225.236.143`. Ak ešte nie, počkaj pár minút.
 
 ---
 
@@ -175,6 +176,8 @@ Ulož (`Ctrl+O`, `Enter`, `Ctrl+X`) a reštartuj:
 ```bash
 systemctl restart ssh
 ```
+
+> Kým DNS ešte nefunguje, použi v týchto príkazoch `46.225.236.143` namiesto doménového mena.
 
 > Prvé okno **nezatváraj**, kým si v druhom nevyskúšal, že sa vieš prihlásiť. Toto je najčastejší spôsob, ako sa človek vyzamkne z vlastného servera.
 
