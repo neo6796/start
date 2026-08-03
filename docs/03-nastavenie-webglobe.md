@@ -11,12 +11,12 @@ Server: **`aha-apps`** u Hetznera, CPX22, Debian 13, IP **`46.225.236.143`**
 |---|---|
 | 1 — VPS | ✅ hotovo — `aha-apps`, CPX22, Debian 13, Hetzner Nuremberg |
 | 2 — DNS `obedy.ahafarma.sk` | ✅ hotovo a overené — `nslookup` vracia `46.225.236.143` |
-| 3 — schránka `obedy@ahafarma.sk` | ⬜ čaká |
-| 4 — SPF, DKIM, DMARC | ✅ už existujú na doméne, netreba pridávať |
+| 3 — odosielanie pošty | ✅ Brevo, doména `obedy.ahafarma.sk` overená |
+| 4 — DKIM a DMARC pre `obedy` | ✅ štyri záznamy pridané a overené, SPF hlavnej domény nedotknutý |
 | 5 — zabezpečenie servera | ✅ hotovo a overené (root aj heslá zablokované) |
 | 6 — Docker | ✅ hotovo, `hello-world` prešiel |
 
-Zostáva už len to, čo sa robí v paneli Webglobe: kroky 2 až 4.
+**Infraštruktúra je hotová.** Zostáva odosielacia adresa a SMTP kľúč v Brevo, potom sa môže nasadzovať.
 
 ---
 
