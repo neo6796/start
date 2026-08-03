@@ -2,7 +2,7 @@
 
 > Postup platí pre Webglobe aj Hetzner. Kroky 1 a 5–6 sa robia na serveri, kroky 2–4 v paneli, kde je spravovaná doména `ahafarma.sk` a pošta.
 
-Doména: **`obedy.ahafarma.sk`** · pošta: **`noreply@obedy.ahafarma.sk`**
+Doména: **`obedy.ahafarma.sk`** · pošta: **`obedy@ahafarma.sk`**
 Server: **`aha-apps`** u Hetznera, CPX22, Debian 13, IP **`46.225.236.143`**
 
 ## Stav
@@ -11,8 +11,8 @@ Server: **`aha-apps`** u Hetznera, CPX22, Debian 13, IP **`46.225.236.143`**
 |---|---|
 | 1 — VPS | ✅ hotovo — `aha-apps`, CPX22, Debian 13, Hetzner Nuremberg |
 | 2 — DNS `obedy.ahafarma.sk` | ✅ hotovo a overené — `nslookup` vracia `46.225.236.143` |
-| 3 — schránka `noreply@` | ⬜ čaká |
-| 4 — SPF, DKIM, DMARC | ⬜ čaká |
+| 3 — schránka `obedy@ahafarma.sk` | ⬜ čaká |
+| 4 — SPF, DKIM, DMARC | ✅ už existujú na doméne, netreba pridávať |
 | 5 — zabezpečenie servera | ✅ hotovo a overené (root aj heslá zablokované) |
 | 6 — Docker | ✅ hotovo, `hello-world` prešiel |
 
@@ -100,15 +100,19 @@ Musí vrátiť `46.225.236.143`. Ak ešte nie, počkaj pár minút.
 
 ## 3. Poštová schránka
 
-V paneli nájdi sekciu e-mailu a **pridaj `obedy.ahafarma.sk` ako doménu pre poštu**, potom v nej vytvor schránku:
+**Zistené v DNS `ahafarma.sk`:** MX smeruje na `mail.ahafarma.sk` → `62.169.176.222`, teda firemná pošta beží u Webglobe. Existuje SPF `v=spf1 a mx a:mail.ahafarma.sk ip4:62.169.176.222 ~all`, DKIM (`default._domainkey`) aj DMARC (`p=none`).
 
-- **`noreply@obedy.ahafarma.sk`**
-- heslo si vygeneruj dlhé a náhodné, **odlož ho** — bude ho potrebovať aplikácia
+**Dôsledok: podadresa pre poštu nie je potrebná a v DNS sa nemení nič.** Appka odosiela cez tie isté servery Webglobe, ktoré firemný SPF už povoľuje. Pôvodný plán s `noreply@obedy.ahafarma.sk` mal chrániť SPF hlavnej domény pred úpravou — keď ju netreba upravovať, stráca zmysel.
 
-> **Ak panel neumožní poštu na podadrese**, použi `obedy@ahafarma.sk` na hlavnej doméne. Vtedy ale v kroku 4 **existujúci SPF záznam `ahafarma.sk` iba doplň, nikdy neprepisuj** — inak prestane chodiť pošta celej firme.
+Založ schránku **`obedy@ahafarma.sk`**:
+
+- heslo dlhé a náhodné, **odlož ho** — bude ho potrebovať aplikácia,
+- `obedy@` namiesto `noreply@` zámerne: dodávateľ vidí zmysluplného odosielateľa a jeho odpoveď („nedostali sme", „14. nevaríme") dorazí niekam, kde ju človek prečíta.
+
+SMTP: `mail.ahafarma.sk`, port 465 alebo 587, s autentifikáciou.
 
 ### ✅ Kontrola
-Prihlás sa do webmailu ako `noreply@…` a pošli si testovací mail na svoju bežnú adresu. Musí prísť.
+Prihlás sa do webmailu ako `obedy@ahafarma.sk` a pošli testovací mail — viď kontrola v kroku 4.
 
 ---
 
@@ -116,25 +120,12 @@ Prihlás sa do webmailu ako `noreply@…` a pošli si testovací mail na svoju b
 
 Bez týchto troch záznamov Gmail aj Microsoft objednávky zahodia alebo hodia do spamu.
 
-### 4a. DKIM
-V paneli pri poštovej doméne hľadaj **DKIM** a zapni ho. Webglobe kľúč vygeneruje sám a keď je DNS u nich, obvykle si aj sám pridá záznam. Ak ti ukáže hodnotu na skopírovanie, pridaj ju do DNS presne tak, ako ju dáva.
+**Všetky tri už na doméne existujú** (viď krok 3), takže sa nepridáva nič. Táto kapitola ostáva ako popis, čo to je a čo robiť, keby test neprešiel.
 
-### 4b. SPF
-Pridaj `TXT` záznam pre `obedy` s hodnotou, ktorú **uvádza Webglobe vo svojej nápovede** (vyzerá ako `v=spf1 include:… -all`).
-
-⚠️ **Nevymýšľaj si obsah SPF a neopisuj ho z návodov iných hostingov** — musí obsahovať presne tie servery, cez ktoré Webglobe odosiela. Nájdeš ho v ich poradni pri nastavovaní pošty.
-
-### 4c. DMARC
-Pridaj `TXT` záznam:
-
-| Typ | Názov | Hodnota |
-|---|---|---|
-| `TXT` | `_dmarc.obedy` | `v=DMARC1; p=none; rua=mailto:tvoj@email.sk` |
-
-`p=none` znamená **„len hlás, nič nezahadzuj"**. Nechaj to tak niekoľko týždňov. Až keď z hlásení vidno, že všetko prechádza, dá sa sprísniť na `p=quarantine`. Keby si nastavil prísny režim hneď a niečo by nesedelo, objednávky by sa prestali doručovať a nikto by nevedel prečo.
+`p=none` v existujúcom DMARC znamená **„len hlás, nič nezahadzuj"**. Nechaj to tak niekoľko týždňov. Až keď z hlásení vidno, že všetko prechádza, dá sa sprísniť na `p=quarantine`. Keby si nastavil prísny režim hneď a niečo by nesedelo, objednávky by sa prestali doručovať a nikto by nevedel prečo.
 
 ### ✅ Kontrola — táto je najdôležitejšia z celého návodu
-Pošli z `noreply@obedy.ahafarma.sk` mail **na nejakú Gmail adresu**. V Gmaile ho otvor → tri bodky → **„Zobraziť originál"**.
+Pošli z `obedy@ahafarma.sk` mail **na nejakú Gmail adresu**. V Gmaile ho otvor → tri bodky → **„Zobraziť originál"**.
 
 Musíš vidieť **trikrát PASS**:
 ```
@@ -142,7 +133,7 @@ SPF:   PASS
 DKIM:  PASS
 DMARC: PASS
 ```
-Ak niektorý chýba alebo je FAIL, ďalej nechoď — presne toto rozhoduje o tom, či objednávky dorazia dodávateľom.
+Ak niektorý chýba alebo je FAIL, ďalej nechoď — presne toto rozhoduje o tom, či objednávky dorazia dodávateľom. Pri zlyhaní SPF sa do existujúceho záznamu **pridá** odosielacia adresa Webglobe; existujúci obsah sa nikdy neprepisuje.
 
 ---
 
