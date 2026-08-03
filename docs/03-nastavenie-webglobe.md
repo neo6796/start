@@ -22,11 +22,30 @@ V ponuke hľadaj **VPS s root prístupom**, nie webhosting.
 
 Pri objednávke **nahraj svoj SSH kľúč**, ak to ponúka. Ak nie, príde ti root heslo mailom — to je v poriadku, kľúč nastavíme v kroku 5.
 
-> Ak nemáš SSH kľúč, vyrob si ho na svojom počítači:
-> ```
-> ssh-keygen -t ed25519 -C "obedar"
-> ```
-> Verejný kľúč (ten, čo sa nahráva) je potom v `~/.ssh/id_ed25519.pub`.
+<details>
+<summary><strong>Čo je SSH a prečo kľúč namiesto hesla</strong></summary>
+
+SSH je spôsob, ako sa z vlastného počítača pripojíš na server a píšeš mu príkazy — vzdialená plocha bez obrázkov, celá šifrovaná.
+
+Kľúč sú **dva súbory**, ktoré vzniknú naraz:
+
+| Súbor | Čo to je | Čo s ním |
+|---|---|---|
+| `id_ed25519` | **súkromný** | ostáva na tvojom počítači, nikdy ho nikomu nedávaš |
+| `id_ed25519.pub` | **verejný** | pokojne rozdávaš, vkladá sa na server |
+
+Verejný je **zámok**, ktorý zavesíš na dvere servera — môže ho vidieť ktokoľvek. Súkromný je **kľúč vo vrecku** a otvorí len tvoj zámok; server ho nikdy neuvidí, len si overí, že ho máš.
+
+Server na verejnej adrese dostane denne stovky pokusov o prihlásenie od automatov skúšajúcich bežné heslá. Kľúč sa uhádnuť nedá. Heslo poslané mailom navyše ostáva v schránke čitateľné navždy.
+
+Vyrobíš ho na počítači (nie na telefóne):
+```
+ssh-keygen -t ed25519 -C "obedar"
+```
+Na všetky otázky Enter. Verejný kľúč je potom v `~/.ssh/id_ed25519.pub` (Windows: `C:\Users\Meno\.ssh\id_ed25519.pub`) a začína sa `ssh-ed25519 AAAA…`.
+
+Keby si súkromný kľúč stratil, panel hostingu má webovú konzolu, ktorá funguje aj bez SSH — cez ňu nahráš nový.
+</details>
 
 **Zapíš si IPv4 adresu servera.** Budeme ju potrebovať v kroku 2.
 
