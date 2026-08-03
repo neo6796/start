@@ -26,39 +26,55 @@ Aplikácia pobeží na **podadrese firemnej domény**, novú doménu kupovať ne
 
 | Typ | Názov | Hodnota |
 |---|---|---|
-| `A` | `obedy.firma.sk` | IP adresa VPS |
-| `AAAA` | `obedy.firma.sk` | IPv6 adresa VPS *(ak ju VPS má)* |
+| `A` | `obedy.ahafarma.sk` | `46.225.236.143` ✅ hotovo |
+
 
 - TTL počas nasadzovania nastaviť nízko (300 s), po odladení sa môže zvýšiť.
 - Certifikát pre HTTPS **netreba kupovať ani nastavovať** — vybaví ho automaticky Let's Encrypt priamo na serveri, len čo A záznam funguje.
 
 ---
 
-## 2. Schránka na odosielanie
+## 2. Schránka na odosielanie — na firemnom mailovom serveri
 
-Aplikácia posiela objednávky dodávateľom a upozornenia adminom. Potrebuje vlastnú schránku:
+Pošta pre `ahafarma.sk` beží na **firemnom serveri v technickej miestnosti** (`62.169.176.222`, MX `mail.ahafarma.sk`). Služba u Webglobe je vypnutá, takže schránka sa zakladá tam, nie v paneli hostingu.
 
-- adresa: **`noreply@obedy.firma.sk`**
-- prístup cez SMTP (`mail.webglobe.sk`, port 465 alebo 587, s autentifikáciou)
+Aplikácia potrebuje:
 
-**Prečo na podadrese a nie `obedy@firma.sk`:** pri odosielaní z hlavnej domény by sa musel upravovať jej SPF záznam — a chyba v ňom zhodí poštu **celej firme**. Na podadrese je to úplne oddelené a firemnej pošty sa to nedotkne. Funkčne je to rovnaké.
+- schránku **`obedy@ahafarma.sk`** (nie `noreply@` — dodávatelia na objednávky odpovedajú a tie odpovede potrebujeme prečítať),
+- **SMTP údaje**: server, port (465 alebo 587), používateľ, heslo,
+- **presmerovanie** z tejto schránky na adresu, ktorú niekto reálne číta.
+
+### ⚠️ Overiť: dostupnosť odosielacieho portu zvonku
+
+Server prijíma poštu zvonku (MX na porte 25), ale **odosielací port 587/465 býva otvorený len do vnútornej siete**. Aplikácia beží na serveri v Nemecku, takže sa naň musí dostať cez internet.
+
+Ak je port zavretý, **neotvárať ho pre celý internet.** Stačí povoliť vo firewalle jedinú zdrojovú adresu:
+
+```
+povoliť TCP 587 (alebo 465) zo zdroja 46.225.236.143
+```
+
+To je IP adresa aplikačného servera. Jedno pravidlo, nulová expozícia navonok.
+
+### Dôsledok pre prevádzku
+Odosielanie objednávok dodávateľom sa tým viaže na dostupnosť firemného servera. Pri výpadku prúdu či internetu v piatok predpoludním objednávka neodíde — aplikácia to podchytí tromi pokusmi a upozornením správcovi s priloženým PDF, ale výpadok treba brať do úvahy.
 
 ---
 
 ## 3. Overovacie záznamy pošty
 
 Bez nich Gmail a Microsoft 365 správy zahodia alebo hodia do spamu — a objednávky sa k dodávateľom nedostanú.
-**Všetky tri patria na podadresu `obedy.firma.sk`, nie na hlavnú doménu.**
+**Netreba pridávať nič — všetky tri už na doméne existujú** a pokrývajú firemný mailový server:
 
-| Typ | Názov | Obsah |
-|---|---|---|
-| `TXT` | `obedy.firma.sk` | **SPF** — presné znenie podľa panela Webglobe (`v=spf1 include:… -all`) |
-| `TXT` alebo `CNAME` | podľa selektora, napr. `dkim._domainkey.obedy.firma.sk` | **DKIM** — kľúč vygeneruje panel Webglobe pri zapnutí DKIM pre doménu |
-| `TXT` | `_dmarc.obedy.firma.sk` | **DMARC** — začať na `v=DMARC1; p=none; rua=mailto:it@firma.sk` |
+| Záznam | Súčasná hodnota |
+|---|---|
+| SPF | `v=spf1 a mx a:mail.ahafarma.sk ip4:62.169.176.222 ~all` |
+| DKIM | `default._domainkey` s RSA kľúčom |
+| DMARC | `v=DMARC1; p=none;` |
 
-⚠️ **Dve upozornenia:**
-1. **Nesiahať na SPF hlavnej domény.** Ak by sa niekedy predsa posielalo z `firma.sk`, existujúci SPF sa musí **doplniť**, nie prepísať — inak prestane chodiť pošta celej firme.
-2. **DMARC nechať zatiaľ na `p=none`.** Je to režim „len hlás, nič nezahadzuj". Po pár týždňoch, keď z hlásení vidno, že všetko prechádza, sa dá sprísniť na `p=quarantine`.
+Keďže aplikácia odosiela cez ten istý server, ktorý SPF už povoľuje, **v DNS sa nemení nič**.
+
+⚠️ Ak by test doručiteľnosti (nižšie) predsa zlyhal na SPF, existujúci záznam sa **doplní**, nikdy neprepisuje — inak prestane chodiť pošta celej firme.
 
 ---
 
@@ -66,7 +82,8 @@ Bez nich Gmail a Microsoft 365 správy zahodia alebo hodia do spamu — a objedn
 
 - [ ] **IP adresa VPS** (a IPv6, ak je)
 - [ ] **SSH prístup** na VPS (kľúč)
-- [ ] **SMTP údaje** pre `noreply@obedy.firma.sk` — server, port, používateľ, heslo
+- [ ] **SMTP údaje** pre `obedy@ahafarma.sk` — server, port, používateľ, heslo
+- [ ] potvrdenie, že **port 587/465 je dostupný z `46.225.236.143`**
 - [ ] potvrdenie, že **DNS záznamy sú aktívne**
 - [ ] prístup na **NAS pre zálohy** — viď nižšie
 
@@ -90,9 +107,9 @@ Dôvod: keby zálohu posielal server, musel by poznať prístup na NAS — a út
 ## Poradie krokov
 
 1. objednať VPS → vznikne IP adresa
-2. pridať `A` záznam pre `obedy.firma.sk`
-3. založiť schránku `noreply@obedy.firma.sk`
-4. pridať SPF, DKIM a DMARC na podadresu
+2. ~~pridať `A` záznam~~ — hotovo, `obedy.ahafarma.sk` → `46.225.236.143`
+3. založiť schránku `obedy@ahafarma.sk` na firemnom mailovom serveri
+4. overiť dostupnosť odosielacieho portu z aplikačného servera
 5. sprístupniť NAS pre sťahovanie záloh
 
 Kroky 2–4 sú rádovo **pol hodiny práce**, jednorazovo.
