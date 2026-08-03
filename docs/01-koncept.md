@@ -689,12 +689,21 @@ Ak by bola cena webhostingu rozhodujúca, existuje legitímna alternatíva: **pr
 
 **Ak sa nikomu vo firme nechce aktualizovať Linux**, Webglobe ponúka aj *Managed VPS*, kde údržbu operačného systému robia oni. Za pár eur navyše to je rozumný kompromis.
 
-#### E-mail — v poriadku, a náš návrh riziko sám znižuje
-- **SPF a DKIM** Webglobe podporuje, **DMARC** je obyčajný TXT záznam, ktorý si pridáme sami (7.2.2). ✔
-- Odosielací server `mail.webglobe.sk`, porty 465 alebo 587 s autentifikáciou. ✔
-- Limit **100 správ za minútu** — my pošleme rádovo desať za deň, takže nepodstatné. ✔
-- **Chýbajú webhooky o odrazoch.** Odrazy sa vracajú ako e-mail, takže by sme museli čítať schránku cez IMAP a parsovať ich. **Nemusíme** — práve preto, že sme sa rozhodli pre *aktívne potvrdenie* namiesto detekcie doručenia (7.2.1). Toto je konkrétny prípad, keď sa to rozhodnutie vypláca.
-- Odosielať treba zo **skutočnej schránky na tej istej doméne** (napr. `obedy@firma.sk`), nie z vymyslenej adresy — inak sa SPF a DKIM rozídu a správy pôjdu do spamu.
+#### E-mail — cez odosielaciu službu, nie cez hosting
+Pri nastavovaní sa ukázalo, že **e-mailová služba u Webglobe je pre doménu vypnutá** a poštu pre `ahafarma.sk` obsluhuje **firemný server v technickej miestnosti** (`62.169.176.222`). Zvažovali sa tri cesty:
+
+| Cesta | Prečo nie / áno |
+|---|---|
+| Zapnúť poštu u Webglobe | ❌ formulár ponúka len `@ahafarma.sk`, podadresa sa nedá; zapnutie by Webglobe spravilo obsluhou pošty hlavnej domény, hoci MX smeruje inam |
+| Firemný server | ❌ naviazalo by odosielanie objednávok na prúd a internet v závode; navyše treba otvoriť odosielací port pre IP aplikačného servera |
+| **Odosielacia služba (Brevo)** | ✅ nezávislá od oboch, zadarmo pri našom objeme, dáta v EÚ, **hlási odrazy** |
+
+Nastavenie:
+- odosielacia doména **`obedy.ahafarma.sk`** — overuje sa len podadresa, hlavná doména ostáva nedotknutá,
+- odosielateľ `objednavky@obedy.ahafarma.sk`,
+- **`Reply-To` smeruje na skutočnú firemnú schránku**, pretože odosielacia služba vie len posielať. Keď dodávateľ odpovie, správa dorazí človeku.
+
+Hlásenia o odrazoch od služby dopĺňajú *aktívne potvrdenie* z 7.2.1 — technickú chybu zachytíme hneď, ľudské potvrdenie hovorí, že objednávku niekto naozaj videl.
 
 #### Zálohy: firemný NAS — vyriešené, ale s dvomi podmienkami
 Appka beží u Webglobe, zálohy sa ukladajú na firemný server/NAS. To je presne to rozdelenie, ktoré chceme: jeden problém u poskytovateľa nezmaže dáta.
@@ -724,7 +733,7 @@ Ak by server bol nedostupný tesne pred uzávierkou, admin má možnosť **uzáv
 - **Auth:** vlastné session cookies, hash PIN/hesiel cez argon2id, rate limiting. Pripravené na neskoršie SSO.
 - **Plánované úlohy:** cron worker — notifikácie, zamykanie týždňa, odoslanie objednávky dodávateľovi.
 - **Push:** Web Push (VAPID) priamo, bez externej služby.
-- **E-mail:** firemné SMTP alebo Resend/Postmark — hlavne pre dodávateľov.
+- **E-mail:** odosielacia služba **Brevo** (EÚ) na podadrese `obedy.ahafarma.sk`. Pošta u Webglobe je pre doménu vypnutá a firemný server v technickej miestnosti by odosielanie objednávok naviazal na prúd a internet v závode — viď 9.1.
 - **Jazyk:** len slovenčina, žiadny prekladový framework. Texty ale držím **na jednom mieste** (jeden modul), nie rozsypané po komponentoch — pridanie ukrajinčiny neskôr je potom deň práce namiesto týždňa. Stojí to teraz nula navyše.
 - ~~Alternatíva Django/Laravel~~ — zvážená a zamietnutá: na zdieľanom hostingu by odpadol prevod Word menu na PDF a stratila by sa prenositeľnosť cez Docker.
 
