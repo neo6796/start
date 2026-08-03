@@ -5,6 +5,21 @@
 Doména: **`obedy.ahafarma.sk`** · pošta: **`noreply@obedy.ahafarma.sk`**
 Server: **`aha-apps`** u Hetznera, CPX22, Debian 13, IP **`46.225.236.143`**
 
+## Stav
+
+| Krok | Stav |
+|---|---|
+| 1 — VPS | ✅ hotovo — `aha-apps`, CPX22, Debian 13, Hetzner Nuremberg |
+| 2 — DNS `obedy.ahafarma.sk` | ⬜ čaká |
+| 3 — schránka `noreply@` | ⬜ čaká |
+| 4 — SPF, DKIM, DMARC | ⬜ čaká |
+| 5 — zabezpečenie servera | ✅ hotovo a overené (root aj heslá zablokované) |
+| 6 — Docker | ✅ hotovo, `hello-world` prešiel |
+
+Zostáva už len to, čo sa robí v paneli Webglobe: kroky 2 až 4.
+
+---
+
 Po každom kroku je **kontrola**. Nechoď ďalej, kým neprejde — chyba v treťom kroku sa hľadá oveľa horšie, keď je rozbitý aj prvý.
 
 Názvy položiek v paneli Webglobe sa môžu mierne líšiť; nižšie je vždy uvedené, **čo hľadať**, nie na čo presne kliknúť.
