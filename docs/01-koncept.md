@@ -1,4 +1,4 @@
-# Objednávanie obedov — koncept (v0.4)
+# Objednávanie obedov — koncept (v0.9)
 
 Pracovný názov: **Obedár**
 Rozsah: 50–100 stravníkov, 1–5 poskytovateľov stravy, interná firemná appka.
@@ -16,7 +16,7 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 9. Pribúda rola **superadmin**; adminov môže byť viac.
 10. **Predák môže doobjednať aj v deň obeda** (do denného deadlinu), stravník už nie.
 11. Stravníci appku pravdepodobne používať nebudú → **hlavným používateľom je predák**, papierové výstupy sú prvotriedna súčasť.
-12. Zastupovanie predáka rieši **delegácia s obdobím + eskalácia na chýbajúce objednávky**, nie automatický reťazec.
+12. Zastupovanie predáka rieši **delegácia s obdobím + eskalácia na chýbajúce objednávky**, nie automatický reťazec odvodený z domnelej neprítomnosti. Poradie zástupcov sa navyše prechádza **dopredu** a appka hlási tímy, ktoré ostanú bez zodpovednej osoby (1.3 bod 7, obrazovka 5.8).
 13. **Bez 2FA.** Superadmin má heslo min. 12 znakov, obnova prístupu cez e-mail.
 14. **Menu na budúci týždeň je známe do pondelka** → objednávacie okno Po–Pia 12:00 ostáva v plnom rozsahu.
 15. Pri spustení dostanú prístup **len predáci a admin**, stravníci na požiadanie.
@@ -27,6 +27,9 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 20. **SMS zatiaľ nie** — pripraví sa len voliteľné pole „telefón", aby sa dala kedykoľvek zapnúť za pol dňa.
 21. **Exporty, história a zálohy sú súčasťou MVP** (kapitola 7), vrátane kompletného exportu dát na jedno kliknutie. Grafy až vo fáze 3.
 22. **Deň má tri stavy, nie dva** (4.6): nerozhodnuté · bez obeda · objednané. Upomienky a počítadlá pracujú len s nerozhodnutými.
+23. **Žiadne „kopírovať minulý týždeň"** (5.1). Menu je každý týždeň iné, takže skopírovaná voľba je vo väčšine prípadov nesprávna — a nesprávna voľba sa tvári vybavene, kým prázdna bunka o sebe dáva vedieť. Bolo by to priame popretie bodu 22.
+24. **Kalendár sviatkov a zatvorených dní je jediný zdroj pravdy** (5.7) pre objednávky, uzávierky aj mesačné rozúčtovanie. Deň, v ktorý sa nevarí, sa v objednávke neukáže vôbec a do fakturácie nevstúpi.
+25. **Faktúra sa kontroluje strojovo proti tomu, čo appka sama odoslala** (5.6). Mesiac sa nedá uzavrieť, kým má nevyriešený rozdiel.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -76,6 +79,7 @@ Cieľ je jasný: **aby sa na nikoho obed nezabudlo.** Mechanizmus navrhujem troc
 4. Zastupujúci vidí cudzí tím ako **samostatný blok** („Zastupujem: Tím Údržba, do 15. 8."), nie zliaty so svojím. Zlievanie tímov spôsobuje omyly typu „objednal som to tomu druhému Kováčovi".
 5. Všetko je v audite ako *„Novák (zastupuje Kováča) objednal pre Horvátha"*.
 6. Delegácia **nikdy neberie práva stravníkovi** — ten si môže objednať sám vždy, bez ohľadu na to, kto koho zastupuje.
+7. **Poradie sa prechádza dopredu, nie až pri probléme.** Appka prejde najbližšie štyri týždne a vypíše tímy, ktoré v niektorý deň ostanú bez zodpovednej osoby — buď preto, že sú preč predák aj všetci jeho zástupcovia, alebo preto, že zástupcu nemá nikto zadaného. Toto je jediná časť mechanizmu, ktorá funguje **skôr**, než sa niečo pokazí; zvyšok (bod 3) je záchranná sieť. Obrazovka je v 5.8.
 
 Zástupca môže zastupovať aj viac tímov naraz (viac blokov pod sebou).
 
@@ -219,7 +223,7 @@ Menu chodí od každého dodávateľa v inej podobe, preto je spôsob zadávania
 
 | Spôsob | Ako to funguje | Kedy |
 |---|---|---|
-| **Ručne** (vždy dostupné) | týždenný editor 5 dní × N jedál, tlačidlo *kopírovať minulý týždeň*, našepkávač už použitých názvov | menu chodí papierom, telefonicky alebo v tele e-mailu |
+| **Ručne** (vždy dostupné) | týždenný editor 5 dní × N jedál, našepkávač už použitých názvov | menu chodí papierom, telefonicky alebo v tele e-mailu |
 | **Import XLSX/CSV** | admin nahrá súbor, appka predvyplní menu, admin skontroluje a potvrdí; mapovanie stĺpcov sa uloží pre daného dodávateľa | dodávateľ posiela tabuľku |
 | **Prilepenie textu** | admin skopíruje menu do textového poľa, appka sa pokúsi rozpoznať dni a jedlá, admin opraví a potvrdí | menu chodí ako PDF alebo v tele e-mailu |
 
@@ -227,7 +231,7 @@ Spoločné pravidlo: **žiadny import sa neuloží bez potvrdenia človekom.** R
 
 Ručný editor musí byť dobrý, lebo je to fallback pre všetkých. Pri 3 jedlách × 5 dní × 2 dodávateľov je to ~5 minút týždenne — import sa oplatí až pri väčších ponukách.
 
-**Do MVP ide ručný editor + kopírovanie minulého týždňa.** Import a prilepenie textu prídu ako druhý krok, keď uvidíme reálne súbory od konkrétnych dodávateľov — bez vzorky by som ich robil naslepo.
+**Do MVP ide ručný editor.** Import a prilepenie textu prídu ako druhý krok, keď uvidíme reálne súbory od konkrétnych dodávateľov — bez vzorky by som ich robil naslepo.
 
 ### 3.3 Menu bez názvov jedál — plnohodnotný režim
 Názvy jedál sú **vždy voliteľné**. Admin môže zadať len počet jedál a appka pracuje čisto s označením (`A`, `B`, `C` / `1`, `2`, `3` / …). Vypĺňanie „bravčový rezeň s broskyňou" nikto nevynucuje.
@@ -268,7 +272,7 @@ Aby príloha slúžila ako dôkaz, musí byť **nemenná a datovaná**:
 
 Tým vzniká úplná reťaz pri spore: **príloha** hovorí, čo `B` v ten týždeň bolo · **audit log** hovorí, kto objednávku zadal a kedy · **zberný hárok** hovorí, podľa čoho ju zadal.
 
-Ďalšie uľahčenie pre tých, čo názvy vypĺňať chcú: **našepkávač z histórie.** Dodávatelia väčšinou rotujú jedlá v cykle, takže po pár týždňoch stačí napísať „vypráž" a zvyšok sa doplní. Plus tlačidlo *kopírovať minulý týždeň*.
+Ďalšie uľahčenie pre tých, čo názvy vypĺňať chcú: **našepkávač z histórie.** Dodávatelia väčšinou rotujú jedlá v cykle, takže po pár týždňoch stačí napísať „vypráž" a zvyšok sa doplní. Našepkávač je bezpečný v tom, čím sa líši od kopírovania celého týždňa: ponúka, ale nič nezapíše bez toho, aby to človek potvrdil.
 
 Nastavenie je per poskytovateľ aj per týždeň — jeden dodávateľ môže mať názvy, druhý len písmená, a v týždni, keď sa adminovi nechce, sa jednoducho nevyplnia. Appka si nikdy nepýta niečo, bez čoho vie fungovať.
 
@@ -379,9 +383,10 @@ Poradie dôležitosti je dané tým, kto appku reálne otvorí: **matica predák
 ### 5.1 Stravník (mobile-first)
 1. **Budúci týždeň** — hlavná obrazovka. 5 kariet Po–Pia, každá ukazuje voľbu alebo „neobjednané". Hore odpočet do uzávierky. Ťuk na deň → zoznam jedál môjho poskytovateľa → ťuk na jedlo → uložené (bez tlačidla „Potvrdiť", ukladá sa priebežne, s undo).
 2. **Tento týždeň** — len na čítanie + tlačidlo *Odhlásiť sa* pri dňoch, kde ešte beží denný deadline.
-3. **Kopírovať minulý týždeň** — jedno tlačidlo, doplní rovnaké voľby (ak dané jedlo v novom menu neexistuje, nechá deň prázdny a označí ho). Pri 100 ľuďoch to je rozdiel medzi „appka funguje" a „appka nefunguje".
-4. **Môj prehľad** — mesiac, počet obedov, cena spolu, príspevok zamestnávateľa, **koľko mi ide zo mzdy**.
-5. **Profil** — zmena PIN, notifikácie, jazyk.
+3. **Môj prehľad** — mesiac, počet obedov, cena spolu, príspevok zamestnávateľa, **koľko mi ide zo mzdy**.
+4. **Profil** — zmena PIN, notifikácie, jazyk.
+
+> **Prečo tu nie je „kopírovať minulý týždeň"** (rozhodnutie 23). Vyzerá to ako najlacnejšie zrýchlenie, ale nefunguje: menu je každý týždeň iné, takže `B` z minulého týždňa je tento týždeň iné jedlo. Skopírovaná voľba je teda vo väčšine prípadov nesprávna — a čo je horšie, **tvári sa vybavene**. Prázdna bunka kričí „doriešiť ma", vyplnená sa nespýta nikoho na nič. Zamaskovali by sme presne tie diery, kvôli ktorým máme trojstavový model (4.6). Zrýchlenie hľadáme inde: v klávesovom prepise v matici predáka (5.2), kde sa celý tím zadá bez myši.
 
 ### 5.2 Predák — „Môj tím" (hlavná obrazovka systému)
 Keďže objednávky za väčšinu ľudí zadáva predák, toto nie je prehľad — **je to zadávacia obrazovka** a musí zvládnuť 20 ľudí za dve minúty.
@@ -395,7 +400,7 @@ Matica **ľudia × dni** (riadky = podriadení, stĺpce Po–Pia). V bunke sú *
 - **prepis z papiera musí byť bleskový:** šípky vľavo/vpravo prechádzajú medzi možnosťami, medzerník volí; alebo priamo `A`/`B`/`C` pre jedlo, `0` pre krížik, `Backspace` pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni, šípky hore/dole tiež. Bez myši, bez dialógov, bez potvrdzovania. Toto je jediná vec, ktorá rozhodne, či predáka appka baví alebo otravuje.
 - pri ponuke nad šesť jedál sa možnosti v bunke zalomia do dvoch riadkov, tabuľka sa nerozbije
 - na tablete to isté prstom: dosť veľké dotykové plochy priamo v riadku
-- hromadné akcie: kopírovať minulý týždeň celému tímu, nastaviť celý riadok na jedno jedlo, hromadné odhlásenie na rozsah dní (dovolenka/PN)
+- hromadné akcie: nastaviť celý riadok na jedno jedlo, hromadné odhlásenie na rozsah dní (dovolenka/PN), vyprázdniť maticu
 - tlač: zberný hárok, zoznam chýbajúcich, potvrdenie tímu (5.5)
 - **zastupované tímy** ako samostatné bloky pod vlastným tímom, zreteľne odlíšené (1.3)
 - v deň obeda sa v riadku dnešného dňa objaví možnosť **doobjednať** (ak to poskytovateľ dovoľuje, 4.3)
@@ -425,6 +430,63 @@ Ak väčšina ľudí appku neotvorí, papier nie je ústupok — je to **hlavný
 5. **Zoznam chýbajúcich objednávok** — pre predáka pred uzávierkou.
 
 Zberný hárok má aj druhý účel: je to **dôkaz**. Keď objednávky zadáva predák, spor „ja som chcel B" padá na neho — a papier s vlastnoručne zapísanou voľbou ten spor ukončí. Audit log povie, kto to zadal; hárok povie, podľa čoho.
+
+### 5.6 Mesačná uzávierka a kontrola faktúry
+Mesiac sa neuzatvára tlačidlom, ale **postupom, ktorý sa nedá preskočiť**: mesiac skončil → prišli faktúry → rozdiely sú vyriešené → zamknuté a odoslané mzdám. Stav je na obrazovke vždy vidieť, aby bolo jasné, na čom to stojí.
+
+**Kontrola faktúry.** Appka pozná presný počet porcií, lebo ho sama odoslala, a pozná každé storno aj doobjednávku s časom. Vie teda faktúru nielen porovnať, ale aj **povedať, čím rozdiel vznikol**:
+
+| Zadávanie | Kedy |
+|---|---|
+| **Len súčet** — počet a suma | prvá kontrola, pol minúty; ak sedí, hotovo |
+| **Po dňoch** | až keď súčet nesedí — až tam sa ukáže deň, ktorý rozdiel vyrobil |
+
+**Políčka faktúry sa nikdy nepredvypĺňajú našimi číslami.** Predvyplnená kontrola je kontrola, ktorú si odklepneme sami sebe. Rovnaký dôvod ako pri rozhodnutí 23.
+
+Typické nálezy a ich riešenie (každý sa musí zvoliť, inak sa mesiac nezamkne):
+
+| Nález | Odkiaľ to appka vie | Riešenie |
+|---|---|---|
+| **storno po dennej uzávierke** | má čas storna aj čas uzávierky | účtovať zamestnancovi v plnej cene bez príspevku / štandardne s príspevkom / znáša firma *(pravidlo určí mzdár, 6.2)* |
+| **rozdiel bez záznamu** | v audite k tomu dňu nič nie je | overiť u dodávateľa / uznať / žiadať dobropis |
+| **iná cena, rovnaký počet** | priemerná cena za obed nesedí s cenníkom | doplniť cenník s platnosťou od dátumu / reklamovať |
+
+Tretí riadok je dôvod, prečo je v súčtovom režime aj **priemerná cena za obed**: počet a suma sú dve nezávislé príčiny a bez tohto údaja by sa cenový posun schoval do počtu.
+
+**Rozúčtovanie** sa počíta z cien platných v deň obeda (6.1), nie z dnešných, a **korekcie sa do neho zarátajú až po vyriešení** — kým je rozdiel otvorený, v rozúčtovaní je namiesto sumy počet nevyriešených.
+
+**Uzavretie** čísla zafixuje. Neskoršia oprava už do uzavretého mesiaca nevstúpi, ide do najbližšieho otvoreného ako samostatná položka s odkazom na pôvodný mesiac (6.3). Ku každej uzávierke sa uloží kto, kedy, s akými číslami a **ako sa ktorý rozdiel vyriešil** — po roku si to nikto nepamätá.
+
+### 5.7 Kalendár sviatkov a zatvorených dní
+Jeden zoznam, z ktorého čítajú objednávky, uzávierky aj mesačné rozúčtovanie. Tri druhy dní:
+
+| Druh | Kto ho určuje | Rozsah |
+|---|---|---|
+| **štátny sviatok** | zákon — appka si ho drží sama | nevarí nikto, needituje sa |
+| **závod zatvorený** | správca | celozávodná dovolenka, odstávka — neobjednáva sa vôbec |
+| **dodávateľ nevarí** | správca, **per dodávateľ** | napr. školská jedáleň cez prázdniny; ostatní varia ďalej |
+
+Pevné sviatky sú zoznam, **Veľký piatok a Veľkonočný pondelok si appka počíta** — sú pohyblivé a ručne udržiavaný zoznam by raz do roka niekto zabudol doplniť.
+
+Čo z kalendára vyplýva:
+- **Deň, v ktorý sa nevarí, sa v objednávke neukáže vôbec** — nie zošedený a neklikateľný. Šedé políčko láka na otázku „prečo sa nedá", chýbajúci stĺpec ju nevyvolá.
+- **Uzávierky sa posúvajú.** Ak je piatok sviatok, týždenná uzávierka je vo štvrtok o 12:00. Pri dennom odhlasovaní s pravidlom *predchádzajúci pracovný deň* sa počíta posledný deň, keď sa naozaj pracovalo, nie kalendárne včerajšok (4.2).
+- **Zatvorenie dňa, na ktorý sú už objednávky, ich zruší.** Appka najprv povie koľko ich je a koho sa to týka, potom sa spýta. Dotknutí predáci dostanú upozornenie a dodávateľovi ide opravená objednávka.
+- **Do fakturácie taký deň nevstúpi.** Uzávierka číta ten istý kalendár, takže nemôže účtovať deň, na ktorý sa nedalo objednať.
+
+Najlacnejší okamih na zatvorenie dňa je skôr, než sa otvorí objednávkové okno — vtedy ho ešte nikto nevidel a nikoho neprekvapí. Obrazovka to hovorí priamo pri každom dni.
+
+### 5.8 Zastupovanie — obrazovka
+Prevedenie mechanizmu z 1.3 do jednej tabuľky **„kto objednáva za koho"** ku zvolenému dňu. Pre každý tím sa ukáže **reťaz**: predák → 1. zástupca → 2. zástupca, s prečiarknutými tými, čo sú v ten deň preč, a zvýrazneným tým, na kom sa to zastavilo.
+
+Hlavná hodnota obrazovky nie je tabuľka, ale **panel rizík**: appka prejde najbližšie štyri týždne deň po dni a vypíše tímy, ktoré v niektorý deň ostanú **bez zodpovednej osoby** — či už preto, že sú preč všetci zástupcovia naraz (v lete pravidlo, nie výnimka), alebo preto, že predák žiadneho nemá. Dopredu, nie v ten deň ráno. To je celé zdôvodnenie, prečo sa zástupcovia zadávajú v poradí.
+
+Ďalej obrazovka drží:
+- **neprítomnosti** (dovolenka, PN, školenie) — zastupovanie sa podľa nich zapne a vypne samo; ručné odovzdanie tímu ostáva možné na deň, týždeň aj hodinu,
+- **poradie zástupcov** per predák, s výslovným označením *bez zástupcu* tam, kde chýba,
+- **záznam o zastupovaní** — kto, za koho, kedy a čo spravil.
+
+**Čo zástupca smie:** objednávať a meniť objednávky prevzatého tímu, odhlasovať jeho ľudí, vidieť jeho zberný hárok a menu. **Čo nesmie:** ceny, príspevky, nastavenia dodávateľov, mzdové podklady, prideľovanie ľudí. Prevzatie má vždy koniec a skončí samo — trvalý prístup „lebo vtedy zastupoval" je najbežnejší spôsob, ako sa oprávnenia rozliezajú po firme.
 
 ---
 
@@ -819,8 +881,8 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 | Fáza | Obsah |
 |---|---|
 | **0 — Koncept** | tento dokument, odsúhlasenie |
-| **1 — Preview** | klikací prototyp bez databázy: login, **matica predáka**, týždeň stravníka, admin nastavenia, ručný editor menu, cenník s oboma modelmi príspevku, ukážky tlačových zostáv, 3 varianty loga |
-| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov, ručný editor menu + kopírovanie týždňa, **matica predáka**, delegácia a eskalácia, ceny a mesačný export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.5)**, **tabuľa v jedálni**, **push notifikácie pre predákov a admina** + sprievodca inštaláciou na plochu, **príloha menu (fotka/PDF/Word)**, **exporty, história a zálohy (kapitola 7)**, audit, nasadenie |
+| **1 — Preview** | klikací prototyp bez databázy: login, **matica predáka**, týždeň stravníka, admin nastavenia, ručný editor menu, cenník s oboma modelmi príspevku, ukážky tlačových zostáv, tabuľa v jedálni, história, **mesačná uzávierka a kontrola faktúry (5.6)**, **kalendár sviatkov a zatvorených dní (5.7)**, **zastupovanie (5.8)**, logo |
+| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov, ručný editor menu, **matica predáka**, **kalendár sviatkov a zatvorených dní (5.7)**, delegácia, reťaz zástupcov a eskalácia (5.8), ceny a **mesačná uzávierka s kontrolou faktúry (5.6)**, export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.5)**, **tabuľa v jedálni**, **push notifikácie pre predákov a admina** + sprievodca inštaláciou na plochu, **príloha menu (fotka/PDF/Word)**, **exporty, história a zálohy (kapitola 7)**, audit, nasadenie |
 | **3 — Rozšírenia** | grafy a dashboard, push pre stravníkov, SMS pre predákov ak treba, import menu (XLSX/CSV, prilepenie textu) podľa reálnych vzoriek, evidencia prevzatia, hostia, SSO, kiosk, rola dodávateľa, prípadná ukrajinčina |
 
 Push je v MVP **len pre predákov a admina** (zopár ľudí, s každým sa dá inštalácia prejsť osobne), pre stravníkov ostáva vo fáze 3. Tlačové zostavy sú naopak plnohodnotnou súčasťou MVP — appku bude držať predák s papierom, nie stravník s telefónom.

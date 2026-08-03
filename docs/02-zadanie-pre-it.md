@@ -1,95 +1,28 @@
-# Zadanie pre IT — príprava domény a pošty
+# Zadanie pre IT — čo zostáva
 
-Pre aplikáciu na objednávanie obedov (*Obedár*). Jedna strana, štyri kroky.
-Presné hodnoty záznamov vygeneruje panel Webglobe pri zakladaní služby — nižšie je uvedené, **ktoré** záznamy treba a kam patria.
+Pre aplikáciu na objednávanie obedov (*Obedár*).
+
+> **Aktualizované.** Server, doména aj odosielanie pošty sú **hotové a overené** — spravili sme ich sami, mimo firemnej infraštruktúry. Pôvodné zadanie počítalo so schránkou na firemnom mailovom serveri a s otvorením odosielacieho portu; **to už neplatí a nerobte to.** Zostáva jediná vec: prístup na NAS pre zálohy.
 
 ---
 
-## 0. Predpoklad — objednaný VPS
-
-Aplikácia potrebuje **VPS s root prístupom**, nie zdieľaný webhosting (nepobeží na ňom Node ani PostgreSQL).
-
-Odporúčané parametre pre ~100 používateľov:
+## Čo je hotové (na vedomie, netreba zasahovať)
 
 | | |
 |---|---|
-| CPU / RAM | 2 vCPU, 4 GB |
-| Disk | 40–80 GB SSD |
-| Systém | Debian 13 alebo Ubuntu 26.04 LTS |
-| Poznámka | ak nikto nechce robiť aktualizácie systému, zvážiť *Managed VPS* |
+| **Aplikačný server** | VPS u Hetznera, Nemecko · Debian 13 · IP `46.225.236.143` |
+| **Podadresa** | `A` záznam `obedy.ahafarma.sk` → `46.225.236.143` |
+| **HTTPS** | Let's Encrypt automaticky na serveri, nič sa nekupuje |
+| **Odosielanie pošty** | cez **Brevo**, odosielacia doména `obedy.ahafarma.sk` |
+| **DKIM a DMARC** | štyri záznamy na podadrese `obedy`, overené |
+
+**Do SPF hlavnej domény `ahafarma.sk` sme nesiahli a siahnuť netreba.** Brevo overuje odosielanie cez DKIM, nie cez SPF. Pošta celej firmy je tým nedotknutá.
+
+**Schránku `obedy@ahafarma.sk` nezakladajte** a **port 587/465 na firemnom serveri neotvárajte.** Bolo by to zbytočné a naviazalo by odosielanie objednávok na prúd a internet v technickej miestnosti.
 
 ---
 
-## 1. Podadresa pre aplikáciu
-
-Aplikácia pobeží na **podadrese firemnej domény**, novú doménu kupovať netreba.
-
-| Typ | Názov | Hodnota |
-|---|---|---|
-| `A` | `obedy.ahafarma.sk` | `46.225.236.143` ✅ hotovo |
-
-
-- TTL počas nasadzovania nastaviť nízko (300 s), po odladení sa môže zvýšiť.
-- Certifikát pre HTTPS **netreba kupovať ani nastavovať** — vybaví ho automaticky Let's Encrypt priamo na serveri, len čo A záznam funguje.
-
----
-
-## 2. Schránka na odosielanie — na firemnom mailovom serveri
-
-Pošta pre `ahafarma.sk` beží na **firemnom serveri v technickej miestnosti** (`62.169.176.222`, MX `mail.ahafarma.sk`). Služba u Webglobe je vypnutá, takže schránka sa zakladá tam, nie v paneli hostingu.
-
-Aplikácia potrebuje:
-
-- schránku **`obedy@ahafarma.sk`** (nie `noreply@` — dodávatelia na objednávky odpovedajú a tie odpovede potrebujeme prečítať),
-- **SMTP údaje**: server, port (465 alebo 587), používateľ, heslo,
-- **presmerovanie** z tejto schránky na adresu, ktorú niekto reálne číta.
-
-### ⚠️ Overiť: dostupnosť odosielacieho portu zvonku
-
-Server prijíma poštu zvonku (MX na porte 25), ale **odosielací port 587/465 býva otvorený len do vnútornej siete**. Aplikácia beží na serveri v Nemecku, takže sa naň musí dostať cez internet.
-
-Ak je port zavretý, **neotvárať ho pre celý internet.** Stačí povoliť vo firewalle jedinú zdrojovú adresu:
-
-```
-povoliť TCP 587 (alebo 465) zo zdroja 46.225.236.143
-```
-
-To je IP adresa aplikačného servera. Jedno pravidlo, nulová expozícia navonok.
-
-### Dôsledok pre prevádzku
-Odosielanie objednávok dodávateľom sa tým viaže na dostupnosť firemného servera. Pri výpadku prúdu či internetu v piatok predpoludním objednávka neodíde — aplikácia to podchytí tromi pokusmi a upozornením správcovi s priloženým PDF, ale výpadok treba brať do úvahy.
-
----
-
-## 3. Overovacie záznamy pošty
-
-Bez nich Gmail a Microsoft 365 správy zahodia alebo hodia do spamu — a objednávky sa k dodávateľom nedostanú.
-**Netreba pridávať nič — všetky tri už na doméne existujú** a pokrývajú firemný mailový server:
-
-| Záznam | Súčasná hodnota |
-|---|---|
-| SPF | `v=spf1 a mx a:mail.ahafarma.sk ip4:62.169.176.222 ~all` |
-| DKIM | `default._domainkey` s RSA kľúčom |
-| DMARC | `v=DMARC1; p=none;` |
-
-Keďže aplikácia odosiela cez ten istý server, ktorý SPF už povoľuje, **v DNS sa nemení nič**.
-
-⚠️ Ak by test doručiteľnosti (nižšie) predsa zlyhal na SPF, existujúci záznam sa **doplní**, nikdy neprepisuje — inak prestane chodiť pošta celej firme.
-
----
-
-## 4. Čo poslať späť
-
-- [ ] **IP adresa VPS** (a IPv6, ak je)
-- [ ] **SSH prístup** na VPS (kľúč)
-- [ ] **SMTP údaje** pre `obedy@ahafarma.sk` — server, port, používateľ, heslo
-- [ ] potvrdenie, že **port 587/465 je dostupný z `46.225.236.143`**
-- [ ] potvrdenie, že **DNS záznamy sú aktívne**
-- [ ] prístup na **NAS pre zálohy** — viď nižšie
-
----
-
-## 5. Zálohovanie na firemný NAS
+## Čo potrebujeme od vás — zálohy na firemný NAS
 
 Zálohy sa ukladajú mimo hostingu, na firemný NAS. Dôležité je, **ktorým smerom to ide**:
 
@@ -98,18 +31,25 @@ Zálohy sa ukladajú mimo hostingu, na firemný NAS. Dôležité je, **ktorým s
 Dôvod: keby zálohu posielal server, musel by poznať prístup na NAS — a útočník, ktorý sa dostane na server, by zmazal aj zálohy. Pri sťahovaní pozná prístup len NAS a server o ňom nevie nič. Bonus: **NAS nemusí byť dostupný z internetu**, stačí mu odchádzajúce spojenie.
 
 Čo treba na strane NAS:
+
 - miesto na **datované snímky** (30 denných + 12 mesačných), nie na jednu prepisovanú kópiu,
-- naplánovanú nočnú úlohu (`restic` alebo `borg` cez SSH),
-- rezervu cca 20 GB — pri deduplikácii to bude v praxi oveľa menej.
+- naplánovanú nočnú úlohu (`restic` alebo `borg` cez SSH na `46.225.236.143`),
+- rezervu cca **20 GB** — pri deduplikácii to bude v praxi podstatne menej,
+- **štvrťročný test obnovy.** Záloha, z ktorej sa nikdy neskúšalo obnoviť, nie je záloha.
+
+Verejný SSH kľúč NAS-u pošlite a my ho na server pridáme; alebo nám povedzte, či ho máme vygenerovať my.
 
 ---
 
-## Poradie krokov
+## Ešte jedna maličkosť — adresa na odpovede
 
-1. objednať VPS → vznikne IP adresa
-2. ~~pridať `A` záznam~~ — hotovo, `obedy.ahafarma.sk` → `46.225.236.143`
-3. založiť schránku `obedy@ahafarma.sk` na firemnom mailovom serveri
-4. overiť dostupnosť odosielacieho portu z aplikačného servera
-5. sprístupniť NAS pre sťahovanie záloh
+Objednávky odchádzajú z `objednavky@obedy.ahafarma.sk`, ale **odpovede dodávateľov musia niekam prísť.** Zatiaľ je ako `Reply-To` nastavená existujúca firemná schránka `info@panskepole.sk`.
 
-Kroky 2–4 sú rádovo **pol hodiny práce**, jednorazovo.
+Ak chcete radšej samostatnú schránku na tento účel (napr. `obedy@ahafarma.sk` na firemnom serveri, len ako prijímaciu), založte ju a dajte vedieť — v aplikácii je to jedno nastavenie, mení sa bez zásahu do kódu. **Odosielanie cez ňu nepotrebujeme**, len prijímanie.
+
+---
+
+## Zhrnutie
+
+1. sprístupniť NAS pre sťahovanie záloh ← **jediná blokujúca vec**
+2. *(voliteľne)* povedať, či má `Reply-To` ostať na `info@panskepole.sk`

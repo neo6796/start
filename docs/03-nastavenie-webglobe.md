@@ -230,14 +230,17 @@ Vypíše „Hello from Docker!".
 
 ---
 
-## 7. Čo mi pošli
+## 7. Čo ešte zostáva
 
-- [ ] **IP adresa** VPS
-- [ ] **SSH prístup** pre používateľa `aha` (alebo pridaj môj verejný kľúč)
-- [ ] **SMTP údaje**: server `mail.webglobe.sk`, port 465 alebo 587, používateľ `noreply@obedy.ahafarma.sk`, heslo
-- [ ] potvrdenie, že **trojitý PASS z kroku 4 prešiel**
+- [x] **IP adresa** VPS — `46.225.236.143`
+- [x] **SSH prístup** pre používateľa `aha`
+- [x] **SMTP cez Brevo** — server `smtp-relay.brevo.com`, port 587, login `b444c5001@smtp-brevo.com`
+- [ ] **kľúč SMTP** — ostáva u teba v správcovi hesiel; na server sa vloží pri nasadzovaní priamo do konfiguračného súboru
+- [ ] **obmedziť kľúč na zdrojovú IP `46.225.236.143`** v Brevo, hneď ako appka pobeží
+- [ ] potvrdenie, že **DKIM aj DMARC PASS prešli** na skúšobnej správe
+- [ ] **prístup na NAS** pre zálohy — `docs/02-zadanie-pre-it.md`
 
-Heslá neposielaj cez chat — daj ich radšej do správcu hesiel a zdieľaj odkazom, alebo mi ich nadiktuj.
+Heslá a kľúče neposielaj cez chat — patria do správcu hesiel a odtiaľ priamo na server.
 
 ---
 
@@ -261,7 +264,7 @@ Reálne **jedno popoludnie**, z toho polovica čakanie.
 | Problém | Kde hľadať |
 |---|---|
 | `nslookup` nevracia IP | zlý typ záznamu, alebo si do *Názov* napísal celé `obedy.ahafarma.sk` namiesto `obedy` |
-| Mail nechodí | schránka nemá založenú doménu pre poštu (krok 3) |
-| SPF FAIL | v SPF chýbajú servery Webglobe, alebo máš na doméne **dva SPF záznamy** — smie byť len jeden |
-| DKIM FAIL | záznam nie je v DNS, alebo nesedí selektor |
+| Mail nechodí | odosielacia adresa nie je v Brevo pridaná ako *Sender*, alebo je zlý SMTP kľúč |
+| SPF ukazuje cudziu doménu | **tak to má byť** — Brevo overuje cez DKIM, návratová doména je jeho; DMARC prejde vďaka DKIM |
+| DKIM FAIL | `CNAME` záznamy `brevo1`/`brevo2._domainkey.obedy` nie sú v DNS, alebo nesedí selektor |
 | Vyzamkol som sa zo servera | konzola cez panel Webglobe funguje aj bez SSH — cez ňu sa vieš dostať späť |

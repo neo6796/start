@@ -639,6 +639,147 @@
   .sw.empty{background:var(--surface);border-color:var(--line-2)}
   .sw.lead{background:var(--by-lead);border-color:var(--by-lead-line)}
 
+  /* ---------- uzávierka ---------- */
+
+  .steps{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+  .step{
+    flex:1 1 190px;
+    padding:11px 14px;
+    border-right:1px solid var(--line);
+    background:var(--surface);
+  }
+  .step:last-child{border-right:0}
+  .step .st-n{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--ink-3)}
+  .step .st-t{font-size:13.5px;font-weight:600;margin:3px 0 2px}
+  .step .st-s{font-size:12px;color:var(--ink-2)}
+  .step.done{background:var(--ok-soft)}
+  .step.done .st-n,.step.done .st-s{color:var(--ok)}
+  .step.now{background:var(--mustard-soft)}
+  .step.now .st-n,.step.now .st-s{color:var(--mustard)}
+
+  .num-in{
+    width:74px;
+    font-family:var(--mono);
+    font-size:13px;
+    text-align:right;
+    padding:4px 6px;
+    border:1px solid var(--line-2);
+    border-radius:3px;
+    background:var(--surface);
+    color:var(--ink);
+  }
+  .num-in:focus{outline:2px solid var(--mustard);outline-offset:-1px;border-color:var(--mustard)}
+  .num-in.empty{background:var(--surface-2);border-style:dashed}
+  tr.diff td{background:var(--miss-soft)}
+  tr.match td.d{color:var(--ok)}
+  td.d{font-weight:700}
+
+  .warnbox,.okbox{
+    border:1px solid;
+    border-radius:var(--r);
+    padding:12px 14px;
+    font-size:13px;
+    line-height:1.5;
+    margin-top:14px;
+  }
+  .warnbox{background:var(--miss-soft);border-color:var(--miss);color:var(--miss)}
+  .okbox{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+  .warnbox strong,.okbox strong{font-weight:700}
+  .warnbox p,.okbox p{margin:6px 0 0}
+  .warnbox p:first-child,.okbox p:first-child{margin-top:0}
+
+  .cause{
+    border-top:1px solid var(--line);
+    padding:11px 0;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+  .cause:first-of-type{border-top:0}
+  .cause .cw{flex:1;min-width:220px}
+  .cause .cd{font-family:var(--mono);font-size:12px;color:var(--ink-3);letter-spacing:.04em}
+  .cause .ct{font-size:13.5px;margin:2px 0 0;line-height:1.45}
+  .cause select{
+    font-size:12.5px;
+    padding:5px 7px;
+    border:1px solid var(--line-2);
+    border-radius:3px;
+    background:var(--surface);
+    color:var(--ink);
+    max-width:100%;
+  }
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .btn[disabled]:hover{border-color:var(--line-2)}
+
+  /* ---------- kalendár ---------- */
+
+  .cal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+  .cal-m{border:1px solid var(--line);border-radius:var(--r);padding:10px 11px 12px;background:var(--surface)}
+  .cal-m h4{font-size:12.5px;letter-spacing:.02em;margin-bottom:8px;text-transform:capitalize}
+  .cal-dow,.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+  .cal-dow span{
+    font-family:var(--mono);
+    font-size:9.5px;
+    letter-spacing:.06em;
+    color:var(--ink-3);
+    text-align:center;
+    padding-bottom:3px;
+  }
+  .cal-d{
+    aspect-ratio:1;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);
+    font-size:11px;
+    border:1px solid transparent;
+    border-radius:2px;
+    background:transparent;
+    color:var(--ink-2);
+    cursor:pointer;
+    padding:0;
+  }
+  .cal-d.pad{visibility:hidden;cursor:default}
+  .cal-d.we{color:var(--faint-ink)}
+  .cal-d:hover{border-color:var(--ink-3)}
+  .cal-d.hol{background:var(--miss-soft);color:var(--miss);font-weight:700}
+  .cal-d.shut{background:var(--mustard-soft);color:var(--mustard);font-weight:700}
+  .cal-d.nocook{background:var(--by-lead);color:var(--ink);font-weight:700}
+  .cal-d.today{box-shadow:inset 0 0 0 2px var(--petrol)}
+  .cal-d[aria-pressed="true"]{outline:2px solid var(--mustard);outline-offset:1px}
+  .cal-d:focus-visible{outline:2px solid var(--mustard);outline-offset:1px}
+  .sw.hol{background:var(--miss-soft);border-color:var(--miss)}
+  .sw.shut{background:var(--mustard-soft);border-color:var(--mustard)}
+  .sw.nocook{background:var(--by-lead);border-color:var(--by-lead-line)}
+
+  /* ---------- zastupovanie ---------- */
+
+  .chain{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:13px}
+  .chain-s{
+    display:inline-flex;align-items:center;gap:6px;
+    border:1px solid var(--line-2);
+    border-radius:var(--r);
+    padding:4px 9px;
+    background:var(--surface);
+  }
+  .chain-s .cn{font-weight:600}
+  .chain-s .cx{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+  .chain-s.out{background:var(--surface-2);color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--ink-3)}
+  .chain-s.out .cn{font-weight:400}
+  .chain-s.hit{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+  .chain-s.none{background:var(--miss-soft);border-color:var(--miss);color:var(--miss)}
+  .chain-a{color:var(--ink-3);font-family:var(--mono);font-size:12px}
+
+  .abs-row{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .abs-row:last-child{border-bottom:0}
+  .abs-row .an{flex:1;min-width:120px;font-size:13.5px}
+  .abs-row .ad{font-family:var(--mono);font-size:12px;color:var(--ink-2);white-space:nowrap}
+  .abs-row .btn{padding:4px 9px;font-size:12px}
+  .abs-row .pill{white-space:nowrap}
+
   footer{
     border-top:1px solid var(--line);
     padding:26px 0 40px;
@@ -754,6 +895,9 @@
       <button class="tab" role="tab" aria-selected="false" data-screen="stravnik">Stravník</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="admin">Admin</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="zostavy">Zostavy</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="uzavierka">Uzávierka</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="kalendar">Kalendár</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="zastup">Zastupovanie</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="tabula">Tabuľa</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="historia">História</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="login">Prihlásenie</button>
@@ -787,7 +931,6 @@
     <span class="pill neutral" id="pd-provider">Reštaurácia U Jeleňa · A B C</span>
     <div class="btn-row" style="margin-left:auto">
       <button class="btn" id="btn-hl" aria-pressed="false">Zvýrazniť nerozhodnuté</button>
-      <button class="btn" id="btn-copy">Kopírovať minulý týždeň</button>
       <button class="btn" id="btn-clear">Vyprázdniť</button>
     </div>
   </div>
@@ -808,7 +951,7 @@
   <div class="team-block deleg">
     <div class="team-head">
       <h3>Zastupujem: Tím Lisovňa</h3>
-      <span class="pill neutral">do 15. 8.</span>
+      <span class="pill neutral" id="pd-deleg-to">—</span>
       <span class="pill neutral">za Milana Urbana</span>
     </div>
     <div class="scroll-x">
@@ -883,9 +1026,6 @@
           <p class="eyebrow" style="margin-bottom:2px">Budúci týždeň</p>
           <h3 id="sv-week" style="font-size:16px;margin-bottom:12px">—</h3>
           <div id="sv-days"></div>
-          <div style="margin-top:16px" class="btn-row">
-            <button class="btn wide" id="sv-copy">Ako minulý týždeň</button>
-          </div>
           <div class="menu-sheet" style="margin-top:16px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px">
               <p class="eyebrow" style="margin:0" id="sv-cat">—</p>
@@ -1090,7 +1230,6 @@
         <div class="card-head"><h3>Menu — budúci týždeň</h3><span class="pill ok" id="a-menu-state">zadané</span></div>
         <div id="a-menu"></div>
         <div class="btn-row" style="margin-top:14px">
-          <button class="btn" id="a-menu-copy">Kopírovať minulý týždeň</button>
           <button class="btn" id="a-menu-clear">Vymazať názvy</button>
           <button class="btn" id="a-menu-file">Pripnúť fotku menu</button>
         </div>
@@ -1263,6 +1402,246 @@
   <div class="note">
     <p class="eyebrow">Čo z toho platí za appku</p>
     <p>Denná objednávka dodávateľovi a mesačný podklad pre mzdy sú dva výstupy, kvôli ktorým celý systém existuje. Kontrola faktúry navyše ukáže nielen rozdiel oproti fakturovanej sume, ale aj deň, v ktorom vzniká.</p>
+  </div>
+</section>
+
+<!-- ============ UZÁVIERKA ============ -->
+<section class="screen wrap" id="s-uzavierka" hidden>
+  <div class="screen-head">
+    <h2>Mesačná uzávierka a kontrola faktúry</h2>
+    <span class="who" style="display:flex;align-items:center;gap:8px">
+      <button class="btn" id="uz-prev" style="padding:3px 9px">←</button>
+      <span id="uz-month">—</span>
+      <button class="btn" id="uz-next" style="padding:3px 9px">→</button>
+    </span>
+  </div>
+
+  <div class="steps" id="uz-steps"></div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Kontrola faktúry</h3>
+      <div class="seg" role="group" id="uz-cat"></div>
+    </div>
+
+    <div id="uz-empty" hidden></div>
+
+    <div id="uz-body">
+    <div class="field" style="margin-bottom:16px">
+      <label>Ako je faktúra rozpísaná</label>
+      <div class="seg" role="group" id="uz-mode">
+        <button data-m="sum" aria-pressed="true">Len súčet</button>
+        <button data-m="day" aria-pressed="false">Po dňoch</button>
+      </div>
+      <p class="hint">Začni súčtom. Ak sedí, hotovo za pol minúty. Ak nesedí, prepni na dni — až tam sa ukáže, ktorý deň rozdiel vyrobil.</p>
+    </div>
+
+    <div id="uz-sum">
+      <div class="scroll-x">
+        <table class="data" style="min-width:520px">
+          <thead>
+            <tr><th>Údaj</th><th class="num">Podľa aplikácie</th><th class="num">Podľa faktúry</th><th class="num">Rozdiel</th></tr>
+          </thead>
+          <tbody id="uz-sum-b"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="uz-day" hidden>
+      <div class="scroll-x">
+        <table class="data" style="min-width:560px">
+          <thead>
+            <tr><th>Deň</th><th class="num">Objednané</th><th class="num">Fakturované</th><th class="num">Rozdiel</th><th class="num">Suma</th></tr>
+          </thead>
+          <tbody id="uz-day-b"></tbody>
+          <tfoot id="uz-day-f"></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div id="uz-verdict"></div>
+    <p class="hint" id="uz-cal-note" style="margin-top:10px"></p>
+
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn" id="uz-demo">Predviesť s číslami z faktúry</button>
+      <button class="btn" id="uz-reset">Vyprázdniť</button>
+      <button class="btn">Načítať XLSX od dodávateľa</button>
+    </div>
+    <p class="hint" style="margin-top:10px">Políčka faktúry sú zámerne prázdne. Predvyplniť ich našimi číslami by znamenalo, že si kontrolu odklepneme sami sebe — a presne to má kontrola vylúčiť.</p>
+    </div>
+  </div>
+
+  <div class="card" id="uz-causes-card" hidden>
+    <div class="card-head"><h3>Rozdiely na vyriešenie</h3><span class="pill miss" id="uz-open">—</span></div>
+    <div id="uz-causes"></div>
+    <p class="hint" style="margin-top:12px">Kým je čo i len jeden rozdiel nevyriešený, mesiac sa uzavrieť nedá. Nie zo zásadovosti — nevyriešený rozdiel znamená, že niekomu strhneme zo mzdy sumu, ktorú nevieme obhájiť.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head"><h3>Rozúčtovanie mesiaca</h3><span class="pill neutral">po korekciách</span></div>
+      <div class="scroll-x">
+        <table class="data" style="min-width:420px">
+          <tbody id="uz-recap"></tbody>
+        </table>
+      </div>
+      <p class="hint" style="margin-top:12px">Ceny sa berú z cenníka platného v deň obeda, nie z dnešného. Faktúra prichádza po zmene cenníka pravidelne a spätný prepočet by tichučko prepísal minulosť.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Uzavretie</h3><span class="pill neutral" id="uz-state">otvorený</span></div>
+      <p style="font-size:13.5px;color:var(--ink-2);margin:0 0 14px;line-height:1.55">
+        Uzavretím sa čísla zafixujú. Neskoršie opravy sa už do uzavretého mesiaca nedostanú — idú do najbližšieho otvoreného ako samostatná položka s odkazom na pôvodný mesiac.
+      </p>
+      <div class="btn-row">
+        <button class="btn primary" id="uz-close" disabled>Uzavrieť mesiac</button>
+        <button class="btn">Podklad pre mzdy — XLSX</button>
+        <button class="btn">Sumár pre účtovníctvo — PDF</button>
+      </div>
+      <p class="hint" id="uz-close-why" style="margin-top:10px">—</p>
+      <div class="menu-sheet" style="margin-top:16px">
+        <p class="eyebrow" style="margin-bottom:6px">Záznam o uzávierke</p>
+        <p style="margin:0;font-size:12.5px;color:var(--ink-2);line-height:1.55">
+          Ku každej uzávierke sa uloží, <strong>kto</strong> ju spravil, <strong>kedy</strong>, s akými číslami a ktoré rozdiely a ako sa vyriešili. Po roku sa nikto nepamätá, prečo v marci sedelo o tri obedy menej.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <p class="eyebrow">Prečo sa faktúra kontroluje strojovo</p>
+    <p>Pri stovke stravníkov a dvadsiatich pracovných dňoch ide o dvetisíc porcií mesačne. Rozdiel troch obedov denne je za rok vyše štyristo obedov — suma, ktorú si nikto nevšimne po jednom, ale ktorá stojí za povšimnutie naraz. Aplikácia pozná presný počet, lebo ho sama poslala, a pozná aj každé storno s časom. Preto vie nielen povedať, že faktúra nesedí, ale aj prečo.</p>
+  </div>
+</section>
+
+<!-- ============ KALENDÁR ============ -->
+<section class="screen wrap" id="s-kalendar" hidden>
+  <div class="screen-head">
+    <h2>Kalendár sviatkov a zatvorených dní</h2>
+    <span class="who" id="kal-year">—</span>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="card">
+        <div class="card-head">
+          <h3>Rok</h3>
+          <div class="btn-row">
+            <button class="btn" id="kal-prev">←</button>
+            <button class="btn" id="kal-next">→</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="kal-grid"></div>
+        <div class="legend" style="margin-top:16px">
+          <span><span class="sw hol"></span> štátny sviatok — nevarí nikto</span>
+          <span><span class="sw shut"></span> závod zatvorený</span>
+          <span><span class="sw nocook"></span> dodávateľ nevarí</span>
+          <span><span class="sw empty"></span> bežný pracovný deň</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-head"><h3 id="kal-d-title">Vyber deň</h3><span class="pill neutral" id="kal-d-kind">—</span></div>
+        <div id="kal-detail">
+          <p style="font-size:13.5px;color:var(--ink-2);margin:0;line-height:1.55">Klikni na deň v kalendári. Ukáže sa, čo s ním aplikácia robí a čo sa stane, keď ho zatvoríš.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Štátne sviatky</h3><span class="pill neutral">zo zákona</span></div>
+        <div id="kal-hol" style="font-size:13px;color:var(--ink-2);line-height:1.7"></div>
+        <p class="hint" style="margin-top:12px">Pevné dátumy si aplikácia drží sama, Veľký piatok a Veľkonočný pondelok si počíta — sú pohyblivé a ručne prepisovaný zoznam by raz do roka niekto zabudol doplniť.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Obdobia mimo prevádzky</h3><span class="pill neutral">zadáva správca</span></div>
+    <div id="kal-periods"></div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn">Pridať obdobie</button>
+    </div>
+  </div>
+
+  <div class="note">
+    <p class="eyebrow">Čo z kalendára vyplýva</p>
+    <p><strong>Deň, v ktorý sa nevarí, sa v objednávke vôbec neukáže.</strong> Nie je zošedený a neklikateľný — nie je tam. Šedé políčko láka na otázku „prečo sa nedá", chýbajúci stĺpec ju nevyvolá.</p>
+    <p><strong>Týždenná uzávierka sa posúva.</strong> Ak je piatok sviatok, uzávierka je vo štvrtok o 12:00. Rovnako denné odhlasovanie: keď má dodávateľ nastavené <em>predchádzajúci pracovný deň</em>, po sviatku sa počíta posledný deň, keď sa naozaj pracovalo — nie kalendárne včerajšok.</p>
+    <p><strong>Zatvorenie dňa, na ktorý sú už objednávky, ich zruší.</strong> Aplikácia najprv povie koľko ich je a koho sa to týka, a až potom sa spýta, či to naozaj chceš.</p>
+  </div>
+</section>
+
+<!-- ============ ZASTUPOVANIE ============ -->
+<section class="screen wrap" id="s-zastup" hidden>
+  <div class="screen-head">
+    <h2>Zastupovanie predákov</h2>
+    <span class="who">aby sa na nikoho obed nezabudlo</span>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Kto objednáva za koho</h3>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)">
+        Stav ku dňu
+        <input type="date" id="zs-date" style="font-family:var(--mono);font-size:12.5px;padding:5px 7px;border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink)">
+      </label>
+    </div>
+    <div class="scroll-x">
+      <table class="data" style="min-width:720px">
+        <thead>
+          <tr><th>Tím</th><th class="num">Ľudí</th><th>Predák</th><th>Reťaz zastupovania</th></tr>
+        </thead>
+        <tbody id="zs-chain"></tbody>
+      </table>
+    </div>
+    <p class="hint" style="margin-top:12px">Poradie zástupcov určuje správca. Aplikácia ide zoznamom zhora nadol a zastaví sa na prvom, kto je v ten deň k dispozícii. Prečiarknutý znamená, že aj on je preč.</p>
+  </div>
+
+  <div id="zs-risk"></div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head"><h3>Neprítomnosti</h3><span class="pill neutral">najbližšie štyri týždne</span></div>
+      <div id="zs-abs"></div>
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn">Pridať neprítomnosť</button>
+      </div>
+      <p class="hint" style="margin-top:10px">Zastupovanie sa zapne a vypne samo podľa týchto dátumov. Ručné odovzdanie tímu je tiež možné — na deň, na týždeň, na hodinu.</p>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-head"><h3>Poradie zástupcov</h3><span class="pill neutral">nastavuje správca</span></div>
+        <div id="zs-deps"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Čo zástupca smie</h3></div>
+        <div style="font-size:13.5px;color:var(--ink-2);line-height:1.6">
+          <p style="margin:0 0 8px"><strong style="color:var(--ink)">Áno:</strong> objednávať a meniť objednávky prevzatého tímu, odhlasovať jeho ľudí, vidieť jeho zberný hárok a menu.</p>
+          <p style="margin:0"><strong style="color:var(--ink)">Nie:</strong> ceny, príspevky, nastavenia dodávateľov, mzdové podklady ani prideľovanie ľudí. Zastupovanie je o obedoch, nie o právach.</p>
+        </div>
+        <p class="hint" style="margin-top:12px">Prevzatie má vždy koniec a skončí samo. Trvalý prístup „lebo vtedy zastupoval" je najbežnejší spôsob, ako sa oprávnenia rozliezajú po firme.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Záznam o zastupovaní</h3><span class="pill neutral">kto, za koho, kedy</span></div>
+    <div class="scroll-x">
+      <table class="data" style="min-width:640px">
+        <thead><tr><th>Kedy</th><th>Kto</th><th>Čo spravil</th></tr></thead>
+        <tbody id="zs-log"></tbody>
+      </table>
+    </div>
+    <p class="hint" style="margin-top:12px">Pri každej bunke v matici je vidieť, kto voľbu zadal. Toto je ten istý údaj zozbieraný za dlhšie obdobie — pri otázke „kto mi to objednal" netreba nikoho obvolávať.</p>
+  </div>
+
+  <div class="note">
+    <p class="eyebrow">Prečo vôbec reťaz a nie jeden zástupca</p>
+    <p>Jeden zástupca stačí, kým nemá dovolenku v tom istom čase ako predák. V lete to nie je výnimka, ale pravidlo — a práve vtedy zlyhá tá časť systému, ktorá sa nikdy netestovala. Preto sa zástupcovia zadávajú v poradí a aplikácia dopredu hlási tímy, ktoré v niektorý deň ostanú bez zodpovednej osoby. Nie v ten deň ráno. Dopredu.</p>
   </div>
 </section>
 
@@ -1580,7 +1959,7 @@
 
 <footer>
   <div class="wrap">
-    <span>Obedár — klikací preview podľa konceptu <code>docs/01-koncept.md</code> (v0.8). Bez databázy, dáta sú vzorové.</span>
+    <span>Obedár — klikací preview podľa konceptu <code>docs/01-koncept.md</code> (v0.9). Bez databázy, dáta sú vzorové.</span>
     <span>Ešte sa nekóduje.</span>
   </div>
 </footer>
@@ -1669,21 +2048,21 @@
   /* cs = poskytovatelia, ktorých má stravník pridelených (prideľuje admin)
      oc = ktorého poskytovateľa sa týka voľba v danom dni */
   const own = [
-    {n:"Kováč Jozef",      p:"4009", cs:[0],   self:false, o:[0,1,0,null,2],   last:[0,1,0,1,2]},
-    {n:"Horváth Peter",    p:"4021", cs:[0],   self:true,  o:[0,0,1,1,null],   last:[0,0,1,1,0]},
-    {n:"Baláž Marián",     p:"4038", cs:[0],   self:false, o:[1,1,1,1,1],      last:[1,1,1,1,1]},
-    {n:"Tóth Ľuboš",       p:"4110", cs:[0],   self:false, o:[null,null,null,null,null], last:[2,0,2,0,2]},
-    {n:"Nagyová Zuzana",   p:"4102", cs:[0],   self:true,  o:[2,2,NONE,2,0],   last:[2,2,0,2,0]},
-    {n:"Šimko Martin",     p:"4127", cs:[0,1], self:false, o:[0,1,null,1,0],   last:[0,1,1,1,0]},
-    {n:"Krajčí Ondrej",    p:"4133", cs:[1],   self:false, o:[1,0,3,0,1],      last:[1,0,3,0,1]},
-    {n:"Bezáková Iveta",   p:"4141", cs:[1],   self:false, o:[NONE,NONE,NONE,NONE,NONE], last:[0,0,0,0,0]},
-    {n:"Danko Radoslav",   p:"4158", cs:[0],   self:false, o:[2,null,2,2,NONE], last:[2,1,2,2,1]}
+    {n:"Kováč Jozef",      p:"4009", cs:[0],   self:false, o:[0,1,0,null,2]},
+    {n:"Horváth Peter",    p:"4021", cs:[0],   self:true,  o:[0,0,1,1,null]},
+    {n:"Baláž Marián",     p:"4038", cs:[0],   self:false, o:[1,1,1,1,1]},
+    {n:"Tóth Ľuboš",       p:"4110", cs:[0],   self:false, o:[null,null,null,null,null]},
+    {n:"Nagyová Zuzana",   p:"4102", cs:[0],   self:true,  o:[2,2,NONE,2,0]},
+    {n:"Šimko Martin",     p:"4127", cs:[0,1], self:false, o:[0,1,null,1,0]},
+    {n:"Krajčí Ondrej",    p:"4133", cs:[1],   self:false, o:[1,0,3,0,1]},
+    {n:"Bezáková Iveta",   p:"4141", cs:[1],   self:false, o:[NONE,NONE,NONE,NONE,NONE]},
+    {n:"Danko Radoslav",   p:"4158", cs:[0],   self:false, o:[2,null,2,2,NONE]}
   ];
 
   const deleg = [
-    {n:"Sedláková Jana",   p:"4204", cs:[1],   self:false, o:[0,0,null,1,3],   last:[0,0,1,1,3]},
-    {n:"Mrva Pavol",       p:"4217", cs:[1],   self:false, o:[1,1,2,NONE,0],   last:[1,1,2,0,0]},
-    {n:"Slaný Erik",       p:"4229", cs:[1],   self:false, o:[null,null,null,null,null], last:[0,2,0,2,0]}
+    {n:"Sedláková Jana",   p:"4204", cs:[1],   self:false, o:[0,0,null,1,3]},
+    {n:"Mrva Pavol",       p:"4217", cs:[1],   self:false, o:[1,1,2,NONE,0]},
+    {n:"Slaný Erik",       p:"4229", cs:[1],   self:false, o:[null,null,null,null,null]}
   ];
 
   /* by = kto voľbu zadal: "self" stravník sám, "lead" predák, null nikto */
@@ -1953,15 +2332,6 @@
     else focusOpt(t, r, c, target);
   });
 
-  const bc = document.getElementById("btn-copy");
-  if (bc) bc.addEventListener("click", function(){
-    own.concat(deleg).forEach(p => {
-      p.o = p.last.map(v => (v === NONE) ? NONE : (v >= CATERERS[p.cs[0]].count ? null : v));
-      p.oc = p.o.map(() => p.cs[0]);
-      p.by = p.o.map(v => undecided(v) ? null : "lead");
-    });
-    renderAll();
-  });
   /* ---------- hromadné odhlásenie ---------- */
   const bv = document.getElementById("btn-vac");
   if (bv) bv.addEventListener("click", function(){
@@ -2106,23 +2476,7 @@
     });
   }
 
-  const svc = document.getElementById("sv-copy");
-  if (svc) svc.addEventListener("click", function(){
-    const last = [0,1,1,1,2];
-    for (let i = 0; i < 5; i++) svOrders[i] = last[i] >= CATERERS[DINER_CAT].count ? null : last[i];
-    openDay = null;
-    renderStravnik();
-  });
-
   /* ---------- admin ---------- */
-  const MENU_LAST = [
-    ["Slepačí vývar, sviečková na smotane, knedľa","Kapustnica, vyprážaný rezeň, zemiaky","Zeleninová polievka, pirohy"],
-    ["Gulášová polievka, pečené kura, ryža","Hrachová polievka, špagety carbonara","Paradajková polievka, plnená paprika"],
-    ["Držková polievka, bravčové stehno, knedľa","Fazuľová polievka, vyprážaný syr, hranolky","Cesnaková polievka, halušky"],
-    ["Slepačí vývar, morčacie prsia, dusená ryža","Šampiňónová polievka, guláš, knedľa","Brokolicová polievka, palacinky"],
-    ["Rybacia polievka, vyprážaná ryba, šalát","Zeleninový vývar, kuracie soté, ryža","Šošovicová polievka, buchty na pare"]
-  ];
-
   function renderAdminMenu(){
     const box = document.getElementById("a-menu");
     if (!box) return;
@@ -2168,17 +2522,6 @@
       st.textContent = has ? "zadané s názvami" : "len označenia";
     }
     renderStravnik();
-  });
-
-  const mc = document.getElementById("a-menu-copy");
-  if (mc) mc.addEventListener("click", function(){
-    const A = CATERERS[adminCat];
-    A.menu = MENU_LAST.map(day => {
-      const row = [];
-      for (let j = 0; j < A.count; j++) row.push(day[j] || "");
-      return row;
-    });
-    renderAll();
   });
 
   const mx = document.getElementById("a-menu-clear");
@@ -2507,6 +2850,695 @@
     el.title = used.map(c => CATERERS[c].name).join(" · ");
   }
 
+  /* ================= SVIATKY A ZATVORENÉ DNI ================= */
+
+  const MON_N = ["január","február","marec","apríl","máj","jún","júl","august","september","október","november","december"];
+  const DOW_S = ["po","ut","st","št","pi","so","ne"];
+
+  function dkey(d){ return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+  function midnight(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  const todayT = midnight(now).getTime();
+
+  function easterSunday(Y){
+    const a=Y%19, b=Math.floor(Y/100), c=Y%100,
+          d=Math.floor(b/4), e=b%4,
+          f=Math.floor((b+8)/25), g=Math.floor((b-f+1)/3),
+          h=(19*a+b-d-g+15)%30,
+          i=Math.floor(c/4), k=c%4,
+          l=(32+2*e+2*i-h-k)%7,
+          m=Math.floor((a+11*h+22*l)/451),
+          mo=Math.floor((h+l-7*m+114)/31),
+          da=((h+l-7*m+114)%31)+1;
+    return new Date(Y, mo-1, da);
+  }
+
+  const FIXED_HOL = [
+    [0,1,"Deň vzniku Slovenskej republiky"],
+    [0,6,"Zjavenie Pána"],
+    [4,1,"Sviatok práce"],
+    [4,8,"Deň víťazstva nad fašizmom"],
+    [6,5,"Sv. Cyrila a Metoda"],
+    [7,29,"Výročie SNP"],
+    [8,1,"Deň Ústavy SR"],
+    [8,15,"Sedembolestná Panna Mária"],
+    [10,1,"Sviatok všetkých svätých"],
+    [10,17,"Deň boja za slobodu a demokraciu"],
+    [11,24,"Štedrý deň"],
+    [11,25,"Prvý sviatok vianočný"],
+    [11,26,"Druhý sviatok vianočný"]
+  ];
+
+  const holCache = {};
+  function holidaysOf(Y){
+    if (holCache[Y]) return holCache[Y];
+    const map = {};
+    FIXED_HOL.forEach(h => { map[dkey(new Date(Y,h[0],h[1]))] = h[2]; });
+    const es = easterSunday(Y);
+    map[dkey(addDays(es,-2))] = "Veľký piatok";
+    map[dkey(addDays(es,1))]  = "Veľkonočný pondelok";
+    holCache[Y] = map;
+    return map;
+  }
+  function holName(d){ return holidaysOf(d.getFullYear())[dkey(d)] || null; }
+
+  const CY = now.getFullYear();
+  const PERIODS = [
+    {kind:"shut",   from:new Date(CY,6,20), to:new Date(CY,6,31), label:"Celozávodná dovolenka", who:"celý závod"},
+    {kind:"nocook", c:1, from:new Date(CY,6,1), to:new Date(CY,7,31), label:"Letné prázdniny", who:"Školská jedáleň Sever"},
+    {kind:"shut",   from:new Date(CY,11,24), to:new Date(CY,11,31), label:"Vianočná odstávka", who:"celý závod"}
+  ];
+
+  const DAY_OVR = {};   /* ručne prepnuté jednotlivé dni */
+
+  function dayInfo(d){
+    const k = dkey(d);
+    const wd = (d.getDay()+6)%7;
+    const info = { we: wd >= 5, hol: holName(d), shut:false, nocook:[], why:[] };
+    if (info.hol){ info.shut = true; CATERERS.forEach((c,i) => info.nocook.push(i)); return info; }
+    PERIODS.forEach(p => {
+      if (d < p.from || d > p.to) return;
+      if (p.kind === "shut"){ info.shut = true; info.why.push({t:p.label, c:null}); }
+      else if (info.nocook.indexOf(p.c) < 0){ info.nocook.push(p.c); info.why.push({t:p.label + " — " + p.who, c:p.c}); }
+    });
+    const o = DAY_OVR[k];
+    if (o){
+      if (typeof o.shut === "boolean") info.shut = o.shut;
+      if (o.nocook) CATERERS.forEach((c,i) => {
+        const has = info.nocook.indexOf(i) >= 0;
+        if (o.nocook[i] && !has) info.nocook.push(i);
+        if (o.nocook[i] === false && has) info.nocook.splice(info.nocook.indexOf(i),1);
+      });
+    }
+    if (info.shut) CATERERS.forEach((c,i) => { if (info.nocook.indexOf(i) < 0) info.nocook.push(i); });
+    return info;
+  }
+  function cooksNobody(d){ const i = dayInfo(d); return i.we || i.nocook.length === CATERERS.length; }
+  function isWorkday(d){ const wd=(d.getDay()+6)%7; return wd < 5 && !holName(d); }
+
+  /* ================= KALENDÁR ================= */
+
+  let kalYear = CY;
+  let kalSel = null;
+
+  function renderKal(){
+    const grid = document.getElementById("kal-grid");
+    if (!grid) return;
+    setText("kal-year", "rok " + kalYear + " · Slovensko");
+    grid.innerHTML = "";
+    for (let m = 0; m < 12; m++){
+      const box = document.createElement("div");
+      box.className = "cal-m";
+      let h = "<h4>" + MON_N[m] + "</h4><div class=\"cal-dow\">" +
+              DOW_S.map(x => "<span>"+x+"</span>").join("") + "</div><div class=\"cal-days\">";
+      const first = new Date(kalYear, m, 1);
+      const pad = (first.getDay()+6)%7;
+      for (let i = 0; i < pad; i++) h += '<span class="cal-d pad"></span>';
+      const last = new Date(kalYear, m+1, 0).getDate();
+      for (let dd = 1; dd <= last; dd++){
+        const d = new Date(kalYear, m, dd);
+        const inf = dayInfo(d);
+        const cls = ["cal-d"];
+        if (inf.we) cls.push("we");
+        if (inf.hol) cls.push("hol");
+        else if (inf.we) { /* víkend ostáva víkendom, odstávky sa naň nekreslia */ }
+        else if (inf.shut) cls.push("shut");
+        else if (inf.nocook.length) cls.push("nocook");
+        if (d.getTime() === todayT) cls.push("today");
+        h += '<button class="'+cls.join(" ")+'" data-day="'+dkey(d)+'" ' +
+             'aria-pressed="'+(kalSel === dkey(d))+'" title="'+(inf.hol || "")+'">'+dd+"</button>";
+      }
+      box.innerHTML = h + "</div>";
+      grid.appendChild(box);
+    }
+
+    const hol = document.getElementById("kal-hol");
+    if (hol){
+      const map = holidaysOf(kalYear);
+      const list = Object.keys(map).map(k => {
+        const p = k.split("-").map(Number);
+        return { d:new Date(p[0],p[1]-1,p[2]), n:map[k] };
+      }).sort((a,b) => a.d - b.d);
+      hol.innerHTML = list.map(x =>
+        '<div><span style="font-family:var(--mono);color:var(--ink-3);display:inline-block;min-width:62px">' +
+        dm(x.d) + '</span> ' + x.n + "</div>").join("");
+    }
+
+    const per = document.getElementById("kal-periods");
+    if (per){
+      const mine = PERIODS.filter(p => p.from.getFullYear() === kalYear);
+      per.innerHTML = mine.length ? mine.map(p =>
+        '<div class="abs-row"><span class="an"><strong>'+p.label+"</strong><br>" +
+        '<span style="color:var(--ink-3);font-size:12.5px">'+p.who+"</span></span>" +
+        '<span class="ad">'+dm(p.from)+" – "+dmy(p.to)+"</span>" +
+        '<span class="pill '+(p.kind === "shut" ? "miss" : "neutral")+'">' +
+        (p.kind === "shut" ? "závod zatvorený" : "dodávateľ nevarí") + "</span>" +
+        '<button class="btn">Upraviť</button></div>').join("")
+        : '<p style="font-size:13.5px;color:var(--ink-2);margin:0">Pre rok '+kalYear+' zatiaľ nie sú zadané žiadne obdobia. Sviatky platia aj tak — tie si aplikácia doplní sama.</p>';
+    }
+    renderKalDetail();
+  }
+
+  function ordersOn(d){
+    const t = midnight(d).getTime();
+    if (t < todayT) return -1;
+    if (t > addDays(thisMon,13).getTime()) return 0;
+    return 41 + ((d.getDate()*7 + d.getMonth()) % 9);
+  }
+
+  function renderKalDetail(){
+    const box = document.getElementById("kal-detail");
+    if (!box) return;
+    const pill = document.getElementById("kal-d-kind");
+    if (!kalSel){
+      setText("kal-d-title", "Vyber deň");
+      if (pill){ pill.className = "pill neutral"; pill.textContent = "—"; }
+      box.innerHTML = '<p style="font-size:13.5px;color:var(--ink-2);margin:0;line-height:1.55">Klikni na deň v kalendári. Ukáže sa, čo s ním aplikácia robí a čo sa stane, keď ho zatvoríš.</p>';
+      return;
+    }
+    const p = kalSel.split("-").map(Number);
+    const d = new Date(p[0], p[1]-1, p[2]);
+    const inf = dayInfo(d);
+    const wd = (d.getDay()+6)%7;
+    setText("kal-d-title", (wd < 5 ? DAYS[wd] : (wd === 5 ? "Sobota" : "Nedeľa")) + " " + d.getDate() + ". " + MON[d.getMonth()] + " " + d.getFullYear());
+
+    let kind = "varí sa", pc = "pill ok";
+    if (inf.hol){ kind = "štátny sviatok"; pc = "pill miss"; }
+    else if (inf.we){ kind = "víkend"; pc = "pill neutral"; }
+    else if (inf.shut){ kind = "závod zatvorený"; pc = "pill miss"; }
+    else if (inf.nocook.length){ kind = inf.nocook.length + " z " + CATERERS.length + " dodávateľov nevarí"; pc = "pill neutral"; }
+    if (pill){ pill.className = pc; pill.textContent = kind; }
+
+    let h = "";
+    if (inf.hol){
+      h += '<div class="warnbox" style="margin-top:0"><strong>' + inf.hol + "</strong>" +
+           "<p>Sviatok určuje zákon, meniť sa nedá. Nevarí nikto, deň sa v objednávke neukáže.</p></div>";
+    } else if (inf.we){
+      h += '<p style="font-size:13.5px;color:var(--ink-2);margin:0 0 14px;line-height:1.55">Víkend. Objednáva sa len na pracovné dni.</p>';
+    } else {
+      h += '<div class="field" style="margin-bottom:12px"><label>Prevádzka</label>' +
+           '<label class="check" style="margin-bottom:9px"><input type="checkbox" id="kal-shut"' +
+           (inf.shut ? " checked" : "") + "> Závod zatvorený — neobjednáva sa vôbec</label>";
+      CATERERS.forEach((c,i) => {
+        h += '<label class="check" style="margin-bottom:7px"><input type="checkbox" data-nocook="'+i+'"' +
+             (inf.nocook.indexOf(i) >= 0 ? " checked" : "") + (inf.shut ? " disabled" : "") +
+             "> " + c.name + " nevarí</label>";
+      });
+      h += "</div>";
+      if (inf.why.length) h += '<p class="hint" style="margin:-4px 0 12px">Vyplýva z obdobia: ' + inf.why.map(w => w.t).join(" · ") + "</p>";
+    }
+
+    const cnt = ordersOn(d);
+    const closed = inf.hol || inf.shut || inf.nocook.length === CATERERS.length;
+    if (!inf.we){
+      if (cnt < 0){
+        h += '<div class="okbox" style="background:var(--surface-2);border-color:var(--line-2);color:var(--ink-2)">' +
+             "<strong>Deň už prebehol.</strong><p>Zmena sa objednávok nedotkne, prepísala by len históriu — a tá je podkladom pre mzdy. Ak je mesiac uzavretý, aplikácia zmenu odmietne.</p></div>";
+      } else if (cnt === 0){
+        h += '<div class="okbox"><strong>Na tento deň sa ešte neobjednáva.</strong>' +
+             "<p>Objednávkové okno sa otvára v pondelok na nasledujúci týždeň. Zatvoriť deň teraz je najlacnejšie — nikoho to neprekvapí, lebo ho ešte nikto nevidel.</p></div>";
+      } else if (closed){
+        h += '<div class="warnbox"><strong>Na tento deň je objednaných ' + cnt + " obedov.</strong>" +
+             "<p>Zatvorením sa všetky zrušia. Aplikácia upozorní dotknutých predákov a stravníkov, ktorí majú prihlásenie, a dodávateľovi pošle opravenú objednávku s nulou.</p>" +
+             '<p style="font-family:var(--mono);font-size:12px">Dotkne sa to 6 tímov · 5 predákov</p></div>';
+      } else {
+        h += '<div class="okbox"><strong>' + cnt + " objednaných obedov.</strong>" +
+             "<p>Deň je otvorený a v objednávkach beží normálne.</p></div>";
+      }
+    }
+
+    if (!inf.we && wd === 4 && (inf.hol || inf.shut)){
+      h += '<div class="warnbox" style="background:var(--mustard-soft);border-color:var(--mustard);color:var(--mustard)">' +
+           "<strong>Piatok je zatvorený → posúva sa týždenná uzávierka.</strong>" +
+           "<p>Namiesto piatka o 12:00 platí štvrtok o 12:00. Predáci dostanú upozornenie o deň skôr.</p></div>";
+    }
+
+    h += '<div class="btn-row" style="margin-top:14px"><button class="btn">Pridať poznámku</button></div>';
+    box.innerHTML = h;
+  }
+
+  document.addEventListener("click", function(e){
+    const b = e.target.closest("[data-day]");
+    if (!b) return;
+    kalSel = (kalSel === b.dataset.day) ? null : b.dataset.day;
+    renderKal();
+  });
+
+  document.addEventListener("change", function(e){
+    if (!kalSel) return;
+    const t = e.target;
+    if (t.id === "kal-shut"){
+      DAY_OVR[kalSel] = DAY_OVR[kalSel] || {};
+      DAY_OVR[kalSel].shut = t.checked;
+      renderKal();
+    } else if (t.dataset && t.dataset.nocook !== undefined){
+      DAY_OVR[kalSel] = DAY_OVR[kalSel] || {};
+      DAY_OVR[kalSel].nocook = DAY_OVR[kalSel].nocook || {};
+      DAY_OVR[kalSel].nocook[+t.dataset.nocook] = t.checked;
+      renderKal();
+    }
+  });
+
+  const kp = document.getElementById("kal-prev");
+  if (kp) kp.addEventListener("click", () => { kalYear--; kalSel = null; renderKal(); });
+  const kn = document.getElementById("kal-next");
+  if (kn) kn.addEventListener("click", () => { kalYear++; kalSel = null; renderKal(); });
+
+  /* ================= MESAČNÁ UZÁVIERKA ================= */
+
+  const UZ_PRICE = [6.20, 5.40];        /* naša cena z cenníka */
+  const UZ_INV_PRICE = [6.30, 5.40];    /* čo reálne prišlo na faktúre ku koncu mesiaca */
+  const UZ_DELTA = { 5: 2, 12: 2 };     /* dni, v ktorých faktúra prevyšuje objednávku */
+
+  let uzOff = 1;          /* koľko mesiacov dozadu; 1 = minulý mesiac */
+  let uzCat = 0;
+  let uzMode = "sum";
+  const uzInv = {};       /* "mes:cat:idx" -> počet z faktúry */
+  const uzSumInv = {};    /* "mes:cat" -> {n, amt} */
+  const uzFixed = {};     /* "mes:cat:id" -> zvolené riešenie */
+
+  function uzMonth(){ return new Date(now.getFullYear(), now.getMonth()-uzOff, 1); }
+  function uzClosed(){ return uzOff > 1; }
+  function uzK(){ return uzOff + ":" + uzCat; }
+
+  function uzDays(ci){
+    const out = [];
+    const M = uzMonth();
+    const d = new Date(M.getFullYear(), M.getMonth(), 1);
+    while (d.getMonth() === M.getMonth()){
+      const inf = dayInfo(d);
+      if (isWorkday(d) && !inf.shut && inf.nocook.indexOf(ci) < 0) out.push(new Date(d));
+      d.setDate(d.getDate()+1);
+    }
+    return out;
+  }
+  function ourCount(ci, i){ return (ci === 0 ? 42 : 26) + ((i*5 + ci*3) % 7); }
+  function invCount(ci, i){ return ourCount(ci,i) + (ci === 0 ? (UZ_DELTA[i] || 0) : 0); }
+  function uzPriceFrom(ci){ return Math.max(1, uzDays(ci).length - 3); }
+  function invPrice(ci, i){ return i >= uzPriceFrom(ci) ? UZ_INV_PRICE[ci] : UZ_PRICE[ci]; }
+  function eur(v){ return v.toFixed(2).replace(".", ","); }
+  /* faktúru prepisuje človek — pripúšťame desatinnú čiarku aj bodku, medzery v tisícoch */
+  function numOf(raw){
+    if (raw === undefined || raw === null || String(raw).trim() === "") return null;
+    const v = parseFloat(String(raw).replace(/\s/g, "").replace(",", "."));
+    return isNaN(v) ? null : v;
+  }
+
+  function uzFindings(ci){
+    const days = uzDays(ci);
+    const out = [];
+    if (ci !== 0 || !days.length) return out;
+    Object.keys(UZ_DELTA).forEach(k => {
+      const i = +k;
+      if (i >= days.length) return;
+      out.push({
+        id: "d" + i,
+        when: DAYS_S[(days[i].getDay()+6)%7] + " " + dm(days[i]),
+        txt: i === 5
+          ? "Faktúra má o 2 obedy viac. V zázname máme dve storná prijaté o 07:41 — jedenásť minút po dennej uzávierke. Dodávateľ ich už uvaril."
+          : "Faktúra má o 2 obedy viac a v aplikácii k tomu nie je žiadny záznam. Ani storno, ani doobjednávka.",
+        opts: i === 5
+          ? ["Účtovať zamestnancom v plnej cene, bez príspevku", "Účtovať štandardne s príspevkom", "Znáša firma"]
+          : ["Overiť u dodávateľa telefonicky", "Uznať a rozúčtovať na tím", "Neuznať — žiadať dobropis"]
+      });
+    });
+    out.push({
+      id: "price",
+      when: dm(days[uzPriceFrom(ci)] || days[days.length-1]),
+      txt: "Od tohto dňa dodávateľ fakturuje " + eur(UZ_INV_PRICE[0]) + " € za obed. V cenníku aplikácie máme " + eur(UZ_PRICE[0]) + " € s platnosťou od 1. 1. Rozdiel je v sume, nie v počte.",
+      opts: ["Doplniť cenník s platnosťou od tohto dňa", "Trvať na pôvodnej cene — reklamovať", "Prijať a prepočítať len tento mesiac"]
+    });
+    return out;
+  }
+
+  function uzEntered(){
+    const s = uzSumInv[uzK()];
+    if (s && (s.n !== undefined || s.amt !== undefined)) return true;
+    return Object.keys(uzInv).some(k => k.indexOf(uzK() + ":") === 0);
+  }
+
+  function renderUz(){
+    const seg = document.getElementById("uz-cat");
+    if (!seg) return;
+    const M = uzMonth();
+    setText("uz-month", MON_N[M.getMonth()] + " " + M.getFullYear());
+    seg.innerHTML = CATERERS.map((c,i) =>
+      '<button data-uzcat="'+i+'" aria-pressed="'+(i === uzCat)+'">'+c.short+"</button>").join("");
+    const pvb = document.getElementById("uz-prev"), nxb = document.getElementById("uz-next");
+    if (nxb) nxb.disabled = uzOff <= 1;
+    if (pvb) pvb.disabled = uzOff >= 6;
+
+    const days = uzDays(uzCat);
+    const emp0 = document.getElementById("uz-empty");
+    emp0.hidden = days.length > 0;
+    document.getElementById("uz-body").hidden = days.length === 0;
+    if (!days.length){
+      emp0.innerHTML = '<div class="okbox" style="margin-top:0;background:var(--surface-2);border-color:var(--line-2);color:var(--ink-2)">' +
+        "<strong>" + CATERERS[uzCat].name + " v tomto mesiaci nevarila ani jeden deň.</strong>" +
+        "<p>Vyplýva to z kalendára zatvorených dní. Faktúra by nemala prísť žiadna — ak príde, je to samo o sebe nález.</p></div>";
+    }
+
+    const ourN = days.reduce((a,_,i) => a + ourCount(uzCat,i), 0);
+    const ourA = days.reduce((a,_,i) => a + ourCount(uzCat,i) * UZ_PRICE[uzCat], 0);
+
+    document.getElementById("uz-sum").hidden = uzMode !== "sum";
+    document.getElementById("uz-day").hidden = uzMode !== "day";
+    Array.from(document.querySelectorAll("#uz-mode button")).forEach(b =>
+      b.setAttribute("aria-pressed", String(b.dataset.m === uzMode)));
+
+    const s = uzSumInv[uzK()] || {};
+    const sN = numOf(s.n), sA = numOf(s.amt);
+    const sb = document.getElementById("uz-sum-b");
+    function dcell(v){
+      if (v === null) return '<td class="num">—</td>';
+      const z = Math.abs(v) < 0.005;
+      return '<td class="num d" style="color:var(--'+(z ? "ok" : "miss")+')">' + (z ? "0" : (v > 0 ? "+" : "") + eur(v)) + "</td>";
+    }
+    function inCell(attr, raw){
+      const empty = raw === undefined || raw === "";
+      return '<td class="num"><input class="num-in'+(empty ? " empty" : "")+'" type="text" ' +
+        'inputmode="decimal" '+attr+' value="'+(empty ? "" : String(raw).replace(/"/g,"&quot;"))+'" placeholder="—"></td>';
+    }
+    sb.innerHTML =
+      "<tr" + (sN !== null && sN !== ourN ? ' class="diff"' : "") + "><td>Počet obedov</td>" +
+      '<td class="num">'+ourN+"</td>" +
+      inCell('data-uzs="n"', s.n) +
+      (sN === null ? '<td class="num">—</td>' : '<td class="num d" style="color:var(--'+(sN === ourN ? "ok" : "miss")+')">'+(sN === ourN ? "0" : (sN > ourN ? "+" : "")+(sN-ourN))+"</td>") + "</tr>" +
+      "<tr" + (sA !== null && Math.abs(sA-ourA) > 0.005 ? ' class="diff"' : "") + "><td>Suma bez DPH</td>" +
+      '<td class="num">'+eur(ourA)+" €</td>" +
+      inCell('data-uzs="amt"', s.amt) +
+      dcell(sA === null ? null : sA - ourA) + "</tr>" +
+      "<tr><td>Priemerná cena za obed</td>" +
+      '<td class="num">'+eur(UZ_PRICE[uzCat])+" €</td>" +
+      '<td class="num">'+(sA !== null && sN ? eur(sA/sN)+" €" : "—")+"</td>" +
+      dcell(sA !== null && sN ? (sA/sN - UZ_PRICE[uzCat]) : null) + "</tr>";
+
+    const db = document.getElementById("uz-day-b");
+    let dN = 0, dInv = 0, anyDay = false;
+    db.innerHTML = days.map((d,i) => {
+      const our = ourCount(uzCat,i);
+      const raw = uzInv[uzK()+":"+i];
+      const v = numOf(raw);
+      dN += our;
+      if (v !== null){ dInv += v; anyDay = true; }
+      const diff = v === null ? null : v - our;
+      return "<tr" + (diff ? ' class="diff"' : (diff === 0 ? ' class="match"' : "")) + ">" +
+        "<td>" + DAYS_S[(d.getDay()+6)%7] + " " + dm(d) + "</td>" +
+        '<td class="num">'+our+"</td>" +
+        inCell('data-uzd="'+i+'"', raw) +
+        '<td class="num d">'+(diff === null ? "—" : (diff === 0 ? "0" : (diff > 0 ? "+" : "")+diff))+"</td>" +
+        '<td class="num">'+eur(our * UZ_PRICE[uzCat])+"</td></tr>";
+    }).join("");
+    document.getElementById("uz-day-f").innerHTML =
+      "<tr><td>Spolu — " + days.length + " pracovných dní</td>" +
+      '<td class="num">'+dN+"</td>" +
+      '<td class="num">'+(anyDay ? dInv : "—")+"</td>" +
+      '<td class="num">'+(anyDay ? (dInv-dN === 0 ? "0" : (dInv > dN ? "+" : "")+(dInv-dN)) : "—")+"</td>" +
+      '<td class="num">'+eur(dN * UZ_PRICE[uzCat])+"</td></tr>";
+
+    const F = uzFindings(uzCat);
+    const cc = document.getElementById("uz-causes-card");
+    const shown = uzEntered() && F.length > 0;
+    cc.hidden = !shown;
+    const openN = F.filter(f => !uzFixed[uzK()+":"+f.id]).length;
+    if (shown){
+      const op = document.getElementById("uz-open");
+      op.className = openN ? "pill miss" : "pill ok";
+      op.textContent = openN ? openN + " nevyriešené" : "všetky vyriešené";
+      document.getElementById("uz-causes").innerHTML = F.map(f => {
+        const sel = uzFixed[uzK()+":"+f.id] || "";
+        return '<div class="cause"><div class="cw">' +
+          '<span class="cd">'+f.when+"</span>" +
+          '<p class="ct">'+f.txt+"</p></div>" +
+          '<select data-uzfix="'+f.id+'">' +
+          '<option value=""'+(sel ? "" : " selected")+">— nevyriešené —</option>" +
+          f.opts.map(o => '<option'+(sel === o ? " selected" : "")+">"+o+"</option>").join("") +
+          "</select>" +
+          '<span class="pill '+(sel ? "ok" : "miss")+'">'+(sel ? "vyriešené" : "otvorené")+"</span></div>";
+      }).join("");
+    }
+
+    const v = document.getElementById("uz-verdict");
+    if (!uzEntered()){
+      v.innerHTML = "";
+    } else if (uzCat !== 0 || (uzMode === "sum" && s.n === ourN && s.amt !== undefined && Math.abs(s.amt-ourA) < 0.005)){
+      v.innerHTML = '<div class="okbox"><strong>Faktúra sedí do centa.</strong><p>Netreba nič ďalej overovať, mesiac môže ísť ďalej.</p></div>';
+    } else {
+      v.innerHTML = '<div class="warnbox"><strong>Faktúra nesedí.</strong>' +
+        "<p>Počet aj suma sa líšia, a to sú dve rôzne príčiny — počet vyrábajú storná a doobjednávky, sumu cena. Prepni na <em>Po dňoch</em> a nájdeš dni, ktoré rozdiel spravili.</p></div>";
+    }
+
+    const steps = document.getElementById("uz-steps");
+    const allFixed = shown ? openN === 0 : uzEntered();
+    const st = [
+      ["01","Mesiac skončil", dmy(new Date(M.getFullYear(), M.getMonth()+1, 0)), "done"],
+      ["02","Faktúry doručené", "2 z 2 dodávateľov", "done"],
+      ["03","Rozdiely vyriešené", shown ? (F.length-openN)+" z "+F.length : (uzEntered() ? "bez rozdielov" : "čaká na faktúru"), allFixed ? "done" : "now"],
+      ["04","Uzavreté a odoslané mzdám", allFixed ? "možno uzavrieť" : "čaká", allFixed ? "now" : ""]
+    ];
+    steps.innerHTML = st.map(x =>
+      '<div class="step '+x[3]+'"><div class="st-n">'+x[0]+'</div><div class="st-t">'+x[1]+'</div><div class="st-s">'+x[2]+"</div></div>").join("");
+
+    const btn = document.getElementById("uz-close");
+    btn.disabled = uzClosed() || !allFixed;
+    setText("uz-close-why", uzClosed()
+      ? "Mesiac je uzavretý a podklad odovzdaný. Čísla sa už nemenia — prípadná oprava ide do najbližšieho otvoreného mesiaca."
+      : (allFixed
+        ? "Všetko sedí. Po uzavretí sa čísla zafixujú a export pre mzdy sa vygeneruje z nich."
+        : (uzEntered() ? "Uzavrieť sa dá, až keď má každý rozdiel zvolené riešenie." : "Uzavrieť sa dá, až keď je faktúra skontrolovaná.")));
+    const stp = document.getElementById("uz-state");
+    stp.className = uzClosed() ? "pill ok" : (allFixed ? "pill ok" : "pill neutral");
+    stp.textContent = uzClosed() ? "uzavretý " + dmy(new Date(M.getFullYear(), M.getMonth()+1, 8)) : (allFixed ? "pripravený na uzavretie" : "otvorený");
+
+    /* koľko pracovných dní v mesiaci sa nevarí a prečo */
+    let skipped = 0;
+    const dd = new Date(M.getFullYear(), M.getMonth(), 1);
+    const reasons = {};
+    while (dd.getMonth() === M.getMonth()){
+      if (isWorkday(dd)){
+        const inf = dayInfo(dd);
+        if (inf.shut || inf.nocook.indexOf(uzCat) >= 0){
+          skipped++;
+          const mine = inf.why.filter(w => w.c === null || w.c === uzCat);
+          (mine.length ? mine.map(w => w.t) : ["mimo prevádzky"]).forEach(w => { reasons[w] = 1; });
+        }
+      }
+      dd.setDate(dd.getDate()+1);
+    }
+    setText("uz-cal-note", skipped
+      ? "V mesiaci je " + skipped + " pracovných dní, v ktorých sa pre tohto dodávateľa nevarilo (" +
+        Object.keys(reasons).join(", ") + "). Uzávierka číta ten istý kalendár ako objednávky — nemôže sa stať, že by účtovala deň, na ktorý sa nedalo objednať."
+      : "");
+
+    const meals = CATERERS.reduce((a,c,ci) => a + uzDays(ci).reduce((b,_,i) => b + ourCount(ci,i), 0), 0);
+    const base = CATERERS.reduce((a,c,ci) => a + uzDays(ci).reduce((b,_,i) => b + ourCount(ci,i)*UZ_PRICE[ci], 0), 0);
+    const nd0 = uzDays(0).length;
+    const applyCorr = !shown || openN === 0;
+    const corr = applyCorr
+      ? Object.keys(UZ_DELTA).reduce((a,k) => a + (+k < nd0 ? UZ_DELTA[k] : 0), 0) * UZ_PRICE[0]
+      : 0;
+    const emp = (base + corr) * 0.55, sf = meals * 0.50;
+    document.getElementById("uz-recap").innerHTML =
+      row("Obedov spolu", meals + " porcií") +
+      row("Cena podľa cenníka", eur(base) + " €") +
+      row("Korekcie z faktúry", applyCorr
+        ? (corr ? "+" + eur(corr) + " €" : "0,00 €")
+        : '<span style="color:var(--miss)">' + openN + " nevyriešených</span>") +
+      row("Základ na rozúčtovanie", eur(base + corr) + " €") +
+      row("Príspevok zamestnávateľa (55 %)", "−" + eur(emp) + " €") +
+      row("Sociálny fond (0,50 € / obed)", "−" + eur(sf) + " €") +
+      '<tr><td style="font-weight:700;border-top:2px solid var(--line-2)">Zrážka zo mzdy spolu</td>' +
+      '<td class="num" style="font-weight:700;border-top:2px solid var(--line-2)">' + eur(base + corr - emp - sf) + " €</td></tr>";
+    function row(a,b){ return "<tr><td>"+a+'</td><td class="num">'+b+"</td></tr>"; }
+  }
+
+  document.addEventListener("click", function(e){
+    const c = e.target.closest("[data-uzcat]");
+    if (c){ uzCat = +c.dataset.uzcat; renderUz(); return; }
+    const m = e.target.closest("#uz-mode button");
+    if (m){ uzMode = m.dataset.m; renderUz(); return; }
+    if (e.target.closest("#uz-prev")){ if (uzOff < 6) uzOff++; renderUz(); return; }
+    if (e.target.closest("#uz-next")){ if (uzOff > 1) uzOff--; renderUz(); return; }
+  });
+
+  document.addEventListener("input", function(e){
+    const t = e.target;
+    if (!t.dataset) return;
+    const isS = t.dataset.uzs !== undefined, isD = t.dataset.uzd !== undefined;
+    if (!isS && !isD) return;
+    const pos = t.selectionStart;
+    const sel = isS ? '[data-uzs="'+t.dataset.uzs+'"]' : '[data-uzd="'+t.dataset.uzd+'"]';
+    if (isS){
+      uzSumInv[uzK()] = uzSumInv[uzK()] || {};
+      if (t.value === "") delete uzSumInv[uzK()][t.dataset.uzs];
+      else uzSumInv[uzK()][t.dataset.uzs] = t.value;
+    } else {
+      const k = uzK() + ":" + t.dataset.uzd;
+      if (t.value === "") delete uzInv[k]; else uzInv[k] = t.value;
+    }
+    renderUz();
+    const again = document.querySelector(sel);
+    if (again){ again.focus(); try { again.setSelectionRange(pos, pos); } catch (err) {} }
+  });
+
+  document.addEventListener("change", function(e){
+    const f = e.target.closest("[data-uzfix]");
+    if (!f) return;
+    const k = uzK() + ":" + f.dataset.uzfix;
+    if (f.value) uzFixed[k] = f.value; else delete uzFixed[k];
+    renderUz();
+  });
+
+  const ud = document.getElementById("uz-demo");
+  if (ud) ud.addEventListener("click", function(){
+    const days = uzDays(uzCat);
+    let n = 0, amt = 0;
+    days.forEach((d,i) => {
+      const v = invCount(uzCat,i);
+      uzInv[uzK()+":"+i] = String(v);
+      n += v; amt += v * invPrice(uzCat,i);
+    });
+    uzSumInv[uzK()] = { n:String(n), amt:eur(amt) };
+    renderUz();
+  });
+
+  const ur = document.getElementById("uz-reset");
+  if (ur) ur.addEventListener("click", function(){
+    Object.keys(uzInv).forEach(k => { if (k.indexOf(uzK()+":") === 0) delete uzInv[k]; });
+    Object.keys(uzFixed).forEach(k => { if (k.indexOf(uzK()+":") === 0) delete uzFixed[k]; });
+    delete uzSumInv[uzK()];
+    renderUz();
+  });
+
+  /* ================= ZASTUPOVANIE ================= */
+
+  const NAMES = {
+    "4009":"Kováč Jozef", "4038":"Baláž Marián", "4192":"Urban Milan",
+    "4217":"Mrva Pavol", "4301":"Beňová Alena", "4356":"Šulek Ivan"
+  };
+  const LEADS = [
+    {n:"4009", team:"Údržba",           ppl:9,  deps:["4038","4217"]},
+    {n:"4192", team:"Lisovňa",          ppl:14, deps:["4009","4217"]},
+    {n:"4217", team:"Expedícia",        ppl:11, deps:["4009"]},
+    {n:"4301", team:"Administratíva",   ppl:6,  deps:[]},
+    {n:"4356", team:"Rastlinná výroba", ppl:23, deps:["4192","4217"]}
+  ];
+  const ABS = [
+    {p:"4192", f:0,  t:12, why:"dovolenka"},
+    {p:"4038", f:2,  t:9,  why:"PN"},
+    {p:"4356", f:3,  t:5,  why:"školenie"},
+    {p:"4301", f:14, t:25, why:"dovolenka"},
+    {p:"4217", f:21, t:25, why:"dovolenka"}
+  ];
+  ABS.forEach(a => { a.from = addDays(thisMon, a.f); a.to = addDays(thisMon, a.t); });
+
+  function awayOn(pid, d){
+    const t = midnight(d).getTime();
+    return ABS.find(a => a.p === pid && t >= a.from.getTime() && t <= a.to.getTime()) || null;
+  }
+  function resolveLead(L, d){
+    const chain = [{ p:L.n, away:awayOn(L.n, d) }];
+    if (!chain[0].away) return { chain:chain, holder:L.n };
+    for (let i = 0; i < L.deps.length; i++){
+      const a = awayOn(L.deps[i], d);
+      chain.push({ p:L.deps[i], away:a });
+      if (!a) return { chain:chain, holder:L.deps[i] };
+    }
+    return { chain:chain, holder:null };
+  }
+
+  let zsDate = midnight(now);
+  function toISO(d){
+    const p = n => (n < 10 ? "0" : "") + n;
+    return d.getFullYear() + "-" + p(d.getMonth()+1) + "-" + p(d.getDate());
+  }
+
+  function renderZs(){
+    const tb = document.getElementById("zs-chain");
+    if (!tb) return;
+    const di = document.getElementById("zs-date");
+    if (di && !di.value) di.value = toISO(zsDate);
+
+    tb.innerHTML = LEADS.map(L => {
+      const r = resolveLead(L, zsDate);
+      const steps = r.chain.map((s,i) => {
+        const cls = s.away ? "chain-s out" : "chain-s hit";
+        return (i ? '<span class="chain-a">→</span>' : "") +
+          '<span class="'+cls+'"><span class="cn">'+NAMES[s.p]+"</span>" +
+          '<span class="cx">'+(s.away ? s.away.why : (i ? "zastupuje" : "predák"))+"</span></span>";
+      }).join("");
+      const tail = r.holder ? "" :
+        '<span class="chain-a">→</span><span class="chain-s none"><span class="cn">nikto</span></span>';
+      return "<tr><td><strong>"+L.team+"</strong></td>" +
+        '<td class="num">'+L.ppl+"</td>" +
+        "<td>"+NAMES[L.n]+"</td>" +
+        '<td><div class="chain">'+steps+tail+"</div></td></tr>";
+    }).join("");
+
+    /* riziká na najbližšie štyri týždne */
+    const gaps = {};
+    for (let i = 0; i < 28; i++){
+      const d = addDays(midnight(now), i);
+      if (!isWorkday(d) || cooksNobody(d)) continue;
+      LEADS.forEach(L => {
+        if (resolveLead(L, d).holder) return;
+        gaps[L.team] = gaps[L.team] || { from:d, to:d, n:0 };
+        gaps[L.team].to = d;
+        gaps[L.team].n++;
+      });
+    }
+    const keys = Object.keys(gaps);
+    const rb = document.getElementById("zs-risk");
+    rb.innerHTML = keys.length
+      ? '<div class="warnbox" style="margin-top:0;margin-bottom:18px"><strong>Tímy, ktoré ostanú bez zodpovednej osoby</strong>' +
+        keys.map(k => {
+          const g = gaps[k];
+          const L = LEADS.find(x => x.team === k);
+          return "<p><strong>"+k+"</strong> — "+dm(g.from)+" až "+dmy(g.to)+" ("+g.n+" pracovných dní). " +
+            NAMES[L.n] + (L.deps.length ? " aj všetci jeho zástupcovia sú preč." : " nemá zadaného žiadneho zástupcu.") +
+            " Objednávky za " + L.ppl + " ľudí by nemal kto spraviť.</p>";
+        }).join("") +
+        '<p style="margin-top:10px"><button class="btn" style="background:var(--surface)">Určiť zástupcu</button></p></div>'
+      : '<div class="okbox" style="margin-top:0;margin-bottom:18px"><strong>Každý tím má na najbližšie štyri týždne zodpovednú osobu.</strong><p>Aplikácia to prepočítava po každej zmene neprítomnosti aj poradia zástupcov.</p></div>';
+
+    const ab = document.getElementById("zs-abs");
+    ab.innerHTML = ABS.slice().sort((a,b) => a.from - b.from).map(a =>
+      '<div class="abs-row"><span class="an"><strong>'+NAMES[a.p]+"</strong><br>" +
+      '<span style="color:var(--ink-3);font-size:12.5px">'+(LEADS.find(L => L.n === a.p) || {team:"člen tímu"}).team+"</span></span>" +
+      '<span class="ad">'+dm(a.from)+" – "+dmy(a.to)+"</span>" +
+      '<span class="pill neutral">'+a.why+"</span>" +
+      '<button class="btn">Upraviť</button></div>').join("");
+
+    const dp = document.getElementById("zs-deps");
+    dp.innerHTML = LEADS.map(L =>
+      '<div class="abs-row"><span class="an"><strong>'+L.team+"</strong><br>" +
+      '<span style="color:var(--ink-3);font-size:12.5px">'+NAMES[L.n]+"</span></span>" +
+      '<span style="flex:2;min-width:200px">' +
+      (L.deps.length
+        ? '<div class="chain">'+L.deps.map((p,i) =>
+            '<span class="chain-s"><span class="cx">'+(i+1)+".</span><span class=\"cn\">"+NAMES[p]+"</span></span>").join("")+"</div>"
+        : '<span class="pill miss">bez zástupcu</span>') +
+      "</span>" +
+      '<button class="btn">Upraviť</button></div>').join("");
+
+    const lg = document.getElementById("zs-log");
+    if (lg) lg.innerHTML = [
+      [addDays(thisMon,0), "Správca", "Zapol zastupovanie: Kováč Jozef preberá Tím Lisovňa do " + dm(addDays(thisMon,12)) + " (dovolenka M. Urban)"],
+      [addDays(thisMon,0), "Kováč Jozef", "Objednal 14 obedov za Tím Lisovňa na týždeň " + dm(addDays(thisMon,7)) + " – " + dm(addDays(thisMon,11))],
+      [addDays(thisMon,3), "Mrva Pavol", "Prevzal Tím Rastlinná výroba — prvý zástupca (M. Urban) je tiež neprítomný"],
+      [addDays(thisMon,3), "Mrva Pavol", "Odhlásil 2 obedy v tíme Rastlinná výroba na " + dm(addDays(thisMon,4))]
+    ].map(r => "<tr><td>"+dm(r[0])+"</td><td>"+r[1]+"</td><td>"+r[2]+"</td></tr>").join("");
+
+    const urban = ABS.find(a => a.p === "4192");
+    setText("pd-deleg-to", "do " + dm(urban.to));
+  }
+
+  const zd = document.getElementById("zs-date");
+  if (zd) zd.addEventListener("change", function(){
+    const p = this.value.split("-").map(Number);
+    if (p.length === 3 && p[0]) zsDate = new Date(p[0], p[1]-1, p[2]);
+    renderZs();
+  });
+
   function renderAll(){
     head(document.getElementById("th-own"));
     head(document.getElementById("th-deleg"));
@@ -2523,6 +3555,9 @@
     renderPrices();
     renderSheet();
     renderBoard();
+    renderUz();
+    renderKal();
+    renderZs();
   }
 
   setText("pd-week", weekLabel);
