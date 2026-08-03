@@ -2,7 +2,7 @@
 
 Pripravujeme aplikáciu na objednávanie obedov. Bude z nej chodiť **mesačný podklad na zrážky zo mzdy**, aby sa nemuselo nič prepisovať ručne.
 
-Potrebujeme k tomu sedem odpovedí. Sú to nastavenia, nie natvrdo zapísané hodnoty — dajú sa kedykoľvek zmeniť, ale musíme vedieť, s čím začať.
+Potrebujeme k tomu osem odpovedí. Sú to nastavenia, nie natvrdo zapísané hodnoty — dajú sa kedykoľvek zmeniť, ale musíme vedieť, s čím začať.
 
 ---
 
@@ -39,7 +39,17 @@ Dodávateľ ho uvaril a vyfakturoval, takže ho niekto zaplatiť musí.
 - [ ] účtovať štandardne, teda **s príspevkom**
 - [ ] **neúčtovať**, znáša firma
 
-### 6. Aký formát potrebuje mzdový softvér?
+### 6. Ak dodávateľ účtuje príplatok za dovoz na vzdialenejšiu prevádzku, kto ho platí?
+
+Časť ľudí pracuje počas týždňa na viacerých prevádzkach a obed sa im vezie tam, kde v ten deň sú. Ak za to dodávateľ pýta príplatok, treba rozhodnúť:
+
+- [ ] **zamestnávateľ** — zamestnanec je tam kvôli práci *(a je to len otázka nákladu, nie zrážky)*
+- [ ] **zamestnanec** — pripočíta sa mu k cene obeda
+- [ ] netýka sa nás, dodávateľ príplatok neúčtuje
+
+Kým to nie je rozhodnuté, aplikácia počíta rovnakú cenu obeda na všetkých miestach.
+
+### 7. Aký formát potrebuje mzdový softvér?
 
 - názov programu: ………
 - [ ] XLSX
@@ -50,7 +60,7 @@ Ak existuje vzorový súbor, ktorý sa dnes do mzdového programu načítava, **
 
 Aké stĺpce musia byť v súbore a v akom poradí? Predbežne počítame s: osobné číslo · meno · stredisko · počet obedov · cena spolu · príspevok zamestnávateľa · sociálny fond · **zrážka zo mzdy**.
 
-### 7. Dokedy v mesiaci musí byť podklad odovzdaný?
+### 8. Dokedy v mesiaci musí byť podklad odovzdaný?
 
 - [ ] do ……… dňa nasledujúceho mesiaca
 

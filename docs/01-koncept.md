@@ -30,6 +30,7 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 23. **Žiadne „kopírovať minulý týždeň"** (5.1). Menu je každý týždeň iné, takže skopírovaná voľba je vo väčšine prípadov nesprávna — a nesprávna voľba sa tvári vybavene, kým prázdna bunka o sebe dáva vedieť. Bolo by to priame popretie bodu 22.
 24. **Kalendár sviatkov a zatvorených dní je jediný zdroj pravdy** (5.7) pre objednávky, uzávierky aj mesačné rozúčtovanie. Deň, v ktorý sa nevarí, sa v objednávke neukáže vôbec a do fakturácie nevstúpi.
 25. **Faktúra sa kontroluje strojovo proti tomu, čo appka sama odoslala** (5.6). Mesiac sa nedá uzavrieť, kým má nevyriešený rozdiel.
+26. **Miesta výdaja** (3.4) sú nastavením poskytovateľa, osoba má **domovské miesto** a jednotlivý deň sa dá prepnúť inam ako výnimka. Objednávka dodávateľovi sa **delí podľa miest**, miesto má **minimum na dovoz** a presun medzi miestami je **korekcia**. Pri jedinom mieste sa appka na miesto nepýta nikde.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -276,6 +277,36 @@ Tým vzniká úplná reťaz pri spore: **príloha** hovorí, čo `B` v ten týž
 
 Nastavenie je per poskytovateľ aj per týždeň — jeden dodávateľ môže mať názvy, druhý len písmená, a v týždni, keď sa adminovi nechce, sa jednoducho nevyplnia. Appka si nikdy nepýta niečo, bez čoho vie fungovať.
 
+### 3.4 Miesta výdaja — ľudia, ktorí sa cez týždeň pohybujú
+
+Kto je počas týždňa raz v závode a raz na inej prevádzke, potrebuje vedieť povedať, **kam sa mu obed má doviezť.** Áno, appka to má vedieť — ale ťažisko nie je vo voľbe stravníka.
+
+**Miesto nie je voľná voľba, je to zoznam.** Kam sa vozí, určuje dodávateľ, nie stravník. Preto sú miesta výdaja **nastavením per poskytovateľ**, rovnako ako počet jedál či termín odhlásenia:
+
+| Údaj miesta | Načo |
+|---|---|
+| názov a skratka | skratka sa vojde do bunky matice aj na papierový hárok (`VR`, `TM`, `NR`) |
+| čas dovozu | ľudia potrebujú vedieť, o koľkej tam jedlo bude |
+| **minimum porcií** | pod istý počet dodávateľ nikam nepôjde a je lepšie to vedieť dopredu |
+| vlastný čas na odhlásenie | ak auto vyráža skôr, deadline je skorší; prázdne = platí termín dodávateľa (4.2) |
+
+**Default a výnimka, nie voľba každý deň.** Osoba má **domovské miesto** (nastavuje admin, tak ako poskytovateľa — 3.1). Deväťdesiat percent dní sa je tam. Konkrétny deň sa dá prepnúť inam a to je **výnimka**: zapíše sa len odchýlka, nie stav. Pýtať sa na miesto pri každom dni by zdvojnásobilo prácu v matici kvôli hŕstke dní a rozbilo by to trojstavový model (4.6) — vznikol by štvrtý stav „jedlo zvolené, miesto nie".
+
+**Kde sa to zadáva:**
+- **matica predáka** má prepínač *Jedlo / Miesto výdaja* — druhý pohľad na tú istú tabuľku, nie druhý riadok v každej bunke. Ovláda sa rovnako (šípky, medzerník, prvé písmeno skratky). Kto v ten deň obed nemá, má pomlčku: **bez obeda niet čo voziť.** V pohľade na jedlá pripomína odchýlku značka v rohu bunky.
+- **stravník** dostane voľbu miesta hneď po výbere jedla — a len vtedy, keď jeho dodávateľ vozí na viac miest. Inak sa neukáže nič.
+- **papierový hárok** (5.5) nemá stĺpec navyše; do políčka sa dopíše skratka za písmeno, `B/TM`. Stĺpec pre každý deň by hárok rozbil, dopísaná skratka nie.
+
+**Čo je na tom naozaj dôležité — objednávka sa delí.** Dodávateľ nepotrebuje len súčet, potrebuje vedieť, **koľko boxov ide kam**. Preto objednávka obsahuje súhrn *aj* rozpis podľa miest. Keby dostal len súčet, uvarí správne a doveze zle, čo je na obed rovnako zlé.
+
+Z toho vyplývajú dve veci, ktoré by inak potichu nefungovali:
+1. **Minimum na dovoz** sa kontroluje pri **týždennej uzávierke**, nie ráno v deň obeda. Vtedy sa s tým ešte dá niečo spraviť — dohodnúť výnimku, alebo tých pár ľudí presunúť do závodu. Appka deň označí a ponúkne oboje; **neblokuje** voľbu, lebo nevie, či dodávateľ výnimku dá.
+2. **Presun medzi miestami je korekcia.** Keď niekto v deň obeda je inde, celkový počet ostane rovnaký a napriek tomu treba prebaliť auto. Denná korekcia (4.3) preto obsahuje aj tabuľku presunov, nielen storná a doobjednávky.
+
+**Kontrola konfliktu:** ak má niekto domovské miesto, kam jeho pridelený dodávateľ nevozí, appka to **ohlási v admine**. Bez toho by sa mu obed ticho vozil na prvé miesto zo zoznamu — teda tam, kde nie je.
+
+**Ak vozí dodávateľ na jediné miesto, neexistuje o čom hovoriť.** Appka sa vtedy na miesto nepýta nikde: ani v matici, ani v telefóne, ani na hárku, ani v objednávke. Funkcia sa nezapína prepínačom, zapne sa tým, že sa zadá druhé miesto.
+
 ---
 
 ## 4. Termíny a uzávierky
@@ -399,6 +430,7 @@ Matica **ľudia × dni** (riadky = podriadení, stĺpce Po–Pia). V bunke sú *
 - počítadlo dní bez voľby pri mene + tlačidlo *Zvýrazniť nerozhodnuté* na kontrolný prechod pred uzávierkou
 - **prepis z papiera musí byť bleskový:** šípky vľavo/vpravo prechádzajú medzi možnosťami, medzerník volí; alebo priamo `A`/`B`/`C` pre jedlo, `0` pre krížik, `Backspace` pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni, šípky hore/dole tiež. Bez myši, bez dialógov, bez potvrdzovania. Toto je jediná vec, ktorá rozhodne, či predáka appka baví alebo otravuje.
 - pri ponuke nad šesť jedál sa možnosti v bunke zalomia do dvoch riadkov, tabuľka sa nerozbije
+- prepínač **Jedlo / Miesto výdaja** — druhý pohľad na tú istú tabuľku, keď dodávateľ vozí na viac miest (3.4)
 - na tablete to isté prstom: dosť veľké dotykové plochy priamo v riadku
 - hromadné akcie: nastaviť celý riadok na jedno jedlo, hromadné odhlásenie na rozsah dní (dovolenka/PN), vyprázdniť maticu
 - tlač: zberný hárok, zoznam chýbajúcich, potvrdenie tímu (5.5)
@@ -873,6 +905,9 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 7. ~~**Doména a e-mailová schránka**~~ — **vyriešené:** podadresa `obedy.firma.sk` na firemnej doméne, pripraví firemný IT technik. Zadanie preňho je v `docs/02-zadanie-pre-it.md`.
 8. **Hostia a návštevy** — treba objednávať obed pre návštevu? (Malé rozšírenie: objednávka bez väzby na osobu, účtovaná stredisku.)
 9. **Prevzatie obeda** — treba evidovať, kto si obed reálne vyzdvihol? Rieši spory typu „zaplatil som a nedostal".
+10. **Miesta výdaja** (3.4) — treba zozbierať od dodávateľov: **kam sú ochotní voziť, o koľkej a od koľkých porcií.** Bez minima a času dovozu je nastavenie len polovičné.
+11. **Príplatok za dovoz na vzdialenejšie miesto** — účtuje ho dodávateľ zvlášť? Ak áno, **kto ho platí?** Zamestnanec je na tej prevádzke kvôli práci, takže logicky zamestnávateľ — ale je to rozhodnutie mzdára a účtovníčky, nie moje. Do vyriešenia je cena obeda rovnaká na všetkých miestach.
+12. **Zoznam prevádzok** — na ktorých miestach firma reálne obeduje a kto je kde vedený. Ide o stĺpec navyše v zozname zamestnancov (`docs/05-zoznam-zamestnancov.md`).
 
 ---
 
@@ -881,8 +916,8 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 | Fáza | Obsah |
 |---|---|
 | **0 — Koncept** | tento dokument, odsúhlasenie |
-| **1 — Preview** | klikací prototyp bez databázy: login, **matica predáka**, týždeň stravníka, admin nastavenia, ručný editor menu, cenník s oboma modelmi príspevku, ukážky tlačových zostáv, tabuľa v jedálni, história, **mesačná uzávierka a kontrola faktúry (5.6)**, **kalendár sviatkov a zatvorených dní (5.7)**, **zastupovanie (5.8)**, logo |
-| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov, ručný editor menu, **matica predáka**, **kalendár sviatkov a zatvorených dní (5.7)**, delegácia, reťaz zástupcov a eskalácia (5.8), ceny a **mesačná uzávierka s kontrolou faktúry (5.6)**, export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.5)**, **tabuľa v jedálni**, **push notifikácie pre predákov a admina** + sprievodca inštaláciou na plochu, **príloha menu (fotka/PDF/Word)**, **exporty, história a zálohy (kapitola 7)**, audit, nasadenie |
+| **1 — Preview** | klikací prototyp bez databázy: login, **matica predáka** vrátane pohľadu na miesta výdaja, týždeň stravníka, admin nastavenia, ručný editor menu, cenník s oboma modelmi príspevku, ukážky tlačových zostáv, tabuľa v jedálni, história, **mesačná uzávierka a kontrola faktúry (5.6)**, **kalendár sviatkov a zatvorených dní (5.7)**, **zastupovanie (5.8)**, logo |
+| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov vrátane **miest výdaja (3.4)**, ručný editor menu, **matica predáka**, **kalendár sviatkov a zatvorených dní (5.7)**, delegácia, reťaz zástupcov a eskalácia (5.8), ceny a **mesačná uzávierka s kontrolou faktúry (5.6)**, export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.5)**, **tabuľa v jedálni**, **push notifikácie pre predákov a admina** + sprievodca inštaláciou na plochu, **príloha menu (fotka/PDF/Word)**, **exporty, história a zálohy (kapitola 7)**, audit, nasadenie |
 | **3 — Rozšírenia** | grafy a dashboard, push pre stravníkov, SMS pre predákov ak treba, import menu (XLSX/CSV, prilepenie textu) podľa reálnych vzoriek, evidencia prevzatia, hostia, SSO, kiosk, rola dodávateľa, prípadná ukrajinčina |
 
 Push je v MVP **len pre predákov a admina** (zopár ľudí, s každým sa dá inštalácia prejsť osobne), pre stravníkov ostáva vo fáze 3. Tlačové zostavy sú naopak plnohodnotnou súčasťou MVP — appku bude držať predák s papierom, nie stravník s telefónom.

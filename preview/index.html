@@ -445,6 +445,40 @@
   /* podfarbenie = niekto konal. Bez voľby = bez podfarbenia. */
   td.by-self{background:var(--ok-soft)}
   td.by-lead{background:var(--by-lead)}
+  td.by-place{background:var(--mustard-soft)}
+  table.matrix td{position:relative}
+  .plmark{
+    position:absolute;
+    top:2px;right:3px;
+    font-family:var(--mono);
+    font-size:9.5px;
+    letter-spacing:.04em;
+    line-height:1;
+    padding:2px 3px;
+    border-radius:2px;
+    background:var(--mustard);
+    color:#fff;
+    pointer-events:none;
+  }
+  .opt-b.pl{font-size:11px;letter-spacing:.03em;min-width:30px}
+  .nomeal{
+    display:block;
+    text-align:center;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--faint-ink);
+    padding:9px 0;
+  }
+  /* jediné možné miesto — nie je čo voliť, ale nie je to ani prázdno */
+  .plfix{
+    display:block;
+    text-align:center;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.03em;
+    color:var(--ink-2);
+    padding:9px 0;
+  }
   /* pred uzávierkou sa dajú prázdne bunky jedným tlačidlom rozsvietiť */
   .hl-gaps td.gap{background:var(--miss-soft)}
 
@@ -631,6 +665,7 @@
   .favi{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line);color:var(--ink-3);font-family:var(--mono);font-size:11px;letter-spacing:.06em}
 
   .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2);margin-top:12px}
+  .legend[hidden]{display:none}
   .legend span{display:inline-flex;align-items:center;gap:7px}
   .sw{width:13px;height:13px;border-radius:2px;border:1px solid}
   .sw.pick{background:var(--mustard-soft);border-color:var(--mustard)}
@@ -930,6 +965,10 @@
     <span class="pill neutral" id="pd-none">—</span>
     <span class="pill neutral" id="pd-provider">Reštaurácia U Jeleňa · A B C</span>
     <div class="btn-row" style="margin-left:auto">
+      <div class="seg" role="group" aria-label="Čo sa v tabuľke zadáva" id="mx-view">
+        <button data-view="meal" aria-pressed="true">Jedlo</button>
+        <button data-view="place" aria-pressed="false">Miesto výdaja</button>
+      </div>
       <button class="btn" id="btn-hl" aria-pressed="false">Zvýrazniť nerozhodnuté</button>
       <button class="btn" id="btn-clear">Vyprázdniť</button>
     </div>
@@ -962,14 +1001,24 @@
     </div>
   </div>
 
-  <div class="legend">
+  <div class="legend" id="lg-meal">
     <span><span class="opt-b" aria-checked="true" aria-hidden="true" style="cursor:default">B</span> zvolené jedlo</span>
     <span><span class="opt-b none" aria-checked="true" aria-hidden="true" style="cursor:default">×</span> nechce obed</span>
     <span><i class="sw empty"></i> bez voľby — nikto nekonal</span>
     <span><i class="sw self"></i> zadal si stravník sám</span>
     <span><i class="sw lead"></i> zadal predák</span>
     <span><span class="gapn" aria-hidden="true">2</span> dní bez voľby</span>
+    <span><span class="plmark" style="position:static" aria-hidden="true">TM</span> vydá sa inde než doma</span>
   </div>
+
+  <div class="legend" id="lg-place" hidden>
+    <span><span class="opt-b pl" aria-checked="true" aria-hidden="true" style="cursor:default">VR</span> kam sa jedlo vezie</span>
+    <span><i class="sw empty"></i> domovské miesto — nikto nič nemenil</span>
+    <span><i class="sw pick"></i> presunuté inam na ten deň</span>
+    <span style="color:var(--ink-3)">— &nbsp;v ten deň nemá obed, takže niet čo voziť</span>
+  </div>
+
+  <div id="pd-places" hidden style="margin-top:18px"></div>
 
   <div class="btn-row" style="margin-top:16px">
     <button class="btn primary">Vytlačiť zberný hárok</button>
@@ -1008,6 +1057,8 @@
     <p>Klávesnicou to ide rýchlejšie: <code>Tab</code> vojde do bunky, <strong>šípky vľavo a vpravo</strong> prechádzajú medzi možnosťami, <strong>medzerník</strong> zvolí. Alebo rovno stlač <code>A</code>, <code>B</code>, <code>C</code> pre jedlo, <code>0</code> pre krížik, <code>Backspace</code> pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni. Šípky <strong>hore a dole</strong> sa medzi ľuďmi pohybujú tiež.</p>
     <p>V ukážke má Bezáková celý týždeň krížiky (dovolenka), Tóth a Slaný sa zatiaľ nevyjadrili vôbec.</p>
     <p>Zastupovaný tím je <strong>samostatný blok</strong>, nie zliaty s vlastným — zlievanie tímov spôsobuje omyly typu „objednal som to tomu druhému Kováčovi". Riadky so zeleným pozadím sú ľudia, ktorí si objednali sami; predák ich nemusí prepisovať.</p>
+    <p><strong>Miesto výdaja je druhý pohľad na tú istú tabuľku</strong>, nie druhý riadok v každej bunke. Prepínač <em>Jedlo / Miesto výdaja</em> hore vpravo prepne obsah buniek na skratky miest a ovláda sa rovnako — šípky a medzerník, alebo prvé písmeno (<code>V</code> závod, <code>T</code> farma, <code>N</code> sklad), <code>Backspace</code> vráti na domovské. Kto v ten deň obed nemá, má pomlčku: bez obeda niet čo voziť. Šimko je v utorok a vo štvrtok na farme — v pohľade na jedlá to prezrádza <span class="plmark" style="position:static">TM</span> v rohu bunky.</p>
+    <p><strong>Prečo výnimka, a nie voľba každý deň.</strong> Deväťdesiat percent dní sa je tam, kde človek býva — to je jeho <em>domovské miesto</em> z Adminu a appka ho nepýta. Pýtať sa naň každý deň by zdvojnásobilo prácu v tabuľke kvôli hŕstke dní. Preto nezafarbená bunka znamená „ide to domov" a zafarbená „v ten deň inam" — presne tá istá logika ako pri jedlách: <strong>podfarbenie je akcia</strong>.</p>
   </div>
 </section>
 
@@ -1097,15 +1148,35 @@
 
   <div class="card">
     <div class="card-head">
+      <h3>Miesta výdaja</h3>
+      <span class="pill neutral">kam dodávateľ vozí</span>
+    </div>
+    <div class="scroll-x" style="border:0">
+      <table class="data" style="min-width:680px">
+        <thead><tr><th>Miesto</th><th>Skratka</th><th>Dovoz</th><th class="num">Minimum</th><th>Odhlásenie do</th><th>Vozí sem</th><th class="num">Domovské pre</th></tr></thead>
+        <tbody id="a-places"></tbody>
+      </table>
+    </div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn">Pridať miesto</button>
+    </div>
+    <p class="hint" style="margin-top:10px">Miesto nie je voľná voľba stravníka — je to zoznam, <strong>kam je daný dodávateľ ochotný voziť</strong>. Keď má dodávateľ jediné miesto, appka sa na miesto nepýta nikde: ani v matici, ani v telefóne, ani na hárku.</p>
+    <p class="hint"><strong>Minimum</strong> je počet porcií, pod ktorý sa dovoz neoplatí. Appka pri týždennej uzávierke ohlási dni, ktoré pod neho spadli — nie ráno v deň obeda, ale vtedy, keď sa s tým ešte dá niečo spraviť.</p>
+    <p class="hint"><strong>Vlastný čas na odhlásenie</strong> má zmysel tam, kde auto vyráža skôr. Ak je políčko prázdne, platí termín dodávateľa.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
       <h3>Pridelenie stravníkov</h3>
       <span class="pill neutral">prideľuje výhradne admin</span>
     </div>
     <div class="scroll-x" style="border:0">
-      <table class="data" style="min-width:560px">
-        <thead><tr><th>Meno</th><th>Os. č.</th><th>Tím</th><th>Pridelený poskytovateľ</th></tr></thead>
+      <table class="data" style="min-width:700px">
+        <thead><tr><th>Meno</th><th>Os. č.</th><th>Tím</th><th>Pridelený poskytovateľ</th><th>Domovské miesto</th></tr></thead>
         <tbody id="a-assign"></tbody>
       </table>
     </div>
+    <p class="hint" id="a-home-warn" hidden style="color:var(--miss);margin-top:12px"></p>
     <div class="btn-row" style="margin-top:14px">
       <button class="btn">Prideliť celému tímu naraz…</button>
     </div>
@@ -1313,7 +1384,7 @@
           <thead><tr><th>Meno</th><th>Po</th><th>Ut</th><th>St</th><th>Št</th><th>Pi</th></tr></thead>
           <tbody id="z-sheet"></tbody>
         </table>
-        <p style="margin:12px 0 0;font-size:11px;color:#6B7573">Napíšte označenie jedla, alebo <strong>×</strong> ak obed nechcete. Prázdne políčko znamená, že ste sa nevyjadrili — predák sa vás bude musieť pýtať. Sivé prečiarknuté políčka si už objednali sami v aplikácii, tie nevypĺňajte.</p>
+        <p style="margin:12px 0 0;font-size:11px;color:#6B7573">Napíšte označenie jedla, alebo <strong>×</strong> ak obed nechcete. Prázdne políčko znamená, že ste sa nevyjadrili — predák sa vás bude musieť pýtať. Sivé prečiarknuté políčka si už objednali sami v aplikácii, tie nevypĺňajte.<br><strong>Ak ste v niektorý deň na inej prevádzke, dopíšte za písmeno skratku miesta</strong> — napríklad <strong>B/TM</strong> pre farmu Tesárske Mlyňany. Bez skratky sa jedlo vezie tam, kde ste vedení (VR — závod).</p>
       </div>
       <p class="hint" style="margin-top:12px">Hárok slúži aj ako doklad: pri spore „ja som chcel B" ukáže voľbu vlastnou rukou.</p>
     </div>
@@ -1334,15 +1405,18 @@
               <tr><td>Pi 7. 8.</td><td class="cnt">23</td><td class="cnt">16</td><td class="cnt">6</td><td class="cnt">45</td></tr>
             </tbody>
           </table>
+          <div id="z-split"></div>
         </div>
+        <div id="z-minwarn"></div>
+        <p class="hint" style="margin-top:12px">Súčet je pre kuchyňu, rozpis pre auto. Keby dodávateľ dostal len súčet, uvarí správne a doveze zle — a to je na obed rovnako zlé.</p>
       </div>
 
       <div class="card">
         <div class="card-head"><h3>Korekcia v deň obeda</h3><span class="pill neutral">pri dennom deadline</span></div>
         <div class="sheet">
           <h4>Streda 5. 8. 2026 — korekcia k 07:30</h4>
-          <p class="meta">Pôvodne 45 · storná 3 · doobjednávky 2</p>
-          <table>
+          <p class="meta">Pôvodne 45 · storná 3 · doobjednávky 2 · presuny medzi miestami 1</p>
+          <table style="margin-bottom:14px">
             <thead><tr><th>Jedlo</th><th class="cnt">Pôvodne</th><th class="cnt">Zmena</th><th class="cnt">Platí</th></tr></thead>
             <tbody>
               <tr><td>A</td><td class="cnt">24</td><td class="cnt">−2</td><td class="cnt">22</td></tr>
@@ -1350,8 +1424,16 @@
               <tr><td>C</td><td class="cnt">7</td><td class="cnt">0</td><td class="cnt">7</td></tr>
             </tbody>
           </table>
+          <table>
+            <thead><tr><th>Kam</th><th class="cnt">Pôvodne</th><th class="cnt">Zmena</th><th class="cnt">Platí</th></tr></thead>
+            <tbody>
+              <tr><td>Závod Vráble</td><td class="cnt">38</td><td class="cnt">−4</td><td class="cnt">34</td></tr>
+              <tr><td>Farma Tesárske Mlyňany</td><td class="cnt">4</td><td class="cnt">+1</td><td class="cnt">5</td></tr>
+              <tr><td>Sklad Nitra</td><td class="cnt">3</td><td class="cnt">+2</td><td class="cnt">5</td></tr>
+            </tbody>
+          </table>
         </div>
-        <p class="hint" style="margin-top:12px">Presne to, čo dnes predák vybavuje telefonátom do kuchyne — len písomne a dohľadateľne.</p>
+        <p class="hint" style="margin-top:12px">Presne to, čo dnes predák vybavuje telefonátom do kuchyne — len písomne a dohľadateľne. <strong>Druhá tabuľka je tá, na ktorú sa zabúda:</strong> keď niekto v ten deň je inde, celkový počet ostane rovnaký a napriek tomu treba prebaliť auto.</p>
       </div>
     </div>
   </div>
@@ -2025,6 +2107,17 @@
   ];
   const CANCEL_RULES = ["v deň obeda", "predchádzajúci pracovný deň", "2 pracovné dni vopred"];
 
+  /* ---------- miesta výdaja ----------
+     Miesto nie je voľná voľba stravníka — je to zoznam, kam daný dodávateľ vozí.
+     min = najmenší počet porcií, pri ktorom je dovoz ochotný prísť. */
+  const PLACES = [
+    {n:"Závod Vráble",           s:"VR", min:0, time:"11:00", cancel:null},
+    {n:"Farma Tesárske Mlyňany", s:"TM", min:4, time:"11:45", cancel:"07:00"},
+    {n:"Sklad Nitra",            s:"NR", min:3, time:"12:15", cancel:"07:00"}
+  ];
+  CATERERS[0].places = [0,1,2];
+  CATERERS[1].places = [0];
+
   let adminCat = 0;              /* ktorého poskytovateľa admin práve nastavuje */
   const DINER_CAT = 0;           /* poskytovateľ prihláseného stravníka */
 
@@ -2048,31 +2141,55 @@
   /* cs = poskytovatelia, ktorých má stravník pridelených (prideľuje admin)
      oc = ktorého poskytovateľa sa týka voľba v danom dni */
   const own = [
-    {n:"Kováč Jozef",      p:"4009", cs:[0],   self:false, o:[0,1,0,null,2]},
-    {n:"Horváth Peter",    p:"4021", cs:[0],   self:true,  o:[0,0,1,1,null]},
-    {n:"Baláž Marián",     p:"4038", cs:[0],   self:false, o:[1,1,1,1,1]},
-    {n:"Tóth Ľuboš",       p:"4110", cs:[0],   self:false, o:[null,null,null,null,null]},
-    {n:"Nagyová Zuzana",   p:"4102", cs:[0],   self:true,  o:[2,2,NONE,2,0]},
-    {n:"Šimko Martin",     p:"4127", cs:[0,1], self:false, o:[0,1,null,1,0]},
-    {n:"Krajčí Ondrej",    p:"4133", cs:[1],   self:false, o:[1,0,3,0,1]},
-    {n:"Bezáková Iveta",   p:"4141", cs:[1],   self:false, o:[NONE,NONE,NONE,NONE,NONE]},
-    {n:"Danko Radoslav",   p:"4158", cs:[0],   self:false, o:[2,null,2,2,NONE]}
+    {n:"Kováč Jozef",      p:"4009", home:0, cs:[0],   self:false, o:[0,1,0,null,2]},
+    {n:"Horváth Peter",    p:"4021", home:0, cs:[0],   self:true,  o:[0,0,1,1,null]},
+    {n:"Baláž Marián",     p:"4038", home:0, cs:[0],   self:false, o:[1,1,1,1,1]},
+    {n:"Tóth Ľuboš",       p:"4110", home:1, cs:[0],   self:false, o:[null,null,null,null,null]},
+    {n:"Nagyová Zuzana",   p:"4102", home:2, cs:[0],   self:true,  o:[2,2,NONE,2,0]},
+    {n:"Šimko Martin",     p:"4127", home:0, cs:[0,1], self:false, o:[0,1,null,1,0]},
+    {n:"Krajčí Ondrej",    p:"4133", home:0, cs:[1],   self:false, o:[1,0,3,0,1]},
+    {n:"Bezáková Iveta",   p:"4141", home:0, cs:[1],   self:false, o:[NONE,NONE,NONE,NONE,NONE]},
+    {n:"Danko Radoslav",   p:"4158", home:1, cs:[0],   self:false, o:[2,null,2,2,NONE]}
   ];
 
   const deleg = [
-    {n:"Sedláková Jana",   p:"4204", cs:[1],   self:false, o:[0,0,null,1,3]},
-    {n:"Mrva Pavol",       p:"4217", cs:[1],   self:false, o:[1,1,2,NONE,0]},
-    {n:"Slaný Erik",       p:"4229", cs:[1],   self:false, o:[null,null,null,null,null]}
+    {n:"Sedláková Jana",   p:"4204", home:0, cs:[1],   self:false, o:[0,0,null,1,3]},
+    {n:"Mrva Pavol",       p:"4217", home:0, cs:[1],   self:false, o:[1,1,2,NONE,0]},
+    {n:"Slaný Erik",       p:"4229", home:0, cs:[1],   self:false, o:[null,null,null,null,null]}
   ];
 
   /* by = kto voľbu zadal: "self" stravník sám, "lead" predák, null nikto */
   own.concat(deleg).forEach(p => {
     p.by = p.o.map(v => undecided(v) ? null : (p.self ? "self" : "lead"));
     p.oc = p.o.map(() => p.cs[0]);
+    p.pl = [null,null,null,null,null];   /* null = domovské miesto */
   });
   /* Šimko má oboch — v stredu si dal jedlo od druhého dodávateľa */
   const simko = own[5];
   simko.o[4] = 2; simko.oc[4] = 1;
+  /* a v utorok a štvrtok je na farme, hoci jeho domovské miesto je závod */
+  simko.pl[1] = 1; simko.pl[3] = 1;
+
+  /* ---------- miesto výdaja ---------- */
+  function placesOf(p, ci){
+    const c = (p.oc && p.oc[ci] !== undefined) ? p.oc[ci] : p.cs[0];
+    return CATERERS[c].places || [0];
+  }
+  /* kam sa jedlo v ten deň naozaj vezie */
+  function placeOn(p, ci){
+    const av = placesOf(p, ci);
+    const want = (p.pl[ci] === null || p.pl[ci] === undefined) ? p.home : p.pl[ci];
+    /* dodávateľ, ktorého má v ten deň, tam nemusí voziť — vtedy platí prvé možné */
+    return av.indexOf(want) >= 0 ? want : av[0];
+  }
+  function hasMeal(p, ci){ return !undecided(p.o[ci]) && p.o[ci] !== NONE; }
+  function porcie(n){ return n === 1 ? "porcia" : (n >= 2 && n <= 4 ? "porcie" : "porcií"); }
+  /* miesta, kam sa človeku vôbec dá voziť — zjednotenie jeho poskytovateľov */
+  function reachable(p){
+    const s = [];
+    p.cs.forEach(c => (CATERERS[c].places || [0]).forEach(x => { if (s.indexOf(x) < 0) s.push(x); }));
+    return s;
+  }
 
   /* ---------- prepínanie obrazoviek ---------- */
   const tabs = Array.from(document.querySelectorAll(".tab"));
@@ -2133,7 +2250,29 @@
 
   function undecided(v){ return v === null; }
 
+  let mxView = "meal";
+
+  function placeCellHTML(person, ri, ci, tblId){
+    /* bez obeda niet čo voziť — miesto sa vtedy ani nepýta */
+    if (!hasMeal(person, ci)) return '<span class="nomeal">—</span>';
+    const av = placesOf(person, ci);
+    const cur = placeOn(person, ci);
+    if (av.length < 2){
+      return '<span class="plfix" title="'+PLACES[cur].n+' — jediné miesto, kam tento dodávateľ vozí">'+PLACES[cur].s+"</span>";
+    }
+    let h = '<div class="opts" role="radiogroup" aria-label="' + person.n + ", " + DAYS[ci] + ', miesto výdaja"><span class="opt-row">';
+    av.forEach((pi, idx) => {
+      const on = pi === cur;
+      h += '<button type="button" class="opt-b pl" role="radio"' +
+           ' aria-checked="' + on + '" tabindex="' + (on || (idx === 0 && cur === undefined) ? 0 : -1) + '"' +
+           ' data-t="' + tblId + '" data-r="' + ri + '" data-c="' + ci + '" data-v="p:' + pi + '"' +
+           ' aria-label="' + PLACES[pi].n + (pi === person.home ? ", domovské miesto" : "") + '">' + PLACES[pi].s + "</button>";
+    });
+    return h + "</span></div>";
+  }
+
   function cellHTML(person, ri, ci, tblId){
+    if (mxView === "place") return placeCellHTML(person, ri, ci, tblId);
     const v = person.o[ci];
     const vc = person.oc[ci];
     const multi = person.cs.length > 1;
@@ -2166,10 +2305,20 @@
     });
 
     if (multi) h += '<span class="opt-row">' + noneBtn + "</span>";
-    return h + "</div>";
+    h += "</div>";
+    /* v pohľade na jedlá pripomenie rožtek, že sa ten deň je inde */
+    if (hasMeal(person, ci)){
+      const pl = placeOn(person, ci);
+      if (pl !== person.home) h += '<span class="plmark" title="Vydá sa: '+PLACES[pl].n+'">'+PLACES[pl].s+"</span>";
+    }
+    return h;
   }
 
   function tdClass(person, ci){
+    if (mxView === "place"){
+      if (!hasMeal(person, ci)) return "";
+      return placeOn(person, ci) === person.home ? "" : "by-place";
+    }
     if (undecided(person.o[ci])) return "gap";
     return person.by[ci] === "self" ? "by-self" : "by-lead";
   }
@@ -2238,6 +2387,37 @@
     countMissing();
   }
 
+  function setPlace(tblId, r, c, pi){
+    const p = rowsOf(tblId)[r];
+    /* opätovný klik na domovské miesto zmaže výnimku, nezapisuje ju */
+    p.pl[c] = (pi === null || pi === p.home) ? null : pi;
+    refreshCell(tblId, r, c);
+    renderPlaceSummary();
+  }
+
+  function renderPlaceSummary(){
+    const box = document.getElementById("pd-places");
+    if (!box) return;
+    const all = own.concat(deleg);
+    const used = {};
+    all.forEach(p => p.o.forEach((_,i) => {
+      if (!hasMeal(p,i)) return;
+      const pl = placeOn(p,i);
+      used[pl] = used[pl] || [0,0,0,0,0];
+      used[pl][i]++;
+    }));
+    const keys = Object.keys(used).map(Number).sort();
+    if (keys.length < 2){ box.hidden = true; return; }
+    box.hidden = false;
+    box.innerHTML =
+      '<div class="scroll-x"><table class="data" style="min-width:420px"><thead><tr><th>Kam sa vezie</th>' +
+      DAYS_S.map((d,i) => '<th class="num">'+d+" "+dm(nextDays[i])+"</th>").join("") + "</tr></thead><tbody>" +
+      keys.map(k => "<tr><td>"+PLACES[k].n+" <span style=\"color:var(--ink-3);font-family:var(--mono);font-size:11.5px\">"+PLACES[k].time+"</span></td>" +
+        used[k].map(v => '<td class="num">'+(v || "—")+"</td>").join("") + "</tr>").join("") +
+      "</tbody></table></div>" +
+      '<p class="hint" style="margin-top:10px">Počty za tvoje tímy. Minimum na dovoz sa posudzuje za celú firmu, nie za tím — ukazuje ho <em>Zostavy</em>.</p>';
+  }
+
   function countMissing(){
     const all = own.concat(deleg);
     let miss = 0, none = 0;
@@ -2266,6 +2446,12 @@
     if (!b || !b.dataset.t) return;
     const t = b.dataset.t, r = +b.dataset.r, c = +b.dataset.c;
     const p = rowsOf(t)[r];
+
+    if (b.dataset.v.indexOf("p:") === 0){
+      setPlace(t, r, c, +b.dataset.v.slice(2));
+      focusOpt(t, r, c, b.dataset.v);
+      return;
+    }
 
     if (b.dataset.v === "x"){
       setValue(t, r, c, p.o[c] === NONE ? null : NONE, p.cs[0]);
@@ -2308,6 +2494,26 @@
       return;
     }
 
+    /* v pohľade na miesta sa píše prvé písmeno skratky */
+    if (mxView === "place"){
+      const p0 = rows[r];
+      if (!hasMeal(p0, c)) return;
+      const av = placesOf(p0, c);
+      const hit = av.filter(pi => PLACES[pi].s[0].toUpperCase() === k.toUpperCase());
+      if (k === "Backspace" || k === "Delete"){
+        e.preventDefault();
+        setPlace(t, r, c, null);
+      } else if (hit.length === 1){
+        e.preventDefault();
+        setPlace(t, r, c, hit[0]);
+      } else return;
+      const nr = r + 1;
+      const tgt = "p:" + placeOn(rows[Math.min(nr, rows.length-1)], c);
+      if (nr < rows.length && hasMeal(rows[nr], c)) focusOpt(t, nr, c, tgt);
+      else focusOpt(t, r, c, "p:" + placeOn(p0, c));
+      return;
+    }
+
     /* priama voľba: písmeno alebo číslo = jedlo, 0 alebo − = bez obeda,
        Backspace = späť na nerozhodnuté */
     let v, vc;
@@ -2330,6 +2536,26 @@
     const nextRow = r + 1;
     if (nextRow < rows.length) focusOpt(t, nextRow, c, target);
     else focusOpt(t, r, c, target);
+  });
+
+  /* ---------- prepínanie matice: jedlo / miesto ---------- */
+  const mv = document.getElementById("mx-view");
+  if (mv) mv.addEventListener("click", function(e){
+    const b = e.target.closest("[data-view]");
+    if (!b) return;
+    mxView = b.dataset.view;
+    Array.from(mv.querySelectorAll("[data-view]")).forEach(x =>
+      x.setAttribute("aria-pressed", String(x.dataset.view === mxView)));
+    const lm = document.getElementById("lg-meal"), lp = document.getElementById("lg-place");
+    if (lm) lm.hidden = mxView !== "meal";
+    if (lp) lp.hidden = mxView !== "place";
+    ["btn-hl","btn-clear"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.hidden = mxView !== "meal";
+    });
+    renderTable("m-own", own);
+    renderTable("m-deleg", deleg);
+    renderPlaceSummary();
   });
 
   /* ---------- hromadné odhlásenie ---------- */
@@ -2391,6 +2617,8 @@
 
   /* ---------- stravník ---------- */
   const svOrders = [0, 1, null, NONE, null];
+  const svHome = 0;                          /* domovské miesto prihláseného */
+  const svPlaces = [null,null,null,null,null];
   let openDay = null;
 
   function renderStravnik(){
@@ -2412,6 +2640,8 @@
       } else {
         chip = '<span class="chip lg">' + label(v, DINER_CAT) + "</span>";
         text = D.menu[i][v] || "jedlo " + label(v, DINER_CAT);
+        const pl = svPlaces[i] === null ? svHome : svPlaces[i];
+        if (pl !== svHome) text += ' <span style="color:var(--mustard);font-family:var(--mono);font-size:11.5px">· ' + PLACES[pl].s + "</span>";
       }
       row.innerHTML =
         '<button class="day-btn" data-d="'+i+'">' + chip +
@@ -2435,6 +2665,23 @@
         h += '<div class="opt"><button class="day-btn" data-pick="'+i+'" data-v="x">' +
              '<span class="chip none">×</span><span class="txt"><div class="nm">Nechcem obed</div>' +
              '<div class="pr">dovolenka, služobka, nechcem jesť</div></span></button></div>';
+
+        /* miesto výdaja len vtedy, keď je z čoho vyberať a je čo voziť */
+        const av = D.places || [0];
+        const has = svOrders[i] !== null && svOrders[i] !== NONE;
+        if (av.length > 1 && has){
+          const cur = svPlaces[i] === null ? svHome : svPlaces[i];
+          h += '<div style="border-top:1px solid var(--line);margin-top:8px;padding-top:10px">' +
+               '<p class="eyebrow" style="margin-bottom:7px">Kde si ho preberiem</p>' +
+               '<div class="btn-row">' +
+               av.map(pi =>
+                 '<button class="btn" data-svpl="'+i+':'+pi+'" aria-pressed="'+(pi === cur)+'" ' +
+                 'style="font-size:12.5px;padding:5px 9px">' + PLACES[pi].n +
+                 (pi === svHome ? ' <span style="opacity:.6">· moje</span>' : "") + "</button>").join("") +
+               "</div>" +
+               '<p class="hint" style="margin-top:8px">' + PLACES[cur].n + " — dovoz o " + PLACES[cur].time +
+               (PLACES[cur].cancel ? ", odhlásenie do " + PLACES[cur].cancel : "") + ".</p></div>";
+        }
         sheet.innerHTML = h;
         box.appendChild(sheet);
       }
@@ -2442,11 +2689,21 @@
   }
 
   document.addEventListener("click", function(e){
+    const sp = e.target.closest("[data-svpl]");
+    if (sp){
+      const q = sp.dataset.svpl.split(":");
+      const pi = +q[1];
+      svPlaces[+q[0]] = pi === svHome ? null : pi;
+      renderStravnik();
+      return;
+    }
     const pick = e.target.closest("[data-pick]");
     if (pick){
       const i = +pick.dataset.pick;
       svOrders[i] = pick.dataset.v === "x" ? NONE : +pick.dataset.v;
-      openDay = null;
+      /* keď je kam voziť, hárok ostane otvorený a rovno sa spýta kam */
+      const many = (CATERERS[DINER_CAT].places || [0]).length > 1;
+      openDay = (many && svOrders[i] !== NONE) ? i : null;
       renderStravnik();
       return;
     }
@@ -2597,10 +2854,51 @@
           '<option value="0"'   + (cur === "0"   ? " selected" : "") + ">Reštaurácia U Jeleňa</option>" +
           '<option value="1"'   + (cur === "1"   ? " selected" : "") + ">Školská jedáleň Sever</option>" +
           '<option value="0,1"' + (cur === "0,1" ? " selected" : "") + ">oba — stravník si volí</option>" +
+        "</select></td>" +
+        '<td><select data-home="'+p.p+'" style="width:100%;max-width:220px;padding:5px 8px;' +
+        'border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink);font-size:13px">' +
+          PLACES.map((L,i) => '<option value="'+i+'"'+(p.home === i ? " selected" : "")+">"+L.n+"</option>").join("") +
         "</select></td>";
       tb.appendChild(tr);
     });
+
+    /* domovské miesto, kam pridelený dodávateľ nevozí — tichá chyba, ktorú treba ukázať */
+    const w = document.getElementById("a-home-warn");
+    if (!w) return;
+    const bad = own.concat(deleg).filter(p => reachable(p).indexOf(p.home) < 0);
+    w.hidden = bad.length === 0;
+    if (bad.length) w.innerHTML = "<strong>Nesúlad pridelenia:</strong> " +
+      bad.map(p => p.n + " má domovské miesto <strong>" + PLACES[p.home].n +
+        "</strong>, ale " + p.cs.map(c => CATERERS[c].short).join(" ani ") + " tam nevozí").join(" · ") +
+      ". Appka v takom prípade použije prvé miesto, kam pridelený dodávateľ chodí — teda iné, než kde dotyční naozaj sú. " +
+      "Treba zmeniť buď poskytovateľa, alebo domovské miesto.";
   }
+
+  function renderPlacesAdmin(){
+    const tb = document.getElementById("a-places");
+    if (!tb) return;
+    const all = own.concat(deleg);
+    tb.innerHTML = PLACES.map((L,i) => {
+      const cats = CATERERS.filter(A => (A.places || [0]).indexOf(i) >= 0).map(A => A.short);
+      const homes = all.filter(p => p.home === i).length;
+      return "<tr><td><strong>"+L.n+"</strong></td>" +
+        '<td style="font-family:var(--mono)">'+L.s+"</td>" +
+        '<td style="font-family:var(--mono)">'+L.time+"</td>" +
+        '<td class="num">'+(L.min ? L.min + " " + porcie(L.min) : "bez minima")+"</td>" +
+        '<td style="font-family:var(--mono)">'+(L.cancel || "podľa dodávateľa")+"</td>" +
+        "<td>"+(cats.length ? cats.join(", ") : '<span style="color:var(--miss)">nikto</span>')+"</td>" +
+        '<td class="num">'+homes+"</td></tr>";
+    }).join("");
+  }
+
+  document.addEventListener("change", function(e){
+    const sel = e.target.closest("[data-home]");
+    if (!sel) return;
+    const p = own.concat(deleg).filter(x => x.p === sel.dataset.home)[0];
+    if (!p) return;
+    p.home = +sel.value;
+    renderAll();
+  });
 
   document.addEventListener("change", function(e){
     const sel = e.target.closest("[data-assign]");
@@ -2797,6 +3095,51 @@
       tb.appendChild(tr);
     });
     setText("z-week", "Týždeň " + weekLabel + " · vytlačené " + dmy(now));
+    renderSplit();
+  }
+
+  /* rozpis objednávky podľa miesta výdaja — vzorové počty za celú firmu */
+  const SPLIT = [
+    [[18,15,7],[16,19,6],[21,12,5],[16,17,8],[20,14,4]],   /* Vráble */
+    [[2,1,2],  [1,2,1],  [2,1,1],  [2,1,2],  [2,1,1]],     /* Tesárske Mlyňany */
+    [[1,1,0],  [1,1,1],  [1,1,1],  [1,1,0],  [1,1,1]]      /* Sklad Nitra */
+  ];
+
+  function renderSplit(){
+    const box = document.getElementById("z-split");
+    if (!box) return;
+    const lab = labelsOf(0);
+    const under = [];
+    let h = "";
+    SPLIT.forEach((rows, pi) => {
+      const L = PLACES[pi];
+      h += '<p class="meta" style="margin:16px 0 6px">' + L.n.toUpperCase() + " · DOVOZ " + L.time +
+           (L.min ? " · MINIMUM " + L.min : "") + "</p>" +
+           "<table><thead><tr><th>Deň</th>" +
+           lab.map(x => '<th class="cnt">'+x+"</th>").join("") +
+           '<th class="cnt">Spolu</th></tr></thead><tbody>';
+      rows.forEach((r,di) => {
+        const sum = r.reduce((a,b) => a+b, 0);
+        const bad = L.min && sum < L.min;
+        if (bad) under.push({ place:L, day:di, sum:sum });
+        h += "<tr><td>"+DAYS_S[di]+" "+dm(thisDays[di])+"</td>" +
+             r.map(v => '<td class="cnt">'+v+"</td>").join("") +
+             '<td class="cnt"'+(bad ? ' style="color:#A8402F"' : "")+">"+sum+(bad ? " ⚠" : "")+"</td></tr>";
+      });
+      h += "</tbody></table>";
+    });
+    box.innerHTML = h;
+
+    const w = document.getElementById("z-minwarn");
+    if (!w) return;
+    w.innerHTML = under.length
+      ? '<div class="warnbox"><strong>Pod minimom na dovoz</strong>' +
+        under.map(u => "<p>" + DAYS[u.day] + " " + dm(thisDays[u.day]) + " — " + u.place.n +
+          ": " + u.sum + " " + porcie(u.sum) + ", minimum je " + u.place.min + ".</p>").join("") +
+        "<p>Hlási sa to <strong>pri týždennej uzávierke</strong>, nie ráno v deň obeda. Buď sa s dodávateľom dohodne výnimka, alebo tí ľudia v ten deň jedia v závode — appka ich vie presunúť hromadne.</p>" +
+        '<p style="margin-top:10px"><button class="btn" style="background:var(--surface)">Presunúť do závodu</button> ' +
+        '<button class="btn" style="background:var(--surface)">Dohodnuté, nechať tak</button></p></div>'
+      : '<div class="okbox"><strong>Všetky miesta sú nad minimom na dovoz.</strong></div>';
   }
 
   /* ---------- render ---------- */
@@ -3550,6 +3893,8 @@
     renderCurrent();
     renderCatList();
     renderAssign();
+    renderPlacesAdmin();
+    renderPlaceSummary();
     checkStyleClash();
     renderAdminMenu();
     renderPrices();

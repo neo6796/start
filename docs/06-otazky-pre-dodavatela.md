@@ -47,6 +47,29 @@ Aby sme ju nastavili podľa toho, ako fungujete vy, potrebujeme odpovede na tiet
 
 ---
 
+## Dovoz — kam a za akých podmienok
+
+Časť našich ľudí pracuje počas týždňa na viacerých prevádzkach. Aplikácia vie objednávku **rozpísať podľa miest**, aby ste vedeli, koľko porcií ide kam — nielen koľko celkovo.
+
+**Na ktoré miesta ste ochotní voziť?** Pre každé prosíme tri údaje:
+
+| Miesto | Čas dovozu | Minimálny počet porcií |
+|---|---|---|
+| ……… | ……… | ……… |
+| ……… | ……… | ……… |
+| ……… | ……… | ……… |
+
+**Minimum je dôležité.** Ak sa nejaký deň pod neho dostaneme, aplikácia nás na to upozorní **už pri týždennej uzávierke** — teda s časom na to, aby sme sa buď dohodli na výnimke, alebo tých pár ľudí presunuli inam. Nie ráno v deň obeda.
+
+**Má niektoré miesto skorší termín na odhlásenie?** Napríklad ak auto vyráža skôr.
+- miesto ……… → odhlásenie do ……… hod.
+
+**Účtujete za dovoz na vzdialenejšie miesto príplatok?**
+- [ ] nie, cena je rovnaká
+- [ ] áno, ……… € *(za porciu / za dovoz — nehodiace sa škrtnite)*
+
+---
+
 ## Termíny
 
 **Dokedy sa dá odhlásiť z obeda na konkrétny deň?**
@@ -58,7 +81,7 @@ Aby sme ju nastavili podľa toho, ako fungujete vy, potrebujeme odpovede na tiet
 - [ ] áno, do ……… hod.
 - [ ] nie
 
-> Ak áno, budeme vám v tom čase posielať **krátku korekciu** v tvare: *„pôvodne 47, storná 3, doobjednávky 2 → 46"*. Teda presne to, čo dnes riešite telefonátom.
+> Ak áno, budeme vám v tom čase posielať **krátku korekciu** v tvare: *„pôvodne 47, storná 3, doobjednávky 2 → 46"*. Teda presne to, čo dnes riešite telefonátom. Ak vozíte na viac miest, korekcia bude obsahovať aj **presuny medzi nimi** — počet ostane rovnaký, ale auto sa balí inak.
 
 ---
 
