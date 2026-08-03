@@ -10,7 +10,7 @@ Server: **`aha-apps`** u Hetznera, CPX22, Debian 13, IP **`46.225.236.143`**
 | Krok | Stav |
 |---|---|
 | 1 — VPS | ✅ hotovo — `aha-apps`, CPX22, Debian 13, Hetzner Nuremberg |
-| 2 — DNS `obedy.ahafarma.sk` | ⬜ čaká |
+| 2 — DNS `obedy.ahafarma.sk` | ✅ hotovo a overené — `nslookup` vracia `46.225.236.143` |
 | 3 — schránka `noreply@` | ⬜ čaká |
 | 4 — SPF, DKIM, DMARC | ⬜ čaká |
 | 5 — zabezpečenie servera | ✅ hotovo a overené (root aj heslá zablokované) |
