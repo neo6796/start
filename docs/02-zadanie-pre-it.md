@@ -41,15 +41,29 @@ Verejný SSH kľúč NAS-u pošlite a my ho na server pridáme; alebo nám poved
 
 ---
 
-## Ešte jedna maličkosť — adresa na odpovede
+## Schránka na odpovede — `obedy@ahafarma.sk`
 
-Objednávky odchádzajú z `objednavky@obedy.ahafarma.sk`, ale **odpovede dodávateľov musia niekam prísť.** Zatiaľ je ako `Reply-To` nastavená existujúca firemná schránka `info@panskepole.sk`.
+Objednávky odchádzajú z `objednavky@obedy.ahafarma.sk`, ale **odpovede dodávateľov musia niekam prísť.** Dočasne je ako `Reply-To` nastavená `info@panskepole.sk`. Chceme to nahradiť samostatnou schránkou na firemnom serveri.
 
-Ak chcete radšej samostatnú schránku na tento účel (napr. `obedy@ahafarma.sk` na firemnom serveri, len ako prijímaciu), založte ju a dajte vedieť — v aplikácii je to jedno nastavenie, mení sa bez zásahu do kódu. **Odosielanie cez ňu nepotrebujeme**, len prijímanie.
+**Prosíme založiť `obedy@ahafarma.sk` — ako schránku, do ktorej sa len prijíma.**
+
+| | |
+|---|---|
+| **Prijímanie** | ✅ áno, to je celý dôvod jej existencie |
+| **Odosielanie cez ňu** | ❌ nie, a nepotrebujeme na ňu ani SMTP údaje |
+| **Otvárať port 587/465 zvonku** | ❌ **nie.** Pôvodné zadanie to žiadalo, dnes už neplatí |
+| **Prístup** | aspoň dvom ľuďom, alebo presmerovanie na dve adresy |
+
+**Prečo nie odosielanie cez ňu.** Objednávky odchádzajú v piatok napoludnie a ráno pred výdajom — teda v okamihoch, keď na tom naozaj záleží. Keby ich posielal server v technickej miestnosti, viazali by sa na prúd a internet v závode. Výpadok v piatok o 12:00 by znamenal, že objednávka neodíde. Preto odosielanie ostáva na externej službe, ktorá je na to postavená.
+
+**Prečo prístup pre dvoch ľudí.** Adresa, na ktorú dodávateľ odpovie *„v stredu nemáme kapacitu, uvaríme len 30 porcií"*, musí byť čítaná aj vtedy, keď je jeden človek na dovolenke. Schránka, ktorú nikto neotvára, je horšia než `info@`, kam sa aspoň niekto pozerá.
+
+V aplikácii je to jedno nastavenie — zmena adresy nevyžaduje zásah do kódu.
 
 ---
 
 ## Zhrnutie
 
 1. sprístupniť NAS pre sťahovanie záloh ← **jediná blokujúca vec**
-2. *(voliteľne)* povedať, či má `Reply-To` ostať na `info@panskepole.sk`
+2. založiť **prijímaciu** schránku `obedy@ahafarma.sk` a dať k nej prístup dvom ľuďom
+3. **neotvárať** odosielací port pre aplikačný server — už to netreba

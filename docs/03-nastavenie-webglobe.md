@@ -118,7 +118,7 @@ Musí vrátiť `46.225.236.143`. Ak ešte nie, počkaj pár minút.
 Nastavenie:
 - odosielacia doména **`obedy.ahafarma.sk`** — overuje sa len podadresa, hlavná doména ostáva nedotknutá,
 - odosielateľ **`objednavky@obedy.ahafarma.sk`**, zobrazované meno `AHAfarma — objednávky obedov`,
-- **`Reply-To` na skutočnú firemnú schránku** — odosielacia služba vie len posielať, takže bez toho by odpovede dodávateľov zmizli,
+- **`Reply-To` na skutočnú firemnú schránku** — odosielacia služba vie len posielať, takže bez toho by odpovede dodávateľov zmizli. Cieľom je samostatná prijímacia schránka `obedy@ahafarma.sk` na firemnom serveri (`docs/02`); dovtedy platí `info@panskepole.sk`. **Odosielacia adresa ostáva `objednavky@obedy.ahafarma.sk`** — posielať ako `@ahafarma.sk` cez Brevo by nešlo, overená je podadresa, nie hlavná doména,
 - **meranie preklikov vypnuté**, aby Brevo neprepisovalo odkaz „Potvrdiť prijatie" na svoju doménu,
 - **odkaz na odhlásenie z odberu vypnutý** — viď nižšie, je to najdôležitejšie z týchto nastavení.
 
