@@ -1,0 +1,21 @@
+# Preview appky Obedár — statická stránka, žiadna databáza.
+# HTTPS certifikát si Caddy vybaví od Let's Encrypt sám a sám ho aj obnovuje.
+
+obedy.ahafarma.sk {
+    root * /srv
+    file_server
+    encode gzip
+
+    # Nech sa preview nedostane do Google. Je to interná ukážka, nie stránka firmy.
+    header X-Robots-Tag "noindex, nofollow"
+
+    # Preview sa počas ladenia mení často — nech prehliadač neukazuje starú verziu.
+    header Cache-Control "no-cache"
+
+    log {
+        output file /data/access.log {
+            roll_size 10MiB
+            roll_keep 5
+        }
+    }
+}
