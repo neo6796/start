@@ -15,8 +15,14 @@ Server: **`aha-apps`** u Hetznera, CPX22, Debian 13, IP **`46.225.236.143`**
 | 4 — DKIM a DMARC pre `obedy` | ✅ štyri záznamy pridané a overené, SPF hlavnej domény nedotknutý |
 | 5 — zabezpečenie servera | ✅ hotovo a overené (root aj heslá zablokované) |
 | 6 — Docker | ✅ hotovo, `hello-world` prešiel |
+| 7 — preview naživo | ✅ `https://obedy.ahafarma.sk` beží, certifikát od Let's Encrypt vydaný |
 
-**Infraštruktúra je hotová.** Zostáva odosielacia adresa a SMTP kľúč v Brevo, potom sa môže nasadzovať.
+**Infraštruktúra je hotová a overená celou cestou** — doména, HTTPS aj Caddy fungujú na skutočnej stránke, nie len na papieri. Ostrá appka sa nasadí do toho istého `docker-compose.yml`: v `Caddyfile` sa `file_server` zmení na `reverse_proxy app:3000` a pribudnú služby `app` a `db`.
+
+Aktualizácia preview je odvtedy jeden príkaz z Macu:
+```
+scp ~/Downloads/index.html aha@46.225.236.143:~/obedar/site/index.html
+```
 
 ---
 
