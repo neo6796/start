@@ -119,10 +119,23 @@ Nastavenie:
 - odosielacia doména **`obedy.ahafarma.sk`** — overuje sa len podadresa, hlavná doména ostáva nedotknutá,
 - odosielateľ **`objednavky@obedy.ahafarma.sk`**, zobrazované meno `AHAfarma — objednávky obedov`,
 - **`Reply-To` na skutočnú firemnú schránku** — odosielacia služba vie len posielať, takže bez toho by odpovede dodávateľov zmizli,
-- **meranie preklikov vypnuté**, aby Brevo neprepisovalo odkaz „Potvrdiť prijatie" na svoju doménu.
+- **meranie preklikov vypnuté**, aby Brevo neprepisovalo odkaz „Potvrdiť prijatie" na svoju doménu,
+- **odkaz na odhlásenie z odberu vypnutý** — viď nižšie, je to najdôležitejšie z týchto nastavení.
+
+### ⚠️ Vypnúť „Neodoberať" v transakčných správach
+
+Prvá skúšobná správa prišla do schránky správne, ale Gmail nad ňou zobrazil pruh *„Táto správa bola poslaná z databázy emailových adries"* s tlačidlom **Neodoberať**. Brevo do správy pridalo hlavičku `List-Unsubscribe`.
+
+**Keby na to kuchár klikol, Brevo si jeho adresu zapíše medzi odhlásené a ďalšie objednávky mu už nepošle** — ticho, bez chybovej hlášky. Appka by odosielanie považovala za úspešné a chyba by sa prejavila až tým, že sa jedného dňa neuvarí.
+
+Hľadaj v Brevo nastavenia **transakčných e-mailov** (*Transactional* → nastavenia, prípadne v nastaveniach účtu pri odosielateľoch) a možnosť pridávania odhlasovacieho odkazu vypni. Názov položky sa časom mení, hľadaj slovo *unsubscribe*.
+
+Appka to prebiť nevie — hlavičku pridáva až relay po tom, čo mu správu odovzdáme.
 
 ### ✅ Kontrola
 Doména musí byť v Brevo označená ako *authenticated*.
+
+Po vypnutí pošli skúšobnú správu znova. **Pruh s tlačidlom Neodoberať už nesmie byť.**
 
 ---
 

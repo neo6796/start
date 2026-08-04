@@ -600,6 +600,16 @@ Nastavuje **admin, samostatne pre každého poskytovateľa**:
 
 **V tele e-mailu sú počty aj ako čistý text**, nielen v prílohe — kuchyňa ho číta na telefóne a otvárať PDF je zbytočná prekážka. PDF a XLSX sú priložené pre archív a účtovníctvo.
 
+> **⚠️ Objednávka nesmie obsahovať odkaz na odhlásenie z odberu.** Overené na prvom skúšobnom e-maile: odosielacia služba doň pridala hlavičku `List-Unsubscribe` a Gmail nad správou zobrazil pruh *„Táto správa bola poslaná z databázy emailových adries"* s tlačidlom **Neodoberať**.
+>
+> Sú s tým dva problémy a druhý je vážny:
+> 1. Objednávka obedov vyzerá ako reklamná pošta, čo jej uberá na dôveryhodnosti presne u toho, kto podľa nej má variť.
+> 2. **Keby na to kuchár klikol, odosielacia služba si jeho adresu zapíše medzi odhlásené a ďalšie objednávky mu už nepošle.** Prestali by chodiť ticho — appka by odosielanie považovala za úspešné a chyba by sa ukázala až tým, že sa jedného dňa neuvarí.
+>
+> Preto sa hlavička v odosielacej službe **vypína**, a to ešte pred prvým ostrým odoslaním. Je to nastavenie účtu, nie niečo, čo vie appka prebiť — hlavičku pridáva relay až po tom, čo správu odovzdáme.
+>
+> Toto je zároveň ukážka, prečo sa skúšobná správa posiela **na Gmail a číta sa aj to, čo je nad ňou**, nielen či prišla.
+
 #### Čo o doručení e-mailu naozaj vieme
 Toto treba povedať na rovinu, lebo na tom stojí celá poistka: **že si e-mail niekto prečítal, sa spoľahlivo zistiť nedá.**
 
