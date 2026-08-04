@@ -625,9 +625,19 @@ Preto je v prehľade **stav odoslania a potvrdenie dodávateľa oddelene** — s
 
 #### Riešenie: aktívne potvrdenie namiesto detekcie
 - V objednávke je odkaz **„Potvrdiť prijatie"** — jeden klik, bez prihlásenia, jednorazový token.
+
+> **Odkaz sám o sebe potvrdenie nespraví — musí otvoriť stránku s tlačidlom.** Znie to ako krok navyše, ale je nutný: **e-mailoví klienti a bezpečnostné skenery odkazy v správach samy navštevujú**, aby overili, či nevedú na škodlivý obsah. Microsoft Defender, firemné antivírusy aj náhľady odkazov to robia bežne a bez toho, aby o tom človek vedel.
+>
+> Keby potvrdenie prebehlo už otvorením odkazu, **objednávku by nám „potvrdil" robot skôr, než by ju uvidel kuchár** — a appka by prestala hlásiť práve tie prípady, kvôli ktorým celá poistka existuje. Tichý súhlas od skenera je horší než žiadny, lebo vyzerá ako dobrá správa.
+>
+> Preto: odkaz otvorí stránku, na nej sú **počty na tie dni** a tlačidlo. Potvrdenie zapíše až stlačenie tlačidla. Vedľajší zisk je, že dodávateľ potvrdzuje **konkrétne čísla**, nie len to, že mu prišiel e-mail — a tie čísla má pred očami ešte raz.
+>
+> V samotnom e-maile môže odkaz vyzerať ako tlačidlo, to je len vzhľad. Skutočné tlačidlo priamo v tele správy (Gmail Actions, AMP for Email) existuje, ale vyžaduje registráciu u Googlu, funguje len v Gmaile a pri ostatných klientoch je aj tak potrebná záložná cesta. Za tú komplikáciu to nestojí.
 - Admin nastaví **per poskytovateľ, do kedy potvrdenie čakať** (nevyžadovať / 30 min / hodina / dve).
 - Ak potvrdenie nepríde včas, appka **eskaluje**: SMS dodávateľovi a upozornenie adminovi „Sever nepotvrdil objednávku, zavolajte im".
 - Neisté *„asi to dorazilo"* sa tým mení na jednoznačné *„potvrdili o 12:07"* — a to je zároveň **dôkaz pri spore o počty**.
+- **Potvrdenie platí pre konkrétne čísla, nie pre e-mail.** Keď po ňom príde korekcia (storno, doobjednávka, presun medzi miestami), staré potvrdenie sa tým **stáva neplatným** a appka žiada nové. Inak by sa dodávateľ mohol brániť tým, že potvrdil niečo iné, než nakoniec platilo — a mal by pravdu.
+- Odkaz je **jednorazový a viazaný na danú objednávku**. Po použití alebo po dni obeda prestane platiť; kto ho dostane preposlaný o týždeň, ním už nič nepotvrdí.
 
 #### Ostatné poistky
 - appka **zaznamená každé odoslanie** so stavom a admin ho vidí v prehľade,
