@@ -12,7 +12,7 @@ Zapísané z **jedálnych lístkov na týždeň 3.–7. 8. 2026**, ktoré prišl
 | cena bez DPH *(pri 19 %)* | 5,29 € | 6,05 € |
 | **Objednávky** | telefonicky **7:00–9:00** | telefonicky **denne do 8:30** |
 | Telefón | 0918 119 328 · 0911 328 119 | 0907 650 755 · 037/633 42 32 |
-| **E-mail** | **na menu nie je** ⚠️ | `gastroabm@gastroabm.sk` |
+| **E-mail** | majú, len nie je na menu | `gastroabm@gastroabm.sk` |
 | Počet jedál | **5** + polievka | **5** + polievka |
 | **Značenie jedál** | **čísla `1`–`5`** | **písmená `A`–`E`** |
 | Značenie alergénov | **čísla** `(1,3,7)` | **slová** `(múka, vajcia, mlieko)` |
@@ -44,14 +44,18 @@ Nie deň vopred, nie týždeň vopred — **ráno do 9:00, respektíve do 8:30.*
 
 To je oveľa voľnejšie, než s čím koncept počítal, a mení váhu dvoch vecí:
 
-| | Bolo v koncepte | Ako to bude v skutočnosti |
+Z toho vyšlo rozdelenie na **dve správy s dvoma významami** (koncept 4.1a):
+
+| | Kedy | Záväzná |
 |---|---|---|
-| **Týždenná objednávka** | hlavný výstup, odchádza v piatok | **náš vnútorný plán** — dodávateľ ho takto nepotrebuje |
-| **Denný súhrn** | doplnok | **hlavný výstup**, odchádza ráno pred 8:30 |
+| **Týždenná predpoveď** — *„očakávame približne toto"* | piatok po uzávierke | **nie** |
+| **Denná objednávka** — *„toto platí na dnes"* | ráno, pred ich hranicou | **áno** |
 
-Nič sa nezahadzuje, len sa prehodí dôraz. Týždenná uzávierka má naďalej zmysel — bez nej by nebolo z čoho tlačiť zberné hárky a nikto by dopredu nevedel, koľko sa varí. Ale **záväzné číslo je to ranné.**
+Pôvodne mala v piatok ísť objednávka a ráno k nej **korekcia** — *„pôvodne 47, storná 3, doobjednávky 2 → 46"*. Korekcia ale znamená, že prvé číslo bolo nesprávne. Pri tomto rozdelení nie je nesprávne nič: predpoveď sa nemýli, lebo nič nesľubuje, a záväzné číslo je vždy len jedno a konečné. **Fakturačná kontrola porovnáva len tie záväzné.**
 
-Praktický dôsledok, ktorý sa ráta: **doobjednanie v deň obeda (4.3) nie je výnimka, ale bežný režim.** U oboch dodávateľov sa dá. Denný deadline v appke bude teda 8:00, nie 11:00 — s rezervou pred tým ich 8:30.
+**Týždenná uzávierka pre stravníka ostáva** (piatok 12:00). Ranné okno nie je jeho právo, ale nástroj predáka — na choroby, návraty a neohlásené príchody. Keby si mohol každý rozhodovať ráno, predákova práca by sa zmenila z jednej týždennej dávky na každodenné naháňanie.
+
+Denný deadline v appke bude **8:00** — polhodina rezervy pred ich 8:30 na odoslanie, prípadné zlyhanie a na to, aby sa dalo zavolať.
 
 ### E-mail majú obaja — ale ráno je lepšia SMS
 
