@@ -2,7 +2,9 @@
 
 Pripravujeme aplikáciu na objednávanie obedov. Bude z nej chodiť **mesačný podklad na zrážky zo mzdy**, aby sa nemuselo nič prepisovať ručne.
 
-Dokument má dve časti. **Prvá popisuje, ako to appka počíta dnes** — prosíme len potvrdiť alebo opraviť, nemusíte to vymýšľať. **Druhá sú veci, ktoré zatiaľ rozhodnuté nie sú** a bez odpovede sa podklad dokončiť nedá.
+Dokument má dve časti a spolu osem otázok. **Prvá popisuje, ako to appka počíta dnes** — prosíme len potvrdiť alebo opraviť, nemusíte to vymýšľať. **Druhá sú veci, ktoré zatiaľ rozhodnuté nie sú** a bez odpovede sa podklad dokončiť nedá.
+
+*Príplatok za dovoz na vzdialenejšiu prevádzku sa v tomto dokumente nerieši — na našich prevádzkach ho žiadny dodávateľ neúčtuje. Aplikácia s ním počíta ako s možnosťou do budúcna; keby ho niekto zaviedol, vrátime sa s otázkou, kto ho platí.*
 
 Všetko sú **nastavenia s platnosťou od dátumu**, nie natvrdo zapísané hodnoty. Dajú sa kedykoľvek zmeniť a zmena neprepíše už uzavreté mesiace.
 
@@ -71,42 +73,45 @@ DPH k príspevku stravníka vyrába štvrté desatinné miesto. Ak sa zaokrúhli
 - [ ] zaokrúhľovať **na každom obede** — matematicky / nadol *(nehodiace sa škrtnite)*
 - [ ] inak: ………
 
+### 5. Obed, ktorý si zamestnanec neodhlásil a neprevzal
+
+Dodávateľ ho uvaril a vyfakturoval, takže ho niekto zaplatiť musí. **Navrhujeme účtovať ho zamestnancovi v plnej cene** — bez príspevku zamestnávateľa a bez sociálneho fondu.
+
+Dôvod nie je trestanie. Príspevok na stravovanie je viazaný na **odpracovanú zmenu**, takže v deň, keď človek v práci nebol, nemá z čoho vzniknúť. Keby sme ho aj tak pripočítali, firma by z vlastných nákladov zaplatila 55 % obeda, na ktorý nárok nebol.
+
+- [ ] súhlasí — **plná cena bez príspevku aj bez fondu**
+- [ ] účtovať štandardne, teda **s príspevkom**
+- [ ] **neúčtovať**, znáša firma
+- [ ] platí niečo iné, a to: ………
+
+> **Ako sa taký obed nájde:** pri mesačnej uzávierke sa dá načítať dochádzka a porovnať, kto mal obed v deň, keď v práci nebol. Aplikácia to sama neúčtuje — len tie dni **označí na rozhodnutie**. Prítomnosť totiž nie je to isté ako prevzatie a podľa indície sa strhávať zo mzdy nemá.
+
 ---
 
 # B. Toto rozhodnuté nie je
 
-### 5. Čo s obedom, ktorý si zamestnanec neodhlásil a neprevzal?
+### 6. Živnostníci — potvrdiť daňový režim
 
-Dodávateľ ho uvaril a vyfakturoval, takže ho niekto zaplatiť musí.
+Obedy objednávame aj pre ľudí, ktorí u nás nie sú v pracovnom pomere. **Typ vzťahu je vlastnosť osoby, nie firmy** — ten istý brigádnik môže byť u nás v pracovnom pomere aj na živnosť.
 
-- [ ] účtovať zamestnancovi **v plnej cene bez príspevku** zamestnávateľa *(najbežnejšie)*
-- [ ] účtovať štandardne, teda **s príspevkom**
-- [ ] **neúčtovať**, znáša firma
+Schéma, s ktorou počítame, je takáto:
 
-### 6. Ak dodávateľ účtuje príplatok za dovoz na vzdialenejšiu prevádzku, kto ho platí?
+| | Zamestnanec | Živnostník |
+|---|---|---|
+| Kto platí jedálni | **firma** | **on sám**, v plnej cene |
+| Ako firma prispieva | príspevok + sociálny fond | **nepriamo** — o tú sumu si zvýši faktúru voči nám |
+| Ako sa to vyrovná | zrážka zo mzdy | nič, zaplatil si sám |
+| Je v mzdovom podklade | áno | **nie, vôbec** |
 
-Časť ľudí pracuje počas týždňa na viacerých prevádzkach a obed sa im vezie tam, kde v ten deň sú. Ak za to dodávateľ pýta príplatok, treba rozhodnúť:
+Aplikácia im teda obed len **objednáva**. Príspevok počíta rovnakým vzorcom ako zamestnancom, ale len preto, aby sa vedelo, o koľko si majú zvýšiť faktúru. Sociálny fond sa ich netýka.
 
-- [ ] **zamestnávateľ** — zamestnanec je tam kvôli práci *(a je to len otázka nákladu, nie zrážky)*
-- [ ] **zamestnanec** — pripočíta sa mu k cene obeda
-- [ ] netýka sa nás, dodávateľ príplatok neúčtuje
+Nejde o plnenie zo Zákonníka práce, preto potrebujeme potvrdiť:
 
-Kým to nie je rozhodnuté, aplikácia počíta rovnakú cenu obeda na všetkých miestach.
+- **ako sa tá položka na faktúre volá a účtuje?** …………
+- **počíta sa suma pred DPH alebo po nej?** Pri platcoch DPH k odmene pribudne DPH, takže rovnaký príspevok stojí firmu viac než u zamestnanca. …………
+- **je na strane živnostníka niečo, na čo ho máme upozorniť?** …………
 
-### 7. Živnostníci
-
-Obedy robíme aj pre ľudí, ktorí nie sú v pracovnom pomere. **Typ vzťahu je vlastnosť osoby, nie firmy** — ten istý brigádnik môže byť u nás v pracovnom pomere aj na živnosť, takže sa to nedá odvodiť od firmy.
-
-Výpočet ceny je pre oboch rovnaký. Líši sa, čo z toho vyjde von: zamestnanec má **zrážku zo mzdy**, živnostník mzdu nemá, takže **dopláca**. Aplikácia pre nich pripraví samostatný výstup — kumulatív, koľko má kto doplatiť, a príspevok zamestnávateľa rozpísaný po firmách.
-
-Poskytnutie zvýhodneného obedu živnostníkovi **nie je plnenie zo Zákonníka práce**, preto s ním počítame mimo bežného príspevku — zo špeciálneho fondu. Či je tá schéma správne postavená, posúdiť nevieme.
-
-- **prispieva sa im vôbec?** …………
-- **z čoho** — špeciálny fond, réžia, inak? …………
-- **v akej výške** — rovnako ako zamestnancom, alebo inak? …………
-- **ako sa to vyrovná** — preúčtovanie, faktúra, hotovosť, zrážka z odmeny? …………
-
-### 8. Aký formát potrebuje mzdový softvér?
+### 7. Aký formát potrebuje mzdový softvér?
 
 - názov programu: ………
 - [ ] XLSX
@@ -119,7 +124,7 @@ Aké stĺpce musia byť v súbore a v akom poradí? Predbežne počítame s: oso
 
 > Podklad chodí **za každú firmu zvlášť**. Predák môže mať v tíme ľudí z viacerých spriaznených firiem — appka ich pri objednávaní nerozdeľuje, ale pri peniazoch áno.
 
-### 9. Dokedy v mesiaci musí byť podklad odovzdaný?
+### 8. Dokedy v mesiaci musí byť podklad odovzdaný?
 
 - [ ] do ……… dňa nasledujúceho mesiaca
 

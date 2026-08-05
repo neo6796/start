@@ -37,9 +37,8 @@ Deväť otázok. Prvé štyri sú **na potvrdenie** — model je navrhnutý, tre
 - [ ] **ktorý z dvoch modelov** sa zapne; pri ekonomickom kto je základný poskytovateľ
 - [ ] strop naviazaný na stravné 5–12 h
 - [ ] **kde sa zaokrúhľuje** — na obede alebo až na mesačnom súčte *(odporúčam druhé)*
-- [ ] **čo s obedom, ktorý si nikto neodhlásil a neprevzal**
-- [ ] kto platí prípadný príplatok za dovoz na vzdialenejšiu prevádzku
-- [ ] **schéma pre živnostníkov** — či sa prispieva, z čoho, koľko a ako sa to vyrovná
+- [ ] potvrdiť, že **neodhlásený obed ide v plnej cene** bez príspevku aj bez fondu
+- [ ] **daňový režim odmeny pre živnostníkov** — ako sa účtuje a či sa suma počíta pred DPH alebo po nej
 - [ ] formát pre mzdový softvér **+ vzorový súbor, ktorý sa dnes načítava**
 - [ ] dokedy v mesiaci musí byť podklad odovzdaný
 
@@ -58,7 +57,8 @@ Osobné číslo je **celý štvorciferný kód z dochádzky** — poradové čí
 - [ ] **v akej podobe chodí menu + vzorka** a v ktorý deň býva hotové
 - [ ] termín na odhlásenie, či prijmú doobjednávku v deň obeda
 - [ ] **kam vozia, o koľkej a od koľkých porcií** (miesta výdaja)
-- [ ] ceny, fakturácia, kedy sa mení cenník
+- [ ] ceny **bez DPH** a sadzba zvlášť, fakturácia, kedy sa mení cenník
+- [ ] **či vedia fakturovať živnostníkom priamo**, alebo všetko nám a my to preúčtujeme
 - [ ] do akého času vedia potvrdiť prijatie objednávky
 
 ---
@@ -69,6 +69,7 @@ Osobné číslo je **celý štvorciferný kód z dochádzky** — poradové čí
 - [ ] určiť, **ktorí dodávatelia to reálne budú** a ako sa volajú
 - [ ] určiť **zoznam prevádzok**, kam sa vozí
 - [ ] potvrdiť **zoznam firiem** — z dochádzky vidno tri skupiny (prefix kódu 1, 2, 3); je to celé?
+- [ ] zistiť, či dochádzkomer vie vyexportovať aj **denné prítomnosti** (osoba × deň), nie len zoznam ľudí — bez toho odpadá kontrola neodhlásených obedov *(stačí jedna vzorka)*
 - [ ] overiť, že heslo k `obedy@ahafarma.sk` je **náhodne generované**, nie vymyslené — port je otvorený voči internetu a schránka dostáva pokusy o uhádnutie
 
 ---

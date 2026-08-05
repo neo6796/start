@@ -89,11 +89,23 @@ Aby sme ju nastavili podľa toho, ako fungujete vy, potrebujeme odpovede na tiet
 
 **Cena za jedlo:** ……… € *(ak sa jedlá líšia cenou, uveďte ku každému)*
 
-**Sú ceny s DPH?** ………
+**Sú ceny s DPH?** ……… *(potrebujeme cenu **bez DPH** a sadzbu zvlášť — príspevok zamestnávateľa sa počíta zo základu)*
 
 **Ako často fakturujete?** ………
 
 **Kedy sa mení cenník?** ……… *(aby sme zmenu zaviedli k správnemu dátumu a nespätne)*
+
+### Časť stravníkov si obed platí sama
+
+Objednávku posielame za všetkých naraz, ale **zaplatiť ju majú dve rôzne strany**. Za zamestnancov platí firma. Časť ľudí u nás ale nie je v pracovnom pomere — tí si svoj obed hradia sami, v plnej cene.
+
+Ako to chcete mať vy?
+
+- [ ] **fakturujeme im priamo** — firemná faktúra bude bez ich porcií *(potrebujeme vedieť, čo od nás k tomu potrebujete: mená, kontakty, IČO)*
+- [ ] **fakturujeme všetko firme** a vysporiadanie si spravíte medzi sebou
+- [ ] inak: ………
+
+> Prosíme neobísť túto otázku. Aplikácia porovnáva vašu faktúru s počtom porcií, ktorý sama odoslala — ak by na faktúre boli porcie, ktoré platí niekto iný, hlásila by rozdiel **každý mesiac** a museli by sme ho zakaždým ručne odklikávať.
 
 ---
 
