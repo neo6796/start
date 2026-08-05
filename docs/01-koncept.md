@@ -1362,10 +1362,10 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 **Otázky dovnútra firmy:**
 4. **Čísla od mzdára** — checklist v kapitole 6.2.
 5. **Mzdový softvér** — ktorý, aby export sedel formátom.
-6. **Zoznam zamestnancov** — je odkiaľ ho preberať (dochádzka, personalistika), alebo sa 100 ľudí zadá ručne? Ručne je to jednorazovo pár hodín, čo je pri tejto veľkosti prijateľné.
+6. ~~**Zoznam zamestnancov**~~ — **vyriešené:** menoslov je pripravený v dohodnutom tvare, **33 ľudí** (prefixy `1`, `2`, `3`). Importuje sa ako *osobné číslo · priezvisko · meno*; väzby sa dopĺňajú v appke z rozbaľovacích zoznamov (1.3b, rozhodnutie 37). Ostáva doplniť **firmu, typ vzťahu, tím, predáka a prevádzku** ku každému — to je otázka na HR, nie na súbor.
 7. ~~**Doména a e-mailová schránka**~~ — **vyriešené:** podadresa `obedy.firma.sk` na firemnej doméne, pripraví firemný IT technik. Zadanie preňho je v `docs/02-zadanie-pre-it.md`.
 8. **Hostia a návštevy** — treba objednávať obed pre návštevu? (Malé rozšírenie: objednávka bez väzby na osobu, účtovaná stredisku.)
-9. **Prevzatie obeda** — treba evidovať, kto si obed reálne vyzdvihol? Rieši spory typu „zaplatil som a nedostal".
+9. **Prevzatie obeda** — zúžené. Papierový **denný hárok s odškrtávaním** (5.5) prevzatie zachytí už v MVP. Ostáva jedno: **prepisuje sa neprevzatý obed späť do appky** (a teda do plnej ceny, 6.4), alebo je hárok len kontrolou pre výdaj? Prvé je pár minút práce mesačne a dá zmysel číslam; druhé je zadarmo, ale neprevzaté obedy sa nedozvieme.
 10. **Miesta výdaja** (3.4) — treba zozbierať od dodávateľov: **kam sú ochotní voziť, o koľkej a od koľkých porcií.** Bez minima a času dovozu je nastavenie len polovičné.
 11. ~~**Príplatok za dovoz na vzdialenejšie miesto**~~ — **vyriešené:** na našich prevádzkach sa neúčtuje. Cena obeda je rovnaká na všetkých miestach. V dátovom modeli ostáva pole s nulou, aby sa dal príplatok zapnúť bez migrácie, keby ho niektorý budúci dodávateľ zaviedol; vtedy sa vráti otázka, kto ho platí (rozhodnutie 35).
 12. **Zoznam prevádzok** — na ktorých miestach firma reálne obeduje a kto je kde vedený.
