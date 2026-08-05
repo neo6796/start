@@ -302,6 +302,9 @@ DMARC: PASS
 
 Podpis prešiel aj s **MailScannerom** v ceste — obava, že by upravoval telo správy po podpísaní, sa nepotvrdila.
 
+
+**Poznámka do budúcna — kľúč je 1024-bitový.** Verejný kľúč začína `p=MIGfMA0…`, čo zodpovedá dĺžke 1024 bitov. Dnes ho prijíma každý poskytovateľ, ale odporúčaná dĺžka je **2048**. Nie je to na okamžitú akciu; keď bude správca nabudúce zasahovať do pošty, oplatí sa kľúč vymeniť. Riziko odkladu: ak niektorý veľký poskytovateľ prestane krátke kľúče uznávať, objednávky začnú padať do spamu bez zjavnej príčiny.
+
 > **Prečo to stálo za opravu, hoci pošta chodila aj predtým:** DMARC vtedy prechádzal len vďaka SPF, a **SPF sa pri preposielaní láme**. Ak dodávateľ presmeruje `kuchyna@` na súkromný Gmail — bežná vec — na poslednom skoku už neodosiela náš server. Bez DKIM by objednávka skončila v spame práve u toho, kto podľa nej varí. DKIM preposielanie prežije. Oprava navyše zlepšila doručovanie **všetkej odchádzajúcej pošty firmy**, nielen obedov.
 
 **Brevo ostáva ako záložná cesta.** Účet, overená doména aj štyri DNS záznamy na podadrese `obedy` sa nerušia — nič nestoja a prepnutie späť je zmena piatich údajov. Cieľový stav je, aby appka skúsila firemný server a **pri zlyhaní automaticky prepla na Brevo**; objednávka tak neostane visieť ani pri výpadku prúdu v technickej miestnosti.
