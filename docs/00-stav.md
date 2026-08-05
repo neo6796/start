@@ -58,7 +58,7 @@ Osobné číslo je **celý štvorciferný kód z dochádzky** — poradové čí
 - [ ] termín na odhlásenie, či prijmú doobjednávku v deň obeda
 - [ ] **kam vozia, o koľkej a od koľkých porcií** (miesta výdaja)
 - [ ] ceny **bez DPH** a sadzba zvlášť, fakturácia, kedy sa mení cenník
-- [ ] **či vedia fakturovať živnostníkom priamo**, alebo všetko nám a my to preúčtujeme
+- [ ] **či fakturujú živnostníkom priamo**, alebo všetko nám a my to preúčtujeme *(nastavenie, zvládneme oboje — len to musíme vedieť)*
 - [ ] do akého času vedia potvrdiť prijatie objednávky
 
 ---

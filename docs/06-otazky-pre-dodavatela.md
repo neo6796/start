@@ -99,13 +99,15 @@ Aby sme ju nastavili podľa toho, ako fungujete vy, potrebujeme odpovede na tiet
 
 Objednávku posielame za všetkých naraz, ale **zaplatiť ju majú dve rôzne strany**. Za zamestnancov platí firma. Časť ľudí u nás ale nie je v pracovnom pomere — tí si svoj obed hradia sami, v plnej cene.
 
-Ako to chcete mať vy?
+Zvládneme oboje, len musíme vedieť, ktoré:
 
-- [ ] **fakturujeme im priamo** — firemná faktúra bude bez ich porcií *(potrebujeme vedieť, čo od nás k tomu potrebujete: mená, kontakty, IČO)*
-- [ ] **fakturujeme všetko firme** a vysporiadanie si spravíte medzi sebou
+- [ ] **fakturujeme im priamo** — firemná faktúra bude bez ich porcií *(napíšte, čo k tomu od nás potrebujete: mená, kontakty, IČO)*
+- [ ] **fakturujeme všetko firme**, vysporiadanie si spravíte medzi sebou
 - [ ] inak: ………
 
-> Prosíme neobísť túto otázku. Aplikácia porovnáva vašu faktúru s počtom porcií, ktorý sama odoslala — ak by na faktúre boli porcie, ktoré platí niekto iný, hlásila by rozdiel **každý mesiac** a museli by sme ho zakaždým ručne odklikávať.
+> Prosíme na to odpovedať, aj keď sa to zdá ako naša vec. Aplikácia porovnáva vašu faktúru s počtom porcií, ktorý sama odoslala — a musí vedieť, či na nej tie porcie majú byť. Inak by hlásila rozdiel **každý mesiac** a zakaždým by sa musel odklikávať ručne.
+
+Nech je odpoveď akákoľvek, vám sa nič nemení: objednávka aj rozvoz idú tak ako doteraz. Ide len o to, komu vystavíte papier.
 
 ---
 

@@ -40,6 +40,7 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 33. **Dochádzka sa dá naimportovať aj pri uzávierke**, nielen pri zakladaní ľudí (6.5). Slúži na triedenie podľa prítomnosti a na nájdenie obedov v dňoch, keď človek v práci nebol. **Nikdy neúčtuje sama** — len označí deň na rozhodnutie.
 34. **Živnostníkom appka obed len objednáva** (6.2a). Dodávateľovi platia sami, príspevok dostávajú nepriamo — o jeho výšku si zvýšia faktúru voči firme. Do mzdového podkladu ani do sociálneho fondu nevstupujú; dostávajú **štruktúrovaný prehľad** po osobách, prevádzkach a poskytovateľoch.
 35. **Príplatok za dovoz sa zatiaľ nerieši** — na našich prevádzkach neexistuje. V dátovom modeli ostáva pole s nulou, aby sa dal zapnúť bez migrácie (3.4, otvorená otázka 11).
+36. **Fakturačný a kontrolný výstup je rozdelený** (6.3) — za každú firmu zvlášť, v rámci nej po poskytovateľoch, a živnostníci každý sám za seba s uvedením firmy, ku ktorej patrí. Každý list končí riadkom **„čo očakávať na faktúre"**. U živnostníka sa vedľa skutočnosti ukáže aj *ako keby bol zamestnanec* — príspevok, fond aj doplatok s DPH. **Kto komu fakturuje, je nastavenie poskytovateľa**, nie otvorená otázka.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -689,18 +690,17 @@ Rozdiel nie je vo vzorci. Vzorec je rovnaký — 55 / 35 / zvyšok, DPH rovnako.
 2. **Vzorec sa mu aj tak počíta** — inak by sa nevedelo, o koľko si má zvýšiť faktúru. Appka teda spočíta príspevok presne tak, ako keby bol zamestnanec, a výsledok len pošle iným smerom.
 3. **Sociálny fond sa ho netýka.** Nejde o plnenie zo Zákonníka práce, takže sa mu z fondu nič nepočíta — suma, ktorú by fond doplácal zamestnancovi, je u neho súčasťou tej istej odmeny na faktúre.
 4. **Prehľad je výstup, nie podklad.** Nikto podľa neho nič nestrháva; slúži jemu, aby vedel, čo fakturovať, a nám, aby sme vedeli, čo čakať.
-5. **Neodhlásený obed sa ich netýka** (6.4). Živnostník platí plnú cenu vždy — nie je z čoho uberať príspevok, ktorý nedostal v peniazoch. Zoznam dní *na rozhodnutie* pri uzávierke (6.5) preto obsahuje **len zamestnancov**.
+5. **Neodhlásený obed sa ich týka tiež** (6.4), len inde. Voči dodávateľovi sa nemení nič — platia plnú cenu vždy. Mení sa **odmena na faktúre**: prispieva sa za odpracovaný deň, nie za deň, keď človek v práci nebol. Taký obed teda ostáva celý na ňom. Zoznam dní *na rozhodnutie* pri uzávierke (6.5) preto obsahuje **aj živnostníkov** — u zamestnanca to rozhoduje o zrážke, u živnostníka o tom, či sa obed dostane do odmeny.
 6. **Prehľad je dostupný aj počas mesiaca**, nie až po uzávierke. Slúži aj na to, aby sa vedelo dopredu, aké sumy sa v ňom asi zbiehajú — po osobách aj po prevádzkach. Do uzavretia mesiaca je to odhad a je tak aj označený.
 
-**Prehľad pre živnostníkov** má tri triedenia — tie isté čísla, tri pohľady:
+**Prehľad pre živnostníkov** má štyri triedenia — tie isté čísla, štyri pohľady. Podrobná stavba listu je v 6.3:
 
 | Triedenie | Na čo je |
 |---|---|
-| **po osobách** | koľko obedov, v akej cene, **koľko si pridať na faktúru**, koľko dlží dodávateľovi |
+| **po osobách** | každý sám za seba: koľko obedov, koľko dlží dodávateľovi, **koľko si pridať na faktúru**, a koľko by doplácal, keby bol zamestnanec |
+| **po firmách** | koľko odmien z ktorej firmy vzniklo — nesie ich firma, ku ktorej človek patrí |
 | **po prevádzkach** | kde tie peniaze vznikajú |
 | **po poskytovateľoch** | koľko z toho ide ktorej jedálni |
-
-> **Jedna vec sa musí dohodnúť s dodávateľom, nie s účtovníčkou.** Objednávku posiela appka za všetkých naraz, ale zaplatiť ju majú dve rôzne strany — firma za zamestnancov, živnostník sám za seba. Buď teda dodávateľ **fakturuje živnostníkom priamo** (a nám faktúru očistí o ich porcie), alebo fakturuje všetko nám a my im to **preúčtujeme**. Bez rozhodnutia by kontrola faktúry (5.6) hlásila rozdiel každý mesiac — appka by počítala porcie, ktoré na našej faktúre nemajú čo hľadať. **Otvorená otázka 17.**
 
 > **Odmena na faktúre je iná transakcia než príspevok na stravovanie.** Pre nás je to nákup služby, pre neho príjem; pri platcoch DPH k nej pribudne DPH, takže firmu bude stáť viac než rovnaký príspevok zamestnancovi. **Nech schému potvrdí účtovníčka** — appka spočíta, čo jej zadáme, ale či je takto správne postavená, posúdiť neviem. **Otvorená otázka 16.**
 
@@ -716,9 +716,47 @@ Rozdiel nie je vo vzorci. Vzorec je rovnaký — 55 / 35 / zvyšok, DPH rovnako.
 - [ ] dokedy v mesiaci musí byť podklad odovzdaný → z toho vyplynie termín mesačnej uzávierky
 
 ### 6.3 Mesačná uzávierka a export
-- Admin **uzavrie mesiac** → čísla sa zafixujú, ďalšie zmeny len ako opravná položka v ďalšom mesiaci (aby sa nemenil už odovzdaný podklad pre mzdy).
-- **Export pre mzdy** (XLSX/CSV): osobné číslo, meno, stredisko/tím, počet obedov, cena spolu, príspevok ZL, sociálny fond, **zrážka zo mzdy**. Formát doladíme podľa toho, čo vie načítať mzdový softvér.
-- **Kontrola faktúry dodávateľa**: mesačný súhrn per poskytovateľ — počet porcií × cena, na porovnanie s faktúrou. Nezriedka sa nezhodujú a bez tohto listu sa to nedá ustrážiť.
+
+Admin **uzavrie mesiac** → čísla sa zafixujú, ďalšie zmeny idú len ako opravná položka do ďalšieho mesiaca (aby sa nemenil už odovzdaný podklad pre mzdy).
+
+**Výstup nie je jeden list.** Peniaze sa zbiehajú u viacerých strán a každá potrebuje vidieť len svoj diel, ale v tej istej štruktúre. Výstup je preto rozdelený **za každú firmu zvlášť** a v rámci nej **po poskytovateľoch**:
+
+#### Za firmu — zamestnanci
+
+| Riadok | Na čo je |
+|---|---|
+| počet obedov, po poskytovateľoch | koľko sa toho zjedlo a u koho |
+| cena spolu bez DPH · DPH · s DPH | základ pre všetko ostatné |
+| **príspevok zamestnávateľa** | náklad firmy |
+| **sociálny fond** | druhý náklad firmy, oddelene |
+| **zrážky zo mzdy spolu** | čo si má firma vybrať od ľudí, kontrolný súčet mzdového podkladu |
+| **čo očakávať na faktúre** od každého dodávateľa | jediné číslo, ktoré sa porovnáva s papierom |
+
+Posledný riadok je celý zmysel toho listu. Firma vopred vie, aká suma jej má prísť od ktorého dodávateľa — a keď nepríde, hneď vidieť z ktorej strany.
+
+#### Za živnostníka — každý sám za seba
+
+Tie isté stĺpce, len pre jednu osobu. Navyše sa vždy eviduje, **ku ktorej firme patrí** — tá nesie nepriamy príspevok, takže sa to musí dať sčítať aj za ňu.
+
+| Riadok | |
+|---|---|
+| firma, ku ktorej patrí | |
+| počet obedov, po poskytovateľoch | |
+| **cena spolu s DPH** | **toto reálne platí dodávateľovi** |
+| *koľko by bol príspevok zamestnávateľa, keby bol zamestnanec* | → **suma, ktorú si pridá na faktúru** |
+| *koľko by bol sociálny fond, keby bol zamestnanec* | → tiež do odmeny |
+| *koľko by ešte doplácal, keby bol zamestnanec* — suma **plus DPH**, presne ako zamestnancom | na porovnanie: toto je, čo ho to má stáť po započítaní odmeny |
+
+**Počíta sa to tým istým vzorcom ako zamestnancom** — len sa to ukáže dvakrát: raz *ako keby* a raz ako to naozaj je. Rozdiel medzi tými dvoma stĺpcami je presne to, čo firma prispieva nepriamo.
+
+Za firmu sa tieto sumy **sčítajú** — koľko odmien z jej živnostníkov v tom mesiaci vzniklo. Inak by sa nedalo povedať, koľko ju obedy stáli celkovo.
+
+#### Ostatné výstupy
+
+- **Export pre mzdy** (XLSX/CSV): osobné číslo, meno, firma, stredisko/tím, počet obedov, cena spolu, príspevok ZL, sociálny fond, **zrážka zo mzdy**. Za každú firmu vlastný súbor; **živnostníci v ňom nie sú.** Formát doladíme podľa toho, čo vie načítať mzdový softvér.
+- **Súhrn po prevádzkach a po poskytovateľoch** — tie isté čísla, iné triedenie. Na otázku *kde tie peniaze vznikajú*.
+
+> **Kto komu fakturuje, je nastavenie poskytovateľa**, nie otvorená otázka. Dodávateľ buď fakturuje živnostníkom priamo (a firemná faktúra je bez ich porcií), alebo fakturuje všetko firme a tá to preúčtuje. Rozdelený výstup zvládne oboje — v prvom prípade sa proti faktúre porovnáva len firemná časť a živnostník dostane svoje číslo na vlastnú kontrolu, v druhom celok. Nastaviť sa to ale **musí**, inak by kontrola faktúry hlásila rozdiel každý mesiac.
 
 ### 6.4 Neodhlásené obedy
 Ak sa človek neodhlási včas a obed si neprevezme, porcia je uvarená a vyfakturovaná. **Predvolené pravidlo: účtuje sa v plnej cene** — bez príspevku zamestnávateľa a bez sociálneho fondu.
@@ -1131,7 +1169,7 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 14. **Zoznam firiem**, pre ktoré sa obedy robia. Z dochádzky vidno tri skupiny (prefix kódu 1, 2, 3) — treba potvrdiť, či je to celé. Pozor: *Živnostníci* sú v dochádzke skupina, ale v appke je to **typ vzťahu osoby**, nie firma — každý živnostník patrí k niektorej skutočnej firme (6.2a).
 15. **Kde sa zaokrúhľuje** (6.2) — DPH k príspevku stravníka vyrába štvrté desatinné miesto. Na obede, alebo až na mesačnom súčte za osobu? Odporúčam druhé. **Otázka pre účtovníčku.**
 16. **Daňový režim odmeny pre živnostníkov** (6.2a) — schéma je jasná (obed si platia sami, príspevok si pripočítajú k faktúre), ale nie je to plnenie zo Zákonníka práce. **Ako sa tá odmena volá a účtuje?** A pri platcoch DPH k nej pribudne DPH, takže rovnaký príspevok stojí firmu viac než u zamestnanca — počíta sa suma pred DPH alebo po nej? **Otázka pre účtovníčku.**
-17. **Kto fakturuje živnostníkom** (6.2a) — objednávku posiela appka za všetkých naraz, ale platia dve rôzne strany. Buď dodávateľ fakturuje živnostníkom priamo a našu faktúru o ich porcie očistí, alebo fakturuje všetko nám a my im to preúčtujeme. **Bez rozhodnutia bude kontrola faktúry hlásiť rozdiel každý mesiac.** Otázka pre dodávateľa, nie pre účtovníčku — je v `06-otazky-pre-dodavatela.md`.
+17. ~~**Kto fakturuje živnostníkom**~~ — **vyriešené:** je to **nastavenie poskytovateľa** (6.3), nie rozhodnutie. Rozdelený výstup zvládne oboje — priamu fakturáciu živnostníkom aj preúčtovanie cez firmu. Od dodávateľa treba len vedieť, ktorý z tých dvoch režimov chce; je to v `06-otazky-pre-dodavatela.md`.
 18. **Vie dochádzkomer exportovať denné prítomnosti** za mesiac? (6.5) V exporte, ktorý už máme, sú **len osoby** — kód, meno, karta — nie dni. Na príznak prítomnosti treba iný výstup: *osoba × deň*, prípadne s odpracovanými hodinami. Ak taký neexistuje, funkcia 6.5 odpadá a neodhlásené obedy sa budú hľadať ručne. **Overiť skôr, než sa to začne stavať** — stačí jedna vzorka.
 
 ---
