@@ -689,6 +689,8 @@ Rozdiel nie je vo vzorci. Vzorec je rovnaký — 55 / 35 / zvyšok, DPH rovnako.
 2. **Vzorec sa mu aj tak počíta** — inak by sa nevedelo, o koľko si má zvýšiť faktúru. Appka teda spočíta príspevok presne tak, ako keby bol zamestnanec, a výsledok len pošle iným smerom.
 3. **Sociálny fond sa ho netýka.** Nejde o plnenie zo Zákonníka práce, takže sa mu z fondu nič nepočíta — suma, ktorú by fond doplácal zamestnancovi, je u neho súčasťou tej istej odmeny na faktúre.
 4. **Prehľad je výstup, nie podklad.** Nikto podľa neho nič nestrháva; slúži jemu, aby vedel, čo fakturovať, a nám, aby sme vedeli, čo čakať.
+5. **Neodhlásený obed sa ich netýka** (6.4). Živnostník platí plnú cenu vždy — nie je z čoho uberať príspevok, ktorý nedostal v peniazoch. Zoznam dní *na rozhodnutie* pri uzávierke (6.5) preto obsahuje **len zamestnancov**.
+6. **Prehľad je dostupný aj počas mesiaca**, nie až po uzávierke. Slúži aj na to, aby sa vedelo dopredu, aké sumy sa v ňom asi zbiehajú — po osobách aj po prevádzkach. Do uzavretia mesiaca je to odhad a je tak aj označený.
 
 **Prehľad pre živnostníkov** má tri triedenia — tie isté čísla, tri pohľady:
 
