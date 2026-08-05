@@ -48,6 +48,8 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 41. **Firma sa mení len k prvému dňu mesiaca** (1.3b), pretože ako jediná delí peniaze. Nástup, odchod aj zmena tímu, predáka, prevádzky a poskytovateľa sú možné **ktorýkoľvek deň**.
 42. **Tabuľa v jedálni sa nerobí** — pri tomto počte ľudí sa neoplatí. Kontrolu „kto si čo objednal a prevzal" plní **denný hárok pre výdaj** (5.5): jeden hárok na prevádzku a poskytovateľa, meno **aj** kód, jedlo len ako písmeno, odškrtávacie políčko.
 43. **Nábeh je pilot na jednom tíme** (kapitola 14) — päť až šesť ľudí, jeden mesiac, **appka hlavná a papier ako kontrola**, nie naopak. Pilot musí dôjsť až po uzávierku a mzdový podklad, nie skončiť pri objednávaní.
+44. **Jeden kľúč, viacero označení** (1.3b) — **žiadne druhé obedové číslo a žiadny prevodník.** Osoba má vnútorný nemenný kľúč, na ktorý sa viaže história, a dochádzkový kód, mzdové číslo aj číslo karty sú **údaje** na nej. Pri výmene dochádzkového systému sa prepíše jedno pole a história sa nehne.
+45. **Spätný zápis je samostatná operácia** (4.5a) — dopisuje obed, ktorý sa zjedol mimo appky. Len **admin**, len do **otvoreného mesiaca**, s dôvodom, s trvalým príznakom na tom dni a **bez odoslania objednávky dodávateľovi**. Uzávierka počet spätných zápisov ukazuje.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -207,6 +209,25 @@ Dôvod je jednoduchý: ručný zápis je rozhodnutie človeka, ktorý o veci ved
 **Pred zápisom sa vždy ukáže, čo sa stane.** Nie hlásenie po skončení, ale obrazovka pred ním: *„doplní sa 12 · prepíše sa 4 · v rozpore s ručným zadaním 3 (nechám tak)"* — a až pod tým tlačidlo. Import, ktorý najprv zapíše a potom oznámi, sa nedá vziať späť.
 
 **Spájací kľúč je celý štvorciferný kód** (`PersonalAccessCode`), nie poradové číslo v rámci firmy. **Nič sa neprečíslováva** — ten kód už existuje, je na kartách a v dochádzke. Appka si vedie oba údaje a do mzdového exportu dá ten, ktorý mzdový softvér požaduje; vnútorne spája cez štvorciferný. Overené na skutočných dátach: číslo `008` majú dvaja rôzni ľudia v dvoch firmách, rovnako `002` a `014`. Pri spájaní cez poradové číslo by dvom rôznym ľuďom splynuli obedy aj zrážky.
+
+#### Jeden kľúč, viacero označení — nie druhé číslo
+
+Ponúka sa zaviesť **vlastné obedové číslo** a medzi ním a dochádzkovým kódom držať prevodník. Neodporúčam to a dôvod je jednoduchý: **prevodná tabuľka je druhý zdroj pravdy o tom, kto je kto.** Keď sa raz rozíde — nová karta, preklep, zabudnutý riadok — nikto nevie, ktorá strana má pravdu, a zistí sa to až na zrážke u nesprávneho človeka.
+
+Stavba, ktorá dá to isté bez tej ceny:
+
+| | |
+|---|---|
+| **Vnútorný kľúč** | vlastný, neviditeľný, nemenný. Naveky sa naň viažu objednávky, zrážky aj história |
+| **Dochádzkový kód** | *údaj* na osobe. Spája sa cezeň import (`08-vstupne-subory.md`) |
+| **Mzdové číslo** | *ďalší údaj*, ak mzdový softvér chce iné |
+| **Číslo karty** | *ďalší údaj*, ak ho raz treba |
+
+Rozdiel oproti prevodníku je v tom, na čom stojí história. **Vnútorný kľúč nie je dochádzkový kód** — je ním len *naplnený* pri prvom importe. Preto sa dochádzkový kód môže kedykoľvek zmeniť a nedotkne sa to ničoho: minulé obedy, uzavreté mesiace ani zrážky sa nehýbu, prepíše sa jedno pole.
+
+Tým odpadá aj obava, ktorá vedie k druhému číslu — *„čo keď sa dochádzkomer vymení"*. Vtedy sa raz prepíšu kódy a appka beží ďalej. **Druhé číslo by sa muselo udržiavať každý deň, aby raz za desať rokov niečo uľahčilo.**
+
+> Ak by predsa vzniklo interné obedové číslo (napríklad kvôli papierovým hárkom), patrí do tabuľky vyššie ako **ďalší údaj**, nie ako druhý kľúč s prevodníkom. Označení môže mať osoba koľko chce; **kľúč jeden.**
 
 **Brigádnici** (žatva, sezónne práce) sú **osoby s krátkou platnosťou**, nie zvláštny druh záznamu. Založia sa menom, tímom a dátumom do; kartu a kód dostávajú v dochádzke tak či tak, takže sa dajú importovať rovnako ako ostatní. Keď obdobie uplynie, sami vypadnú z matice a nikto ich nemusí upratovať.
 
@@ -538,6 +559,31 @@ Obmedzenia doobjednávky: len z jedál, ktoré sú v ten deň v menu, a v rámci
 
 ### 4.5 Výnimky po deadline
 Admin (a len admin) môže zrušiť objednávku aj po termíne — povinne s dôvodom a s príznakom **„účtovať napriek odhláseniu"** (áno/nie), lebo dodávateľ už porciu uvaril. Bez tohto poľa sa účtovanie rozíde s realitou. Viď aj 6.4.
+
+### 4.5a Spätný zápis — zaznamenať obed, ktorý sa už zjedol
+
+Je to iná operácia než výnimka z 4.5. Tam sa mení niečo, čo appka poslala. Tu sa **dopisuje niečo, čo sa stalo mimo nej**: obed, ktorý sa objednal telefónom, na papieri alebo pred spustením appky.
+
+Prvé použitie príde hneď — pri nábehu (kapitola 14). Pilot sa nezačne prvého v mesiaci; obedy z prvých dní sú už objednané, uvarené a zjedené, ale mzdový podklad za ten mesiac musí byť celý. Spätný zápis je jediný spôsob, ako sa mesiac uzavrie správne.
+
+Hodí sa aj potom: zberný hárok príde neskoro, chyba sa nájde deň po termíne, niekto sa vráti z PN a obed mu objednali telefonicky.
+
+**Pravidlá:**
+
+| | |
+|---|---|
+| Kto | **len admin.** Predákovi termíny platia — inak by prestali platiť úplne |
+| Kam | **len do otvoreného mesiaca.** Zamknutý mesiac sa nedopisuje, tam ide oprava ako položka do ďalšieho (6.3) |
+| Cena | z **dňa, ktorého sa zápis týka** (6.1), nie dnešná |
+| Stopa | kto, kedy, prečo — a **príznak ostáva na tom dni natrvalo** |
+
+**Objednávka dodávateľovi sa neodosiela.** Toto je najdôležitejšie pravidlo a zároveň jediné, kde sa dá spätný zápis pokaziť: obed sa už uvaril a zjedol. Keby zápis prešiel bežnou cestou, appka by objednala jedlá na deň, ktorý dávno bol. Spätný zápis teda **zapíše a odosielanie preskočí** — vedome, nie ako vedľajší účinok.
+
+**Zadáva sa hromadne, nie po dňoch.** Mesačná mriežka *ľudia × dni*, tá istá ako týždenná matica, len širšia — admin ju prepíše zo zberných hárkov. Pri pilote je to šesť ľudí × tri dni, teda pár minút.
+
+**Vidno to aj v číslach.** Uzávierka pri každom mesiaci ukáže *„z toho 34 zadaných spätne"*. Nie preto, že je to podozrivé, ale preto, že sa to nemá stratiť: keď o pol roka niekto porovná appku s faktúrou, má vidieť, ktoré porcie appka nikdy neobjednala.
+
+> **Je to diera v disciplíne, ktorú má appka vytvárať** — a preto je vidieť. Keby bol spätný zápis pohodlný a tichý, termíny by o pol roka prestali znamenať čokoľvek: vždy sa to dá dopísať potom. Admin, dôvod, príznak, počet v uzávierke. Nie zákaz, ale ani zvyk.
 
 ### 4.6 Tri stavy dňa
 Deň každého stravníka je v jednom z troch stavov. Systém ich musí **rozlišovať**, inak chodia upomienky ľuďom, ktorí sa už rozhodli, a predák naháňa niekoho, kto je na dovolenke.
@@ -1350,6 +1396,7 @@ Takže naopak: objednávka dodávateľovi ide z appky, papier sa vedie súbežne
 
 Najčastejšia chyba pri takomto nábehu je odskúšať len objednávanie — tú ľahkú polovicu. Pilot musí dôjsť až na koniec:
 
+- [ ] **spätný zápis dní pred spustením** (4.5a) — pilot sa nezačne prvého v mesiaci, ale mzdový podklad musí byť za celý mesiac
 - [ ] týždenná objednávka odoslaná a **potvrdená** dodávateľom, každý týždeň
 - [ ] aspoň jedno **odhlásenie po termíne** a jedno **doobjednanie v deň obeda**
 - [ ] **mesačná uzávierka** a kontrola proti skutočnej faktúre

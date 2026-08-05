@@ -42,6 +42,8 @@ osobne_cislo;priezvisko;meno
 
 **Nič viac.** Firma, tím, predák, prevádzka ani poskytovateľ do súboru nepatria — nastavujú sa v aplikácii výberom zo zoznamu. Keby chodili textom, *Vráble · Vrable · závod Vráble* by vyrobili tri rôzne prevádzky a rozbité súčty by sa ukázali až o dva mesiace pri uzávierke.
 
+> **Prvý menoslov je pripravený** — 33 ľudí, prefixy `1` (7), `2` (2), `3` (24). Súbor sa v tomto repozitári **neuchováva**: sú v ňom mená a osobné čísla skutočných ľudí a tie patria do databázy aplikácie, nie do správy verzií. Dokumentácia opisuje, ako sa s údajmi zaobchádza; samotné údaje v nej nemajú čo hľadať.
+
 ### Rozdelenie mena
 
 V dochádzke býva meno **v jednom poli** ako `Kováč Peter`. Rozdelenie je na prevodníku a má jednu pascu: *Kováč Peter Pavol* aj *Kováč Novák Peter* vyzerajú rovnako, ale nie sú.
