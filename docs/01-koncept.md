@@ -30,7 +30,10 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 23. **Žiadne „kopírovať minulý týždeň"** (5.1). Menu je každý týždeň iné, takže skopírovaná voľba je vo väčšine prípadov nesprávna — a nesprávna voľba sa tvári vybavene, kým prázdna bunka o sebe dáva vedieť. Bolo by to priame popretie bodu 22.
 24. **Kalendár sviatkov a zatvorených dní je jediný zdroj pravdy** (5.7) pre objednávky, uzávierky aj mesačné rozúčtovanie. Deň, v ktorý sa nevarí, sa v objednávke neukáže vôbec a do fakturácie nevstúpi.
 25. **Faktúra sa kontroluje strojovo proti tomu, čo appka sama odoslala** (5.6). Mesiac sa nedá uzavrieť, kým má nevyriešený rozdiel.
-26. **Miesta výdaja** (3.4) sú nastavením poskytovateľa, osoba má **domovské miesto** a jednotlivý deň sa dá prepnúť inam ako výnimka. Objednávka dodávateľovi sa **delí podľa miest**, miesto má **minimum na dovoz** a presun medzi miestami je **korekcia**. Pri jedinom mieste sa appka na miesto nepýta nikde.
+26. **Firma, tím a prevádzka sú tri nezávislé rozmery** (1.3a). Predák môže mať v tíme ľudí z viacerých spriaznených firiem, na jednej prevádzke sa stravujú ľudia z viacerých firiem. Matica predáka sa podľa firiem nečlení, **mesačný podklad áno**.
+27. **Stravník sa nikdy nemaže, len sa mu ukončí platnosť** (1.3b). Import z dochádzky je opakovateľný a ukazuje rozdiel; chýbajúceho človeka nikdy neruší sám. Spájací kľúč je **celý štvorciferný kód**, nie poradové číslo vo firme — to sa medzi firmami opakuje.
+28. **Brigádnici sú osoby s krátkou platnosťou**, nie zvláštny druh záznamu (1.3b).
+29. **Miesta výdaja** (3.4) sú nastavením poskytovateľa, osoba má **domovské miesto** a jednotlivý deň sa dá prepnúť inam ako výnimka. Objednávka dodávateľovi sa **delí podľa miest**, miesto má **minimum na dovoz** a presun medzi miestami je **korekcia**. Pri jedinom mieste sa appka na miesto nepýta nikde.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -65,6 +68,49 @@ Vedľajší efekt: ľudia bez smartfónu majú riešenie — objedná im predák
 Tím = entita s prideleným predákom, nie pole „nadriadený" na osobe.
 Dôvod: výmena predáka je jedna zmena, nie 15 zmien.
 Osoba patrí práve do jedného tímu. Osoba bez tímu = „Bez zaradenia", vidí ju len admin.
+
+### 1.3a Firma, tím a prevádzka sú tri nezávislé veci
+
+Toto je pri tomto zákazníkovi kľúčové: obedy sa robia **naraz pre viac spriaznených firiem** a organizačne sú pomiešané. Model to zvláda len vtedy, keď sa tri veci držia oddelene a nič ich nenúti zhodovať sa:
+
+| Rozmer | Vlastnosť čoho | Načo slúži | Kto ho určuje |
+|---|---|---|---|
+| **Firma** | osoby | peniaze — komu sa fakturuje, z čej mzdy sa zráža | mzdy / personalistika |
+| **Tím** | osoby | zodpovednosť — kto za ňu objednáva | admin |
+| **Prevádzka** | osoby (domovská) a dňa (výnimka) | logistika — kam sa vezie jedlo | admin, na deň predák alebo stravník |
+
+**Predák pod firmou A môže mať v tíme ľudí z firiem A, B aj C.** To nie je výnimka, ktorú treba ošetriť — je to normálny stav. Predák o firmách vôbec nemusí vedieť; on rieši, kto zajtra je čo. Firma sa zjaví až v peniazoch.
+
+**Na jednej prevádzke sa súbežne stravujú ľudia z viacerých firiem.** Rozvoz sa preto delí podľa **miesta**, nie podľa firmy — auto vezie jednu debnu na Farmu bez ohľadu na to, kto koho zamestnáva.
+
+Z toho vyplývajú tri veci, ktoré by inak boli chybou:
+1. **Matica predáka nesmie byť členená podľa firiem** — bol by to hluk pre jediného človeka, ktorého to nezaujíma.
+2. **Mesačný podklad sa člení podľa firiem**, nie podľa tímov. Každá firma dostane svoj súbor pre svoje mzdy.
+3. **Faktúra od dodávateľa je jedna** a rozpad na firmy si robíme my. Dodávateľ nemá dôvod vedieť, koľko firiem to je.
+
+> **Živnostníci nie sú zamestnanci.** V dochádzke je „Živnostníci" tretia skupina vedľa dvoch firiem, ale u nich **neexistuje zrážka zo mzdy** — nemajú mzdu. Ich obedy treba riešiť inak: preúčtovaním, faktúrou alebo úhradou v hotovosti. Appka to musí vedieť ako **spôsob úhrady na úrovni firmy** (*zrážka zo mzdy* / *faktúra* / *hotovosť*), inak sa mesačný podklad pre túto skupinu nedá použiť. **Otvorená otázka pre mzdára — viď 13.**
+
+### 1.3b Životný cyklus stravníka — ľudia pribúdajú, menia sa a odchádzajú
+
+Zoznam ľudí nie je jednorazový import, je to **priebežne udržiavaný stav**. Preto:
+
+**Nikdy sa nemaže, len sa ukončí platnosť.** Osoba má *platnosť od* a *platnosť do*. Kto odišiel v marci, musí v marcových objednávkach a v marcovom mzdovom podklade ostať presne tak, ako tam bol — inak sa uzavretý mesiac rozíde sám so sebou (5.6, 6.1). V aktuálnom týždni sa už neukáže, v histórii áno.
+
+**Opakovaný import namiesto prepisovania.** Súbor z dochádzky sa dá nahrať kedykoľvek znova a appka ukáže **rozdiel**, nie výsledok:
+
+| Nález | Návrh appky |
+|---|---|
+| kód, ktorý ešte nepoznáme | pridať ako nového — admin doplní tím a prevádzku |
+| zmenené priezvisko pri známom kóde | prepísať meno, história ostáva viazaná na kód |
+| kód, ktorý v novom súbore chýba | *neodstraňovať automaticky* — ponúknuť ukončenie platnosti |
+
+Ten posledný riadok je zámerný. Chýbajúci človek môže byť odídený, ale aj na dlhodobej PN, alebo len nebol v exporte za daný mesiac. **Automatické rušenie by ticho zmazalo živých ľudí.** Preto sa vždy pýta.
+
+**Spájací kľúč je celý štvorciferný kód** (`PersonalAccessCode`), nie poradové číslo v rámci firmy. Overené na skutočných dátach: číslo `008` majú dvaja rôzni ľudia v dvoch firmách, rovnako `002` a `014`. Pri spájaní cez poradové číslo by dvom rôznym ľuďom splynuli obedy aj zrážky.
+
+**Brigádnici** (žatva, sezónne práce) sú **osoby s krátkou platnosťou**, nie zvláštny druh záznamu. Založia sa menom, tímom a dátumom do; kartu a kód dostávajú v dochádzke tak či tak, takže sa dajú importovať rovnako ako ostatní. Keď obdobie uplynie, sami vypadnú z matice a nikto ich nemusí upratovať.
+
+Pre prípad, že ani to nie je dosť rýchle — príde partia na dva dni a nikto ich nestíha zakladať — má predák možnosť objednať **porcie navyše bez mena**, viazané na tím a prevádzku. Vtedy sa nedajú komu účtovať, takže idú na stredisko. Je to ústupok, nie predvolený režim: bezmenná porcia znamená, že sa neskôr nedá zistiť, kto ju zjedol.
 
 ### 1.3 Zastupovanie predáka
 Cieľ je jasný: **aby sa na nikoho obed nezabudlo.** Mechanizmus navrhujem trochu inak, než znel pôvodný nápad — s rovnakým výsledkom, ale bez slabého miesta.
@@ -927,7 +973,9 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 9. **Prevzatie obeda** — treba evidovať, kto si obed reálne vyzdvihol? Rieši spory typu „zaplatil som a nedostal".
 10. **Miesta výdaja** (3.4) — treba zozbierať od dodávateľov: **kam sú ochotní voziť, o koľkej a od koľkých porcií.** Bez minima a času dovozu je nastavenie len polovičné.
 11. **Príplatok za dovoz na vzdialenejšie miesto** — účtuje ho dodávateľ zvlášť? Ak áno, **kto ho platí?** Zamestnanec je na tej prevádzke kvôli práci, takže logicky zamestnávateľ — ale je to rozhodnutie mzdára a účtovníčky, nie moje. Do vyriešenia je cena obeda rovnaká na všetkých miestach.
-12. **Zoznam prevádzok** — na ktorých miestach firma reálne obeduje a kto je kde vedený. Ide o stĺpec navyše v zozname zamestnancov (`docs/05-zoznam-zamestnancov.md`).
+12. **Zoznam prevádzok** — na ktorých miestach firma reálne obeduje a kto je kde vedený.
+13. **Spôsob úhrady pre živnostníkov** (1.3a) — nemajú mzdu, takže zrážka zo mzdy u nich neexistuje. Preúčtovanie? Faktúra? Hotovosť? Bez odpovede sa im mesačný podklad nedá spraviť. **Otázka pre mzdára a účtovníčku.**
+14. **Zoznam firiem**, pre ktoré sa obedy robia, a ku každej spôsob úhrady. Z dochádzky vidno tri skupiny (prefix kódu 1, 2, 3) — treba potvrdiť, či je to celé. Ide o stĺpec navyše v zozname zamestnancov (`docs/05-zoznam-zamestnancov.md`).
 
 ---
 
