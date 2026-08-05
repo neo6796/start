@@ -8,7 +8,8 @@ Stav k 5. 8. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných 
 
 | | |
 |---|---|
-| **Koncept** | `01-koncept.md`, v0.9 — 31 rozhodnutí, 14 kapitol |
+| **Koncept** | `01-koncept.md`, v0.9 — 43 rozhodnutí, 15 kapitol |
+| **Vstupné súbory** | `08-vstupne-subory.md` — hotové zadanie na prevod dochádzky, odovzdateľné tak ako je |
 | **Model rozúčtovania** | dva modely (štandardný 55/35/zvyšok a ekonomický), overené výpočtom — `01-koncept.md` 6.2 |
 | **Preview** | klikací prototyp, 11 obrazoviek, beží na **https://obedy.ahafarma.sk** |
 | **Server** | Hetzner, Debian 13, `46.225.236.143`, zabezpečený (root aj heslá zablokované) |
@@ -66,6 +67,7 @@ Osobné číslo je **celý štvorciferný kód z dochádzky** — poradové čí
 ## Čo má spraviť Erik
 
 - [ ] **poslať odkaz na preview predákom** a pozbierať pripomienky
+- [ ] vybrať **tím na pilot** — 5–6 ľudí, jedna prevádzka, jeden dodávateľ *(kapitola 14 konceptu; nie nadšenca, ale svedomitého vlažného predáka)*
 - [ ] určiť, **ktorí dodávatelia to reálne budú** a ako sa volajú
 - [ ] určiť **zoznam prevádzok**, kam sa vozí
 - [ ] potvrdiť **zoznam firiem** — z dochádzky vidno tri skupiny (prefix kódu 1, 2, 3); je to celé?

@@ -44,6 +44,10 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 37. **Import nesie len totožnosť** (1.3b) — osobné číslo, priezvisko, meno. Firma, tím, predák, prevádzka aj poskytovateľ sa nastavujú v appke **výberom z rozbaľovacieho zoznamu, nikdy písaním**. Zoznam sa dá vyexportovať a nahrať späť, ale import **neznáme hodnoty odmieta, nezakladá** — inak by bol dierou v tom istom pravidle.
 38. **Ručne zadaná hodnota prebíja importovanú** (1.3b) — vo všetkých importoch. Import dopĺňa prázdne, prepisuje predchádzajúci import a **ručný zápis nechá tak**, len ho vypíše ako rozdiel. **Pred zápisom sa vždy ukáže, čo sa stane**, nie až po ňom.
 39. **Appka nečíta natívny export dochádzkomera** (6.5) — číta jednoduchý dohodnutý tvar `osobne_cislo; datum; hodiny` (`docs/08-vstupne-subory.md`). Prevod je mimo appky. Pri výmene dochádzkového systému sa tak mení prevodník, nie appka.
+40. **Záznam o neprítomnosti sa vedie pre každého stravníka**, nielen pre predákov (1.4). Jeden záznam obsluhuje zastupovanie, zatvorenie dní v matici aj to, aby kontrola cez dochádzku nehlásila očakávanú neprítomnosť. **Nič neblokuje a nie je povinný.**
+41. **Firma sa mení len k prvému dňu mesiaca** (1.3b), pretože ako jediná delí peniaze. Nástup, odchod aj zmena tímu, predáka, prevádzky a poskytovateľa sú možné **ktorýkoľvek deň**.
+42. **Tabuľa v jedálni sa nerobí** — pri tomto počte ľudí sa neoplatí. Kontrolu „kto si čo objednal a prevzal" plní **denný hárok pre výdaj** (5.5): jeden hárok na prevádzku a poskytovateľa, meno **aj** kód, jedlo len ako písmeno, odškrtávacie políčko.
+43. **Nábeh je pilot na jednom tíme** (kapitola 14) — päť až šesť ľudí, jeden mesiac, **appka hlavná a papier ako kontrola**, nie naopak. Pilot musí dôjsť až po uzávierku a mzdový podklad, nie skončiť pri objednávaní.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -171,6 +175,23 @@ To je celý vzťah medzi tými dvoma systémami. Dochádzka je kontrolná vzorka
 
 Ten posledný riadok je zámerný. Chýbajúci človek môže byť odídený, ale aj na dlhodobej PN, alebo len nebol v exporte za daný mesiac. **Automatické rušenie by ticho zmazalo živých ľudí.** Preto sa vždy pýta.
 
+#### Čo sa smie meniť kedykoľvek a čo len k prvému
+
+Príchod a odchod človeka nemá s kalendárom nič spoločné — ľudia nastupujú a odchádzajú hocikedy a appka to musí zvládnuť ktorýkoľvek deň. Jedna jediná zmena je obmedzená:
+
+| Zmena | Kedy |
+|---|---|
+| **nástup nového stravníka** | ktorýkoľvek deň |
+| **odchod / prepnutie na neaktívneho** | ktorýkoľvek deň |
+| tím, predák, prevádzka, poskytovateľ | ktorýkoľvek deň |
+| **firma** | **len k prvému dňu mesiaca** |
+
+Firma je jediný rozmer, ktorý delí peniaze. Keby sa dala prepnúť pätnásteho, jeden človek by mal mesiac rozdelený medzi dva mzdové podklady a dve faktúry — a to je práca navyše pre všetkých pri niečom, čo sa deje raz za rok. **Appka preto ako dátum zmeny firmy ponúka len prvý deň mesiaca.**
+
+Príchod ani odchod tým netrpia. Nový človek nemá čo deliť — jeho prvý mesiac je neúplný, ale celý patrí jednej firme. Rovnako odchod: obedy po posledný deň patria firme, v ktorej bol.
+
+Ostatné rozmery obmedzené nie sú, lebo sa zapisujú po dňoch a spätne sa nič neprepisuje — zmena prevádzky platí odo dneška, minulý týždeň si drží, čo mal.
+
 #### Ručne zadané prebíja importované
 
 Toto pravidlo platí pre **všetky importy v appke** — menoslov, dochádzku aj čokoľvek, čo pribudne neskôr. Každá hodnota si nesie svoj **pôvod**: *z importu* alebo *ručne*.
@@ -208,6 +229,28 @@ Cieľ je jasný: **aby sa na nikoho obed nezabudlo.** Mechanizmus navrhujem troc
 7. **Poradie sa prechádza dopredu, nie až pri probléme.** Appka prejde najbližšie štyri týždne a vypíše tímy, ktoré v niektorý deň ostanú bez zodpovednej osoby — buď preto, že sú preč predák aj všetci jeho zástupcovia, alebo preto, že zástupcu nemá nikto zadaného. Toto je jediná časť mechanizmu, ktorá funguje **skôr**, než sa niečo pokazí; zvyšok (bod 3) je záchranná sieť. Obrazovka je v 5.8.
 
 Zástupca môže zastupovať aj viac tímov naraz (viac blokov pod sebou).
+
+### 1.4 Neprítomnosť — jeden záznam, tri použitia
+
+Záznam *kto je preč, od–do, prečo* už v koncepte je — appka ho vedie predákom, aby sa podľa neho zapínalo zastupovanie (1.3). **Stačí zrušiť to obmedzenie a viesť ho pre každého stravníka.** Nie je to nová vec, je to tá istá vec bez zbytočného plotu.
+
+Dôvod je krátky zoznam: *dovolenka · PN · školenie alebo služobná cesta · iné*. Nič viac — nie je to modul na evidenciu dochádzky.
+
+Ten jeden záznam potom obsluhuje tri veci naraz:
+
+| Použitie | Čo z toho plynie |
+|---|---|
+| **zastupovanie** *(už funguje)* | preč je predák → zapne sa zástupca |
+| **matica predáka** | dni sa nastavia na *bez obeda* a je pri nich vidieť **prečo** |
+| **kontrola cez dochádzku** (6.5) | neprítomnosť je **očakávaná**, takže sa nehlási ako nález |
+
+Tretí riadok je hlavný dôvod, prečo to má zmysel. Bez neho by pri uzávierke vypadol zoznam, v ktorom je polovica ľudí na dovolenke — a zoznam, v ktorom je väčšina nálezov nezaujímavá, nikto po druhýkrát neotvorí.
+
+Tri pravidlá, aby to nezavadzalo:
+
+1. **Nič neblokuje.** Deň označený neprítomnosťou sa dá kedykoľvek prebiť — človek sa vráti skôr, príde na pár hodín, zastaví sa po obed. Je to predvolená hodnota, nie zámok. Rovnaký princíp ako pri delegácii, ktorá nikdy neberie práva stravníkovi.
+2. **Nie je povinné.** Kto nič nezadá, appka funguje presne ako doteraz — dni ostanú nerozhodnuté a hromadné odhlásenie rozsahu dní zostáva.
+3. **Nie je to rozpor s rozhodnutím 23.** Zákaz „kopírovať minulý týždeň" stojí na tom, že skopírovaná voľba je **odhad**, ktorý sa tvári ako odpoveď. Dovolenka nie je odhad — je to informácia, ktorú niekto vie a zapísal ju.
 
 ---
 
@@ -583,8 +626,33 @@ Ak väčšina ľudí appku neotvorí, papier nie je ústupok — je to **hlavný
 2. **Zberný hárok** — tím v riadkoch, Po–Pia v stĺpcoch. Vytlačí sa, zavesí vedľa menu, ľudia si voľbu zapíšu perom, predák ju prepíše do appky. Takto to bude v skutočnosti fungovať, tak nech to appka podporuje priamo.
    **Kombinovaný zber:** kto si už objednal sám v appke, má voľbu na hárku **predtlačenú sivou** a políčko prečiarknuté — aby ju nikto nezapisoval druhýkrát a predák nemusel rozmýšľať, čo je nové. Hárok sa dá vytlačiť kedykoľvek počas týždňa a vždy ukazuje aktuálny stav.
 3. **Potvrdenie tímu po uzávierke** — čo má kto objednané. Zavesí sa vedľa menu, aby si to ľudia mohli skontrolovať skôr, než bude neskoro.
-4. **Denný zoznam pre výdaj** — kto má dnes čo, zoradené podľa priezviska.
+4. **Denný hárok pre výdaj** — kto má dnes čo. Podrobne nižšie, lebo je to jediný nástroj, ktorým sa dá skontrolovať prevzatie.
 5. **Zoznam chýbajúcich objednávok** — pre predáka pred uzávierkou.
+
+#### Denný hárok pre výdaj
+
+**Jeden hárok = jedna prevádzka × jeden poskytovateľ × jeden deň.** Vždy zvlášť, aj keď sa v ten deň varí na tri miesta — každé miesto má iný čas dovozu a iného človeka, ktorý pri ňom stojí.
+
+To rozdelenie **aj podľa poskytovateľa** je dôležitejšie, než sa zdá: jedlá sa označujú `A/B/C` v rámci menu, takže `B` od jednej jedálne a `B` od druhej sú dve rôzne veci. Na spoločnom hárku by sa nedali rozlíšiť.
+
+**Čo je v hlavičke:** prevádzka · dátum · poskytovateľ · čas dovozu · **koľko porcií bolo objednaných a kedy sa objednávka odoslala**. Posledný údaj je tam preto, aby sa rozdiel medzi papierom a tým, čo naozaj prišlo, dal zachytiť pri výdaji, nie až o mesiac pri faktúre.
+
+**Riadok:**
+
+| Priezvisko a meno | Kód | Jedlo | Prevzaté |
+|---|---|---|---|
+| Kováč Peter | 1042 | B | ☐ |
+| Nováková Mária | 1043 | A | ☐ |
+
+**Meno aj kód, nie jedno z toho.** Meno preto, že človek pri výdaji pozná ľudí podľa mena, nie podľa čísla — hárok len s kódmi znamená vyhľadávanie pri každej porcii. Kód preto, že samotné meno nestačí: dvaja Kováči v jednom rade sú bežná vec a v koncepte je to už raz spomenuté ako zdroj omylov.
+
+**Jedlo len ako písmeno, nie názov.** Kto potrebuje vedieť, čo je `B`, pozrie na menu vedľa. Hárok sa tým zúži a zároveň sa na ňom neocitne text typu *bezmäsité* alebo *diabetické* — voľba jedla môže naznačiť zdravotný stav alebo vyznanie a hárok pri výdaji vidí každý, kto stojí v rade (kapitola 12).
+
+**Odškrtávacie políčko** je celá odpoveď na otázku „ako skontrolovať, kto si čo prevzal". Kým nie je evidencia prevzatia v appke (fáza 3), papier ju robí za ňu — a robí ju dobre, lebo ten človek pri výdaji tam aj tak stojí. Neodškrtnuté riadky na konci dňa sú presne zoznam z 6.4.
+
+**Zoradenie:** predvolene podľa priezviska, lebo pri výdaji sa hľadá jeden človek. Prepínateľné **po tímoch**, s každým tímom na novej strane — vtedy sa hárok dá roztrhať a dať predákom, ktorí si svoju skupinu skontrolujú sami.
+
+**Pätička:** súčty po jedlách (`A: 12 · B: 8 · C: 4`), spolu, a prázdne miesto na dopísanie počtu neprevzatých. Súčet na papieri sa musí zhodovať s počtom v hlavičke — ak nie, niekto je na hárku navyše alebo chýba, a to sa má zistiť ráno.
 
 Zberný hárok má aj druhý účel: je to **dôkaz**. Keď objednávky zadáva predák, spor „ja som chcel B" padá na neho — a papier s vlastnoručne zapísanou voľbou ten spor ukončí. Audit log povie, kto to zadal; hárok povie, podľa čoho.
 
@@ -1229,6 +1297,8 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 
 - Osobné údaje v minimálnom rozsahu: meno, osobné číslo, tím, poskytovateľ, e-mail (ak je).
 - Voľba jedla môže nepriamo naznačiť zdravotný stav alebo vyznanie (diabetická, bezmäsitá, halal) → nezverejňovať mimo nutného okruhu; predák vidí označenie jedla, nie dôvod.
+- **Tabuľa v jedálni sa nerobí** (rozhodnutie 42), takže mená ani voľby nie sú nikde na verejnej obrazovke.
+- **Denný hárok pre výdaj** mená obsahuje — je to prevádzkový dokument pre človeka pri výdaji, nie nástenka. Preto je na ňom jedlo len ako písmeno (`A/B/C`), nie názov: hárok vidí každý, kto stojí v rade, a *bezmäsité* alebo *diabetické* na ňom nemá čo robiť. Po dni sa neodkladá na pult.
 - Retencia: objednávky a mzdové podklady podľa účtovných lehôt, audit log 1 rok, potom anonymizácia.
 - Prístup k mzdovým údajom má len admin, nie predák.
 
@@ -1262,14 +1332,69 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 
 ---
 
-## 14. Fázy
+## 14. Nábeh — ako sa prepneme z papiera
+
+Celý zvyšok dokumentu opisuje **ustálený stav**. Prvý mesiac je iný a treba ho naplánovať zvlášť, lebo práve v ňom sa dá pokaziť dôvera v appku na dlho.
+
+### Jeden tím, päť až šesť ľudí, jeden mesiac
+
+Presne tak, ako znel návrh. Jedna prevádzka, jeden poskytovateľ, jeden predák, hŕstka ľudí. Dôvod nie je opatrnosť — je to **rýchlosť opravy**. Keď sa niečo pokazí pri šiestich ľuďoch, vyrieši sa to jedným telefonátom. Pri stovke sa to nevyrieši vôbec.
+
+### Appka je od prvého dňa hlavná, papier je kontrola
+
+Toto je jediné miesto, kde by som navrhovaný postup obrátil. *„Papier ide naostro a appka vedľa neho"* znie bezpečnejšie, ale nefunguje: keď z appky nič nezávisí, predák do nej nezadá načas a nezistí sa nič. **Chyba, ktorá nikoho nebolí, sa neukáže.**
+
+Takže naopak: objednávka dodávateľovi ide z appky, papier sa vedie súbežne a **v piatok sa porovnajú**. Rozdiel medzi nimi je nález. Pri šiestich ľuďoch je najhorší možný následok šesť nesprávnych obedov a jeden telefonát.
+
+### Prvý mesiac musí obsiahnuť aj peniaze
+
+Najčastejšia chyba pri takomto nábehu je odskúšať len objednávanie — tú ľahkú polovicu. Pilot musí dôjsť až na koniec:
+
+- [ ] týždenná objednávka odoslaná a **potvrdená** dodávateľom, každý týždeň
+- [ ] aspoň jedno **odhlásenie po termíne** a jedno **doobjednanie v deň obeda**
+- [ ] **mesačná uzávierka** a kontrola proti skutočnej faktúre
+- [ ] **mzdový podklad** odovzdaný mzdárke — aj keby bol na šesť riadkov
+
+Uzávierka a mzdový podklad sú tá časť, ktorá sa najhoršie opravuje neskôr, lebo sa dotýka peňazí a už odovzdaných čísel. Musí sa odskúšať prvá, nie posledná.
+
+### Koho vybrať
+
+**Nie nadšencov.** Tím, ktorého predák je svedomitý, ale k technike vlažný — ak to zvládne on, zvládne to každý. Nadšenec obíde každú nedokonalosť sám od seba a neohlási ju.
+
+Ak sa to dá zariadiť, nech je v pilote aspoň jeden človek, ktorý sa počas týždňa pohybuje po viacerých prevádzkach. Miesta výdaja (3.4) sú najkomplikovanejšia časť návrhu a je lepšie ich vyskúšať na jednom človeku než na dvadsiatich.
+
+### Čo sa meria
+
+Nie *„fungovalo to"*, ale:
+
+| | |
+|---|---|
+| odišla objednávka **načas**, každý týždeň? | |
+| **potvrdil** dodávateľ prijatie zakaždým? | |
+| koľkokrát sa **objednávalo po termíne** | |
+| sedela **faktúra** na prvý pokus? | |
+| koľko času tým predák reálne strávil | |
+
+Posledný riadok rozhodne o rozšírení viac než ktorýkoľvek iný. Ak to predákovi zaberie viac času než papier, appka sa neujme, aj keby počítala bezchybne.
+
+### Rozšírenie
+
+Po mesiaci bez rozdielov medzi papierom a appkou pribudne **druhý tím**, potom zvyšok. Papierová kontrola sa udrží ešte jeden mesiac aj u nových tímov a potom sa zruší — okrem zberného hárku, ten ostáva natrvalo (5.5).
+
+**Kým beží pilot, zvyšok firmy objednáva po starom.** Žiadny paralelný polovičný stav pre všetkých.
+
+---
+
+## 15. Fázy
 
 | Fáza | Obsah |
 |---|---|
 | **0 — Koncept** | tento dokument, odsúhlasenie |
 | **1 — Preview** | klikací prototyp bez databázy: login, **matica predáka** vrátane pohľadu na miesta výdaja, týždeň stravníka, admin nastavenia, ručný editor menu, cenník s oboma modelmi príspevku, ukážky tlačových zostáv, tabuľa v jedálni, história, **mesačná uzávierka a kontrola faktúry (5.6)**, **kalendár sviatkov a zatvorených dní (5.7)**, **zastupovanie (5.8)**, logo |
-| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov vrátane **miest výdaja (3.4)**, ručný editor menu, **matica predáka**, **kalendár sviatkov a zatvorených dní (5.7)**, delegácia, reťaz zástupcov a eskalácia (5.8), ceny a **mesačná uzávierka s kontrolou faktúry (5.6)**, export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy (5.5)**, **tabuľa v jedálni**, **push notifikácie pre predákov a admina** + sprievodca inštaláciou na plochu, **príloha menu (fotka/PDF/Word)**, **exporty, história a zálohy (kapitola 7)**, audit, nasadenie |
-| **3 — Rozšírenia** | grafy a dashboard, push pre stravníkov, SMS pre predákov ak treba, import menu (XLSX/CSV, prilepenie textu) podľa reálnych vzoriek, evidencia prevzatia, hostia, SSO, kiosk, rola dodávateľa, prípadná ukrajinčina |
+| **2 — MVP** | prihlásenie a roly vrátane superadmina, obnova hesla cez e-mail, týždenná objednávka + uzávierky, denné odhlásenie s pravidlami per poskytovateľ, **doobjednanie predákom + korekčný súhrn**, konfigurácia poskytovateľov vrátane **miest výdaja (3.4)**, ručný editor menu, **matica predáka**, **kalendár sviatkov a zatvorených dní (5.7)**, **neprítomnosti (1.4)**, delegácia, reťaz zástupcov a eskalácia (5.8), **import menoslovu a hromadné priraďovanie väzieb (1.3b)**, ceny a **mesačná uzávierka s kontrolou faktúry (5.6)**, **rozdelený fakturačný výstup (6.3)**, export pre mzdy, denný súhrn pre dodávateľa, **tlačové zostavy vrátane denného hárku pre výdaj (5.5)**, **push notifikácie pre predákov a admina** + sprievodca inštaláciou na plochu, **príloha menu (fotka/PDF/Word)**, **exporty, história a zálohy (kapitola 7)**, audit, nasadenie |
+| **3 — Rozšírenia** | grafy a dashboard, **import prítomnosti pri uzávierke (6.5)**, push pre stravníkov, SMS pre predákov ak treba, import menu (XLSX/CSV, prilepenie textu) podľa reálnych vzoriek, evidencia prevzatia v appke *(dovtedy ju plní papierový hárok)*, hostia, SSO, kiosk, rola dodávateľa, prípadná ukrajinčina |
+
+**Tabuľa v jedálni sa nerobí** (rozhodnutie 42) — v preview ostáva ako ukážka, do MVP nejde. Menu na nástenke plní ten istý účel za cenu jedného výtlačku.
 
 Ako sa appka dostane na server, ako sa mení za behu a čo zmena urobí s dátami — samostatne v `docs/07-nasadenie-a-zmeny.md`. Podstatné pre koncept: **cena odfotená na objednávku (6.1) a zamknuté mesiace (5.6) sú to, vďaka čomu sa dá appka meniť aj po rokoch bez toho, aby sa prepisovala minulosť.**
 
