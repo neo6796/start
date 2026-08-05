@@ -1018,9 +1018,9 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 11. **Príplatok za dovoz na vzdialenejšie miesto** — účtuje ho dodávateľ zvlášť? Ak áno, **kto ho platí?** Zamestnanec je na tej prevádzke kvôli práci, takže logicky zamestnávateľ — ale je to rozhodnutie mzdára a účtovníčky, nie moje. Do vyriešenia je cena obeda rovnaká na všetkých miestach.
 12. **Zoznam prevádzok** — na ktorých miestach firma reálne obeduje a kto je kde vedený.
 13. **Spôsob úhrady pre živnostníkov** (1.3a) — nemajú mzdu, takže zrážka zo mzdy u nich neexistuje. Preúčtovanie? Faktúra? Hotovosť? Bez odpovede sa im mesačný podklad nedá spraviť. **Otázka pre mzdára a účtovníčku.**
-14. **Zoznam firiem**, pre ktoré sa obedy robia, a ku každej spôsob úhrady.
+14. **Zoznam firiem**, pre ktoré sa obedy robia. Z dochádzky vidno tri skupiny (prefix kódu 1, 2, 3) — treba potvrdiť, či je to celé. Pozor: *Živnostníci* sú v dochádzke skupina, ale v appke je to **typ vzťahu osoby**, nie firma — každý živnostník patrí k niektorej skutočnej firme (6.2a).
 15. **Kde sa zaokrúhľuje** (6.2) — DPH k príspevku stravníka vyrába štvrté desatinné miesto. Na obede, alebo až na mesačnom súčte za osobu? Odporúčam druhé. **Otázka pre účtovníčku.**
-16. **Schéma pre živnostníkov** (6.2a) — príspevok zo špeciálneho fondu a forma úhrady. Nie je to plnenie zo Zákonníka práce, takže to má posúdiť účtovníčka. Z dochádzky vidno tri skupiny (prefix kódu 1, 2, 3) — treba potvrdiť, či je to celé. Ide o stĺpec navyše v zozname zamestnancov (`docs/05-zoznam-zamestnancov.md`).
+16. **Schéma pre živnostníkov** (6.2a) — príspevok zo špeciálneho fondu a forma úhrady. Nie je to plnenie zo Zákonníka práce, takže to má posúdiť účtovníčka.
 
 ---
 
