@@ -35,17 +35,15 @@ Potrebujeme:
 
 ---
 
-## 2. Firewall — jedno pravidlo
+## 2. Firewall — ✅ netreba nič robiť
 
-Aplikácia beží na serveri v Nemecku, takže sa na váš mailový server musí dostať cez internet.
+Port **465 je otvorený a nasmerovaný na mailový server**, overené správcom.
 
-```
-povoliť TCP 587 (alebo 465) zo zdroja 46.225.236.143
-```
+Pôvodne som navrhoval zúžiť ho len na zdrojovú adresu `46.225.236.143`. **To by bola chyba** — ten istý port používajú zamestnanci zo svojich telefónov a notebookov mimo firemnej siete. Zúžením by sa im rozbilo odosielanie pošty. Odosielací port má byť dostupný, presne ako je.
 
-**Jedna adresa, jedno pravidlo, nulová expozícia navonok.** Neotvárajte port pre celý internet.
+**Dôsledok, ktorý z toho vyplýva pre nás:** keďže je port otvorený voči internetu, dostáva neustále pokusy o uhádnutie hesla. Heslo k schránke `obedy@ahafarma.sk` preto musí byť **dlhé a náhodne vygenerované správcom hesiel**, nie vymyslené človekom.
 
-*(Toto je bod, ktorý v predchádzajúcej verzii zadania stálo „nerobiť". Vtedy sme počítali s externou službou. Teraz to potrebujeme.)*
+Nejde o formalitu. Keby sa schránka prelomila, poslúžila by na rozosielanie spamu a **IP adresa firemného mailového servera by skončila na čiernych listinách.** Vtedy prestanú chodiť nielen objednávky obedov, ale pošta celej firmy.
 
 ---
 
@@ -90,9 +88,8 @@ Verejný SSH kľúč NAS-u pošlite a pridáme ho na server; alebo povedzte, či
 
 | | Čo | Blokuje? |
 |---|---|---|
-| 1 | schránka `obedy@ahafarma.sk` + SMTP údaje + prístup pre dvoch | ✅ áno |
-| 2 | firewall: TCP 587/465 zo zdroja `46.225.236.143` | ✅ áno |
-| 3 | potvrdiť DKIM podpisovanie odchádzajúcej pošty | ✅ áno |
-| 4 | prístup na NAS pre sťahovanie záloh | až pred spustením |
-
-Prvé tri sú rádovo **pol hodiny práce**, jednorazovo.
+| 1 | schránka `obedy@ahafarma.sk` + SMTP údaje | ✅ hotové |
+| 2 | firewall — port 465 otvorený a nasmerovaný | ✅ hotové, netreba meniť |
+| 3 | DKIM podpisovanie odchádzajúcej pošty | ✅ potvrdené |
+| 4 | **prístup k schránke pre dvoch ľudí** | ⬜ zostáva |
+| 5 | **prístup na NAS pre sťahovanie záloh** | ⬜ až pred spustením |
