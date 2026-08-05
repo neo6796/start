@@ -55,6 +55,9 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 48. **Odmena živnostníkovi sa počíta od nákladu firmy** (6.2a) — *firmu má obed stáť rovnako, nech je stravník zamestnanec alebo živnostník*. Suma na faktúre sa dopočíta spätne podľa toho, či je platiteľom DPH a či si firma DPH odpočíta.
 49. **Prevzatie obeda sa neeviduje** (5.5). Pri výdaji stojí zamestnanec dodávateľa, nie náš. Políčko na hárku ostáva ako pomôcka, ale nič sa naň nevieša. Obedy v dňoch neprítomnosti chytá import prítomnosti (6.5).
 50. **Hostia sa riešia porciou bez mena** (1.3b) účtovanou stredisku, s dôvodom *hosť*. Žiadny nový mechanizmus, hosť ide v plnej cene.
+51. **Záväzné číslo je denný súhrn, nie týždenná objednávka** (`09-dodavatelia.md`). Obaja dodávatelia berú objednávky **ráno v deň obeda** (7:00–9:00 a do 8:30), takže týždenná uzávierka ostáva ako **náš vnútorný plán** — z čoho tlačiť hárky a vedieť dopredu počty — ale dodávateľovi odchádza záväzný počet ráno. Denný deadline v appke: **8:00**.
+52. **Menu sa neprepisuje, prikladá sa PDF** — potvrdené na skutočných lístkoch. Prepisovanie 5 jedál × 5 dní × 2 dodávatelia je 50 položiek týždenne a zahodilo by **gramáže a alergény**, ktoré na PDF sú a majú tam byť zo zákona. Do appky ide len označenie jedla.
+53. **Značenie jedál je per poskytovateľ** aj v skutočnosti, nielen v teórii: GASTROGAL čísluje `1`–`5`, ABM `A`–`E`. To isté platí pre alergény — čísla verzus slová.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -891,15 +894,27 @@ Príspevok patrí zamestnancovi, ktorý v rámci zmeny **odpracoval viac než š
 
 Tretí riadok nemá appka riešiť sama: krátka zmena môže byť skrátený úväzok, prerušená práca aj zle pípnutá karta. **Označí a čaká**, rovnako ako pri všetkom ostatnom, čo vie len naznačiť.
 
-#### Strop — číslo, ktoré sa mení niekoľkokrát ročne
+#### Strop — nikto nikam necestuje, je to len meradlo
 
-Zákon obmedzuje príspevok zamestnávateľa hornou hranicou naviazanou na **stravné pri pracovnej ceste 5–12 hodín**. Tá suma sa mení opatrením MPSVR aj viackrát do roka, takže **nemá čo byť v kóde ani vo vzorci** — je to nastavenie s platnosťou od dátumu, ako všetko ostatné v 6.1.
+Zákon obmedzuje príspevok zamestnávateľa hornou hranicou naviazanou na **stravné pri pracovnej ceste 5–12 hodín**. **Pracovná cesta pritom s obedmi nemá nič spoločné** — zákon si len požičal existujúce číslo ako meradlo. Nikto nikam nejde; je to suma, ktorú ministerstvo pravidelne vyhlasuje a od ktorej sa strop odvodzuje.
 
-Pri cenách obeda okolo 5–7 € je 55 % niečo medzi 2,75 a 3,85 €, čo je pod tou hranicou — **strop teda pravdepodobne vôbec nezasiahne.** To ale nie je dôvod ho vynechať: ceny rastú a hranica sa mení nezávisle od nich.
+```
+strop = 55 % zo stravného 5–12 h
+```
 
-Preto: strop je **zapnuteľný a datovaný**, appka ho vyhodnotí pri každom obede a keď zasiahne, **napíše to** namiesto tichého orezania — *„príspevok orezaný stropom, 3,85 → 3,60"*. Tichý strop je najhorší možný: čísla nesedia a nikto nevie prečo.
+**Zadáva sa stravné, nie strop.** Je to o krok navyše, ale správny: `8,50 €` je číslo, ktoré ministerstvo vyhlási a účtovníčka podá; `4,68 €` by musel niekto vypočítať a pri každej zmene prepočítať znova. Appka odvodený strop ukáže hneď vedľa, aby sa dal skontrolovať.
 
-**Čo treba od účtovníčky:** jedno číslo a dátum, odkedy platí. Nie schému.
+**Kedy vôbec zasiahne — jednoduché pravidlo.** Príspevok je 55 % z ceny, strop je 55 % zo stravného. Percento je rovnaké, takže sa vykráti:
+
+> **Strop zasiahne až vtedy, keď cena obeda bez DPH prekročí celé stravné za 5–12 hodín.**
+
+Pri obedoch za 6,30 a 7,20 € s DPH je to 5,29 a 6,05 € bez DPH — hlboko pod akoukoľvek hodnotou stravného, aká za posledné roky platila. **Prakticky nezasiahne.** To ale nie je dôvod ho nezadať: ceny obedov rastú a stravné sa mení nezávisle od nich, takže sa raz stretnúť môžu.
+
+Preto je strop **zapnuteľný a datovaný**, appka ho vyhodnotí pri každom obede a keď zasiahne, **napíše to** namiesto tichého orezania — *„príspevok orezaný stropom, 3,85 → 3,60"*. Tichý strop je najhorší možný: čísla nesedia a nikto nevie prečo.
+
+Keď strop zasiahne, rozdiel neplatí zamestnávateľ — dorovná ho **sociálny fond alebo stravník**, podľa modelu v 6.2. Strop teda nemení, koľko obed stojí; mení, kto ho platí.
+
+**Čo treba od účtovníčky:** hodnota stravného 5–12 h a dátum, odkedy platí. Nie schéma, jedno číslo.
 
 ### 6.2a Zamestnanci a živnostníci — rovnaký výpočet, celkom iná cesta peňazí
 
@@ -952,9 +967,11 @@ riadok na faktúre = taká suma, aby firmu stála X
 
 Vo všetkých troch riadkoch firmu obed stojí `X`. Líši sa len číslo na papieri.
 
-Appka preto potrebuje pri osobe **príznak platiteľa DPH** a jedno globálne nastavenie: *je DPH z tejto odmeny pre firmu nákladom, alebo si ju odpočíta?* Predvolene **odpočíta** — firmy sú platiteľmi a ide o službu prijatú k podnikaniu.
+**Príznak platiteľa DPH je pri osobe**, nie pri firme — živnostník sa ním môže stať kedykoľvek a je to jeho vlastnosť. Doteraz sme takého nemali; keď príde prvý, prepne sa mu prepínač a nič iné sa robiť nemusí.
 
-> **Zostáva jediná vec pre účtovníčku, a je to jedna veta, nie schéma:** *odpočíta si firma DPH z tejto odmeny, alebo je pre ňu nákladom?* Podľa toho sa prepne to nastavenie. Ako sa položka na faktúre pomenuje, je tiež na nej — appka to slovo len vytlačí. **Otvorená otázka 16.**
+Tretí riadok tabuľky je pritom **teoretická možnosť, nie očakávaný stav**: naše firmy sú platiteľmi DPH a ide o službu prijatú k podnikaniu, takže si DPH odpočítajú. **Riadok na faktúre bude teda `X`** a príznak platiteľa slúži hlavne na to, aby prehľad ukázal správne aj to, koľko bude na faktúre celkom s DPH — nech vie človek, čo má vystaviť.
+
+> **Pre účtovníčku ostáva jediná vec, a nie je to schéma:** *ako sa má tá položka na faktúre volať?* Appka to slovo len vytlačí, ale malo by byť u všetkých rovnaké. **Otvorená otázka 16.**
 
 #### Čo treba potvrdiť s mzdovým oddelením pred spustením
 - [ ] percentá 55 / 35 a sadzbu DPH k príspevku stravníka (19 %)
@@ -1462,9 +1479,10 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 **Rozhodnuté:** predák objednáva, mení aj odhlasuje · poskytovateľ pridelený adminom · ceny a mzdový podklad áno · bez zmien · menu per poskytovateľ (ručne + neskôr import) · menu známe do pondelka · príspevok ako nastavenie · väčšina bez e-mailu aj bez appky → predák + nástenka · kombinovaný zber cez hárok · len slovenčina · superadmin bez 2FA, heslo 12 znakov, obnova cez e-mail · prístupy pri spustení len predáci a admin · doobjednanie predákom v deň obeda · delegácia s obdobím + eskalácia.
 
 **Otázky na dodávateľov** (obchodné, nie technické — appka sa prispôsobí):
-1. **Akceptujú doobjednanie v deň obeda a dokedy?** (4.3) Ak nie, u daného dodávateľa sa funkcia nezapne.
-2. **Vzorky menu** — v akom formáte reálne chodia, aby sa dalo rozhodnúť o importe (3.2).
-3. **Denný deadline na odhlásenie** — každý dodávateľ svoj (4.2). Treba ich pozbierať.
+1. ~~**Akceptujú doobjednanie v deň obeda?**~~ — **vyriešené: obaja áno**, a je to u nich bežný režim. GASTROGAL berie objednávky **7:00–9:00**, ABM **do 8:30** (`09-dodavatelia.md`). Denný deadline v appke bude **8:00**, s rezervou pred nimi.
+2. ~~**Vzorky menu**~~ — **máme obe.** Chodia ako úhľadné PDF na celý týždeň, s gramážami aj alergénmi. **Import sa robiť nebude, PDF sa priloží** — prepisovanie 50 položiek týždenne by navyše zahodilo alergény, ktoré tam majú byť zo zákona.
+3. ~~**Denný deadline na odhlásenie**~~ — pravdepodobne tá istá ranná hranica, ale treba to počuť výslovne. Presunuté do `09-dodavatelia.md`.
+3a. ⚠️ **Má GASTROGAL e-mail na objednávky?** Na menu je len telefón. Ak e-mail nemajú, appka pre nich vygeneruje **denný súhrn na nadiktovanie** a nahlásenie sa odklikne ručne. Funguje to, ale musí sa to vedieť dopredu. **Prvá otázka na nich.**
 
 **Otázky dovnútra firmy:**
 4. **Čísla od mzdára** — checklist v kapitole 6.2.
@@ -1479,8 +1497,8 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 13. ~~**Spôsob úhrady pre živnostníkov**~~ — **vyriešené:** platia dodávateľovi sami v plnej cene. Firma neplatí za nich nič a nič im nestrháva; príspevok dostávajú nepriamo ako **odmenu pripočítanú k ich faktúre** voči firme (6.2a, rozhodnutie 34).
 14. ~~**Zoznam firiem**~~ — **vyriešené a potvrdilo to, čo sa tušilo:** prefixy v dochádzke **nie sú firmy**. `1` = Adiumentum, `2` = PD, ale `3` = *živnostníci*, čo je **typ vzťahu, nie firma** — živnostník patrí napríklad pod Adiumentum. Skutočných firiem je viac (Cronus, HBE, …). Prefix sa preto **na nič nepoužije**: dochádzka dodá len ID a meno, firmu aj typ vzťahu zadá admin v appke (rozhodnutie 37). Zoznam firiem sa dopĺňa v nastaveniach a nemusí byť úplný vopred.
 15. ~~**Kde sa zaokrúhľuje**~~ — **vyriešené:** v plnej presnosti na obede, zaokrúhľuje sa až **mesačný súčet za osobu** (6.2).
-16. **Odmena pre živnostníkov — jedna veta od účtovníčky** (6.2a). Princíp je rozhodnutý: *firmu má obed stáť rovnako, nech je stravník zamestnanec alebo živnostník*, a suma na faktúre sa dopočíta spätne od toho. Ostáva len: **odpočíta si firma DPH z tejto odmeny, alebo je pre ňu nákladom?** Podľa toho sa prepne jedno nastavenie. Plus ako sa tá položka pomenuje.
-16a. **Strop — jedno číslo a dátum** (6.2b). Suma naviazaná na stravné pri pracovnej ceste 5–12 h, s platnosťou od dátumu. Pri dnešných cenách obeda pravdepodobne nezasiahne, ale mení sa niekoľkokrát ročne a appka ju má vyhodnocovať. **Otázka pre účtovníčku.**
+16. **Ako sa má položka na faktúre živnostníka volať** (6.2a). To je z pôvodnej otázky všetko, čo zostalo: DPH si firma odpočíta (je platiteľom a ide o službu prijatú k podnikaniu), takže riadok na faktúre je `X`. Príznak platiteľa DPH je pri osobe. Chýba len názov položky, nech je u všetkých rovnaký.
+16a. **Stravné za 5–12 h — jedno číslo a dátum** (6.2b). Z neho si appka odvodí strop ako 55 %. Pri cenách 6,30 a 7,20 € nezasiahne — zasiahol by až pri obede drahšom, než je celé stravné — ale zadať sa má, lebo ceny rastú a stravné sa mení nezávisle. **Otázka pre účtovníčku.**
 17. ~~**Kto fakturuje živnostníkom**~~ — **vyriešené:** je to **nastavenie poskytovateľa** (6.3), nie rozhodnutie. Rozdelený výstup zvládne oboje — priamu fakturáciu živnostníkom aj preúčtovanie cez firmu. Od dodávateľa treba len vedieť, ktorý z tých dvoch režimov chce; je to v `06-otazky-pre-dodavatela.md`.
 18. ~~**Vie dochádzkomer exportovať denné prítomnosti**~~ — **vyriešené inak:** natívny export nevyhovuje a appka ho ani čítať nebude. Prevod do dohodnutého tvaru `osobne_cislo; datum; hodiny` sa spraví mimo appky; zadanie je v `docs/08-vstupne-subory.md` (rozhodnutie 39). Ostáva overiť, že sa z dochádzkomera dá dostať aspoň *osoba × deň* v akejkoľvek podobe — bez toho niet čo prevádzať.
 
