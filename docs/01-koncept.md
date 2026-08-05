@@ -40,7 +40,10 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 33. **Dochádzka sa dá naimportovať aj pri uzávierke**, nielen pri zakladaní ľudí (6.5). Slúži na triedenie podľa prítomnosti a na nájdenie obedov v dňoch, keď človek v práci nebol. **Nikdy neúčtuje sama** — len označí deň na rozhodnutie.
 34. **Živnostníkom appka obed len objednáva** (6.2a). Dodávateľovi platia sami, príspevok dostávajú nepriamo — o jeho výšku si zvýšia faktúru voči firme. Do mzdového podkladu ani do sociálneho fondu nevstupujú; dostávajú **štruktúrovaný prehľad** po osobách, prevádzkach a poskytovateľoch.
 35. **Príplatok za dovoz sa zatiaľ nerieši** — na našich prevádzkach neexistuje. V dátovom modeli ostáva pole s nulou, aby sa dal zapnúť bez migrácie (3.4, otvorená otázka 11).
-36. **Fakturačný a kontrolný výstup je rozdelený** (6.3) — za každú firmu zvlášť, v rámci nej po poskytovateľoch, a živnostníci každý sám za seba s uvedením firmy, ku ktorej patrí. Každý list končí riadkom **„čo očakávať na faktúre"**. U živnostníka sa vedľa skutočnosti ukáže aj *ako keby bol zamestnanec* — príspevok, fond aj doplatok s DPH. **Kto komu fakturuje, je nastavenie poskytovateľa**, nie otvorená otázka.
+36. **Fakturačný a kontrolný výstup je rozdelený** (6.3) — za každú firmu zvlášť, v rámci nej po poskytovateľoch, a živnostníci každý sám za seba s uvedením firmy, ku ktorej patrí. Nad nimi je **sumár za firmu v rovnakej štruktúre ako pri zamestnancoch** a nakoniec súčet oboch. Každý list končí riadkom **„čo očakávať na faktúre"**. U živnostníka sa vedľa skutočnosti ukáže aj *ako keby bol zamestnanec* — príspevok, fond aj doplatok s DPH. **Kto komu fakturuje, je nastavenie poskytovateľa**, nie otvorená otázka.
+37. **Import nesie len totožnosť** (1.3b) — osobné číslo, priezvisko, meno. Firma, tím, predák, prevádzka aj poskytovateľ sa nastavujú v appke **výberom z rozbaľovacieho zoznamu, nikdy písaním**. Zoznam sa dá vyexportovať a nahrať späť, ale import **neznáme hodnoty odmieta, nezakladá** — inak by bol dierou v tom istom pravidle.
+38. **Ručne zadaná hodnota prebíja importovanú** (1.3b) — vo všetkých importoch. Import dopĺňa prázdne, prepisuje predchádzajúci import a **ručný zápis nechá tak**, len ho vypíše ako rozdiel. **Pred zápisom sa vždy ukáže, čo sa stane**, nie až po ňom.
+39. **Appka nečíta natívny export dochádzkomera** (6.5) — číta jednoduchý dohodnutý tvar `osobne_cislo; datum; hodiny` (`docs/08-vstupne-subory.md`). Prevod je mimo appky. Pri výmene dochádzkového systému sa tak mení prevodník, nie appka.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -116,6 +119,39 @@ Neaktívny **nie je zmazaný**. Nezobrazuje sa v matici a nechodia mu upomienky,
 | **Appka** | jediný zdroj pravdy. Pridanie, zmena, prepnutie na neaktívneho — všetko sa robí tu |
 | **Import z dochádzky** | **pomôcka, nie pán.** Spustí sa, keď treba; navrhne, nič neprepíše |
 
+#### Import nesie len totožnosť
+
+Súbor obsahuje **tri stĺpce: osobné číslo, priezvisko, meno.** Nič viac. Firma, typ vzťahu, tím, predák, prevádzka aj poskytovateľ sa nastavujú **až v appke**.
+
+Nie je to zjednodušenie pre pohodlie, je to obrana. Keby tie väzby chodili v súbore, prišli by ako text — a text sa dá napísať trikrát inak. *Vráble · Vrable · závod Vráble* by v databáze vyrobili tri prevádzky a rozbité súčty by sa objavili až o dva mesiace pri uzávierke. **Import teda nesie len to, čoho je dochádzka skutočným zdrojom: kto to je.**
+
+V appke sa všetko ostatné vyberá **z rozbaľovacieho zoznamu, nikdy sa nepíše.** Zoznam sa dá doplniť, ale je to samostatný, vedomý krok — nie vedľajší účinok preklepu v tabuľke.
+
+#### Poradie zakladania
+
+Rozbaľovací zoznam musí mať z čoho vyberať, takže poradie nie je ľubovoľné:
+
+| | Krok | Prečo tu |
+|---|---|---|
+| 1 | **firmy** | bez nich sa nedá určiť, komu sa fakturuje |
+| 2 | **prevádzky** | miesta, kde sa ľudia vyskytujú |
+| 3 | **poskytovatelia** a ich miesta výdaja (3.4) | tie sa viažu na prevádzky |
+| 4 | **import menoslovu** — ID, priezvisko, meno | ľudia bez väzieb, zatiaľ „nezaradení" |
+| 5 | **označiť predákov** | predák je sám stravník, takže musí najprv existovať |
+| 6 | **doplniť väzby** — firma, typ vzťahu, tím, predák, prevádzka, poskytovateľ | všetko z rozbaľovacích zoznamov |
+
+Krok 5 je dôvod, prečo sa predáci nedajú nahodiť skôr než ľudia: **predák je stravník s príznakom**, nie samostatná entita. Až keď sú označení, dá sa v kroku 6 pri každom človeku vybrať jeho predák — a v zozname sú len tí, ktorí naozaj predákmi sú.
+
+**Krok 6 sa robí hromadne, nie po jednom.** Sto ľudí × šesť rozbaľovacích zoznamov je šesťsto kliknutí a zaručená chyba. Preto: označiť riadky → *nastaviť predáka* / *nastaviť prevádzku* / *nastaviť firmu* na všetky naraz. Väčšina ľudí má tie isté hodnoty, takže reálna práca je pár skupín a potom hŕstka výnimiek.
+
+#### Export a import menoslovu
+
+Zoznam sa dá **vyexportovať aj nahrať späť** — na hromadnú úpravu v Exceli, na zálohu, na kontrolu druhým človekom. Platia pri tom tri pravidlá, inak by sa tým dal zoznam pokaziť rýchlejšie než ručne:
+
+1. **Spája sa cez osobné číslo**, nie cez meno. Riadok s neznámym číslom je **návrh na pridanie**, nie tiché pridanie.
+2. **Neznáme hodnoty sa odmietajú, nezakladajú.** Ak je v stĺpci *prevádzka* napísané niečo, čo v zozname prevádzok nie je, import ten riadok označí ako chybu a **nevytvorí novú prevádzku**. Toto je celý dôvod, prečo sa v appke vyberá z rozbaľovacieho zoznamu — bez tejto zábrany by bol export späť dierou v tom pravidle.
+3. **Chýbajúci riadok nikoho neruší.** Rovnako ako pri importe z dochádzky (nižšie).
+
 Import nič neprepisuje sám a **nikdy nikoho neruší** — len ukáže rozdiel a čaká na potvrdenie. Nový človek v obedoch potrebuje aj tím, poskytovateľa a prevádzku, ktoré dochádzka nepozná; a brigádnik potrebuje obed hneď, nie až keď sa objaví v mesačnom exporte.
 
 Appka pritom vie dochádzku používať ako **zrkadlo na kontrolu**, bez toho, aby podľa nej konala:
@@ -134,6 +170,20 @@ To je celý vzťah medzi tými dvoma systémami. Dochádzka je kontrolná vzorka
 | kód, ktorý v novom súbore chýba | *neodstraňovať automaticky* — ponúknuť ukončenie platnosti |
 
 Ten posledný riadok je zámerný. Chýbajúci človek môže byť odídený, ale aj na dlhodobej PN, alebo len nebol v exporte za daný mesiac. **Automatické rušenie by ticho zmazalo živých ľudí.** Preto sa vždy pýta.
+
+#### Ručne zadané prebíja importované
+
+Toto pravidlo platí pre **všetky importy v appke** — menoslov, dochádzku aj čokoľvek, čo pribudne neskôr. Každá hodnota si nesie svoj **pôvod**: *z importu* alebo *ručne*.
+
+| Čo import nájde | Čo urobí |
+|---|---|
+| prázdna hodnota | **doplní** bez pýtania |
+| hodnota **z predchádzajúceho importu** | **prepíše** — opravený súbor má opraviť aj údaje |
+| hodnota zadaná **ručne** | **nechá tak** a zapíše do zoznamu rozdielov |
+
+Dôvod je jednoduchý: ručný zápis je rozhodnutie človeka, ktorý o veci vedel viac než súbor. Keby ho import prepísal, tá informácia zmizne bez stopy — a nikto si nevšimne, že zmizla. Preto sa **rozdiely ukážu a čaká sa**: buď sa prevezme jeden riadok, alebo všetky naraz, ale vždy vedome.
+
+**Pred zápisom sa vždy ukáže, čo sa stane.** Nie hlásenie po skončení, ale obrazovka pred ním: *„doplní sa 12 · prepíše sa 4 · v rozpore s ručným zadaním 3 (nechám tak)"* — a až pod tým tlačidlo. Import, ktorý najprv zapíše a potom oznámi, sa nedá vziať späť.
 
 **Spájací kľúč je celý štvorciferný kód** (`PersonalAccessCode`), nie poradové číslo v rámci firmy. **Nič sa neprečíslováva** — ten kód už existuje, je na kartách a v dochádzke. Appka si vedie oba údaje a do mzdového exportu dá ten, ktorý mzdový softvér požaduje; vnútorne spája cez štvorciferný. Overené na skutočných dátach: číslo `008` majú dvaja rôzni ľudia v dvoch firmách, rovnako `002` a `014`. Pri spájaní cez poradové číslo by dvom rôznym ľuďom splynuli obedy aj zrážky.
 
@@ -749,7 +799,25 @@ Tie isté stĺpce, len pre jednu osobu. Navyše sa vždy eviduje, **ku ktorej fi
 
 **Počíta sa to tým istým vzorcom ako zamestnancom** — len sa to ukáže dvakrát: raz *ako keby* a raz ako to naozaj je. Rozdiel medzi tými dvoma stĺpcami je presne to, čo firma prispieva nepriamo.
 
-Za firmu sa tieto sumy **sčítajú** — koľko odmien z jej živnostníkov v tom mesiaci vzniklo. Inak by sa nedalo povedať, koľko ju obedy stáli celkovo.
+#### Za firmu — živnostníci, tie isté riadky
+
+Nad jednotlivcami je **sumár za firmu v rovnakej štruktúre ako pri zamestnancoch**. Tie isté riadky, aby sa dali čítať vedľa seba a porovnávať:
+
+| Riadok | Zamestnanci | Živnostníci |
+|---|---|---|
+| počet obedov, po poskytovateľoch | ✓ | ✓ |
+| cena spolu bez DPH · DPH · s DPH | ✓ | ✓ |
+| príspevok zamestnávateľa | náklad firmy | *ako keby* → do odmeny |
+| sociálny fond | náklad firmy | *ako keby* → do odmeny |
+| doplatok stravníka s DPH | zrážka zo mzdy | *ako keby*, na porovnanie |
+| **čo firmu tento mesiac stálo** | príspevok + fond | **odmeny na faktúrach** |
+| čo očakávať na faktúre od dodávateľa | ✓ | ✓ alebo *fakturuje sa im priamo* |
+
+#### Za firmu — spolu
+
+Posledný list je súčet oboch: **koľko firmu obedy stáli celkovo**, zamestnanci aj živnostníci, a koľko z toho niesol sociálny fond. Bez neho by sa dalo odpovedať len na polovicu otázky.
+
+Rovnaké súčty sú aj **po prevádzkach a po poskytovateľoch** — tie isté čísla, iné triedenie. Štatistika nikdy nezaškodí a pri rozhodovaní o dodávateľoch je to jediný podklad, ktorý existuje.
 
 #### Ostatné výstupy
 
@@ -802,7 +870,27 @@ Preto platí tvrdé pravidlo: **import nikdy nič neúčtuje sám.** Označí de
 
 **Import je voliteľný.** Uzávierka bez neho funguje presne tak ako doteraz — len sa tie dni nenájdu. Nie je to podmienka uzavretia mesiaca; je to nástroj, keď ho treba.
 
-**Formát:** ten istý XML export z dochádzkomera, aký sa už používa pri zakladaní ľudí. Žiadny nový súbor, žiadna ďalšia dohoda s dodávateľom dochádzky.
+#### Ručná oprava prítomnosti
+
+Dochádzka nie je neomylná: zabudnutá karta, služobná cesta, práca z iného miesta. Preto sa **každý deň dá prepnúť ručne** — priamo v zozname, s povinnou poznámkou prečo. Takto opravený deň dostane pôvod *ručne* a **ďalší import ho už neprepíše** (1.3b): ukáže rozdiel a nechá rozhodnúť.
+
+Poradie je tu dôležité opačne než pri menoslove. Pri ľuďoch sa najprv importuje a potom dopĺňa; pri dochádzke sa **najprv importuje, potom opravuje** — a od tej chvíle je oprava silnejšia než súbor. Kto si dal námahu zistiť, že Kováč bol na školení a kartu nepípol, nemá o to prísť tým, že sa súbor nahrá druhýkrát.
+
+Pred každým importom sa ukáže **čo sa prepíše**, s rozpisom podľa toho istého pravidla: doplní sa · prepíše sa · v rozpore s ručným zadaním.
+
+#### Formát vstupu
+
+Dochádzkomer nevyhovuje priamo — jeho export obsahuje osoby, nie dni. Súbor sa teda pripraví zvlášť a appka číta **jednoduchý dohodnutý tvar**, nie natívny export:
+
+```
+osobne_cislo;datum;hodiny
+1042;2026-08-03;8.5
+1042;2026-08-04;0
+```
+
+Tri stĺpce, jeden riadok = jeden človek a jeden deň. Podrobná špecifikácia vrátane hraničných prípadov je v `docs/08-vstupne-subory.md` — je napísaná tak, aby sa dala odovzdať komukoľvek, kto ten prevod spraví.
+
+**Prečo takto a nie natívny export:** appka sa neviaže na jeden konkrétny dochádzkový systém. Keď sa dochádzkomer o tri roky vymení, mení sa prevodník — jeden malý skript — a nie appka.
 
 ---
 
@@ -1170,7 +1258,7 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 15. **Kde sa zaokrúhľuje** (6.2) — DPH k príspevku stravníka vyrába štvrté desatinné miesto. Na obede, alebo až na mesačnom súčte za osobu? Odporúčam druhé. **Otázka pre účtovníčku.**
 16. **Daňový režim odmeny pre živnostníkov** (6.2a) — schéma je jasná (obed si platia sami, príspevok si pripočítajú k faktúre), ale nie je to plnenie zo Zákonníka práce. **Ako sa tá odmena volá a účtuje?** A pri platcoch DPH k nej pribudne DPH, takže rovnaký príspevok stojí firmu viac než u zamestnanca — počíta sa suma pred DPH alebo po nej? **Otázka pre účtovníčku.**
 17. ~~**Kto fakturuje živnostníkom**~~ — **vyriešené:** je to **nastavenie poskytovateľa** (6.3), nie rozhodnutie. Rozdelený výstup zvládne oboje — priamu fakturáciu živnostníkom aj preúčtovanie cez firmu. Od dodávateľa treba len vedieť, ktorý z tých dvoch režimov chce; je to v `06-otazky-pre-dodavatela.md`.
-18. **Vie dochádzkomer exportovať denné prítomnosti** za mesiac? (6.5) V exporte, ktorý už máme, sú **len osoby** — kód, meno, karta — nie dni. Na príznak prítomnosti treba iný výstup: *osoba × deň*, prípadne s odpracovanými hodinami. Ak taký neexistuje, funkcia 6.5 odpadá a neodhlásené obedy sa budú hľadať ručne. **Overiť skôr, než sa to začne stavať** — stačí jedna vzorka.
+18. ~~**Vie dochádzkomer exportovať denné prítomnosti**~~ — **vyriešené inak:** natívny export nevyhovuje a appka ho ani čítať nebude. Prevod do dohodnutého tvaru `osobne_cislo; datum; hodiny` sa spraví mimo appky; zadanie je v `docs/08-vstupne-subory.md` (rozhodnutie 39). Ostáva overiť, že sa z dochádzkomera dá dostať aspoň *osoba × deň* v akejkoľvek podobe — bez toho niet čo prevádzať.
 
 ---
 

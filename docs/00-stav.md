@@ -69,7 +69,7 @@ Osobné číslo je **celý štvorciferný kód z dochádzky** — poradové čí
 - [ ] určiť, **ktorí dodávatelia to reálne budú** a ako sa volajú
 - [ ] určiť **zoznam prevádzok**, kam sa vozí
 - [ ] potvrdiť **zoznam firiem** — z dochádzky vidno tri skupiny (prefix kódu 1, 2, 3); je to celé?
-- [ ] zistiť, či dochádzkomer vie vyexportovať aj **denné prítomnosti** (osoba × deň), nie len zoznam ľudí — bez toho odpadá kontrola neodhlásených obedov *(stačí jedna vzorka)*
+- [ ] dať niekomu spraviť **prevod dochádzky** do dohodnutého tvaru — zadanie je hotové v `08-vstupne-subory.md`, dá sa odovzdať tak ako je
 - [ ] overiť, že heslo k `obedy@ahafarma.sk` je **náhodne generované**, nie vymyslené — port je otvorený voči internetu a schránka dostáva pokusy o uhádnutie
 
 ---
