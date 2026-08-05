@@ -1,49 +1,36 @@
-# Otázky pre mzdové oddelenie a účtovníčku
+# Rozúčtovanie obedov — potvrdené nastavenia a dve otvorené otázky
 
-Pripravujeme aplikáciu na objednávanie obedov. Bude z nej chodiť **mesačný podklad na zrážky zo mzdy**, aby sa nemuselo nič prepisovať ručne.
+Aplikácia na objednávanie obedov bude posielať **mesačný podklad na zrážky zo mzdy**, aby sa nemuselo nič prepisovať ručne.
 
-Dokument má dve časti a spolu osem otázok. **Prvá popisuje, ako to appka počíta dnes** — prosíme len potvrdiť alebo opraviť, nemusíte to vymýšľať. **Druhá sú veci, ktoré zatiaľ rozhodnuté nie sú** a bez odpovede sa podklad dokončiť nedá.
+Väčšina nastavení je **odsúhlasená 5. 8. 2026**. Tento dokument ich zapisuje, aby bolo o rok jasné, podľa čoho sa appka nastavovala — a na konci sú **dve veci, ktoré ešte treba doplniť**.
 
-*Príplatok za dovoz na vzdialenejšiu prevádzku sa v tomto dokumente nerieši — na našich prevádzkach ho žiadny dodávateľ neúčtuje. Aplikácia s ním počíta ako s možnosťou do budúcna; keby ho niekto zaviedol, vrátime sa s otázkou, kto ho platí.*
-
-Všetko sú **nastavenia s platnosťou od dátumu**, nie natvrdo zapísané hodnoty. Dajú sa kedykoľvek zmeniť a zmena neprepíše už uzavreté mesiace.
+Všetko sú nastavenia **s platnosťou od dátumu**. Zmena sa spraví v administrácii a **neprepíše už uzavreté mesiace**.
 
 ---
 
-# A. Takto to počítame — prosíme potvrdiť
+# Časť A — potvrdené
 
-### 1. Základné rozdelenie
+## 1. Základné rozdelenie ✅
 
-Jedáleň nám dá **cenu bez DPH** a svoju sadzbu. Z **ceny bez DPH** sa potom počíta:
+Jedáleň dá **cenu bez DPH** a svoju sadzbu. Z ceny **bez DPH** sa počíta:
 
-| | Predvolené |
+| | |
 |---|---|
 | sadzba DPH dodávateľa | 19 % |
 | **príspevok zamestnávateľa** | **55 %** *(zákonné minimum)* |
-| **príspevok stravníka** | **35 %** |
+| **príspevok stravníka** | **35 %**, v ekonomickom modeli pásmo 35–45 % |
 | sadzba DPH k príspevku stravníka | **19 %** |
-| doplatok zo **sociálneho fondu** | **nenastavuje sa — dopočíta sa ako zvyšok** |
+| **sociálny fond** | **nenastavuje sa — dopočíta sa ako zvyšok**, bez DPH |
 
-Sociálny fond zámerne nie je vstup. Zadáva sa, koľko dáva zamestnávateľ a koľko stravník, a fond dorovná to, čo ostane — takže súčet vždy sedí na cenu z faktúry a nemôže vzniknúť rozdiel.
+Sociálny fond zámerne nie je vstup. Zadáva sa, koľko dáva zamestnávateľ a koľko stravník; fond dorovná zvyšok. Súčet tak vždy sedí na cenu z faktúry a nemôže vzniknúť rozdiel.
 
-- [ ] súhlasí
-- [ ] opraviť: ………
+## 2. Model rozúčtovania ✅ — ekonomický, predvolene pri každej jedálni
 
-### 2. Ktorý z dvoch modelov zapneme?
+Zapína sa **pri každom poskytovateľovi zvlášť**, nie globálne. Predvolene je zapnutý.
 
-Otázka vzniká len vtedy, ak budeme mať **viac jedální s rôznymi cenami**. Prepínač je jeden pre celú aplikáciu.
+Ekonomický model drží príspevok firmy na cenovej hladine **najlacnejšej jedálne**; rozdiel dopláca stravník v pásme 35–45 %. Zmyslom je, **aby sa drahšie jedlo nepreplácalo zo sociálneho fondu.**
 
-**Model A — štandardný.** Pevné percentá, fond je zvyšok:
-
-```
-zamestnávateľ 55 %   ·   stravník 35 %   ·   sociálny fond 10 %
-```
-
-Jednoduchý a predvídateľný. Má ale jednu vlastnosť: pri drahšom jedle rastie úmerne **aj to, čím prispieva sociálny fond**. Kto si vyberie drahší obed, dostane aj vyšší príspevok z fondu.
-
-**Model B — ekonomický.** Vychádza z **cenovej hladiny základného poskytovateľa** a fond použije len do jej výšky. Zamestnávateľ dáva stále rovnakú nominálnu sumu, rozdiel dopláca stravník — jeho podiel sa pohybuje v pásme **35 až 45 %**.
-
-Príklad pri základnej cene **5,00 €** *(t. j. `2,75 + 0,50 = 3,25 €` od firmy)*:
+Príklad pri základnej cene **5,00 €** *(firma dáva `2,75 + 0,50 = 3,25 €`)*:
 
 | cena bez DPH | 55 % | z fondu | **firma spolu** | stravník | podiel | +DPH | **platí stravník** |
 |---:|---:|---:|---:|---:|---:|---:|---:|
@@ -52,84 +39,73 @@ Príklad pri základnej cene **5,00 €** *(t. j. `2,75 + 0,50 = 3,25 €` od fi
 | **5,91** | 3,25 | 0,00 | **3,25** | 2,66 | 45,0 % | 0,51 | **3,16** |
 | 7,00 | 3,85 | — | **3,85** | 3,15 | 45,0 % | 0,60 | **3,75** |
 
-Nad cenou 5,91 € už samotné zákonné minimum prekročí nominálnu hladinu, **fond sa nepoužije vôbec** a delenie je presne 55 / 45. Zmyslom je, aby sa drahšie jedlo nepreplácalo zo sociálneho fondu.
+Nad cenou 5,91 € už samotné zákonné minimum prekročí nominálnu hladinu, fond sa nepoužije vôbec a delenie je presne 55 / 45.
 
-- [ ] **model A** — štandardný, 55 / 35 / zvyšok
-- [ ] **model B** — ekonomický; základný poskytovateľ je ………, pásmo stravníka ……… až ……… %
-- [ ] budeme mať aj tak len jednu jedáleň, takže je to jedno
+> **Pri najlacnejšej jedálni je ekonomický model totožný so štandardným** (55 / 35 / 10). Preto je bezpečné mať ho zapnutý všade: kde nemá čo obmedzovať, neobmedzuje nič.
 
-### 3. Uplatňuje sa strop?
+## 3. Zaokrúhľovanie ✅ — až mesačný súčet
 
-Zákon obmedzuje príspevok hornou hranicou naviazanou na stravné pri pracovnej ceste 5–12 hodín.
+Počíta sa **na obede v plnej presnosti** a zaokrúhľuje sa až **mesačný súčet za osobu**. Pri dvadsiatich obedoch by sa inak nazbieral rozdiel oproti tomu, čo firma zaplatila jedálni.
 
-- [ ] áno, vo výške ……… €
-- [ ] nie
+## 4. Neodhlásený obed ✅ — plná cena
 
-### 4. Kde sa zaokrúhľuje?
+Obed, ktorý si zamestnanec neodhlásil a neprevzal, sa účtuje **v plnej cene — bez príspevku zamestnávateľa a bez sociálneho fondu.**
 
-DPH k príspevku stravníka vyrába štvrté desatinné miesto. Ak sa zaokrúhli na každom obede zvlášť, pri dvadsiatich obedoch sa nazbiera rozdiel oproti tomu, čo firma reálne zaplatila jedálni.
+Nie je to trestanie. Príspevok je viazaný na **odpracovanú zmenu**, takže v deň neprítomnosti nemá z čoho vzniknúť.
 
-- [ ] počítať v plnej presnosti a zaokrúhliť až **mesačný súčet za osobu** *(odporúčame)*
-- [ ] zaokrúhľovať **na každom obede** — matematicky / nadol *(nehodiace sa škrtnite)*
-- [ ] inak: ………
+Aplikácia to sama neúčtuje. Pri uzávierke sa dá načítať dochádzka a tie dni sa **označia na rozhodnutie** — prítomnosť nie je to isté ako prevzatie a podľa indície sa strhávať zo mzdy nemá.
 
-### 5. Obed, ktorý si zamestnanec neodhlásil a neprevzal
-
-Dodávateľ ho uvaril a vyfakturoval, takže ho niekto zaplatiť musí. **Navrhujeme účtovať ho zamestnancovi v plnej cene** — bez príspevku zamestnávateľa a bez sociálneho fondu.
-
-Dôvod nie je trestanie. Príspevok na stravovanie je viazaný na **odpracovanú zmenu**, takže v deň, keď človek v práci nebol, nemá z čoho vzniknúť. Keby sme ho aj tak pripočítali, firma by z vlastných nákladov zaplatila 55 % obeda, na ktorý nárok nebol.
-
-- [ ] súhlasí — **plná cena bez príspevku aj bez fondu**
-- [ ] účtovať štandardne, teda **s príspevkom**
-- [ ] **neúčtovať**, znáša firma
-- [ ] platí niečo iné, a to: ………
-
-> **Ako sa taký obed nájde:** pri mesačnej uzávierke sa dá načítať dochádzka a porovnať, kto mal obed v deň, keď v práci nebol. Aplikácia to sama neúčtuje — len tie dni **označí na rozhodnutie**. Prítomnosť totiž nie je to isté ako prevzatie a podľa indície sa strhávať zo mzdy nemá.
-
----
-
-# B. Toto rozhodnuté nie je
-
-### 6. Živnostníci — potvrdiť daňový režim
-
-Obedy objednávame aj pre ľudí, ktorí u nás nie sú v pracovnom pomere. **Typ vzťahu je vlastnosť osoby, nie firmy** — ten istý brigádnik môže byť u nás v pracovnom pomere aj na živnosť.
-
-Schéma, s ktorou počítame, je takáto:
+## 5. Živnostníci ✅ — schéma
 
 | | Zamestnanec | Živnostník |
 |---|---|---|
 | Kto platí jedálni | **firma** | **on sám**, v plnej cene |
-| Ako firma prispieva | príspevok + sociálny fond | **nepriamo** — o tú sumu si zvýši faktúru voči nám |
+| Ako firma prispieva | príspevok + sociálny fond | **nepriamo** — o tú sumu si zvýši faktúru voči firme |
 | Ako sa to vyrovná | zrážka zo mzdy | nič, zaplatil si sám |
 | Je v mzdovom podklade | áno | **nie, vôbec** |
 
-Aplikácia im teda obed len **objednáva**. Príspevok počíta rovnakým vzorcom ako zamestnancom, ale len preto, aby sa vedelo, o koľko si majú zvýšiť faktúru. Sociálny fond sa ich netýka.
+**Určujúce pravidlo: firmu má obed stáť rovnako, nech je stravník zamestnanec alebo živnostník.** Suma na faktúre sa preto dopočíta spätne od nákladu firmy, nie od ceny obeda — či je živnostník platiteľom DPH, nemá hýbať tým, koľko firma dáva.
 
-Nejde o plnenie zo Zákonníka práce, preto potrebujeme potvrdiť:
+*Typ vzťahu je vlastnosť osoby, nie firmy.* Ten istý brigádnik môže byť u nás v pracovnom pomere aj na živnosť; živnostník pritom patrí pod niektorú konkrétnu firmu.
 
-- **ako sa tá položka na faktúre volá a účtuje?** …………
-- **počíta sa suma pred DPH alebo po nej?** Pri platcoch DPH k odmene pribudne DPH, takže rovnaký príspevok stojí firmu viac než u zamestnanca. …………
-- **je na strane živnostníka niečo, na čo ho máme upozorniť?** …………
+## 6. Výstup a termín ✅
 
-### 7. Aký formát potrebuje mzdový softvér?
+**Podklad odchádza do 5.–6. dňa** nasledujúceho mesiaca, **jeden súbor za každú firmu**, XLSX aj CSV. Živnostníci v ňom nie sú — pre nich je samostatný prehľad.
 
-- názov programu: ………
-- [ ] XLSX
-- [ ] CSV — aký oddeľovač a kódovanie? ………
-- [ ] iný: ………
+Stĺpce: osobné číslo · meno · firma · stredisko/tím · počet obedov · cena spolu · príspevok zamestnávateľa · sociálny fond · **zrážka zo mzdy**.
 
-Ak existuje vzorový súbor, ktorý sa dnes do mzdového programu načítava, **pošlite ho** — export nastavíme presne podľa neho.
+Keďže každá firma má vlastný mzdový softvér, export je **univerzálny a dokumentovaný**, nie šitý na jeden program. Ak niektorý súbor neprijme, doladí sa preň predvoľba.
 
-Aké stĺpce musia byť v súbore a v akom poradí? Predbežne počítame s: osobné číslo · meno · firma · stredisko · počet obedov · cena spolu · príspevok zamestnávateľa · sociálny fond · **zrážka zo mzdy**.
-
-> Podklad chodí **za každú firmu zvlášť**. Predák môže mať v tíme ľudí z viacerých spriaznených firiem — appka ich pri objednávaní nerozdeľuje, ale pri peniazoch áno.
-
-### 8. Dokedy v mesiaci musí byť podklad odovzdaný?
-
-- [ ] do ……… dňa nasledujúceho mesiaca
-
-Z toho vyplynie, kedy aplikácia mesiac uzavrie. Po uzávierke sa čísla zafixujú a prípadné opravy idú ako položka do ďalšieho mesiaca — aby sa už odovzdaný podklad spätne nemenil.
+> Mzdová uzávierka **nečaká na faktúru od jedálne.** Appka pozná presný počet porcií, lebo ho sama odoslala. Keď faktúra príde neskôr a niečo nesedí, rozdiel ide ako opravná položka do najbližšieho otvoreného mesiaca — už odovzdaný podklad sa spätne nemení.
 
 ---
 
-**Poznámka:** zákonné limity a hodnota stravného sa menia opatrením MPSVR aj niekoľkokrát ročne. Preto sú všetky hodnoty v aplikácii nastavením s platnosťou od dátumu. Zmena sa spraví v administrácii a **neprepíše už uzavreté mesiace** — tie ostávajú presne v tej podobe, v akej boli odovzdané.
+# Časť B — čo ešte potrebujeme
+
+Dve veci. Obe sú krátke.
+
+## 7. Strop — jedno číslo a dátum
+
+Zákon obmedzuje príspevok zamestnávateľa hornou hranicou naviazanou na **stravné pri pracovnej ceste 5–12 hodín**. Tá suma sa mení opatrením MPSVR aj niekoľkokrát ročne, takže ju appka drží ako nastavenie s platnosťou od dátumu.
+
+Pri cenách obeda okolo 5–7 € vychádza 55 % na 2,75 až 3,85 €, čo je pravdepodobne pod hranicou — **strop teda zrejme vôbec nezasiahne.** Napriek tomu ho chceme mať zadaný: ceny rastú a hranica sa mení nezávisle od nich. Keď zasiahne, aplikácia to **napíše** — nikdy neoreže ticho.
+
+- **suma:** ……… €
+- **platí od:** ………
+
+## 8. Živnostníci — DPH z tej odmeny
+
+Suma, o ktorú si živnostník zvýši faktúru, sa počíta tak, aby firmu obed stál presne toľko ako u zamestnanca. Aby to appka vedela dopočítať, potrebuje vedieť jedno:
+
+**Odpočíta si firma DPH z tejto položky, alebo je pre ňu nákladom?**
+
+- [ ] **odpočíta** — ide o službu prijatú k podnikaniu *(predvolené)*
+- [ ] **je nákladom** — appka sumu na faktúre poníži tak, aby aj s DPH vyšla na rovnaký náklad
+
+A ešte: **ako sa tá položka na faktúre pomenuje?** ………
+
+*(Aplikácia to slovo len vytlačí — ale malo by byť u všetkých rovnaké.)*
+
+---
+
+**Poznámka:** zákonné limity a hodnota stravného sa menia opatrením MPSVR aj niekoľkokrát ročne. Preto sú všetky hodnoty v aplikácii nastavením s platnosťou od dátumu. Zmena **neprepíše už uzavreté mesiace** — tie ostávajú presne v tej podobe, v akej boli odovzdané.

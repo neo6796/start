@@ -8,9 +8,9 @@ Stav k 5. 8. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných 
 
 | | |
 |---|---|
-| **Koncept** | `01-koncept.md`, v0.9 — 43 rozhodnutí, 15 kapitol |
+| **Koncept** | `01-koncept.md`, v0.9 — 50 rozhodnutí, 15 kapitol |
 | **Vstupné súbory** | `08-vstupne-subory.md` — hotové zadanie na prevod dochádzky, odovzdateľné tak ako je |
-| **Model rozúčtovania** | dva modely (štandardný 55/35/zvyšok a ekonomický), overené výpočtom — `01-koncept.md` 6.2 |
+| **Model rozúčtovania** | **odsúhlasený 5. 8.** — ekonomický predvolene pri každej jedálni, overený výpočtom (`01-koncept.md` 6.2) |
 | **Preview** | klikací prototyp, 11 obrazoviek, beží na **https://obedy.ahafarma.sk** |
 | **Server** | Hetzner, Debian 13, `46.225.236.143`, zabezpečený (root aj heslá zablokované) |
 | **Docker + Caddy** | HTTPS automaticky od Let's Encrypt |
@@ -32,22 +32,18 @@ Nič z toho nie je „malo by fungovať" — všetko je vyskúšané celou cesto
 
 ### Od mzdového oddelenia a účtovníčky — `04-otazky-pre-mzdara.md`
 
-Deväť otázok. Prvé štyri sú **na potvrdenie** — model je navrhnutý, treba ho len odobriť alebo opraviť. Zvyšok rozhodnutý nie je a bez neho sa mzdový podklad dokončiť nedá:
+**Väčšina potvrdená 5. 8.** — 55/35/zvyšok, DPH 19 %, ekonomický model predvolene pri každej jedálni, zaokrúhlenie až na mesačnom súčte, neodhlásený obed v plnej cene, podklad do 5.–6. dňa, univerzálny export za každú firmu.
 
-- [ ] potvrdiť rozdelenie **55 / 35 / zvyšok** z ceny bez DPH a DPH 19 % k príspevku stravníka
-- [ ] **ktorý z dvoch modelov** sa zapne; pri ekonomickom kto je základný poskytovateľ
-- [ ] strop naviazaný na stravné 5–12 h
-- [ ] **kde sa zaokrúhľuje** — na obede alebo až na mesačnom súčte *(odporúčam druhé)*
-- [ ] potvrdiť, že **neodhlásený obed ide v plnej cene** bez príspevku aj bez fondu
-- [ ] **daňový režim odmeny pre živnostníkov** — ako sa účtuje a či sa suma počíta pred DPH alebo po nej
-- [ ] formát pre mzdový softvér **+ vzorový súbor, ktorý sa dnes načítava**
-- [ ] dokedy v mesiaci musí byť podklad odovzdaný
+Zostali **dve veci**:
 
-### Zoznam zamestnancov — `05-zoznam-zamestnancov.md`
+- [ ] **strop** naviazaný na stravné 5–12 h — jedna suma a dátum, odkedy platí
+- [ ] **DPH z odmeny pre živnostníkov** — odpočíta si ju firma, alebo je nákladom? Plus ako sa tá položka na faktúre volá
 
-- [ ] XLSX alebo CSV: osobné číslo · priezvisko · meno · **firma** · **typ vzťahu (PP / živnostník)** · tím · predák · zástupca · poskytovateľ · **prevádzka** · e-mail · telefón
+### Zoznam zamestnancov — hotový
 
-Osobné číslo je **celý štvorciferný kód z dochádzky** — poradové číslo vo firme sa medzi firmami opakuje. Nič sa neprečíslováva; mená a čísla sa dajú naimportovať z dochádzky, dopísať treba firmu, typ vzťahu, tím a prevádzku.
+**Menoslov je pripravený:** 33 ľudí v tvare *osobné číslo · priezvisko · meno*, overený proti špecifikácii. Do repozitára sa neukladá — sú to skutočné osobné údaje.
+
+Firma, typ vzťahu, tím, predák a prevádzka sa **zadajú v appke** z rozbaľovacích zoznamov, nie v Exceli. Prefixy z dochádzky (`1` Adiumentum, `2` PD, `3` živnostníci) sa na nič nepoužijú — `3` nie je firma, ale typ vzťahu.
 
 ### Od dodávateľov — `06-otazky-pre-dodavatela.md`
 
@@ -70,7 +66,6 @@ Osobné číslo je **celý štvorciferný kód z dochádzky** — poradové čí
 - [ ] vybrať **tím na pilot** — 5–6 ľudí, jedna prevádzka, jeden dodávateľ *(kapitola 14 konceptu; nie nadšenca, ale svedomitého vlažného predáka)*
 - [ ] určiť, **ktorí dodávatelia to reálne budú** a ako sa volajú
 - [ ] určiť **zoznam prevádzok**, kam sa vozí
-- [ ] potvrdiť **zoznam firiem** — z dochádzky vidno tri skupiny (prefix kódu 1, 2, 3); je to celé?
 - [ ] dať niekomu spraviť **prevod dochádzky** do dohodnutého tvaru — zadanie je hotové v `08-vstupne-subory.md`, dá sa odovzdať tak ako je
 - [ ] overiť, že heslo k `obedy@ahafarma.sk` je **náhodne generované**, nie vymyslené — port je otvorený voči internetu a schránka dostáva pokusy o uhádnutie
 
@@ -88,9 +83,8 @@ Osobné číslo je **celý štvorciferný kód z dochádzky** — poradové čí
 
 **Stavať appku môžem hneď** — koncept aj preview sú hotové a odsúhlasené.
 
-**Spustiť ju naostro nie**, kým nie sú:
-1. čísla od mzdára *(inak sa nedá spraviť mzdový podklad)*
-2. zoznam zamestnancov *(inak sa appka nemá čím naplniť)*
-3. údaje aspoň od jedného dodávateľa *(inak nie je čo objednávať)*
+**Spustiť ju naostro** už blokuje len jedno: **údaje aspoň od jedného dodávateľa.** Bez nich nie je čo objednávať.
 
-Tie tri veci trvajú najdlhšie, lebo nezávisia od nás. **Oplatí sa ich rozposlať hneď**, aj keď sa appka ešte len píše.
+Zoznam ľudí je hotový a rozúčtovanie odsúhlasené. Zo mzdového oddelenia chýbajú dve čísla, ktoré sa dopĺňajú v nastaveniach kedykoľvek — appku nezdržia.
+
+**Hárok pre dodávateľov sa preto oplatí rozposlať hneď**, aj keď sa appka ešte len píše. Je jediná vec na kritickej ceste.

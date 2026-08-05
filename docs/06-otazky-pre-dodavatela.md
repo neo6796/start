@@ -93,6 +93,10 @@ Aby sme ju nastavili podľa toho, ako fungujete vy, potrebujeme odpovede na tiet
 
 **Ako často fakturujete?** ………
 
+**Dokedy po skončení mesiaca býva faktúra u nás?** ……… *(približne stačí)*
+
+> Prečo sa pýtame: mzdový podklad musíme odovzdať do 5.–6. dňa. Ak faktúra príde skôr, stihneme ju porovnať ešte pred tým a je hotovo. Ak príde neskôr, nič sa nedeje — len sa prípadný rozdiel vyrovná až v ďalšom mesiaci. **Nie je to podmienka, len sa nám oplatí to vedieť.**
+
 **Kedy sa mení cenník?** ……… *(aby sme zmenu zaviedli k správnemu dátumu a nespätne)*
 
 ### Časť stravníkov si obed platí sama
