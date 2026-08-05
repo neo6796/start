@@ -249,14 +249,27 @@ Vypíše „Hello from Docker!".
 
 ---
 
-## 7. Čo ešte zostáva
+## 7. Odosielanie — firemný server, Brevo ako záloha
 
-- [x] **IP adresa** VPS — `46.225.236.143`
-- [x] **SSH prístup** pre používateľa `aha`
-- [x] **SMTP cez Brevo** — server `smtp-relay.brevo.com`, port 587, login `b444c5001@smtp-brevo.com`
-- [ ] **kľúč SMTP** — ostáva u teba v správcovi hesiel; na server sa vloží pri nasadzovaní priamo do konfiguračného súboru
-- [ ] **obmedziť kľúč na zdrojovú IP `46.225.236.143`** v Brevo, hneď ako appka pobeží
-- [ ] potvrdenie, že **DKIM aj DMARC PASS prešli** na skúšobnej správe
+Po overení, že cez Brevo pošta chodí, sme sa rozhodli **skúsiť firemný mailový server**. Dôvod: jedno miesto namiesto dvoch, žiadny cudzí účet a zmizne hlavička `List-Unsubscribe`, ktorú Brevo pridávalo.
+
+**Nastavenie v prevádzke:**
+
+| | |
+|---|---|
+| Odosielateľ | `obedy@ahafarma.sk` — tá istá schránka aj prijíma, takže `Reply-To` netreba |
+| SMTP | `mail.ahafarma.sk`, **port 465, implicitné SSL** *(nie STARTTLS ako pri Breve)* |
+| Prihlasovacie meno | `obedy` |
+| Heslo | v správcovi hesiel; na server sa vkladá raz, priamo do konfiguračného súboru |
+| DKIM | podpisovanie potvrdené správcom |
+| Firewall | TCP 465 povolený zo zdroja `46.225.236.143` |
+
+**Brevo ostáva ako záložná cesta.** Účet, overená doména aj štyri DNS záznamy na podadrese `obedy` sa nerušia — nič nestoja a prepnutie späť je zmena piatich údajov. Cieľový stav je, aby appka skúsila firemný server a **pri zlyhaní automaticky prepla na Brevo**; objednávka tak neostane visieť ani pri výpadku prúdu v technickej miestnosti.
+
+### Zostáva
+
+- [ ] overiť odoslanie cez `mail.ahafarma.sk` skúšobnou správou zo servera
+- [ ] potvrdiť **DKIM, SPF aj DMARC PASS** v Gmaile a že **nie je pruh „Neodoberať"**
 - [ ] **prístup na NAS** pre zálohy — `docs/02-zadanie-pre-it.md`
 
 Heslá a kľúče neposielaj cez chat — patria do správcu hesiel a odtiaľ priamo na server.
