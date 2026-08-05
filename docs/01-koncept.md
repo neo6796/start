@@ -33,7 +33,9 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 26. **Firma, tím a prevádzka sú tri nezávislé rozmery** (1.3a). Predák môže mať v tíme ľudí z viacerých spriaznených firiem, na jednej prevádzke sa stravujú ľudia z viacerých firiem. Matica predáka sa podľa firiem nečlení, **mesačný podklad áno**.
 27. **Stravník sa nikdy nemaže, len sa mu ukončí platnosť** (1.3b). Import z dochádzky je opakovateľný a ukazuje rozdiel; chýbajúceho človeka nikdy neruší sám. Spájací kľúč je **celý štvorciferný kód**, nie poradové číslo vo firme — to sa medzi firmami opakuje.
 28. **Brigádnici sú osoby s krátkou platnosťou**, nie zvláštny druh záznamu (1.3b).
-29. **Miesta výdaja** (3.4) sú nastavením poskytovateľa, osoba má **domovské miesto** a jednotlivý deň sa dá prepnúť inam ako výnimka. Objednávka dodávateľovi sa **delí podľa miest**, miesto má **minimum na dovoz** a presun medzi miestami je **korekcia**. Pri jedinom mieste sa appka na miesto nepýta nikde.
+29. **Rozúčtovanie je 55 / 35 / zvyšok z ceny bez DPH** (6.2). Sociálny fond sa **nenastavuje, dopočíta sa** ako zvyšok, takže súčet dvoch nastaviteľných percent nesmie presiahnuť 100 % — appka to odmietne pri ukladaní. Dve rôzne sadzby DPH: dodávateľa (19 %) a k príspevku stravníka (23 %).
+30. **Typ vzťahu (PP / živnostník) je vlastnosť osoby, nie firmy** (6.2a) — brigádnik môže byť oboje. Výpočet je pre oboch rovnaký, líši sa výstup: mzdový podklad po firmách verzus samostatný výstup pre živnostníkov.
+31. **Miesta výdaja** (3.4) sú nastavením poskytovateľa, osoba má **domovské miesto** a jednotlivý deň sa dá prepnúť inam ako výnimka. Objednávka dodávateľovi sa **delí podľa miest**, miesto má **minimum na dovoz** a presun medzi miestami je **korekcia**. Pri jedinom mieste sa appka na miesto nepýta nikde.
 
 > **Ťažisko appky:** nie je to appka pre stravníkov. Je to nástroj pre **predákov, admina a mzdy** — správne počty dodávateľovi, správna zrážka zo mzdy, dohľadateľnosť. Stravníkovi dáva menu na nástenke a možnosť objednať si sám, ak chce. Tak sa má aj navrhovať.
 
@@ -578,27 +580,68 @@ Toto je vrstva, ktorá appku spája s účtovníctvom, a zároveň jediná čas�
 - **Cena sa odfotí na objednávku** v momente zamknutia týždňa. Retroaktívna zmena cenníka nesmie prepísať históriu — inak sa mesačná uzávierka rozíde s tým, čo ľudia videli.
 - Všetky sumy sú v **centoch ako celé čísla**, nikdy `float`. Zaokrúhľovanie definované na jednom mieste.
 
-### 6.2 Príspevky
-V systéme budú **oba modely** ako nastavenie (per poskytovateľ alebo globálne), aby sa dalo prepnúť bez zásahu do kódu:
+### 6.2 Rozúčtovanie ceny obeda
 
-| Zložka | Model |
-|---|---|
-| Príspevok zamestnávateľa | **percento z ceny jedla** (Zákonník práce žiada min. 55 %) **alebo** **pevná suma na obed**, v oboch prípadoch s voliteľným **stropom** naviazaným na hodnotu stravného pri pracovnej ceste 5–12 h |
-| Príspevok zo sociálneho fondu | pevná suma na obed (voliteľné, môže byť 0) |
-| **Doplatok zamestnanca** | `cena − príspevok ZL − sociálny fond` → **suma na zrážku zo mzdy** |
+Cenu určuje jedáleň **bez DPH** a k nej svoju sadzbu. Všetko ostatné sú **nastavenia s platnosťou od dátumu** (6.1), nie konštanty — sadzby aj percentá sa v čase menia.
 
-Percentá, sumy a strop sú **nastavenia, nie konštanty v kóde** — zákonné limity a hodnota stravného sa menia opatrením MPSVR aj niekoľkokrát ročne. Nastavenie má platnosť od dátumu, rovnako ako cenník (6.1).
+| Nastavenie | Kde sa nastavuje | Predvolené |
+|---|---|---|
+| cena jedla **bez DPH** | cenník poskytovateľa | podľa jedálne |
+| **sadzba DPH dodávateľa** | poskytovateľ | 19 % |
+| **príspevok zamestnávateľa** — % z ceny bez DPH | globálne / per firma | 55 % |
+| **príspevok stravníka** — % z ceny bez DPH | globálne / per firma | 35 % |
+| **sadzba DPH k príspevku stravníka** | globálne | 23 % |
+| doplatok zo **sociálneho fondu** | **nenastavuje sa — dopočíta sa** | zvyšok, teda 10 % |
+
+#### Výpočet na jednom obede
+
+Príklad pri cene **5,00 € bez DPH**:
+
+| | € |
+|---|---:|
+| cena jedla bez DPH | 5,0000 |
+| DPH dodávateľa (19 %) | 0,9500 |
+| **cena s DPH — toľko platí firma jedálni** | **5,9500** |
+| | |
+| príspevok zamestnávateľa (55 % z 5,00) | 2,7500 |
+| príspevok stravníka (35 % z 5,00) | 1,7500 |
+| DPH k príspevku stravníka (23 % z 1,75) | 0,4025 |
+| **zrážka zo mzdy / doplatok stravníka** | **2,1525 → 2,15** |
+| doplatok zo sociálneho fondu | 0,5000 |
+
+Kontrola: `2,75 + 1,75 + 0,50 = 5,00` — základ bez DPH je vždy pokrytý do koruny.
+
+> **Sociálny fond je zvyšok, nie ďalšia páčka.** Vzorec je `SF = cena bez DPH − príspevok zamestnávateľa − príspevok stravníka`. Preto **súčet dvoch nastaviteľných percent nesmie presiahnuť 100 %** — pri 70 % a 35 % by sociálny fond vyšiel záporný. Appka to musí odmietnuť už pri ukladaní nastavenia, nie až pri uzávierke; chybu v percentách si nikto nevšimne, chybu pri ukladaní áno.
+
+**Kde sa zaokrúhľuje.** DPH k príspevku stravníka vyrába štvrté desatinné miesto (2,1525 €). Odporúčam počítať **na obede v plnej presnosti a zaokrúhliť až mesačný súčet za osobu.** Keby sa zaokrúhľovalo pri každom obede, pri dvadsiatich obedoch by sa nazbieral rozdiel oproti tomu, čo firma reálne zaplatila. Rozhodnutie patrí účtovníčke — **otvorená otázka 15.**
+
+### 6.2a Zamestnanci a živnostníci — rovnaký výpočet, iný výstup
+
+**Typ vzťahu je vlastnosť osoby, nie firmy.** Brigádnik u tej istej firmy môže byť v pracovnom pomere aj živnostník, takže sa to nedá odvodiť od firmy ani od skupiny v dochádzke. Osoba má teda **dva nezávislé údaje**: *firma* (ku ktorej patrí) a *typ vzťahu* (`PP` / `živnostník`).
+
+Výpočet je pre oboch **identický** — 55 / 35 / zvyšok, DPH rovnako. Líši sa len to, čo z toho vyjde von:
+
+| | Pracovný pomer | Živnostník |
+|---|---|---|
+| Výstup | mzdový podklad **za každú firmu zvlášť** | **jeden samostatný výstup** za všetkých |
+| Ako sa vyrovnáva | zrážka zo mzdy | doplatok — nemá mzdu, z čoho zraziť |
+| Príspevok zamestnávateľa | z bežných nákladov firmy | zo **špeciálneho fondu** firmy, ku ktorej patrí |
+
+**Výstup pre živnostníkov** obsahuje:
+1. **kumulatív** — celková cena všetkých ich jedál za mesiac,
+2. **po osobách** — koľko má každý doplatiť,
+3. **príspevok zamestnávateľa po firmách** — každý živnostník je pridelený k niektorej firme, takže sa vie, ktorej fond to nesie.
+
+> Poskytnutie zvýhodneného obedu živnostníkovi je iná transakcia než zamestnancovi — nejde o plnenie zo Zákonníka práce. **Nech nastavenie potvrdí účtovníčka**; appka spočíta, čo jej zadáme, ale či je schéma správne postavená, posúdiť neviem. **Otvorená otázka 16.**
 
 #### Čo treba potvrdiť s mzdovým oddelením pred spustením
-- [ ] percento alebo pevná suma, a v akej výške
-- [ ] či sa uplatňuje strop a aký
-- [ ] či sa prispieva aj zo sociálneho fondu a koľko
-- [ ] ako sa zaokrúhľuje (na cent, matematicky/nadol)
+- [ ] percentá 55 / 35 a sadzbu DPH k príspevku stravníka (23 %)
+- [ ] či sa uplatňuje **strop** naviazaný na stravné pri pracovnej ceste 5–12 h
+- [ ] **kde sa zaokrúhľuje** — na obede alebo až na mesačnom súčte (odporúčam druhé)
 - [ ] politika neodhlásených obedov (6.4)
+- [ ] **schéma pre živnostníkov** — príspevok zo špeciálneho fondu, forma úhrady
 - [ ] formát, v akom mzdový softvér vie načítať export (6.3)
 - [ ] dokedy v mesiaci musí byť podklad odovzdaný → z toho vyplynie termín mesačnej uzávierky
-
-Do preview dám obe varianty vedľa seba s modelovými číslami, aby sa mzdár mohol pozrieť a povedať, ktorá sedí.
 
 ### 6.3 Mesačná uzávierka a export
 - Admin **uzavrie mesiac** → čísla sa zafixujú, ďalšie zmeny len ako opravná položka v ďalšom mesiaci (aby sa nemenil už odovzdaný podklad pre mzdy).
@@ -975,7 +1018,9 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 11. **Príplatok za dovoz na vzdialenejšie miesto** — účtuje ho dodávateľ zvlášť? Ak áno, **kto ho platí?** Zamestnanec je na tej prevádzke kvôli práci, takže logicky zamestnávateľ — ale je to rozhodnutie mzdára a účtovníčky, nie moje. Do vyriešenia je cena obeda rovnaká na všetkých miestach.
 12. **Zoznam prevádzok** — na ktorých miestach firma reálne obeduje a kto je kde vedený.
 13. **Spôsob úhrady pre živnostníkov** (1.3a) — nemajú mzdu, takže zrážka zo mzdy u nich neexistuje. Preúčtovanie? Faktúra? Hotovosť? Bez odpovede sa im mesačný podklad nedá spraviť. **Otázka pre mzdára a účtovníčku.**
-14. **Zoznam firiem**, pre ktoré sa obedy robia, a ku každej spôsob úhrady. Z dochádzky vidno tri skupiny (prefix kódu 1, 2, 3) — treba potvrdiť, či je to celé. Ide o stĺpec navyše v zozname zamestnancov (`docs/05-zoznam-zamestnancov.md`).
+14. **Zoznam firiem**, pre ktoré sa obedy robia, a ku každej spôsob úhrady.
+15. **Kde sa zaokrúhľuje** (6.2) — DPH k príspevku stravníka vyrába štvrté desatinné miesto. Na obede, alebo až na mesačnom súčte za osobu? Odporúčam druhé. **Otázka pre účtovníčku.**
+16. **Schéma pre živnostníkov** (6.2a) — príspevok zo špeciálneho fondu a forma úhrady. Nie je to plnenie zo Zákonníka práce, takže to má posúdiť účtovníčka. Z dochádzky vidno tri skupiny (prefix kódu 1, 2, 3) — treba potvrdiť, či je to celé. Ide o stĺpec navyše v zozname zamestnancov (`docs/05-zoznam-zamestnancov.md`).
 
 ---
 
