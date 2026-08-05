@@ -24,7 +24,7 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 17. **Push notifikácie pre predákov a admina** sú v MVP (Android hneď, iPhone po pridaní na plochu), pre stravníkov až neskôr.
 18. **Názvy jedál sú voliteľné** — menu môže bežať len na `A/B/C`; namiesto písania sa dá pripnúť fotka, PDF alebo Word papierového menu, ktorý zároveň slúži ako dôkaz.
 19. **Trvale prihlásený** je predvolené, s kratšou platnosťou pre admina a opätovným overením hesla pri zásahoch do peňazí.
-20. **SMS zatiaľ nie** — pripraví sa len voliteľné pole „telefón", aby sa dala kedykoľvek zapnúť za pol dňa.
+20. ~~SMS zatiaľ nie~~ → **SMS pre dennú objednávku áno** (8.x). Obaja dodávatelia berú objednávky ráno telefonicky, takže SMS je kanál, ktorý reálne používajú. Nesie len hlavičku s počtami; detail a potvrdenie ostávajú v e-maili. Náklad rádovo 2 € mesačne.
 21. **Exporty, história a zálohy sú súčasťou MVP** (kapitola 7), vrátane kompletného exportu dát na jedno kliknutie. Grafy až vo fáze 3.
 22. **Deň má tri stavy, nie dva** (4.6): nerozhodnuté · bez obeda · objednané. Upomienky a počítadlá pracujú len s nerozhodnutými.
 23. **Žiadne „kopírovať minulý týždeň"** (5.1). Menu je každý týždeň iné, takže skopírovaná voľba je vo väčšine prípadov nesprávna — a nesprávna voľba sa tvári vybavene, kým prázdna bunka o sebe dáva vedieť. Bolo by to priame popretie bodu 22.
@@ -55,7 +55,7 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 48. **Odmena živnostníkovi sa počíta od nákladu firmy** (6.2a) — *firmu má obed stáť rovnako, nech je stravník zamestnanec alebo živnostník*. Suma na faktúre sa dopočíta spätne podľa toho, či je platiteľom DPH a či si firma DPH odpočíta.
 49. **Prevzatie obeda sa neeviduje** (5.5). Pri výdaji stojí zamestnanec dodávateľa, nie náš. Políčko na hárku ostáva ako pomôcka, ale nič sa naň nevieša. Obedy v dňoch neprítomnosti chytá import prítomnosti (6.5).
 50. **Hostia sa riešia porciou bez mena** (1.3b) účtovanou stredisku, s dôvodom *hosť*. Žiadny nový mechanizmus, hosť ide v plnej cene.
-51. **Záväzné číslo je denný súhrn, nie týždenná objednávka** (`09-dodavatelia.md`). Obaja dodávatelia berú objednávky **ráno v deň obeda** (7:00–9:00 a do 8:30), takže týždenná uzávierka ostáva ako **náš vnútorný plán** — z čoho tlačiť hárky a vedieť dopredu počty — ale dodávateľovi odchádza záväzný počet ráno. Denný deadline v appke: **8:00**.
+51. **Dodávateľovi idú dve rôzne správy, nie objednávka a korekcia** (4.1a). V piatok **nezáväzná týždenná predpoveď** (aby vedel, koľko nakúpiť), ráno **záväzná denná objednávka** — jediné číslo, ktoré platí a podľa ktorého sa fakturuje. Korekcia ako pojem zaniká: predpoveď sa nemýli, lebo nič nesľubuje. **Týždenná uzávierka pre stravníka ostáva** (piatok 12:00); ranné okno je nástroj predáka, nie právo stravníka. Denný deadline **8:00**.
 52. **Menu sa neprepisuje, prikladá sa PDF** — potvrdené na skutočných lístkoch. Prepisovanie 5 jedál × 5 dní × 2 dodávatelia je 50 položiek týždenne a zahodilo by **gramáže a alergény**, ktoré na PDF sú a majú tam byť zo zákona. Do appky ide len označenie jedla.
 53. **Značenie jedál je per poskytovateľ** aj v skutočnosti, nielen v teórii: GASTROGAL čísluje `1`–`5`, ABM `A`–`E`. To isté platí pre alergény — čísla verzus slová.
 
@@ -544,6 +544,42 @@ Všetky časy v zóne **Europe/Bratislava**, v databáze UTC. Deadline platí na
 - ak menu na budúci týždeň v pondelok ráno chýba, admin dostane upozornenie,
 - kým menu nie je zadané, stravník aj predák vidia „*menu na budúci týždeň ešte nie je zverejnené*", nie prázdny týždeň,
 - ak menu mešká, admin môže uzávierku pre daný týždeň jednorazovo posunúť.
+
+### 4.1a Čo sa dodávateľovi posiela a kedy — predpoveď verzus záväzný počet
+
+Obaja dodávatelia berú objednávky **ráno v deň obeda** (`09-dodavatelia.md`). To otvára otázku, či má týždenná objednávka vôbec zmysel — a odpoveď je, že má, ale **inú než sa pôvodne písalo.**
+
+Rozdeľuje sa to na dve správy s dvoma rôznymi význammi:
+
+| | **Týždenná predpoveď** | **Denná objednávka** |
+|---|---|---|
+| Kedy | piatok po uzávierke | ráno, pred deadlinom dodávateľa |
+| Čo je zač | *„na budúci týždeň očakávame približne toto"* | **záväzný počet na dnes** |
+| Záväzná | **nie** | **áno** |
+| Načo je | dodávateľ vie, koľko nakúpiť a uvariť | podľa nej sa varí a fakturuje |
+| Potvrdenie | netreba | **áno**, s odkazom na potvrdenie |
+| Nastavenie | zapnuteľná per poskytovateľ | vždy |
+
+**Prečo je to lepšie než pôvodný model.** Doteraz sa mala v piatok poslať objednávka a ráno k nej **korekcia** — *„pôvodne 47, storná 3, doobjednávky 2 → 46"*. Korekcia ale znamená, že prvé číslo bolo nesprávne. Pri tomto rozdelení nič nesprávne nie je: **predpoveď sa nemýli, lebo nič nesľubuje**, a záväzné číslo je vždy len jedno a vždy konečné. Dodávateľ dostane ráno hotový počet, nie rébus na dopočítanie.
+
+> **Fakturačná kontrola porovnáva len záväzné denné objednávky** (5.6). Predpovede do nej nevstupujú vôbec. Preto musí byť v texte oboch správ jednoznačne napísané, čo je čo — *PREDBEŽNÉ, nezáväzné* verzus *ZÁVÄZNÁ OBJEDNÁVKA NA DNES*.
+
+#### Prečo sa týždenná uzávierka pre stravníka ruší nesmie
+
+Ponúka sa myšlienka ísť ďalej: keď sa aj tak posiela až ráno, načo zamykať týždeň v piatok? Nech si každý klikne, kedy chce, až do rannej hranice.
+
+**To by rozbilo to, čo má appka chrániť.** Ak sa dá rozhodnúť ráno, ľudia sa naučia rozhodovať ráno — a predákova práca sa zmení z jednej týždennej dávky na každodenné naháňanie. Presne to, od čoho ich má appka oslobodiť.
+
+Ochrana je pritom už zapísaná, len sa oplatí ju tu pripomenúť. **Sú to dva deadliny pre dve rôzne skupiny** (rozhodnutie 10):
+
+| Deadline | Pre koho | Čo sa po ňom dá |
+|---|---|---|
+| **týždenná uzávierka** *(piatok 12:00)* | **stravník** | už nič — týždeň je pre neho zamknutý |
+| **denná uzávierka** *(8:00)* | **predák a admin** | odhlásiť, doobjednať, presunúť miesto |
+
+Ranné okno teda **nie je právo stravníka, je to nástroj predáka** — na choroby, návraty a neohlásené príchody. Kto si chce vybrať jedlo, má na to celý týždeň dopredu. Kto si nevyberie, nemá obed a musí za predákom — a to je zámer, nie chyba.
+
+**Denný deadline dávame na 8:00**, hoci dodávatelia berú do 8:30 a 9:00. Tá polhodina je náš čas na odoslanie, prípadné zlyhanie a na to, aby sa dalo zavolať.
 
 ### 4.2 Denné odhlásenie
 Pravidlo sa nastavuje **per poskytovateľ**, tvar:
@@ -1238,12 +1274,14 @@ SMS je **doplnok, nie náhrada** — neunesie prílohu a do jednej správy sa zm
 | Udalosť | Odporúčanie | Prečo |
 |---|---|---|
 | **Zlyhanie e-mailu** | **zapnúť vždy** | keď spadne SMTP, ďalší e-mail nepomôže — ide tou istou cestou. SMS je jediný naozaj **nezávislý kanál**. |
-| **Denná korekcia** | podľa dodávateľa | ráno o 07:30 je kuchár pri sporáku, nie pri počítači. Krátka správa „streda: A 22, B 15, C 7, spolu 44" sa mu hodí viac než mail. |
-| **Týždenná objednávka** | spravidla netreba | do SMS sa nezmestí, poslúži nanajvýš ako upozornenie „objednávka odoslaná, detail v maili". |
+| **Denná objednávka** (4.1a) | **áno, odporúčam zapnúť** | ráno o 7:30 je kuchár pri sporáku, nie pri počítači — mail si otvorí neskôr, SMS mu pípne hneď. Toto je práve tá správa, ktorú si podľa oboch dodávateľov aj tak volajú telefónom. |
+| **Týždenná predpoveď** | netreba | do SMS sa nezmestí a nie je záväzná; nanajvýš „predpoved na buduci tyzden odoslana, detail v maili". |
+
+> **SMS nenahrádza e-mail, dopĺňa ho.** Nesie len hlavičku — *„OBEDY 6.8.: A 12, B 8, C 4, spolu 24. Vrable 18, Mlynany 6."* Detail, rozpis po miestach a hlavne **odkaz na potvrdenie prijatia** ostávajú v maili, lebo SMS sa nedá potvrdiť ani doložiť. Ak by sa niekedy volilo len jedno, musí to byť e-mail — ale voliť sa nemusí, SMS stojí centy.
 
 **Text sa posiela zámerne bez diakritiky.** So slovenskými mäkčeňmi prechádza SMS z kódovania GSM-7 na UCS-2 a limit padá zo **160 znakov na 70** — jedna správa by sa rozpadla na tri, s trojnásobnou cenou a rizikom, že prídu v zlom poradí. Appka pri zostavovaní textu ukáže počet znakov a upozorní, ak by sa správa delila.
 
-**Náklady** sú zanedbateľné: ~0,03–0,05 € za správu, pri dvoch dodávateľoch a dennej korekcii rádovo **2 € mesačne**.
+**Náklady** sú zanedbateľné: ~0,03–0,05 € za správu, pri dvoch dodávateľoch a dennej objednávke rádovo **2 € mesačne**.
 
 #### Cez koho posielať SMS
 Na slovenskom trhu je viacero brán s API (SMSgate, 123sms, EuroSMS, SMS-portal, O2 Business). Ceny sa pohybujú **od ~0,01 do 0,04 € za správu**. Pri našom objeme je cena za správu takmer jedno — vyberať treba podľa iných vecí:
@@ -1482,7 +1520,7 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 1. ~~**Akceptujú doobjednanie v deň obeda?**~~ — **vyriešené: obaja áno**, a je to u nich bežný režim. GASTROGAL berie objednávky **7:00–9:00**, ABM **do 8:30** (`09-dodavatelia.md`). Denný deadline v appke bude **8:00**, s rezervou pred nimi.
 2. ~~**Vzorky menu**~~ — **máme obe.** Chodia ako úhľadné PDF na celý týždeň, s gramážami aj alergénmi. **Import sa robiť nebude, PDF sa priloží** — prepisovanie 50 položiek týždenne by navyše zahodilo alergény, ktoré tam majú byť zo zákona.
 3. ~~**Denný deadline na odhlásenie**~~ — pravdepodobne tá istá ranná hranica, ale treba to počuť výslovne. Presunuté do `09-dodavatelia.md`.
-3a. ⚠️ **Má GASTROGAL e-mail na objednávky?** Na menu je len telefón. Ak e-mail nemajú, appka pre nich vygeneruje **denný súhrn na nadiktovanie** a nahlásenie sa odklikne ručne. Funguje to, ale musí sa to vedieť dopredu. **Prvá otázka na nich.**
+3a. ~~**Má GASTROGAL e-mail?**~~ — **áno, majú obaja.** Odosielanie ide tak, ako koncept počítal. Pribúda k nemu **ranná SMS s počtami** (rozhodnutie 20) — o 7:30 je kuchár pri sporáku, nie pri počítači. Zostáva sa ich spýtať, na aké číslo a či chcú aj nezáväznú týždennú predpoveď.
 
 **Otázky dovnútra firmy:**
 4. **Čísla od mzdára** — checklist v kapitole 6.2.

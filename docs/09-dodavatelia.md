@@ -53,15 +53,19 @@ Nič sa nezahadzuje, len sa prehodí dôraz. Týždenná uzávierka má naďalej
 
 Praktický dôsledok, ktorý sa ráta: **doobjednanie v deň obeda (4.3) nie je výnimka, ale bežný režim.** U oboch dodávateľov sa dá. Denný deadline v appke bude teda 8:00, nie 11:00 — s rezervou pred tým ich 8:30.
 
-### ⚠️ GASTROGAL nemá na menu e-mail
+### E-mail majú obaja — ale ráno je lepšia SMS
 
-Celý mechanizmus odosielania objednávok stojí na e-maile a na potvrdení prijatia. **Ak GASTROGAL berie objednávky len telefonicky, u nich to nefunguje.**
+GASTROGAL ho nemá na menu, ale má ho. Odosielanie objednávok teda ide tak, ako koncept počítal.
 
-Nie je to zlé, ale musí sa to vedieť dopredu, lebo sú len dve možnosti:
-1. **majú e-mail, len nie je na menu** → všetko ide ako v koncepte,
-2. **naozaj len telefón** → appka pre nich vygeneruje **denný súhrn na obrazovku a na tlač**, človek ho nadiktuje a v appke odklikne *„nahlásené telefonicky o 7:42"*. Potvrdenie prijatia potom nahradí ten záznam.
+Napriek tomu pribúda **SMS ako druhý kanál pre rannú objednávku** (rozhodnutie 20). Dôvod je prevádzkový, nie technický: **o 7:30 je kuchár pri sporáku, nie pri počítači.** Mail si otvorí neskôr, SMS mu pípne hneď — a je to presne tá správa, ktorú si podľa oboch menu aj tak nechávajú volať telefónom.
 
-Druhá možnosť je funkčná, len sa nesmie zistiť až pri spustení. **Je to prvá otázka na nich.**
+SMS nesie len hlavičku:
+
+```
+OBEDY 6.8.: A 12, B 8, C 4, spolu 24. Vrable 18, Mlynany 6.
+```
+
+**Detail, rozpis po miestach a odkaz na potvrdenie ostávajú v e-maili** — SMS sa nedá potvrdiť ani doložiť. Náklad je rádovo 2 € mesačne.
 
 ---
 
@@ -69,7 +73,6 @@ Druhá možnosť je funkčná, len sa nesmie zistiť až pri spustení. **Je to 
 
 Zvyšok hárku `06-otazky-pre-dodavatela.md` platí. Podstatné je:
 
-- [ ] **GASTROGAL: e-mail na objednávky** — existuje? *(najdôležitejšie)*
 - [ ] **je polievka v cene?** Obe menu ju uvádzajú zvlášť, ale cena je jedna — treba potvrdiť
 - [ ] **kam sú ochotní voziť** a od koľkých porcií *(ABM sídli v Tesárskych Mlyňanoch, čo je jedna z prevádzok)*
 - [ ] **do kedy sa dá odhlásiť** — pravdepodobne tá istá ranná hranica, ale treba to počuť
@@ -77,6 +80,7 @@ Zvyšok hárku `06-otazky-pre-dodavatela.md` platí. Podstatné je:
 - [ ] **fakturujú živnostníkom priamo**, alebo všetko nám?
 - [ ] **dokedy po mesiaci býva faktúra u nás**
 - [ ] **potvrdia prijatie objednávky** a do akého času
+- [ ] **chcú aj rannú SMS s počtami?** Na aké číslo, a chcú aj nezáväznú týždennú predpoveď?
 
 ---
 
