@@ -683,7 +683,9 @@ Výpočet je pre oboch **identický** — 55 / 35 / zvyšok, DPH rovnako. Líši
 > Poskytnutie zvýhodneného obedu živnostníkovi je iná transakcia než zamestnancovi — nejde o plnenie zo Zákonníka práce. **Nech nastavenie potvrdí účtovníčka**; appka spočíta, čo jej zadáme, ale či je schéma správne postavená, posúdiť neviem. **Otvorená otázka 16.**
 
 #### Čo treba potvrdiť s mzdovým oddelením pred spustením
-- [ ] percentá 55 / 35 a sadzbu DPH k príspevku stravníka (23 %)
+- [ ] percentá 55 / 35 a sadzbu DPH k príspevku stravníka (19 %)
+- [ ] **ktorý z dvoch modelov** sa zapne — štandardný alebo ekonomický (6.2)
+- [ ] pri ekonomickom: **kto je základný poskytovateľ** a aké je pásmo stravníka (35–45 %)
 - [ ] či sa uplatňuje **strop** naviazaný na stravné pri pracovnej ceste 5–12 h
 - [ ] **kde sa zaokrúhľuje** — na obede alebo až na mesačnom súčte (odporúčam druhé)
 - [ ] politika neodhlásených obedov (6.4)

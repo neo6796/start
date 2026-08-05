@@ -8,7 +8,8 @@ Stav k 5. 8. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných 
 
 | | |
 |---|---|
-| **Koncept** | `01-koncept.md`, v0.9 — 26 rozhodnutí, 14 kapitol |
+| **Koncept** | `01-koncept.md`, v0.9 — 31 rozhodnutí, 14 kapitol |
+| **Model rozúčtovania** | dva modely (štandardný 55/35/zvyšok a ekonomický), overené výpočtom — `01-koncept.md` 6.2 |
 | **Preview** | klikací prototyp, 11 obrazoviek, beží na **https://obedy.ahafarma.sk** |
 | **Server** | Hetzner, Debian 13, `46.225.236.143`, zabezpečený (root aj heslá zablokované) |
 | **Docker + Caddy** | HTTPS automaticky od Let's Encrypt |
@@ -28,20 +29,25 @@ Nič z toho nie je „malo by fungovať" — všetko je vyskúšané celou cesto
 - [ ] **prístup na NAS pre zálohy** — datované snímky, 30 denných + 12 mesačných, ~20 GB, NAS si ťahá zo servera *(`02-zadanie-pre-it.md`)*
 - [ ] *(nie je urgentné)* vymeniť DKIM kľúč za 2048-bitový pri najbližšom zásahu do pošty
 
-### Od mzdového oddelenia — `04-otazky-pre-mzdara.md`
+### Od mzdového oddelenia a účtovníčky — `04-otazky-pre-mzdara.md`
 
-Osem otázok. Bez nich sa nedá dokončiť mzdový podklad:
+Deväť otázok. Prvé štyri sú **na potvrdenie** — model je navrhnutý, treba ho len odobriť alebo opraviť. Zvyšok rozhodnutý nie je a bez neho sa mzdový podklad dokončiť nedá:
 
-- [ ] model príspevku zamestnávateľa (percento alebo pevná suma) a jeho výška
-- [ ] strop, sociálny fond, zaokrúhľovanie
+- [ ] potvrdiť rozdelenie **55 / 35 / zvyšok** z ceny bez DPH a DPH 19 % k príspevku stravníka
+- [ ] **ktorý z dvoch modelov** sa zapne; pri ekonomickom kto je základný poskytovateľ
+- [ ] strop naviazaný na stravné 5–12 h
+- [ ] **kde sa zaokrúhľuje** — na obede alebo až na mesačnom súčte *(odporúčam druhé)*
 - [ ] **čo s obedom, ktorý si nikto neodhlásil a neprevzal**
 - [ ] kto platí prípadný príplatok za dovoz na vzdialenejšiu prevádzku
+- [ ] **schéma pre živnostníkov** — či sa prispieva, z čoho, koľko a ako sa to vyrovná
 - [ ] formát pre mzdový softvér **+ vzorový súbor, ktorý sa dnes načítava**
 - [ ] dokedy v mesiaci musí byť podklad odovzdaný
 
 ### Zoznam zamestnancov — `05-zoznam-zamestnancov.md`
 
-- [ ] XLSX alebo CSV: osobné číslo · priezvisko · meno · tím · predák · zástupca · poskytovateľ · **prevádzka** · e-mail · telefón
+- [ ] XLSX alebo CSV: osobné číslo · priezvisko · meno · **firma** · **typ vzťahu (PP / živnostník)** · tím · predák · zástupca · poskytovateľ · **prevádzka** · e-mail · telefón
+
+Osobné číslo je **celý štvorciferný kód z dochádzky** — poradové číslo vo firme sa medzi firmami opakuje. Nič sa neprečíslováva; mená a čísla sa dajú naimportovať z dochádzky, dopísať treba firmu, typ vzťahu, tím a prevádzku.
 
 ### Od dodávateľov — `06-otazky-pre-dodavatela.md`
 
@@ -62,6 +68,7 @@ Osem otázok. Bez nich sa nedá dokončiť mzdový podklad:
 - [ ] **poslať odkaz na preview predákom** a pozbierať pripomienky
 - [ ] určiť, **ktorí dodávatelia to reálne budú** a ako sa volajú
 - [ ] určiť **zoznam prevádzok**, kam sa vozí
+- [ ] potvrdiť **zoznam firiem** — z dochádzky vidno tri skupiny (prefix kódu 1, 2, 3); je to celé?
 - [ ] overiť, že heslo k `obedy@ahafarma.sk` je **náhodne generované**, nie vymyslené — port je otvorený voči internetu a schránka dostáva pokusy o uhádnutie
 
 ---
