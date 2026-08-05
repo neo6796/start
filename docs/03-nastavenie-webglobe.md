@@ -258,12 +258,13 @@ Po overení, že cez Brevo pošta chodí, sme sa rozhodli **skúsiť firemný ma
 | | |
 |---|---|
 | Odosielateľ | `obedy@ahafarma.sk` — tá istá schránka aj prijíma, takže `Reply-To` netreba |
-| SMTP | **`mail.pdvrable.sk`**, port 465, implicitné SSL *(nie STARTTLS ako pri Breve)* |
+| SMTP | **`mail.pdvrable.sk`, port 587, STARTTLS** |
 | Prečo iné meno servera | je to ten istý stroj, ale certifikát je vystavený na `mail.pdvrable.sk`. Pripojenie na `mail.ahafarma.sk` by neprešlo overením mena. Doména odosielateľa s menom SMTP servera nesúvisí. |
+| Prečo 587 a nie 465 | **Hetzner blokuje odchádzajúci port 465** — overené, nedostupný je aj `smtp.gmail.com:465`. Port 587 funguje. Nie je to horšie riešenie: `--ssl-reqd` zruší spojenie, ak server neponúkne šifrovanie, takže heslo nikdy neide otvorene. |
 | Prihlasovacie meno | `obedy` |
 | Heslo | v správcovi hesiel; na server sa vkladá raz, priamo do konfiguračného súboru |
 | DKIM | podpisovanie potvrdené správcom |
-| Firewall | TCP 465 povolený zo zdroja `46.225.236.143` |
+| Firewall | netreba nič — port 587 je dostupný, overené zo servera |
 
 **Brevo ostáva ako záložná cesta.** Účet, overená doména aj štyri DNS záznamy na podadrese `obedy` sa nerušia — nič nestoja a prepnutie späť je zmena piatich údajov. Cieľový stav je, aby appka skúsila firemný server a **pri zlyhaní automaticky prepla na Brevo**; objednávka tak neostane visieť ani pri výpadku prúdu v technickej miestnosti.
 
