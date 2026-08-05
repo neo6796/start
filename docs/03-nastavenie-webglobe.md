@@ -258,7 +258,8 @@ Po overení, že cez Brevo pošta chodí, sme sa rozhodli **skúsiť firemný ma
 | | |
 |---|---|
 | Odosielateľ | `obedy@ahafarma.sk` — tá istá schránka aj prijíma, takže `Reply-To` netreba |
-| SMTP | `mail.ahafarma.sk`, **port 465, implicitné SSL** *(nie STARTTLS ako pri Breve)* |
+| SMTP | **`mail.pdvrable.sk`**, port 465, implicitné SSL *(nie STARTTLS ako pri Breve)* |
+| Prečo iné meno servera | je to ten istý stroj, ale certifikát je vystavený na `mail.pdvrable.sk`. Pripojenie na `mail.ahafarma.sk` by neprešlo overením mena. Doména odosielateľa s menom SMTP servera nesúvisí. |
 | Prihlasovacie meno | `obedy` |
 | Heslo | v správcovi hesiel; na server sa vkladá raz, priamo do konfiguračného súboru |
 | DKIM | podpisovanie potvrdené správcom |
