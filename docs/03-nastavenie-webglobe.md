@@ -261,10 +261,31 @@ Po overení, že cez Brevo pošta chodí, sme sa rozhodli **skúsiť firemný ma
 | SMTP | **`mail.pdvrable.sk`, port 587, STARTTLS** |
 | Prečo iné meno servera | je to ten istý stroj, ale certifikát je vystavený na `mail.pdvrable.sk`. Pripojenie na `mail.ahafarma.sk` by neprešlo overením mena. Doména odosielateľa s menom SMTP servera nesúvisí. |
 | Prečo 587 a nie 465 | **Hetzner blokuje odchádzajúci port 465** — overené, nedostupný je aj `smtp.gmail.com:465`. Port 587 funguje. Nie je to horšie riešenie: `--ssl-reqd` zruší spojenie, ak server neponúkne šifrovanie, takže heslo nikdy neide otvorene. |
-| Prihlasovacie meno | `obedy` |
+| Prihlasovacie meno | **`obedy`** — krátke, nie celá adresa (overené) |
 | Heslo | v správcovi hesiel; na server sa vkladá raz, priamo do konfiguračného súboru |
 | DKIM | podpisovanie potvrdené správcom |
 | Firewall | netreba nič — port 587 je dostupný, overené zo servera |
+
+### ✅ Overené celou cestou (5. 8. 2026)
+
+Skúšobná správa odoslaná **zo servera `aha-apps`** cez firemný mailový server na Gmail:
+
+```
+Received: from … [46.225.236.143] … by pdvrable.sk (Postfix) with ESMTPSA
+SPF:   PASS
+DMARC: PASS
+```
+
+`ESMTPSA` = aplikačný server sa prihlásil a správu odovzdal. Doručené do schránky, nie do spamu, **bez pruhu „Neodoberať"** — tá hlavička bola Brevo.
+
+### Dve veci, ktoré musí appka robiť inak než skúšobný `curl`
+
+Skúšobná správa odhalila dva nedostatky, ktoré pri teste nevadia, ale v prevádzke by škodili:
+
+| Nedostatok | Ako to bolo v teste | Čo musí appka |
+|---|---|---|
+| **Chýbal `Message-ID` a `Date`** | Google ich doplnil sám — v hlavičkách je `SMTPIN_ADDED_MISSING` | generovať oba; chýbajúci `Message-ID` je u časti príjemcov signál spamu a bez neho sa správa ťažko dohľadáva |
+| **Nezmyselný názov pri pozdrave (`EHLO`)** | `Received: from mail2.txt` — curl použil názov súboru | posielať `EHLO obedy.ahafarma.sk`; prísnejšie servery hodnotia neplatný názov negatívne |
 
 ### ⚠️ DKIM — zverejnený je iný selektor, než ktorým sa podpisuje
 
