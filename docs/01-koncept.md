@@ -31,7 +31,7 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 24. **Kalendár sviatkov a zatvorených dní je jediný zdroj pravdy** (5.7) pre objednávky, uzávierky aj mesačné rozúčtovanie. Deň, v ktorý sa nevarí, sa v objednávke neukáže vôbec a do fakturácie nevstúpi.
 25. **Faktúra sa kontroluje strojovo proti tomu, čo appka sama odoslala** (5.6). Mesiac sa nedá uzavrieť, kým má nevyriešený rozdiel.
 26. **Firma, tím a prevádzka sú tri nezávislé rozmery** (1.3a). Predák môže mať v tíme ľudí z viacerých spriaznených firiem, na jednej prevádzke sa stravujú ľudia z viacerých firiem. Matica predáka sa podľa firiem nečlení, **mesačný podklad áno**.
-27. **Stravník sa nikdy nemaže, len sa mu ukončí platnosť** (1.3b). Import z dochádzky je opakovateľný a ukazuje rozdiel; chýbajúceho človeka nikdy neruší sám. Spájací kľúč je **celý štvorciferný kód**, nie poradové číslo vo firme — to sa medzi firmami opakuje.
+27. **Stravník sa nikdy nemaže, len sa prepne na neaktívneho** (1.3b). **Zoznam vlastní appka**, import z dochádzky je pomôcka — navrhuje, nikdy neprepisuje ani neruší. Existujúce osobné čísla sa **neprečíslovávajú**. Import z dochádzky je opakovateľný a ukazuje rozdiel; chýbajúceho človeka nikdy neruší sám. Spájací kľúč je **celý štvorciferný kód**, nie poradové číslo vo firme — to sa medzi firmami opakuje.
 28. **Brigádnici sú osoby s krátkou platnosťou**, nie zvláštny druh záznamu (1.3b).
 29. **Dva modely rozúčtovania, prepínané globálne** (6.2). *Štandardný* je 55 / 35 / zvyšok do sociálneho fondu. *Ekonomický* drží príspevok zamestnávateľa na nominálnej hladine základného poskytovateľa: stravník sa doťahuje v pásme 35–45 % a fond dopĺňa len zvyšok, takže **drahšie jedlo sa z fondu nepreplatí**. Sociálny fond sa v oboch prípadoch **nenastavuje, dopočíta sa**.
 30. **Typ vzťahu (PP / živnostník) je vlastnosť osoby, nie firmy** (6.2a) — brigádnik môže byť oboje. Výpočet je pre oboch rovnaký, líši sa výstup: mzdový podklad po firmách verzus samostatný výstup pre živnostníkov.
@@ -96,7 +96,29 @@ Z toho vyplývajú tri veci, ktoré by inak boli chybou:
 
 Zoznam ľudí nie je jednorazový import, je to **priebežne udržiavaný stav**. Preto:
 
-**Nikdy sa nemaže, len sa ukončí platnosť.** Osoba má *platnosť od* a *platnosť do*. Kto odišiel v marci, musí v marcových objednávkach a v marcovom mzdovom podklade ostať presne tak, ako tam bol — inak sa uzavretý mesiac rozíde sám so sebou (5.6, 6.1). V aktuálnom týždni sa už neukáže, v histórii áno.
+**Nikdy sa nemaže, len sa prepne na neaktívneho.** Osoba má prepínač *aktívny / neaktívny* a voliteľne aj *platí do*. Prepínač je hlavný — človek ho stlačí, keď brigádnik skončí. Dátum je pre prípad, že sa koniec vie dopredu; vtedy sa prepne sám.
+
+Neaktívny **nie je zmazaný**. Nezobrazuje sa v matici a nechodia mu upomienky, ale ostáva v histórii aj vo všetkých uzavretých mesiacoch presne tak, ako tam bol. Keby sa vrátil o rok, prepne sa späť a nadviaže na svoje staré záznamy. Mazanie by rozbilo uzavretý mesiac (5.6, 6.1).
+
+**Brigádnici tým pádom nepotrebujú nič zvláštne.** Nahodia sa ako ktokoľvek iný a po sezóne sa prepnú na neaktívnych. Žiadny osobitný druh záznamu, žiadne upratovanie.
+
+### Kto zoznam vlastní
+
+**Zoznam stravníkov je majetkom appky, nie dochádzky.** Dochádzkomer nevie o tímoch, poskytovateľoch ani prevádzkach — tie existujú len tu. Preto:
+
+| | |
+|---|---|
+| **Appka** | jediný zdroj pravdy. Pridanie, zmena, prepnutie na neaktívneho — všetko sa robí tu |
+| **Import z dochádzky** | **pomôcka, nie pán.** Spustí sa, keď treba; navrhne, nič neprepíše |
+
+Import nič neprepisuje sám a **nikdy nikoho neruší** — len ukáže rozdiel a čaká na potvrdenie. Nový človek v obedoch potrebuje aj tím, poskytovateľa a prevádzku, ktoré dochádzka nepozná; a brigádnik potrebuje obed hneď, nie až keď sa objaví v mesačnom exporte.
+
+Appka pritom vie dochádzku používať ako **zrkadlo na kontrolu**, bez toho, aby podľa nej konala:
+
+- *„v dochádzke sú 3 ľudia, ktorých v obedoch nemáš"*
+- *„5 ľudí máš aktívnych, ale v dochádzke sa dva mesiace neobjavili — neodišli?"*
+
+To je celý vzťah medzi tými dvoma systémami. Dochádzka je kontrolná vzorka, nie nadriadený.
 
 **Opakovaný import namiesto prepisovania.** Súbor z dochádzky sa dá nahrať kedykoľvek znova a appka ukáže **rozdiel**, nie výsledok:
 
@@ -108,7 +130,7 @@ Zoznam ľudí nie je jednorazový import, je to **priebežne udržiavaný stav**
 
 Ten posledný riadok je zámerný. Chýbajúci človek môže byť odídený, ale aj na dlhodobej PN, alebo len nebol v exporte za daný mesiac. **Automatické rušenie by ticho zmazalo živých ľudí.** Preto sa vždy pýta.
 
-**Spájací kľúč je celý štvorciferný kód** (`PersonalAccessCode`), nie poradové číslo v rámci firmy. Overené na skutočných dátach: číslo `008` majú dvaja rôzni ľudia v dvoch firmách, rovnako `002` a `014`. Pri spájaní cez poradové číslo by dvom rôznym ľuďom splynuli obedy aj zrážky.
+**Spájací kľúč je celý štvorciferný kód** (`PersonalAccessCode`), nie poradové číslo v rámci firmy. **Nič sa neprečíslováva** — ten kód už existuje, je na kartách a v dochádzke. Appka si vedie oba údaje a do mzdového exportu dá ten, ktorý mzdový softvér požaduje; vnútorne spája cez štvorciferný. Overené na skutočných dátach: číslo `008` majú dvaja rôzni ľudia v dvoch firmách, rovnako `002` a `014`. Pri spájaní cez poradové číslo by dvom rôznym ľuďom splynuli obedy aj zrážky.
 
 **Brigádnici** (žatva, sezónne práce) sú **osoby s krátkou platnosťou**, nie zvláštny druh záznamu. Založia sa menom, tímom a dátumom do; kartu a kód dostávajú v dochádzke tak či tak, takže sa dajú importovať rovnako ako ostatní. Keď obdobie uplynie, sami vypadnú z matice a nikto ich nemusí upratovať.
 
