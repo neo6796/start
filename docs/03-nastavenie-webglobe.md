@@ -16,6 +16,7 @@ Server: **`aha-apps`** u Hetznera, CPX22, Debian 13, IP **`46.225.236.143`**
 | 5 — zabezpečenie servera | ✅ hotovo a overené (root aj heslá zablokované) |
 | 6 — Docker | ✅ hotovo, `hello-world` prešiel |
 | 7 — preview naživo | ✅ `https://obedy.ahafarma.sk` beží, certifikát od Let's Encrypt vydaný |
+| 8 — odosielanie z firemného servera | ✅ overené zo servera, SPF + DKIM + DMARC všetky PASS |
 
 **Infraštruktúra je hotová a overená celou cestou** — doména, HTTPS aj Caddy fungujú na skutočnej stránke, nie len na papieri. Ostrá appka sa nasadí do toho istého `docker-compose.yml`: v `Caddyfile` sa `file_server` zmení na `reverse_proxy app:3000` a pribudnú služby `app` a `db`.
 
@@ -287,27 +288,21 @@ Skúšobná správa odhalila dva nedostatky, ktoré pri teste nevadia, ale v pre
 | **Chýbal `Message-ID` a `Date`** | Google ich doplnil sám — v hlavičkách je `SMTPIN_ADDED_MISSING` | generovať oba; chýbajúci `Message-ID` je u časti príjemcov signál spamu a bez neho sa správa ťažko dohľadáva |
 | **Nezmyselný názov pri pozdrave (`EHLO`)** | `Received: from mail2.txt` — curl použil názov súboru | posielať `EHLO obedy.ahafarma.sk`; prísnejšie servery hodnotia neplatný názov negatívne |
 
-### ⚠️ DKIM — zverejnený je iný selektor, než ktorým sa podpisuje
+### ✅ DKIM — vyriešené
 
-Skúšobná správa z `obedy@ahafarma.sk` na Gmail (5. 8. 2026) dopadla takto:
+Prvá skúšobná správa hlásila `dkim=permerror (no key for signature)`: server podpisoval selektorom `mail`, ale v DNS bol zverejnený len `default`. Gmail hľadal `mail._domainkey.ahafarma.sk` a nenašiel nič.
+
+Správca doplnil chýbajúci `TXT` záznam a **5. 8. 2026 o 12:49 prešli všetky tri kontroly**:
 
 ```
 SPF:   PASS   (62.169.176.222)
-DKIM:  permerror (no key for signature) ... header.s=mail
+DKIM:  PASS   header.i=@ahafarma.sk header.s=mail
 DMARC: PASS
 ```
 
-**Nie je to neplatný podpis, ale nenájdený kľúč.** Server podpisuje selektorom `mail` (`s=mail`, `d=ahafarma.sk`), no v DNS je zverejnený len `default._domainkey`. Gmail hľadá `mail._domainkey.ahafarma.sk`, nenájde nič a overenie vzdá.
+Podpis prešiel aj s **MailScannerom** v ceste — obava, že by upravoval telo správy po podpísaní, sa nepotvrdila.
 
-**Dnes to pošte nebráni** — DMARC prejde vďaka SPF, ktorý je zarovnaný. **Ale je to krehké:**
-
-- **SPF sa pri preposielaní láme.** Ak dodávateľ presmeruje `kuchyna@` na súkromný Gmail — čo je bežné — na poslednom skoku už odosielajúci server nie je náš, SPF zlyhá a bez DKIM padne aj DMARC. Objednávka skončí v spame práve u toho, kto podľa nej varí.
-- **DKIM preposielanie prežije.** Preto sa oplatí mať oboje, nie jedno.
-- Pri prípadnom sprísnení DMARC na `p=quarantine` by sa z toho stal ostrý problém.
-
-**Čo s tým:** zverejniť verejný kľúč ako `TXT` záznam `mail._domainkey.ahafarma.sk`. Kľúč je v konfigurácii DKIM na mailovom serveri, pri OpenDKIM zvyčajne `/etc/opendkim/keys/ahafarma.sk/mail.txt`.
-
-Ak by po zverejnení kľúča Gmail hlásil `dkim=fail` namiesto `permerror`, podozrivý je **MailScanner** (v hlavičkách je `X-MailScanner: Found to be clean`) — ak upravuje telo správy po podpísaní, podpis prestane sedieť. Vtedy treba podpisovať až za skenerom.
+> **Prečo to stálo za opravu, hoci pošta chodila aj predtým:** DMARC vtedy prechádzal len vďaka SPF, a **SPF sa pri preposielaní láme**. Ak dodávateľ presmeruje `kuchyna@` na súkromný Gmail — bežná vec — na poslednom skoku už neodosiela náš server. Bez DKIM by objednávka skončila v spame práve u toho, kto podľa nej varí. DKIM preposielanie prežije. Oprava navyše zlepšila doručovanie **všetkej odchádzajúcej pošty firmy**, nielen obedov.
 
 **Brevo ostáva ako záložná cesta.** Účet, overená doména aj štyri DNS záznamy na podadrese `obedy` sa nerušia — nič nestoja a prepnutie späť je zmena piatich údajov. Cieľový stav je, aby appka skúsila firemný server a **pri zlyhaní automaticky prepla na Brevo**; objednávka tak neostane visieť ani pri výpadku prúdu v technickej miestnosti.
 
