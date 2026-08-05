@@ -33,7 +33,7 @@ Stav: koncept. Nič sa nekóduje, kým nie je odsúhlasený tento dokument a ná
 26. **Firma, tím a prevádzka sú tri nezávislé rozmery** (1.3a). Predák môže mať v tíme ľudí z viacerých spriaznených firiem, na jednej prevádzke sa stravujú ľudia z viacerých firiem. Matica predáka sa podľa firiem nečlení, **mesačný podklad áno**.
 27. **Stravník sa nikdy nemaže, len sa mu ukončí platnosť** (1.3b). Import z dochádzky je opakovateľný a ukazuje rozdiel; chýbajúceho človeka nikdy neruší sám. Spájací kľúč je **celý štvorciferný kód**, nie poradové číslo vo firme — to sa medzi firmami opakuje.
 28. **Brigádnici sú osoby s krátkou platnosťou**, nie zvláštny druh záznamu (1.3b).
-29. **Rozúčtovanie je 55 / 35 / zvyšok z ceny bez DPH** (6.2). Sociálny fond sa **nenastavuje, dopočíta sa** ako zvyšok, takže súčet dvoch nastaviteľných percent nesmie presiahnuť 100 % — appka to odmietne pri ukladaní. Dve rôzne sadzby DPH: dodávateľa (19 %) a k príspevku stravníka (23 %).
+29. **Dva modely rozúčtovania, prepínané globálne** (6.2). *Štandardný* je 55 / 35 / zvyšok do sociálneho fondu. *Ekonomický* drží príspevok zamestnávateľa na nominálnej hladine základného poskytovateľa: stravník sa doťahuje v pásme 35–45 % a fond dopĺňa len zvyšok, takže **drahšie jedlo sa z fondu nepreplatí**. Sociálny fond sa v oboch prípadoch **nenastavuje, dopočíta sa**.
 30. **Typ vzťahu (PP / živnostník) je vlastnosť osoby, nie firmy** (6.2a) — brigádnik môže byť oboje. Výpočet je pre oboch rovnaký, líši sa výstup: mzdový podklad po firmách verzus samostatný výstup pre živnostníkov.
 31. **Miesta výdaja** (3.4) sú nastavením poskytovateľa, osoba má **domovské miesto** a jednotlivý deň sa dá prepnúť inam ako výnimka. Objednávka dodávateľovi sa **delí podľa miest**, miesto má **minimum na dovoz** a presun medzi miestami je **korekcia**. Pri jedinom mieste sa appka na miesto nepýta nikde.
 
@@ -582,38 +582,64 @@ Toto je vrstva, ktorá appku spája s účtovníctvom, a zároveň jediná čas�
 
 ### 6.2 Rozúčtovanie ceny obeda
 
-Cenu určuje jedáleň **bez DPH** a k nej svoju sadzbu. Všetko ostatné sú **nastavenia s platnosťou od dátumu** (6.1), nie konštanty — sadzby aj percentá sa v čase menia.
+Cenu určuje jedáleň **bez DPH** a k nej svoju sadzbu. Všetko ostatné sú **nastavenia s platnosťou od dátumu** (6.1), nie konštanty.
 
-| Nastavenie | Kde sa nastavuje | Predvolené |
-|---|---|---|
-| cena jedla **bez DPH** | cenník poskytovateľa | podľa jedálne |
-| **sadzba DPH dodávateľa** | poskytovateľ | 19 % |
-| **príspevok zamestnávateľa** — % z ceny bez DPH | globálne / per firma | 55 % |
-| **príspevok stravníka** — % z ceny bez DPH | globálne / per firma | 35 % |
-| **sadzba DPH k príspevku stravníka** | globálne | 23 % |
-| doplatok zo **sociálneho fondu** | **nenastavuje sa — dopočíta sa** | zvyšok, teda 10 % |
+| Nastavenie | Predvolené |
+|---|---|
+| cena jedla **bez DPH** | z cenníka poskytovateľa |
+| sadzba DPH dodávateľa | 19 % |
+| **príspevok zamestnávateľa** — % z ceny bez DPH | **55 %** *(zákonné minimum)* |
+| **príspevok stravníka** — % z ceny bez DPH | 35 %, v ekonomickom modeli pásmo **35–45 %** |
+| sadzba DPH k príspevku stravníka | 19 % |
+| doplatok zo **sociálneho fondu** | **nenastavuje sa — dopočíta sa** |
 
-#### Výpočet na jednom obede
+**Model rozúčtovania sa volí globálne**, jedným prepínačom pre celú appku:
 
-Príklad pri cene **5,00 € bez DPH**:
+#### Model A — štandardný
 
-| | € |
-|---|---:|
-| cena jedla bez DPH | 5,0000 |
-| DPH dodávateľa (19 %) | 0,9500 |
-| **cena s DPH — toľko platí firma jedálni** | **5,9500** |
-| | |
-| príspevok zamestnávateľa (55 % z 5,00) | 2,7500 |
-| príspevok stravníka (35 % z 5,00) | 1,7500 |
-| DPH k príspevku stravníka (23 % z 1,75) | 0,4025 |
-| **zrážka zo mzdy / doplatok stravníka** | **2,1525 → 2,15** |
-| doplatok zo sociálneho fondu | 0,5000 |
+Pevné percentá, sociálny fond je zvyšok:
 
-Kontrola: `2,75 + 1,75 + 0,50 = 5,00` — základ bez DPH je vždy pokrytý do koruny.
+```
+zamestnávateľ = 55 %
+stravník      = 35 %
+sociálny fond = zvyšok, teda 10 %
+```
 
-> **Sociálny fond je zvyšok, nie ďalšia páčka.** Vzorec je `SF = cena bez DPH − príspevok zamestnávateľa − príspevok stravníka`. Preto **súčet dvoch nastaviteľných percent nesmie presiahnuť 100 %** — pri 70 % a 35 % by sociálny fond vyšiel záporný. Appka to musí odmietnuť už pri ukladaní nastavenia, nie až pri uzávierke; chybu v percentách si nikto nevšimne, chybu pri ukladaní áno.
+Škáluje s cenou. Pri drahšom jedle rastie všetko úmerne — **aj to, čím prispieva sociálny fond.**
 
-**Kde sa zaokrúhľuje.** DPH k príspevku stravníka vyrába štvrté desatinné miesto (2,1525 €). Odporúčam počítať **na obede v plnej presnosti a zaokrúhliť až mesačný súčet za osobu.** Keby sa zaokrúhľovalo pri každom obede, pri dvadsiatich obedoch by sa nazbieral rozdiel oproti tomu, čo firma reálne zaplatila. Rozhodnutie patrí účtovníčke — **otvorená otázka 15.**
+#### Model B — ekonomický
+
+Rieši práve to, čo model A nerieši: **aby sa luxus nepreplácal zo sociálneho fondu.** Vychádza sa z **cenovej hladiny základného poskytovateľa** a fond sa použije len do jej výšky.
+
+```
+zl55  = 55 % z ceny                          ← vždy, zákonné minimum
+strop = 55 % zo základnej ceny + SF pri nej  ← nominálna suma, koľko chce firma dávať
+stravník = C − strop,  orezané do pásma 35 % až 45 % z ceny
+sociálny fond = C − zl55 − stravník          ← zvyšok, nikdy záporný
+```
+
+Poradie je podstatné: **najprv sa doťahuje stravník, až potom sa siahne na fond.** Fond dopĺňa len to, čo ostane.
+
+Príklad pri základnej cene **5,00 €** — strop je teda `2,75 + 0,50 = 3,25 €`:
+
+| cena bez DPH | 55 % | z fondu | **zamestnávateľ** | stravník | podiel | +DPH | **platí stravník** |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 5,00 *(základ)* | 2,75 | 0,50 | **3,25** | 1,75 | 35,0 % | 0,33 | **2,08** |
+| 5,50 | 3,02 | 0,22 | **3,25** | 2,25 | 40,9 % | 0,43 | **2,68** |
+| 5,75 | 3,16 | 0,09 | **3,25** | 2,50 | 43,5 % | 0,48 | **2,98** |
+| **5,91** | 3,25 | 0,00 | **3,25** | 2,66 | 45,0 % | 0,51 | **3,16** |
+| 6,50 | 3,58 | — | **3,58** | 2,92 | 45,0 % | 0,56 | **3,48** |
+| 7,00 | 3,85 | — | **3,85** | 3,15 | 45,0 % | 0,60 | **3,75** |
+
+**Zlom je pri 5,91 €.** Do tej ceny fond dopĺňa a príspevok zamestnávateľa drží presne na strope. Nad ňou už samotné zákonné minimum strop prekročí, **fond sa nepoužije vôbec** a rozdelenie je presne 55 / 45. Nad zlomom teda každé zdraženie nesie stravník.
+
+> **Model je uzavretý sám v sebe.** Keďže `55 % + 45 % = 100 %`, pri hornom okraji pásma vychádza fond presne na nulu a nikdy nemôže vyjsť záporný. Žiadna cena, ani neobmedzene vysoká, model nerozbije.
+
+**Čo sa nastavuje:** základný poskytovateľ (alebo priamo strop v eurách), spodná a horná hranica pásma stravníka. Zvyšok appka dopočíta.
+
+**Ochrana pri ukladaní:** `príspevok zamestnávateľa + horná hranica stravníka` nesmie presiahnuť 100 % — inak by fond vyšiel záporný. Appka to odmietne pri ukladaní nastavenia, nie až pri uzávierke.
+
+**Kde sa zaokrúhľuje.** DPH k príspevku stravníka vyrába štvrté desatinné miesto. Odporúčam počítať **na obede v plnej presnosti a zaokrúhliť až mesačný súčet za osobu** — pri dvadsiatich obedoch by sa inak nazbieral rozdiel oproti tomu, čo firma zaplatila jedálni. Rozhodnutie patrí účtovníčke, **otvorená otázka 15.**
 
 ### 6.2a Zamestnanci a živnostníci — rovnaký výpočet, iný výstup
 
