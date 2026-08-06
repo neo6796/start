@@ -1013,6 +1013,20 @@ riadok na faktúre = taká suma, aby firmu stála X
 
 Vo všetkých troch riadkoch firmu obed stojí `X`. Líši sa len číslo na papieri.
 
+#### Jeden dôsledok, ktorý sa ukázal až na číslach
+
+Zadanie znelo *firmu má obed stáť rovnako*. To platí — vo všetkých prípadoch **3,44 €**. Na strane človeka to ale celkom rovnako nevyjde a je to čistý dôsledok DPH:
+
+| Kto | Zaplatí za obed od GASTROGALu | Oproti zamestnancovi |
+|---|---:|---:|
+| **zamestnanec** | **2,20 €** | — |
+| **živnostník, platiteľ DPH** | 1,85 € | **−0,35 €** |
+| **živnostník, neplatiteľ** | 2,86 € | **+0,65 €** |
+
+Platiteľ si DPH z faktúry jedálne odpočíta, takže mu ostane presne podiel stravníka. Neplatiteľ ju odpočítať nemôže a nesie DPH z celého obeda. Zamestnanec je medzi nimi: DPH zo svojho podielu platí, ale DPH z podielu firmy nesie a odpočíta si firma.
+
+**Nie je to chyba modelu ani niečo na dopočítanie** — je to reálny rozdiel medzi troma daňovými postaveniami. Appka ho **vyčísli a ukáže**; či sa neplatiteľovi tých 65 centov dorovná vyšším príplatkom, je rozhodnutie, nie výpočet. Zatiaľ sa nedorovnáva.
+
 **Príznak platiteľa DPH je pri osobe**, nie pri firme — živnostník sa ním môže stať kedykoľvek a je to jeho vlastnosť. Doteraz sme takého nemali; keď príde prvý, prepne sa mu prepínač a nič iné sa robiť nemusí.
 
 Tretí riadok tabuľky je pritom **teoretická možnosť, nie očakávaný stav**: naše firmy sú platiteľmi DPH a ide o službu prijatú k podnikaniu, takže si DPH odpočítajú. **Riadok na faktúre bude teda `X`** a príznak platiteľa slúži hlavne na to, aby prehľad ukázal správne aj to, koľko bude na faktúre celkom s DPH — nech vie človek, čo má vystaviť.

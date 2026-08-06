@@ -676,6 +676,19 @@
 
   /* ---------- uzávierka ---------- */
 
+  .seg.sm button{padding:5px 10px;font-size:12.5px}
+  .ro{padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg-2);font-size:14px}
+  .chk{display:flex;align-items:center;gap:9px;font-size:14px;cursor:pointer}
+  .btn.ghost{background:transparent}
+  .badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    padding:2px 7px;border-radius:999px;border:1px solid currentColor;margin-left:7px;vertical-align:1px}
+  .badge.lead{color:var(--petrol)}
+  .badge.adm{color:var(--miss)}
+  .badge.ziv{color:var(--ink-3)}
+  tr.is-lead td:first-child{box-shadow:inset 3px 0 0 var(--petrol)}
+  tr.is-adm td:first-child{box-shadow:inset 3px 0 0 var(--miss)}
+  tr.is-off td{opacity:.5}
+  td.gap{color:var(--miss);font-weight:600}
   .steps{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
   .step{
     flex:1 1 190px;
@@ -929,6 +942,8 @@
       <button class="tab" role="tab" aria-selected="true" data-screen="predak">Predák</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="stravnik">Stravník</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="admin">Admin</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="ludia">Ľudia</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="ceny">Ceny</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="zostavy">Zostavy</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="uzavierka">Uzávierka</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="kalendar">Kalendár</button>
@@ -1368,6 +1383,159 @@
 </section>
 
 <!-- ============ ZOSTAVY ============ -->
+<section class="screen wrap" id="s-ludia" hidden>
+  <div class="screen-head">
+    <h2>Ľudia</h2>
+    <span class="who">správca · zoznam vlastní appka, import z dochádzky len navrhuje</span>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Zavádzanie</h3>
+      <span class="pill neutral" id="l-progress">—</span>
+    </div>
+    <p class="hint">Import z dochádzky prinesie <strong>len osobné číslo, priezvisko a meno</strong>. Všetko ostatné sa vyberá tu z rozbaľovacích zoznamov — nikdy sa nepíše, aby nevznikli tri prevádzky s tým istým názvom (koncept 1.3b).</p>
+    <div class="steps" id="l-steps"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Zoznam</h3>
+      <span class="pill neutral" id="l-count">—</span>
+    </div>
+    <div class="seg" role="group" id="l-view" aria-label="Pohľad">
+      <button data-view="akt" aria-pressed="true">Aktívni</button>
+      <button data-view="bez" aria-pressed="false">Bez zaradenia</button>
+      <button data-view="pre" aria-pressed="false">Predáci a admini</button>
+      <button data-view="ziv" aria-pressed="false">Živnostníci</button>
+      <button data-view="nea" aria-pressed="false">Neaktívni</button>
+    </div>
+    <label class="chk" style="margin-top:12px"><input type="checkbox" id="l-top" checked> <span>Predákov a adminov vytiahnuť navrch</span></label>
+    <div class="scroll-x" style="margin-top:12px;border:0">
+      <table class="data" style="min-width:860px">
+        <thead><tr><th>Os. č.</th><th>Priezvisko a meno</th><th>Firma</th><th>Vzťah</th><th>Tím</th><th>Predák</th><th>Prevádzka</th><th>Poskytovateľ</th></tr></thead>
+        <tbody id="l-list"></tbody>
+      </table>
+    </div>
+    <p class="hint" id="l-empty" hidden style="margin-top:12px"></p>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn">Označené → nastaviť predáka…</button>
+      <button class="btn">Označené → nastaviť prevádzku…</button>
+      <button class="btn ghost">Exportovať zoznam</button>
+    </div>
+    <p class="hint" style="margin-top:10px">Sto ľudí × šesť rozbaľovacích zoznamov je šesťsto kliknutí a zaručená chyba. <strong>Väzby sa priraďujú hromadne</strong> — väčšina ľudí má tie isté hodnoty, takže reálna práca je pár skupín a potom hŕstka výnimiek.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Import z dochádzky</h3>
+      <span class="pill neutral">navrhuje, neprepisuje</span>
+    </div>
+    <p class="hint">Takto vyzerá obrazovka <strong>pred</strong> zápisom. Import, ktorý najprv zapíše a potom oznámi, sa nedá vziať späť.</p>
+    <table class="data" style="margin-top:12px">
+      <tbody>
+        <tr><td>doplní sa</td><td class="num"><strong>12</strong></td><td class="hint">prázdne hodnoty</td></tr>
+        <tr><td>prepíše sa</td><td class="num"><strong>4</strong></td><td class="hint">pochádzajú z predchádzajúceho importu</td></tr>
+        <tr><td>v rozpore s ručným zadaním</td><td class="num"><strong>3</strong></td><td class="hint" style="color:var(--miss)">nechám tak — ručný zápis prebíja import</td></tr>
+        <tr><td>neznáme osobné číslo</td><td class="num"><strong>2</strong></td><td class="hint">vypíšu sa, nič nezakladajú</td></tr>
+      </tbody>
+    </table>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn primary">Zapísať 16 zmien</button>
+      <button class="btn ghost">Zobraziť 3 rozpory</button>
+    </div>
+  </div>
+</section>
+
+<section class="screen wrap" id="s-ceny" hidden>
+  <div class="screen-head">
+    <h2>Ceny a rozúčtovanie</h2>
+    <span class="who">správca · zmena sa neprepíše do uzavretých mesiacov</span>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Spoločné nastavenia</h3>
+      <span class="pill neutral">platnosť od dátumu</span>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="field"><label>Príspevok zamestnávateľa</label><div class="ro"><strong id="c-zl">55</strong> % z ceny bez DPH <span class="hint">— zákonné minimum</span></div></div>
+        <div class="field"><label>Pásmo stravníka</label><div class="ro"><strong id="c-band">35 – 45</strong> % z ceny bez DPH</div></div>
+        <div class="field"><label>DPH k podielu stravníka</label><div class="ro"><strong id="c-dph">19</strong> %</div></div>
+      </div>
+      <div>
+        <div class="field"><label>Stravné 5–12 h</label><div class="ro"><strong id="c-stravne">8,30 €</strong> <span class="hint">od <span id="c-stravne-od">1. 9. 2024</span></span></div></div>
+        <div class="field"><label>Zákonný strop na príspevok</label><div class="ro"><strong id="c-strop">4,57 €</strong> <span class="hint">= 55 % zo stravného</span></div></div>
+        <div class="field"><label>Sociálny fond</label><div class="ro"><span class="hint">nenastavuje sa — <strong>dopočíta sa ako zvyšok</strong></span></div></div>
+      </div>
+    </div>
+    <p class="hint" id="c-strop-note" style="margin-top:6px"></p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Model pri každom poskytovateľovi</h3>
+      <span class="pill neutral">predvolene ekonomický</span>
+    </div>
+    <div class="scroll-x" style="border:0">
+      <table class="data" style="min-width:760px">
+        <thead><tr><th>Poskytovateľ</th><th class="num">s DPH</th><th class="num">bez DPH</th><th>Model</th><th class="num">Firma</th><th class="num">Stravník</th><th class="num">Podiel</th></tr></thead>
+        <tbody id="c-cats"></tbody>
+      </table>
+    </div>
+    <p class="hint" style="margin-top:10px" id="c-base-note"></p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Rozpad ceny</h3>
+      <span class="pill neutral">na jeden obed</span>
+    </div>
+    <div class="scroll-x" style="border:0">
+      <table class="data" style="min-width:800px">
+        <thead><tr><th>Poskytovateľ</th><th class="num">cena bez DPH</th><th class="num">55 %</th><th class="num">soc. fond</th><th class="num">firma spolu</th><th class="num">stravník</th><th class="num">+DPH</th><th class="num">platí stravník</th></tr></thead>
+        <tbody id="c-split"></tbody>
+      </table>
+    </div>
+    <p class="hint" style="margin-top:10px" id="c-eq"></p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Čo by sa stalo pri inej cene</h3>
+      <span class="pill neutral">skúšobný prepočet</span>
+    </div>
+    <div class="field" style="max-width:340px">
+      <label for="c-try">Cena obeda s DPH</label>
+      <input type="range" id="c-try" min="400" max="1200" step="5" value="720" style="width:100%">
+      <div class="ro" style="margin-top:8px"><strong id="c-try-val">7,20 €</strong> s DPH · <span id="c-try-net">6,05 €</span> bez DPH</div>
+    </div>
+    <div class="scroll-x" style="border:0;margin-top:10px">
+      <table class="data" style="min-width:760px">
+        <thead><tr><th>Model</th><th class="num">55 %</th><th class="num">soc. fond</th><th class="num">firma spolu</th><th class="num">stravník</th><th class="num">podiel</th><th class="num">platí stravník</th></tr></thead>
+        <tbody id="c-try-out"></tbody>
+      </table>
+    </div>
+    <p class="hint" id="c-try-note" style="margin-top:10px"></p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Živnostníci</h3>
+      <span class="pill neutral">iná cesta peňazí, ten istý vzorec</span>
+    </div>
+    <p class="hint">Appka im obed <strong>len objednáva</strong> — dodávateľovi platia sami v plnej cene. Príspevok dostávajú nepriamo: o tú sumu si zvýšia faktúru voči firme ako <strong>stabilizačný príplatok</strong>. Do mzdového podkladu ani do sociálneho fondu nevstupujú.</p>
+    <div class="scroll-x" style="border:0;margin-top:12px">
+      <table class="data" style="min-width:820px">
+        <thead><tr><th>Poskytovateľ</th><th class="num">platí jedálni</th><th class="num">stabilizačný príplatok</th><th class="num">čistý náklad<br><span class="hint">platiteľ DPH</span></th><th class="num">čistý náklad<br><span class="hint">neplatiteľ</span></th><th class="num">zamestnanec<br><span class="hint">platí</span></th></tr></thead>
+        <tbody id="c-ziv"></tbody>
+      </table>
+    </div>
+    <p class="hint" style="margin-top:10px" id="c-ziv-note"></p>
+  </div>
+</section>
+
 <section class="screen wrap" id="s-zostavy" hidden>
   <div class="screen-head">
     <h2>Tlačové zostavy a exporty</h2>
@@ -2081,30 +2249,81 @@
 
   const CATERERS = [
     {
-      name:"Reštaurácia U Jeleňa", short:"U Jeleňa",
-      style:"upper", count:3, compose:"komplet",
-      cancelWhen:0, cancelTime:"07:30", late:true, names:true,
-      emails:"kuchyna@ujelena.example, fakturacia@ujelena.example", sendOffset:0, sendEmpty:true,
-      phone:"+421 903 000 000", smsWeekly:false, smsDaily:true, smsFail:true, smsUnconf:true, confirmWithin:60,
-      prices:[6.20, 6.20, 5.80, 6.40, 5.90, 6.10, 6.30, 5.70, 6.00, 6.50],
+      name:"GASTROGAL", short:"GASTROGAL",
+      style:"arabic", count:5, compose:"komplet",
+      cancelWhen:0, cancelTime:"08:00", late:true, names:true,
+      emails:"objednavky@gastrogal.example", sendOffset:0, sendEmpty:true,
+      phone:"+421 918 000 000", smsWeekly:false, smsDaily:true, smsFail:true, smsUnconf:true, confirmWithin:60,
+      vat:19, gross:6.30, model:"eko",
+      prices:[5.29,5.29,5.29,5.29,5.29,5.29,5.29,5.29,5.29,5.29],
+      soup:["Cícerová polievka s koreňovou zeleninou","Hovädzí vývar so zeleninou a rezancami",
+            "Letná kapustovo-paradajková polievka","Kyslá fazuľová polievka","Slepá gulášová polievka so zemiakmi"],
       menu:[
-        ["Držková polievka, vyprážaný syr, hranolky, tatárska","Slepačí vývar, kuracie prsia na masle, ryža","Šošovicová polievka, pirohy s bryndzou"],
-        ["Zeleninová polievka, sviečková na smotane, knedľa","Fazuľová polievka, vyprážaný rezeň, zemiaky","Paradajková polievka, špagety s bazalkou"],
-        ["Hovädzí vývar, guláš, knedľa","Kapustnica, pečené kuracie stehno, ryža","Cesnaková polievka, zeleninové rizoto"],
-        ["Hrachová polievka, bravčový rezeň s broskyňou, zemiaky","Slepačí vývar, dusené hovädzie, ryža","Brokolicová polievka, palacinky s džemom"],
-        ["Rybacia polievka, vyprážaná ryba, zemiakový šalát","Zeleninový vývar, morčacie prsia, dusená ryža","Šampiňónová polievka, halušky s kapustou"]
+        ["Vyprážaný syr so šunkou, varené zemiaky, tatárska","Kurací stroganov, dusená ryža","Kysnutý koláč s jahodami a mrveničkou","Brokolicové fašírky s ovsenými vločkami, varené zemiaky, šalát","Zeleninový šalát s baby mozzarellou, sušenými paradajkami a cestovinou"],
+        ["Vyprážaný kurací rezeň s čiernym sezamom, dusená ryža, šalát","Maďarský bravčový guláš, kysnutá knedľa","Mrkvový koláč s citrónovou polevou","Furmanské halušky (klobása, kyslá smotana, údený syr)","Zeleninový šalát s grilovaným tofu, pečené zemiaky"],
+        ["Vyprážaný bravčový rezeň, varené zemiaky, šalát","Zapekané kuracie prsia s mozzarellou a paradajkami, dusená ryža","Tvarohové guľky s hrozienkami, džemom a maslom","Zeleninová fritata, varené zemiaky, tzatziky","Pizza Al Capone"],
+        ["Vyprážaný kurací rezeň v cestíčku, dusená ryža, šalát","Pikantné bravčové soté s paprikou, tarhoňa, uhorka","Jablkový mrežovník","Zapekaná tortilla s kuracím mäsom, pečené zemiaky, dip","Zeleninový šalát s arancini, bylinkový dresing"],
+        ["Vyprážaný mletý rezeň so syrom, zemiaky a ryža, šalát","Pečené kuracie stehno, dusená ryža, kompót","Kakaový závin z kysnutého cesta","Zapekané rybie filé so zeleninou a syrom, pečené zemiaky","Zeleninový šalát s kuracím mäsom, bulgur, dresing"]
       ]
     },
     {
-      name:"Školská jedáleň Sever", short:"Sever",
-      style:"arabic", count:4, compose:"casti",
-      cancelWhen:1, cancelTime:"14:00", late:false, names:false,
-      emails:"objednavky@jedalen-sever.example", sendOffset:30, sendEmpty:false,
-      phone:"+421 911 000 000", smsWeekly:false, smsDaily:false, smsFail:true, smsUnconf:true, confirmWithin:30,
-      prices:[5.40, 5.40, 5.90, 5.20, 5.60, 5.60, 5.80, 5.30, 5.50, 5.70],
-      menu:[[ "","","","" ],[ "","","","" ],[ "","","","" ],[ "","","","" ],[ "","","","" ]]
+      name:"GASTRO ABM", short:"ABM",
+      style:"upper", count:5, compose:"komplet",
+      cancelWhen:0, cancelTime:"08:00", late:true, names:true,
+      emails:"gastroabm@gastroabm.example", sendOffset:0, sendEmpty:true,
+      phone:"+421 907 000 000", smsWeekly:false, smsDaily:true, smsFail:true, smsUnconf:true, confirmWithin:60,
+      vat:19, gross:7.20, model:"eko",
+      prices:[6.05,6.05,6.05,6.05,6.05,6.05,6.05,6.05,6.05,6.05],
+      soup:["Karfiolová s mrveničkou","Hrášková s krupicovými haluškami","Vývar s rezancami a zeleninou",
+            "Šošovicová sladká so zeleninou","Špenátová s vajíčkom"],
+      menu:[
+        ["Kurací rezeň vo francúzskom cestíčku, štuchané zemiaky, šalát","Bravčový tokáň na maďarský spôsob, tarhoňa, uhorka","Mexické rizoto s bravčovým mäsom a syrom","Domáci pudingový pletenec","Grilované šampiňóny so zeleninovým šalátom, bagetka"],
+        ["Švédske mäsové guľky v smotanovo-horčicovej omáčke, knedľa","Zapekané kuracie prsia s brokolicou a syrom, ryža","Zemiakový prívarok s domácou fašírkou, chlieb","Orechové rezance s džemom","Zeleninový šalát s kuracími stripsami"],
+        ["Vyprážaný bravčový rezeň, cibuľkové zemiaky, šalát","Paprikáš z kuracieho stehna, maslové halušky","Cuketové placky, varené zemiaky, tatárska","Kysnutý slivkový koláč s posýpkou","Zeleninový šalát s vyprážaným enciánom, krokety"],
+        ["Plnená paprika na paradajkovej omáčke, knedľa","Vyprážaný kurací rezeň v jogurtovo-cesnakovej marináde, pyré","Zemiakové gnocchi so smotanovo-šampiňónovou omáčkou","Zemiakové šúľance s višňovou náplňou","Sladký ovocný šalát s jogurtovým dressingom"],
+        ["Kurací závitok plnený šunkou a syrom, ryža, šalát","Šunkovo-syrový špíz, varené zemiaky, tatárska","Vyprážaný karfiol, varené zemiaky, tatárska","Ryžový nákyp s ovocím","Zeleninový šalát, rybie prsty, tatárska"]
+      ]
     }
   ];
+
+  /* ---------- rozúčtovanie (koncept 6.2) ---------- */
+  const MONEY = {
+    zl: 55,          /* príspevok zamestnávateľa, % z ceny bez DPH — zákonné minimum */
+    svLo: 35,        /* spodná hranica pásma stravníka */
+    svHi: 45,        /* horná hranica pásma stravníka */
+    dphSv: 19,       /* DPH k podielu stravníka */
+    stravne: 8.30,   /* stravné 5–12 h, opatrenie MPSVR SR č. 211/2024 Z. z. */
+    stravneOd: "1. 9. 2024"
+  };
+  function strop(){ return MONEY.stravne * MONEY.zl / 100; }
+  /* základná cenová hladina = najlacnejší aktívny poskytovateľ */
+  function baseNet(){ return Math.min.apply(null, CATERERS.map(c => c.prices[0])); }
+  /* nominálna suma, ktorú firma dáva — 55 % + zvyšok do 100 % pri základnej cene */
+  function nominal(){ const b = baseNet(); return b * (100 - MONEY.svLo) / 100; }
+
+  /* rozpad ceny jedného obeda. Vracia všetko v eurách. */
+  function split(net, model){
+    const zl55 = net * MONEY.zl / 100;
+    let zl = zl55, sv, sf;
+    if (model === "eko") {
+      const cap = nominal();
+      sv = net - cap;
+      const lo = net * MONEY.svLo / 100, hi = net * MONEY.svHi / 100;
+      if (sv < lo) sv = lo;
+      if (sv > hi) sv = hi;
+    } else {
+      sv = net * MONEY.svLo / 100;
+    }
+    /* zákonný strop na príspevok zamestnávateľa */
+    const cap = strop();
+    let capped = false;
+    if (zl > cap) { zl = cap; capped = true; }
+    sf = net - zl - sv;
+    if (sf < 0) sf = 0;
+    const dph = sv * MONEY.dphSv / 100;
+    return { net:net, zl:zl, sf:sf, sv:sv, dph:dph, platiSv:sv+dph,
+             firma:zl+sf, podiel:sv/net*100, capped:capped };
+  }
   const CANCEL_RULES = ["v deň obeda", "predchádzajúci pracovný deň", "2 pracovné dni vopred"];
 
   /* ---------- miesta výdaja ----------
@@ -3882,6 +4101,236 @@
     renderZs();
   });
 
+
+  /* ================= ĽUDIA ================= */
+  const FIRMS = ["Adiumentum", "PD Vráble", "Cronus", "HBE"];
+  const TEAMS = ["Údržba", "Rastlinná výroba", "Sklad", "Administratíva"];
+  /* vz: 0 = pracovný pomer, 1 = živnostník;  r: "" | "lead" | "admin" */
+  /* Vzorové osoby — nie skutoční ľudia. Preview je verejne dostupné,
+     takže menoslov ani osobné čísla z dochádzky sa doň nedávajú. */
+  const LUDIA = [
+    {p:"1101", n:"Adamcová Zuzana",  f:0, vz:0, t:3, l:0, pl:0, c:0, r:"admin", ok:true},
+    {p:"1104", n:"Bartoš Martin",    f:0, vz:0, t:0, l:0, pl:0, c:0, r:"lead",  ok:true},
+    {p:"1109", n:"Cibuľa Jozef",     f:0, vz:0, t:0, l:1, pl:0, c:0, r:"",      ok:true},
+    {p:"1115", n:"Dubovský Pavol",   f:0, vz:0, t:0, l:1, pl:1, c:0, r:"",      ok:true},
+    {p:"1118", n:"Ferko Peter",      f:1, vz:0, t:1, l:2, pl:1, c:1, r:"lead",  ok:true},
+    {p:"1122", n:"Gajdošová Dagmar", f:1, vz:0, t:3, l:0, pl:0, c:0, r:"",      ok:true},
+    {p:"1130", n:"Hlavatá Veronika", f:1, vz:0, t:2, l:3, pl:2, c:0, r:"",      ok:true},
+    {p:"2103", n:"Ivanič Andrej",    f:1, vz:0, t:1, l:2, pl:1, c:1, r:"",      ok:true},
+    {p:"2107", n:"Jurkovič Marek",   f:2, vz:0, t:2, l:3, pl:2, c:0, r:"lead",  ok:true},
+    {p:"3102", n:"Kubicová Martina", f:0, vz:1, t:3, l:0, pl:0, c:0, r:"",      ok:true},
+    {p:"3105", n:"Lipták Miloš",     f:0, vz:1, t:0, l:1, pl:0, c:0, r:"",      ok:true},
+    {p:"3111", n:"Mrázik Mikuláš",   f:2, vz:1, t:1, l:2, pl:1, c:1, r:"",      ok:true},
+    {p:"3116", n:"Nemček Marek",     f:3, vz:1, t:2, l:3, pl:2, c:0, r:"",      ok:true},
+    {p:"3120", n:"Ondrejka Vladimír",f:null,vz:null,t:null,l:null,pl:null,c:null,r:"",ok:true},
+    {p:"3124", n:"Pauer Michal",     f:null,vz:null,t:null,l:null,pl:null,c:null,r:"",ok:true},
+    {p:"3129", n:"Rybár Marek",      f:0, vz:1, t:0, l:1, pl:null, c:0, r:"",   ok:true},
+    {p:"3133", n:"Sedlák Katarína",  f:1, vz:0, t:3, l:0, pl:0, c:0, r:"",      ok:false},
+    {p:"3138", n:"Tomašov Milan",    f:2, vz:0, t:2, l:3, pl:2, c:0, r:"",      ok:true},
+    {p:"3142", n:"Uhrík Pavel",      f:3, vz:1, t:1, l:2, pl:1, c:1, r:"",      ok:true},
+    {p:"3147", n:"Zvara Peter",      f:0, vz:0, t:0, l:1, pl:0, c:0, r:"",      ok:false}
+  ];
+  let lView = "akt", lTop = true;
+
+  function lFilter(){
+    let r = LUDIA.slice();
+    if (lView === "akt") r = r.filter(x => x.ok);
+    else if (lView === "nea") r = r.filter(x => !x.ok);
+    else if (lView === "bez") r = r.filter(x => x.ok && (x.f===null||x.t===null||x.l===null||x.pl===null||x.c===null));
+    else if (lView === "pre") r = r.filter(x => x.ok && x.r);
+    else if (lView === "ziv") r = r.filter(x => x.ok && x.vz === 1);
+    if (lTop) r.sort((a,b) => (a.r?0:1) - (b.r?0:1));
+    return r;
+  }
+  function cell(v, arr){
+    if (v === null || v === undefined) return '<td class="gap">— doplniť</td>';
+    return "<td>" + (arr ? arr[v] : v) + "</td>";
+  }
+  function renderLudia(){
+    const rows = lFilter();
+    const tb = document.getElementById("l-list");
+    if (!tb) return;
+    tb.innerHTML = rows.map(x => {
+      const cls = x.r === "admin" ? "is-adm" : (x.r === "lead" ? "is-lead" : "");
+      const bad = x.r === "admin" ? '<span class="badge adm">admin</span>'
+                : x.r === "lead"  ? '<span class="badge lead">predák</span>' : "";
+      const zb = x.vz === 1 ? '<span class="badge ziv">živn.</span>' : "";
+      return '<tr class="' + cls + (x.ok ? "" : " is-off") + '">' +
+        "<td>" + x.p + "</td>" +
+        "<td><strong>" + x.n + "</strong>" + bad + "</td>" +
+        cell(x.f, FIRMS) +
+        (x.vz === null ? '<td class="gap">— doplniť</td>' : "<td>" + (x.vz ? "živnostník" : "PP") + zb + "</td>") +
+        cell(x.t, TEAMS) +
+        (x.l === null ? '<td class="gap">— doplniť</td>' : "<td>" + ["Bartoš M.","Ferko P.","Jurkovič M.","Adamcová Z."][x.l] + "</td>") +
+        cell(x.pl, PLACES.map(q => q.n)) +
+        cell(x.c, CATERERS.map(q => q.short)) +
+        "</tr>";
+    }).join("");
+    const gaps = LUDIA.filter(x => x.ok && (x.f===null||x.t===null||x.l===null||x.pl===null||x.c===null)).length;
+    setText("l-count", rows.length + " " + (rows.length===1?"osoba":(rows.length<5?"osoby":"osôb")));
+    const pr = document.getElementById("l-progress");
+    if (pr){
+      pr.textContent = gaps ? gaps + " nezaradených" : "zavádzanie hotové";
+      pr.className = "pill " + (gaps ? "miss" : "ok");
+    }
+    const em = document.getElementById("l-empty");
+    if (em){
+      em.hidden = rows.length > 0;
+      em.textContent = lView === "bez"
+        ? "Nikto nezostal — každý má firmu, tím, predáka, prevádzku aj poskytovateľa. Zavádzanie je hotové."
+        : "V tomto pohľade nikto nie je.";
+    }
+    const st = document.getElementById("l-steps");
+    if (st){
+      const kroky = [
+        ["1", "Firmy", FIRMS.length + " zadaných"],
+        ["2", "Prevádzky", PLACES.length + " zadané"],
+        ["3", "Poskytovatelia", CATERERS.length + " zadaní"],
+        ["4", "Import menoslovu", LUDIA.length + " ľudí"],
+        ["5", "Označiť predákov", LUDIA.filter(x => x.r).length + " označených"]
+      ];
+      st.innerHTML = kroky.map(x => '<div class="step done"><div class="st-n">' + x[0] + '</div><div class="st-t">' + x[1] + '</div><div class="st-s">' + x[2] + "</div></div>").join("")
+        + '<div class="step ' + (gaps ? "now" : "done") + '"><div class="st-n">6</div><div class="st-t">Doplniť väzby</div><div class="st-s">'
+        + (gaps ? "zostáva " + gaps : "hotové") + "</div></div>";
+    }
+  }
+
+  /* ================= CENY ================= */
+  function eur(v){ return v.toFixed(2).replace(".", ",") + " €"; }
+  function pct(v){ return v.toFixed(1).replace(".", ",") + " %"; }
+
+  function renderCeny(){
+    if (!document.getElementById("c-cats")) return;
+    setText("c-zl", String(MONEY.zl));
+    setText("c-band", MONEY.svLo + " – " + MONEY.svHi);
+    setText("c-dph", String(MONEY.dphSv));
+    setText("c-stravne", eur(MONEY.stravne));
+    setText("c-stravne-od", MONEY.stravneOd);
+    setText("c-strop", eur(strop()));
+
+    const maxNet = Math.max.apply(null, CATERERS.map(c => c.prices[0]));
+    setText("c-strop-note",
+      "Strop zasiahne až vtedy, keď cena obeda bez DPH prekročí celé stravné — teda nad " +
+      eur(MONEY.stravne) + " bez DPH, čo je " + eur(MONEY.stravne * (1 + MONEY.dphSv/100)) +
+      " s DPH. Najdrahšia jedáleň má " + eur(maxNet * (1 + MONEY.dphSv/100)) +
+      ", rezerva je " + eur(MONEY.stravne * (1+MONEY.dphSv/100) - maxNet * (1+MONEY.dphSv/100)) + " na porcii.");
+
+    document.getElementById("c-cats").innerHTML = CATERERS.map((c, i) => {
+      const r = split(c.prices[0], c.model);
+      return "<tr><td><strong>" + c.name + "</strong></td>" +
+        '<td class="num">' + eur(c.gross) + "</td>" +
+        '<td class="num">' + eur(c.prices[0]) + "</td>" +
+        '<td><div class="seg sm" role="group">' +
+          '<button data-mdl="' + i + '|eko" aria-pressed="' + (c.model==="eko") + '">ekonomický</button>' +
+          '<button data-mdl="' + i + '|std" aria-pressed="' + (c.model==="std") + '">štandardný</button>' +
+        "</div></td>" +
+        '<td class="num"><strong>' + eur(r.firma) + "</strong></td>" +
+        '<td class="num">' + eur(r.platiSv) + "</td>" +
+        '<td class="num">' + pct(r.podiel) + "</td></tr>";
+    }).join("");
+
+    const bi = CATERERS.map(c => c.prices[0]).indexOf(baseNet());
+    setText("c-base-note",
+      "Základná cenová hladina sa neurčuje ručne — appka berie najlacnejšieho aktívneho poskytovateľa, teraz " +
+      CATERERS[bi].name + " za " + eur(baseNet()) + " bez DPH. Nominálna suma, ktorú firma dáva, je preto " +
+      eur(nominal()) + ". Pri najlacnejšom poskytovateľovi sú oba modely totožné, takže predvoľba nikdy neuškodí.");
+
+    document.getElementById("c-split").innerHTML = CATERERS.map(c => {
+      const r = split(c.prices[0], c.model);
+      return "<tr><td><strong>" + c.short + "</strong></td>" +
+        '<td class="num">' + eur(r.net) + "</td>" +
+        '<td class="num">' + eur(r.zl) + (r.capped ? ' <span class="badge adm">strop</span>' : "") + "</td>" +
+        '<td class="num">' + (r.sf < 0.005 ? "—" : eur(r.sf)) + "</td>" +
+        '<td class="num"><strong>' + eur(r.firma) + "</strong></td>" +
+        '<td class="num">' + eur(r.sv) + "</td>" +
+        '<td class="num">' + eur(r.dph) + "</td>" +
+        '<td class="num"><strong>' + eur(r.platiSv) + "</strong></td></tr>";
+    }).join("");
+
+    const fs = CATERERS.map(c => split(c.prices[0], c.model).firma);
+    const same = Math.abs(fs[0] - fs[fs.length-1]) < 0.005;
+    setText("c-eq", same
+      ? "Firmu stojí obed rovnako v oboch jedálňach — " + eur(fs[0]) + " bez DPH. Rozdiel v cene nesie ten, kto si drahšie jedlo vybral. Presne to je zmyslom ekonomického modelu."
+      : "Príspevok firmy sa medzi jedálňami líši (" + fs.map(eur).join(" verzus ") + "), lebo aspoň pri jednej je zapnutý štandardný model — pri drahšom jedle rastie aj to, čím prispieva sociálny fond.");
+
+    document.getElementById("c-ziv").innerHTML = CATERERS.map(c => {
+      const r = split(c.prices[0], c.model);
+      const plati  = r.net * (1 + c.vat/100);   /* faktúra jedálne s DPH */
+      const sDph   = r.net - r.firma;           /* platiteľ si DPH odpočíta */
+      const bezDph = plati - r.firma;           /* neplatiteľ neodpočíta nič */
+      const zam    = r.platiSv;                 /* zamestnanec platí zo mzdy, DPH si tiež neodpočíta */
+      const d1 = sDph - zam, d2 = bezDph - zam;
+      const sig = v => (v >= 0 ? "+" : "−") + eur(Math.abs(v));
+      return "<tr><td><strong>" + c.short + "</strong></td>" +
+        '<td class="num">' + eur(plati) + "</td>" +
+        '<td class="num"><strong>' + eur(r.firma) + "</strong></td>" +
+        '<td class="num">' + eur(sDph) + ' <span class="hint">' + sig(d1) + "</span></td>" +
+        '<td class="num">' + eur(bezDph) + ' <span class="hint">' + sig(d2) + "</span></td>" +
+        '<td class="num"><strong>' + eur(zam) + "</strong></td></tr>";
+    }).join("");
+
+    (function(){
+      const c = CATERERS[0], r = split(c.prices[0], c.model);
+      const plati = r.net * (1 + c.vat/100);
+      const lepsie = r.platiSv - (r.net - r.firma);
+      const horsie = (plati - r.firma) - r.platiSv;
+      setText("c-ziv-note",
+        "Firmu to stojí " + eur(r.firma) + " vo všetkých troch prípadoch — to bolo zadanie a to platí. " +
+        "Na strane človeka to ale celkom rovnako nevyjde, a je to čistý dôsledok DPH: " +
+        "živnostník–platiteľ si DPH z jedálne odpočíta, takže je o " + eur(lepsie) + " lacnejší než zamestnanec; " +
+        "neplatiteľ ju odpočítať nemôže a je o " + eur(horsie) + " drahší. " +
+        "Zamestnanec je medzi nimi, lebo DPH z jeho podielu platí a neodpočíta, kým DPH z podielu firmy nesie a odpočíta si firma. " +
+        "Rozdiely sú v centoch a appka ich len ukazuje — či sa neplatiteľovi dorovnajú, je rozhodnutie, nie výpočet.");
+    })();
+
+    renderTry();
+  }
+
+  function renderTry(){
+    const el = document.getElementById("c-try");
+    if (!el) return;
+    const gross = Number(el.value) / 100;
+    const net = gross / (1 + MONEY.dphSv/100);
+    setText("c-try-val", eur(gross));
+    setText("c-try-net", eur(net));
+    document.getElementById("c-try-out").innerHTML = ["eko","std"].map(m => {
+      const r = split(net, m);
+      return "<tr><td>" + (m==="eko" ? "ekonomický" : "štandardný") + "</td>" +
+        '<td class="num">' + eur(r.zl) + (r.capped ? ' <span class="badge adm">strop</span>' : "") + "</td>" +
+        '<td class="num">' + (r.sf < 0.005 ? "—" : eur(r.sf)) + "</td>" +
+        '<td class="num"><strong>' + eur(r.firma) + "</strong></td>" +
+        '<td class="num">' + eur(r.sv) + "</td>" +
+        '<td class="num">' + pct(r.podiel) + "</td>" +
+        '<td class="num"><strong>' + eur(r.platiSv) + "</strong></td></tr>";
+    }).join("");
+    const zlom = nominal() / (1 - MONEY.svHi/100);
+    const e = split(net, "eko");
+    let note;
+    if (e.capped) note = "Nad " + eur(MONEY.stravne * (1+MONEY.dphSv/100)) + " s DPH zasahuje zákonný strop: príspevok firmy sa zastaví na " + eur(strop()) + " a rozdiel dorovná sociálny fond, ktorý bol dovtedy nepoužitý.";
+    else if (e.podiel >= MONEY.svHi - 0.05) note = "Stravník je na hornom okraji pásma (" + MONEY.svHi + " %). Sociálny fond sa nepoužije vôbec a delenie je presne " + MONEY.zl + " / " + MONEY.svHi + " — od tejto ceny nesie každé zdraženie stravník.";
+    else note = "Sociálny fond dopĺňa " + eur(e.sf) + " do nominálnej hladiny " + eur(nominal()) + ". Zlom je pri " + eur(zlom * (1+MONEY.dphSv/100)) + " s DPH — nad ňou sa fond nepoužije.";
+    setText("c-try-note", note);
+  }
+
+  document.addEventListener("click", e => {
+    const v = e.target.closest && e.target.closest("[data-view]");
+    if (v && v.parentElement.id === "l-view"){
+      lView = v.getAttribute("data-view");
+      Array.from(v.parentElement.children).forEach(b => b.setAttribute("aria-pressed", String(b === v)));
+      renderLudia();
+    }
+    const m = e.target.closest && e.target.closest("[data-mdl]");
+    if (m){
+      const parts = m.getAttribute("data-mdl").split("|");
+      CATERERS[Number(parts[0])].model = parts[1];
+      renderCeny(); renderUz();
+    }
+  });
+  const lTopEl = document.getElementById("l-top");
+  if (lTopEl) lTopEl.addEventListener("change", e => { lTop = e.target.checked; renderLudia(); });
+  const cTryEl = document.getElementById("c-try");
+  if (cTryEl) cTryEl.addEventListener("input", renderTry);
+
   function renderAll(){
     head(document.getElementById("th-own"));
     head(document.getElementById("th-deleg"));
@@ -3903,6 +4352,8 @@
     renderUz();
     renderKal();
     renderZs();
+    renderLudia();
+    renderCeny();
   }
 
   setText("pd-week", weekLabel);
