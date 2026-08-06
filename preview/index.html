@@ -173,6 +173,8 @@
   }
 
   .wrap{max-width:1160px;margin:0 auto;padding:0 var(--pad)}
+  /* Finančné prehľady majú veľa stĺpcov — na širokej obrazovke im dáme viac miesta. */
+  .wrap.wide{max-width:1360px}
 
   /* ---------- shell ---------- */
 
@@ -397,6 +399,9 @@
     }
     .scroll-x + .swipe-hint{display:block}
   }
+  /* Sumy sa nesmú lámať medzi číslom a menou. */
+  table.data td.num{white-space:nowrap}
+  table.data th.num{white-space:normal}
   .swipe-hint{display:none;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
     color:var(--ink-3);margin-top:7px;text-transform:uppercase}
 
@@ -1565,7 +1570,7 @@
   </div>
 </section>
 
-<section class="screen wrap" id="s-zivnost" hidden>
+<section class="screen wrap wide" id="s-zivnost" hidden>
   <div class="screen-head">
     <h2>Živnostníci — mesačný prehľad</h2>
     <span class="who">august 2026 · nie je to mzdový podklad, podľa neho sa nič nestrháva</span>
@@ -1597,11 +1602,11 @@
       <span class="pill neutral" id="zv-count">—</span>
     </div>
     <div class="scroll-x" style="border:0">
-      <table class="data" style="min-width:1180px">
+      <table class="data" style="min-width:1000px">
         <thead><tr>
           <th>Meno</th><th>Firma</th><th>Prevádzka</th><th class="num">Obedy</th>
-          <th class="num">Jedálni celkom</th><th class="num">z toho DPH 19 %</th><th class="num">bez DPH</th>
-          <th class="num">Stabilizačný príplatok</th><th class="num">Jeho čistý náklad</th>
+          <th class="num">Jedálni<br>celkom</th><th class="num">z toho<br>DPH 19 %</th><th class="num">bez DPH</th>
+          <th class="num">Stabilizačný<br>príplatok</th><th class="num">Jeho čistý<br>náklad</th>
           <th class="num">Zamestnanec<br>by platil</th>
         </tr></thead>
         <tbody id="zv-osoby"></tbody>
@@ -1609,7 +1614,7 @@
       </table>
     </div>
     <p class="swipe-hint">← tabuľka sa posúva vbok →</p>
-    <p class="hint" style="margin-top:12px">Stĺpec <strong>stabilizačný príplatok</strong> je jediné číslo, ktoré človek potrebuje — o toľko si zvýši faktúru voči firme. Posledné dva stĺpce sú na porovnanie a nie sú súčasťou žiadneho dokladu.</p>
+    <p class="hint" style="margin-top:12px">Stĺpec <strong>stabilizačný príplatok</strong> je jediné číslo, ktoré človek potrebuje — o toľko si zvýši faktúru voči firme. <strong>Jeho čistý náklad</strong> je, čo ho obed po započítaní príplatku naozaj stojí. Posledný stĺpec je len informatívny: koľko by za rovnaký počet zaplatil zamestnanec. Do žiadneho dokladu nevstupuje.</p>
   </div>
 
   <div class="card">
@@ -1625,8 +1630,8 @@
     <div class="scroll-x" style="border:0;margin-top:12px">
       <table class="data" style="min-width:980px">
         <thead><tr><th id="zv-h1">Firma</th><th class="num">Osôb</th><th class="num">Obedov</th>
-          <th class="num">Jedálni celkom</th><th class="num">z toho DPH 19 %</th><th class="num">bez DPH</th>
-          <th class="num">Príplatky spolu</th><th class="num">Zamestnanci<br>by platili</th></tr></thead>
+          <th class="num">Jedálni<br>celkom</th><th class="num">z toho<br>DPH 19 %</th><th class="num">bez DPH</th>
+          <th class="num">Príplatky<br>spolu</th><th class="num">Zamestnanci<br>by platili</th></tr></thead>
         <tbody id="zv-sum"></tbody>
         <tfoot id="zv-sum-foot"></tfoot>
       </table>
@@ -4497,11 +4502,11 @@
     const rows = ZIV.map(z => [z, zivRow(z)]);
 
     tb.innerHTML = rows.map(([z, r]) => {
-      const rozpis = z.c.map((n, i) => n ? n + "× " + CATERERS[i].short : null).filter(Boolean).join(" · ");
+      const rozpis = z.c.map((n, i) => n ? n + "× " + CATERERS[i].short : null).filter(Boolean).join(" + ");
       return "<tr><td><strong>" + z.n + "</strong></td>" +
         "<td>" + FIRMS[z.f] + "</td>" +
         "<td>" + PLACES[z.pl].n + "</td>" +
-        '<td class="num">' + r.obedy + ' <span class="hint">' + rozpis + "</span></td>" +
+        '<td class="num">' + r.obedy + '<br><span class="hint" style="white-space:nowrap">' + rozpis + "</span></td>" +
         '<td class="num">' + eur(r.plati) + "</td>" +
         '<td class="num hint">' + eur(r.dph) + "</td>" +
         '<td class="num hint">' + eur(r.bez) + "</td>" +
@@ -4559,11 +4564,12 @@
       '<td class="num hint">' + eur(T.bez) + "</td>" +
       '<td class="num"><strong>' + eur(T.prip) + "</strong></td>" +
       '<td class="num"><strong>' + eur(T.zam) + "</strong></td></tr>";
-    setText("zv-sum-note", zvView === "f"
+    document.getElementById("zv-sum-note").innerHTML = (zvView === "f"
       ? "<strong>Príplatky spolu</strong> sú to, čo firmu obedy jej živnostníkov tento mesiac stoja — príde jej to na ich faktúrach. Nič iné za nich neplatí. Posledný stĺpec je len informatívny: koľko by tí istí ľudia zaplatili, keby boli zamestnancami. Nevstupuje do žiadneho dokladu."
       : (zvView === "p"
         ? "Triedenie po prevádzkach odpovedá na otázku, kde tie peniaze vznikajú. Do účtovníctva nevstupuje, je to podklad na rozhodovanie."
         : "Rozpis po jedálňach je jediný spôsob, ako sa dá porovnať, koľko ktorá jedáleň stojí — porcie od nej platia priamo živnostníci a na našej faktúre nie sú."));
+
 
     /* ---- list pre jedného ---- */
     const sel = document.getElementById("zv-who");
