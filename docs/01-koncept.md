@@ -950,7 +950,17 @@ Preto je strop **zapnuteľný a datovaný**, appka ho vyhodnotí pri každom obe
 
 Keď strop zasiahne, rozdiel neplatí zamestnávateľ — dorovná ho **sociálny fond alebo stravník**, podľa modelu v 6.2. Strop teda nemení, koľko obed stojí; mení, kto ho platí.
 
-**Čo treba od účtovníčky:** hodnota stravného 5–12 h a dátum, odkedy platí. Nie schéma, jedno číslo.
+#### Zadané ✅
+
+| | |
+|---|---|
+| **stravné 5–12 h** | **8,30 €** |
+| platí od | **1. 9. 2024** *(opatrenie MPSVR SR č. 211/2024 Z. z.)* |
+| **odvodený strop** | **4,57 €** *(55 % z 8,30; vnútorne 4,565 v plnej presnosti)* |
+
+**Nezasiahne.** Strop by sa uplatnil až pri obede drahšom než **8,30 € bez DPH**, čo je **9,88 € s DPH**. Najdrahšia jedáleň má 7,20 € — **rezerva je 2,68 € na porcii.**
+
+Pre úplnosť: keby raz zasiahol, model ostane súdržný. Príspevok zamestnávateľa sa zastaví na 4,57 €, stravník má strop na 45 % a rozdiel dorovná **sociálny fond** — teda sa objaví späť, hoci pri dnešných cenách je nad zlomom nepoužitý. Nič sa nerozbije, len sa presunie, kto platí.
 
 ### 6.2a Zamestnanci a živnostníci — rovnaký výpočet, celkom iná cesta peňazí
 
@@ -1007,7 +1017,9 @@ Vo všetkých troch riadkoch firmu obed stojí `X`. Líši sa len číslo na pap
 
 Tretí riadok tabuľky je pritom **teoretická možnosť, nie očakávaný stav**: naše firmy sú platiteľmi DPH a ide o službu prijatú k podnikaniu, takže si DPH odpočítajú. **Riadok na faktúre bude teda `X`** a príznak platiteľa slúži hlavne na to, aby prehľad ukázal správne aj to, koľko bude na faktúre celkom s DPH — nech vie človek, čo má vystaviť.
 
-> **Pre účtovníčku ostáva jediná vec, a nie je to schéma:** *ako sa má tá položka na faktúre volať?* Appka to slovo len vytlačí, ale malo by byť u všetkých rovnaké. **Otvorená otázka 16.**
+**Položka na faktúre sa volá „stabilizačný príplatok"** ✅ — určila účtovníčka. Je to zámerne názov, ktorý nesľubuje plnenie zo Zákonníka práce, lebo ním nie je. Appka ten text len vytlačí do prehľadu, aby ho mali všetci rovnaký.
+
+> Suma sa bude mesiac od mesiaca líšiť, lebo vychádza z počtu obedov — 20 obedov × 3,44 € je 68,80 €. To je v poriadku a nie je to na čom šetriť pozornosť: appka to číslo vypočíta a živnostník ho len prepíše na faktúru.
 
 #### Čo treba potvrdiť s mzdovým oddelením pred spustením
 - [ ] percentá 55 / 35 a sadzbu DPH k príspevku stravníka (19 %)
@@ -1284,12 +1296,26 @@ SMS je **doplnok, nie náhrada** — neunesie prílohu a do jednej správy sa zm
 **Náklady** sú zanedbateľné: ~0,03–0,05 € za správu, pri dvoch dodávateľoch a dennej objednávke rádovo **2 € mesačne**.
 
 #### Cez koho posielať SMS
-Na slovenskom trhu je viacero brán s API (SMSgate, 123sms, EuroSMS, SMS-portal, O2 Business). Ceny sa pohybujú **od ~0,01 do 0,04 € za správu**. Pri našom objeme je cena za správu takmer jedno — vyberať treba podľa iných vecí:
 
-- [ ] **doručenky** (delivery reports) — bez nich nevieme, či SMS dorazila, a stratíme polovicu zmyslu,
-- [ ] **alfanumerický odosielateľ** — aby prišla od `OBEDY` alebo názvu firmy (max. 11 znakov), nie z neznámeho čísla. Kuchár neznáme číslo ignoruje,
-- [ ] **žiadny mesačný paušál ani minimálny odber** — posielame desiatky správ mesačne,
-- [ ] jednoduché HTTP API a **EÚ spracovanie údajov**.
+**Najprv to podstatné: appka nebude hovoriť s konkrétnou bránou.** Odosielanie SMS je jedno rozhranie s dvomi metódami — *pošli* a *aké je doručenie* — a brána je pod ním vymeniteľný modul. Zmena poskytovateľa je potom hodina práce, nie prepisovanie appky. Preto sa nad výberom nemá dlho stáť: keď sa ukáže ako zlý, prehodí sa.
+
+**Objem je smiešny:** dvaja dodávatelia × ~250 pracovných dní ≈ **500 správ ročne**, plus zopár poplachových. Pri cenách 0,01–0,04 € za správu je celý ročný náklad **5 až 20 €**. Cena za správu je teda takmer nepodstatná a **vyberať treba podľa iného**:
+
+| | Prečo to rozhoduje |
+|---|---|
+| **alfanumerický odosielateľ** | aby SMS prišla od `OBEDAR`, nie z neznámeho čísla. Kuchár o 7:30 neznáme číslo ignoruje — a tým padne celý zmysel |
+| **doručenky** | bez nich nevieme, či dorazila |
+| **žiadny paušál ani minimálny odber** | 40 správ mesačne je pre väčšinu brán nič |
+| **nepremlčateľný kredit** | niektoré brány nechajú kredit prepadnúť po roku. Pri 500 SMS ročne by sme dokupovali len preto, že predošlý kredit vyhorel |
+| **EÚ spracovanie údajov** | posielame telefónne čísla |
+
+**Odporúčanie: slovenská brána** — z tých dostupných napríklad **EuroSMS**. Dôvod nie je technický, ale prevádzkový: slovenská faktúra bez cezhraničného prenosu daňovej povinnosti, podpora po slovensky a hlavne **registrácia alfanumerického odosielateľa ako domáci proces**. České brány (SMSmanager, GoSMS) sú rovnako dobré technicky a bežne obsluhujú SK čísla — sú prirodzená druhá voľba.
+
+**Twilio neodporúčam ako prvú voľbu.** Je to dobrá služba, ale v Európe drahšia, je to americký subjekt a registrácia alfanumerického odosielateľa preň býva byrokratickejšia. Má zmysel, keď treba desiatky krajín — my potrebujeme jednu.
+
+> **Jediné, čo má dlhú dodaciu lehotu, je ten alfanumerický odosielateľ.** Registrácia `OBEDAR` môže trvať dni a niekde chce doklad o firme. **Vybaviť to treba pri zakladaní účtu, nie týždeň pred spustením** — inak prvé SMS prídu z neznámeho čísla, kuchári si ich nevšimnú a kanál si hneď na začiatku pokazí povesť.
+
+**Overiť pri zakladaní účtu** (aktuálne ceny ani podmienky sa z konceptu potvrdiť nedajú, menia sa): paušál, minimálny odber, platnosť kreditu, spôsob doručeniek (webhook alebo dopytovanie) a dostupnosť alfanumerického odosielateľa pre SK.
 
 #### Prečo nie Viber, WhatsApp alebo Telegram
 | | Prekážka |
@@ -1535,8 +1561,8 @@ Alternatívne názvy: *Obedár*, *Menu 5*, *Naobed*, *Obedy*.
 13. ~~**Spôsob úhrady pre živnostníkov**~~ — **vyriešené:** platia dodávateľovi sami v plnej cene. Firma neplatí za nich nič a nič im nestrháva; príspevok dostávajú nepriamo ako **odmenu pripočítanú k ich faktúre** voči firme (6.2a, rozhodnutie 34).
 14. ~~**Zoznam firiem**~~ — **vyriešené a potvrdilo to, čo sa tušilo:** prefixy v dochádzke **nie sú firmy**. `1` = Adiumentum, `2` = PD, ale `3` = *živnostníci*, čo je **typ vzťahu, nie firma** — živnostník patrí napríklad pod Adiumentum. Skutočných firiem je viac (Cronus, HBE, …). Prefix sa preto **na nič nepoužije**: dochádzka dodá len ID a meno, firmu aj typ vzťahu zadá admin v appke (rozhodnutie 37). Zoznam firiem sa dopĺňa v nastaveniach a nemusí byť úplný vopred.
 15. ~~**Kde sa zaokrúhľuje**~~ — **vyriešené:** v plnej presnosti na obede, zaokrúhľuje sa až **mesačný súčet za osobu** (6.2).
-16. **Ako sa má položka na faktúre živnostníka volať** (6.2a). To je z pôvodnej otázky všetko, čo zostalo: DPH si firma odpočíta (je platiteľom a ide o službu prijatú k podnikaniu), takže riadok na faktúre je `X`. Príznak platiteľa DPH je pri osobe. Chýba len názov položky, nech je u všetkých rovnaký.
-16a. **Stravné za 5–12 h — jedno číslo a dátum** (6.2b). Z neho si appka odvodí strop ako 55 %. Pri cenách 6,30 a 7,20 € nezasiahne — zasiahol by až pri obede drahšom, než je celé stravné — ale zadať sa má, lebo ceny rastú a stravné sa mení nezávisle. **Otázka pre účtovníčku.**
+16. ~~**Názov položky na faktúre živnostníka**~~ — **vyriešené: „stabilizačný príplatok".** DPH si firma odpočíta (je platiteľom a ide o službu prijatú k podnikaniu), takže riadok je `X`; príznak platiteľa DPH je pri osobe.
+16a. ~~**Stravné za 5–12 h**~~ — **vyriešené: 8,30 € od 1. 9. 2024** (opatrenie MPSVR SR č. 211/2024 Z. z.), strop teda **4,57 €**. Pri cenách 6,30 a 7,20 € nezasiahne; zasiahol by až nad 9,88 € s DPH.
 17. ~~**Kto fakturuje živnostníkom**~~ — **vyriešené:** je to **nastavenie poskytovateľa** (6.3), nie rozhodnutie. Rozdelený výstup zvládne oboje — priamu fakturáciu živnostníkom aj preúčtovanie cez firmu. Od dodávateľa treba len vedieť, ktorý z tých dvoch režimov chce; je to v `06-otazky-pre-dodavatela.md`.
 18. ~~**Vie dochádzkomer exportovať denné prítomnosti**~~ — **vyriešené inak:** natívny export nevyhovuje a appka ho ani čítať nebude. Prevod do dohodnutého tvaru `osobne_cislo; datum; hodiny` sa spraví mimo appky; zadanie je v `docs/08-vstupne-subory.md` (rozhodnutie 39). Ostáva overiť, že sa z dochádzkomera dá dostať aspoň *osoba × deň* v akejkoľvek podobe — bez toho niet čo prevádzať.
 
