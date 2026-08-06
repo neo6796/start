@@ -978,7 +978,7 @@
   <div class="stat-row">
     <span class="pill miss" id="pd-missing">—</span>
     <span class="pill neutral" id="pd-none">—</span>
-    <span class="pill neutral" id="pd-provider">Reštaurácia U Jeleňa · A B C</span>
+    <span class="pill neutral" id="pd-provider">—</span>
     <div class="btn-row" style="margin-left:auto">
       <div class="seg" role="group" aria-label="Čo sa v tabuľke zadáva" id="mx-view">
         <button data-view="meal" aria-pressed="true">Jedlo</button>
@@ -1067,8 +1067,8 @@
     <p><strong>Podfarbenie znamená akciu.</strong> Kde nikto nekonal, nie je podfarbenie žiadne — bunka je čistá, možnosti len bledo orámované. Až voľba bunku zafarbí, a farba hovorí <strong>kto ju urobil</strong>: <span style="border-bottom:2px solid var(--ok)">zelenkavá</span> = zadal si stravník sám, <span style="border-bottom:2px solid var(--by-lead-line)">modrozelenkavá</span> = zadal predák. Skús klikať a uvidíš, ako sa bunky farbia pod tebou.</p>
     <p><strong>Tri stavy, nie dva.</strong> Označenie jedla horčicovo, krížik <code>×</code> sivo. Krížik znamená, že dotyčný obed <strong>nechce</strong> (dovolenka, služobka, nechce jesť) — je to rozhodnutie, takže sa nepočíta medzi chýbajúcich a upomienka mu nechodí. Opätovný klik na zvolenú možnosť ju zruší a bunka sa vráti na nezafarbenú.</p>
     <p>Diery sa tým pádom hľadajú ako <strong>nezafarbené miesta</strong>. Pomáha aj počítadlo pri mene a tlačidlo <strong>Zvýrazniť nerozhodnuté</strong>, ktoré ich pred uzávierkou rozsvieti.</p>
-    <p><strong>Rôzni poskytovatelia v jednom tíme.</strong> Krajčí a Bezáková majú pridelenú Školskú jedáleň Sever, preto majú v riadku <code>1 2 3 4</code> namiesto <code>A B C</code> — a pri osobnom čísle sa im ukáže značka poskytovateľa. Zastupovaný tím Lisovňa je celý na Severe. Predák tak obsluhuje oboch dodávateľov v jednej tabuľke a nemusí nikam prepínať; každý riadok ponúka presne to, čo daný človek môže dostať.</p>
-    <p><strong>Šimko má pridelených oboch</strong> — jeho bunky majú ponuky <strong>pod sebou</strong>, <code>A B C</code> na prvom riadku a <code>1 2 3 4</code> na druhom, a v piatok si dal jedlo od Severu. Krížik je <strong>vždy jeden</strong> a má vlastný riadok naspodku: „nechcem obed" je rozhodnutie o dni, nie o dodávateľovi, takže nedáva zmysel mať ho pri každej jedálni. Pridelenie sa mení v Admine, v tabuľke „Pridelenie stravníkov" — skús to prehodiť niekomu ďalšiemu a pozri sa, čo to v matici spraví.</p>
+    <p><strong>Rôzni poskytovatelia v jednom tíme.</strong> Krajčí a Bezáková majú pridelené GASTRO ABM, preto majú v riadku <code>A B C D E</code> namiesto <code>1 2 3 4 5</code> — a pri osobnom čísle sa im ukáže značka poskytovateľa. Zastupovaný tím Lisovňa je celý na ABM. Predák tak obsluhuje oboch dodávateľov v jednej tabuľke a nemusí nikam prepínať; každý riadok ponúka presne to, čo daný človek môže dostať.</p>
+    <p><strong>Šimko má pridelených oboch</strong> — jeho bunky majú ponuky <strong>pod sebou</strong>, <code>1 2 3 4 5</code> na prvom riadku a <code>A B C D E</code> na druhom, a v piatok si dal jedlo od ABM. Krížik je <strong>vždy jeden</strong> a má vlastný riadok naspodku: „nechcem obed" je rozhodnutie o dni, nie o dodávateľovi, takže nedáva zmysel mať ho pri každej jedálni. Pridelenie sa mení v Admine, v tabuľke „Pridelenie stravníkov" — skús to prehodiť niekomu ďalšiemu a pozri sa, čo to v matici spraví.</p>
     <p>Klávesnicou to ide rýchlejšie: <code>Tab</code> vojde do bunky, <strong>šípky vľavo a vpravo</strong> prechádzajú medzi možnosťami, <strong>medzerník</strong> zvolí. Alebo rovno stlač <code>A</code>, <code>B</code>, <code>C</code> pre jedlo, <code>0</code> pre krížik, <code>Backspace</code> pre návrat na nerozhodnuté — kurzor sám skočí na ďalšieho človeka v tom istom dni. Šípky <strong>hore a dole</strong> sa medzi ľuďmi pohybujú tiež.</p>
     <p>V ukážke má Bezáková celý týždeň krížiky (dovolenka), Tóth a Slaný sa zatiaľ nevyjadrili vôbec.</p>
     <p>Zastupovaný tím je <strong>samostatný blok</strong>, nie zliaty s vlastným — zlievanie tímov spôsobuje omyly typu „objednal som to tomu druhému Kováčovi". Riadky so zeleným pozadím sú ľudia, ktorí si objednali sami; predák ich nemusí prepisovať.</p>
@@ -1147,8 +1147,7 @@
       <span class="pill neutral">2 z 5 aktívnych</span>
     </div>
     <div class="seg" role="group" id="a-cat" aria-label="Výber poskytovateľa">
-      <button data-cat="0" aria-pressed="true">Reštaurácia U Jeleňa</button>
-      <button data-cat="1" aria-pressed="false">Školská jedáleň Sever</button>
+      <!-- naplní renderCatButtons() z CATERERS -->
       <button id="a-cat-add">+ pridať</button>
     </div>
     <p class="hint" style="margin-top:10px">Každý poskytovateľ má vlastné číslovanie, počet jedál, skladbu, cenník aj termín na odhlásenie. <strong>Poskytovateľa prideľuje stravníkovi admin</strong> — sám si ho nevyberá (koncept 3.1).</p>
@@ -1200,7 +1199,7 @@
 
   <div class="grid-2">
     <div class="card">
-      <div class="card-head"><h3>Nastavenie — <span id="a-cat-name">Reštaurácia U Jeleňa</span></h3></div>
+      <div class="card-head"><h3>Nastavenie — <span id="a-cat-name">—</span></h3></div>
 
       <div class="field">
         <label for="a-style">Typ číslovania</label>
@@ -1359,25 +1358,25 @@
         <thead><tr><th>Kedy</th><th>Kanál</th><th>Komu</th><th>Čo</th><th>Stav odoslania</th><th>Potvrdenie dodávateľa</th><th></th></tr></thead>
         <tbody>
           <tr><td>dnes 07:30</td><td><span class="pill neutral">SMS</span></td><td>+421 903 000 000</td><td>Korekcia na dnes — 44 porcií</td><td><span class="pill ok">doručenka od operátora</span></td><td>—</td><td></td></tr>
-          <tr><td>dnes 07:30</td><td><span class="pill neutral">e-mail</span></td><td>kuchyna@ujelena.example</td><td>Korekcia na dnes — storná 3, doobj. 2</td><td><span class="pill ok">prijaté ich serverom</span></td><td><span class="pill ok">potvrdené 07:41</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
-          <tr><td>včera 14:30</td><td><span class="pill neutral">e-mail</span></td><td>objednavky@jedalen-sever.example</td><td>Korekcia na dnes — storná 1</td><td><span class="pill ok">prijaté ich serverom</span></td><td><span class="pill ok">potvrdené 14:52</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>dnes 07:30</td><td><span class="pill neutral">e-mail</span></td><td>objednavky@gastrogal.example</td><td>Korekcia na dnes — storná 3, doobj. 2</td><td><span class="pill ok">prijaté ich serverom</span></td><td><span class="pill ok">potvrdené 07:41</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>včera 14:30</td><td><span class="pill neutral">e-mail</span></td><td>gastroabm@gastroabm.example</td><td>Korekcia na dnes — storná 1</td><td><span class="pill ok">prijaté ich serverom</span></td><td><span class="pill ok">potvrdené 14:52</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
           <tr><td>pi 13:01</td><td><span class="pill neutral">SMS</span></td><td>+421 903 000 000</td><td>Urgencia — objednávka nepotvrdená hodinu</td><td><span class="pill ok">doručenka od operátora</span></td><td><span class="pill ok">potvrdené 13:09</span></td><td></td></tr>
-          <tr><td>pi 12:00</td><td><span class="pill neutral">e-mail</span></td><td>kuchyna@ujelena.example</td><td>Objednávka na 3.–7. 8. — 233 porcií</td><td><span class="pill ok">prijaté ich serverom</span></td><td><span class="pill miss">nepotvrdené do 13:00</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>pi 12:00</td><td><span class="pill neutral">e-mail</span></td><td>objednavky@gastrogal.example</td><td>Objednávka na 3.–7. 8. — 233 porcií</td><td><span class="pill ok">prijaté ich serverom</span></td><td><span class="pill miss">nepotvrdené do 13:00</span></td><td><button class="btn" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
           <tr><td>pi 12:31</td><td><span class="pill neutral">SMS</span></td><td>+421 911 000 000</td><td>Náhrada za zlyhaný e-mail — ozvite sa</td><td><span class="pill ok">doručenka od operátora</span></td><td>—</td><td></td></tr>
-          <tr><td>pi 12:30</td><td><span class="pill neutral">e-mail</span></td><td>objednavky@jedalen-sever.example</td><td>Objednávka na 3.–7. 8. — 96 porcií</td><td><span class="pill miss">odmietnuté · schránka plná</span></td><td>—</td><td><button class="btn primary" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
+          <tr><td>pi 12:30</td><td><span class="pill neutral">e-mail</span></td><td>gastroabm@gastroabm.example</td><td>Objednávka na 3.–7. 8. — 96 porcií</td><td><span class="pill miss">odmietnuté · schránka plná</span></td><td>—</td><td><button class="btn primary" style="padding:3px 9px;font-size:12px">Poslať znova</button></td></tr>
         </tbody>
       </table>
     </div>
-    <p class="hint" style="margin-top:12px"><strong>Dva rôzne stĺpce, lebo sú to dve rôzne veci.</strong> „Stav odoslania" hovorí len o tom, čo vieme technicky: či poštový server dodávateľa správu prijal alebo odmietol. To <em>nie je</em> dôkaz, že ju niekto videl — mohla skončiť v spame alebo v schránke, ktorú nikto neotvára. Dôkaz je až <strong>potvrdenie dodávateľa</strong>: v objednávke je odkaz „Potvrdiť prijatie", jeden klik bez prihlásenia. Pozri posledné dva riadky odspodu: U Jeleňa nepotvrdila objednávku do hodiny, o 13:01 im odišla urgencia SMS-kou a o osem minút potvrdili.</p>
+    <p class="hint" style="margin-top:12px"><strong>Dva rôzne stĺpce, lebo sú to dve rôzne veci.</strong> „Stav odoslania" hovorí len o tom, čo vieme technicky: či poštový server dodávateľa správu prijal alebo odmietol. To <em>nie je</em> dôkaz, že ju niekto videl — mohla skončiť v spame alebo v schránke, ktorú nikto neotvára. Dôkaz je až <strong>potvrdenie dodávateľa</strong>: v objednávke je odkaz „Potvrdiť prijatie", jeden klik bez prihlásenia. Pozri posledné dva riadky odspodu: GASTROGAL nepotvrdil objednávku do hodiny, o 13:01 im odišla urgencia SMS-kou a o osem minút potvrdili.</p>
   </div>
 
   <div class="note">
     <p class="eyebrow">Prečo takto</p>
-    <p><strong>Prepni poskytovateľa hore</strong> a uvidíš, že každý má vlastný svet: U Jeleňa má tri jedlá <code>A B C</code> v komplete a odhlasuje sa v deň obeda do 07:30, Sever má štyri jedlá <code>1 2 3 4</code> po častiach, odhlasuje sa už predchádzajúci pracovný deň do 14:00 a názvy jedál nemá vyplnené vôbec.</p>
+    <p><strong>Prepni poskytovateľa hore</strong> a uvidíš, že každý má vlastný svet: GASTROGAL čísluje jedlá <code>1 2 3 4 5</code>, GASTRO ABM tie isté počty značí <code>A B C D E</code>. Rovnaké jedlo, iné písmeno — a práve preto nemôže byť značenie napevno v appke. To isté platí pre alergény: jeden ich píše číslami, druhý slovami.</p>
     <p><strong>Prepni typ číslovania alebo posuň počet jedál</strong> a potom sa vráť na obrazovku predáka — označenia sa zmenia, ale <strong>len u ľudí prideleného poskytovateľa</strong>. Admin nastavuje štýl, nie jednotlivé písmená.</p>
     <p><strong>Že mail „dorazil", sa spoľahlivo zistiť nedá.</strong> Vieme len, či ho ich poštový server prijal alebo odmietol — a to nie je to isté ako že ho niekto čítal. Mohol skončiť v spame. Otváracie pixely sú nespoľahlivé (obrázky sú blokované) a žiadosť o potvrdenie prečítania takmer nikto nepotvrdí. Preto to appka nerieši detekciou, ale <strong>aktívnym potvrdením</strong>: dodávateľ klikne v maili na odkaz a ak to do nastaveného času nespraví, appka eskaluje SMS-kou jemu a upozornením adminovi. Nespoľahlivé „asi dorazilo" sa tým mení na jednoznačné „potvrdili o 12:07", čo je zároveň dôkaz pri spore o počty.</p>
-    <p><strong>SMS je doplnok, nie náhrada.</strong> Neunesie prílohu, takže týždennú objednávku ňou poslať nemožno — do 160 znakov sa zmestí len denná korekcia alebo upozornenie. Najsilnejší dôvod ju mať je <strong>zlyhanie e-mailu</strong>: keď spadne SMTP, ďalší e-mail už nepomôže, lebo ide tou istou cestou. Preto to mám zapnuté u oboch dodávateľov aj vtedy, keď bežné SMS nechcú. U Jeleňa má navyše zapnutú dennú korekciu — ráno o pol ôsmej je kuchár pri sporáku, nie pri počítači.</p>
-    <p><strong>Odosielanie objednávok</strong> je tiež per poskytovateľ a časy sa počítajú z jeho vlastných uzávierok — všimni si, že U Jeleňa posiela dennú korekciu ráno o 07:30 na ten istý deň, kým Sever ju posiela o 14:30 <strong>predchádzajúci</strong> pracovný deň. „Ráno po dennej uzávierke" teda platí len pre niektorých dodávateľov; appka to nemôže mať napevno.</p>
+    <p><strong>SMS je doplnok, nie náhrada.</strong> Neunesie prílohu, takže týždennú objednávku ňou poslať nemožno — do 160 znakov sa zmestí len denná korekcia alebo upozornenie. Najsilnejší dôvod ju mať je <strong>zlyhanie e-mailu</strong>: keď spadne SMTP, ďalší e-mail už nepomôže, lebo ide tou istou cestou. Preto to mám zapnuté u oboch dodávateľov aj vtedy, keď bežné SMS nechcú. Obaja majú navyše zapnutú <strong>dennú objednávku</strong> — ráno o pol ôsmej je kuchár pri sporáku, nie pri počítači.</p>
+    <p><strong>Odosielanie objednávok</strong> je tiež per poskytovateľ a časy sa počítajú z jeho vlastných uzávierok — obaja naši dodávatelia berú objednávky ráno, takže záväzný počet im odchádza pred ôsmou. Keby pribudol dodávateľ, ktorý chce počty deň vopred poobede, appka mu ich pošle vtedy — časy sa počítajú z jeho vlastných uzávierok, nie z pevného rozvrhu.</p>
     <p>Cenník má oba modely príspevku vedľa seba, aby sa mzdové oddelenie mohlo pozrieť na konkrétne čísla a povedať, ktorý sedí. Zákonné limity sa menia niekoľkokrát ročne, preto sú to nastavenia s platnosťou od dátumu, nie hodnoty v kóde.</p>
   </div>
 </section>
@@ -1561,7 +1560,7 @@
       <div class="card">
         <div class="card-head"><h3>Objednávka pre dodávateľa</h3><span class="pill neutral">PDF + XLSX e-mailom</span></div>
         <div class="sheet">
-          <h4>Reštaurácia U Jeleňa</h4>
+          <h4>GASTROGAL</h4>
           <p class="meta">Objednávka na 3. – 7. 8. 2026 · odoslané 31. 7. 2026 o 12:00</p>
           <table>
             <thead><tr><th>Deň</th><th class="cnt">A</th><th class="cnt">B</th><th class="cnt">C</th><th class="cnt">Spolu</th></tr></thead>
@@ -1632,7 +1631,7 @@
     </div>
     <div class="sheet" style="max-width:520px">
       <h4>Objednávka obedov — ZÁVOD SK</h4>
-      <p class="meta">3. – 7. 8. 2026 · Reštaurácia U Jeleňa · odoslané 31. 7. o 12:00</p>
+      <p class="meta">3. – 7. 8. 2026 · GASTROGAL · odoslané 31. 7. o 12:00</p>
       <table style="margin-bottom:16px">
         <thead><tr><th>Deň</th><th class="cnt">A</th><th class="cnt">B</th><th class="cnt">C</th><th class="cnt">Spolu</th></tr></thead>
         <tbody>
@@ -1944,7 +1943,7 @@
   <div class="card">
     <div class="card-head">
       <h3>Karta osoby — Horváth Peter</h3>
-      <span class="pill neutral">os. č. 4021 · Údržba · U Jeleňa</span>
+      <span class="pill neutral">os. č. 4021 · Údržba · GASTROGAL</span>
     </div>
     <div class="scroll-x" style="border:0">
       <table class="data" style="min-width:660px">
@@ -1981,9 +1980,9 @@
           <tr><td>30. 7. 09:14</td><td>Kováč J. (predák)</td><td>Objednávka — Horváth P., streda 5. 8.</td><td><span class="chip sm ghost">·</span> → <span class="chip sm">B</span></td></tr>
           <tr><td>30. 7. 09:14</td><td>Kováč J. (predák)</td><td>Objednávka — Tóth Ľ., streda 5. 8.</td><td><span class="chip sm ghost">·</span> → <span class="chip sm">A</span></td></tr>
           <tr><td>30. 7. 08:02</td><td>Novák M. <em>(zastupuje Urbana)</em></td><td>Objednávka — Sedláková J., pondelok 3. 8.</td><td><span class="chip sm">2</span> → <span class="chip sm">1</span></td></tr>
-          <tr><td>29. 7. 16:40</td><td>Nováková A. (admin)</td><td>Cenník U Jeleňa — platnosť od 1. 9.</td><td>6,20 → 6,50 €</td></tr>
+          <tr><td>29. 7. 16:40</td><td>Nováková A. (admin)</td><td>Cenník GASTROGAL — platnosť od 1. 9.</td><td>6,20 → 6,50 €</td></tr>
           <tr><td>28. 7. 08:12</td><td>Nováková A. (admin)</td><td>Odhlásenie po termíne — Horváth P., 28. 7.</td><td>dôvod: PN · <strong>účtovať</strong></td></tr>
-          <tr><td>27. 7. 08:14</td><td>Nováková A. (admin)</td><td>Príloha menu — U Jeleňa, 32. týždeň</td><td>nahraná verzia 1</td></tr>
+          <tr><td>27. 7. 08:14</td><td>Nováková A. (admin)</td><td>Príloha menu — GASTROGAL, 32. týždeň</td><td>nahraná verzia 1</td></tr>
         </tbody>
       </table>
     </div>
@@ -3070,9 +3069,8 @@
         "<td>"+p.n+'</td><td class="num">'+p.p+"</td><td>"+team+"</td>" +
         '<td><select data-assign="'+p.p+'" style="width:100%;max-width:250px;padding:5px 8px;' +
         'border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink);font-size:13px">' +
-          '<option value="0"'   + (cur === "0"   ? " selected" : "") + ">Reštaurácia U Jeleňa</option>" +
-          '<option value="1"'   + (cur === "1"   ? " selected" : "") + ">Školská jedáleň Sever</option>" +
-          '<option value="0,1"' + (cur === "0,1" ? " selected" : "") + ">oba — stravník si volí</option>" +
+          CATERERS.map((C,i) => '<option value="'+i+'"'+(cur === String(i) ? " selected" : "")+">"+C.name+"</option>").join("") +
+          '<option value="0,1"' + (cur === "0,1" ? " selected" : "") + ">obaja — stravník si volí</option>" +
         "</select></td>" +
         '<td><select data-home="'+p.p+'" style="width:100%;max-width:220px;padding:5px 8px;' +
         'border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink);font-size:13px">' +
@@ -3210,6 +3208,21 @@
     document.getElementById("a-late").checked = A.late;
     document.getElementById("a-names").checked = A.names;
   }
+
+  function renderCatButtons(){
+    const box = document.getElementById("a-cat");
+    if (!box) return;
+    const add = box.querySelector("#a-cat-add");
+    box.querySelectorAll("button[data-cat]").forEach(b => b.remove());
+    CATERERS.forEach((C, i) => {
+      const b = document.createElement("button");
+      b.setAttribute("data-cat", String(i));
+      b.setAttribute("aria-pressed", String(i === adminCat));
+      b.textContent = C.name;
+      box.insertBefore(b, add);
+    });
+  }
+  renderCatButtons();
 
   document.querySelectorAll("#a-cat button[data-cat]").forEach(b => b.addEventListener("click", function(){
     document.querySelectorAll("#a-cat button[data-cat]").forEach(x =>
@@ -3408,7 +3421,7 @@
     const used = [];
     own.concat(deleg).forEach(p => p.cs.forEach(c => { if (used.indexOf(c) === -1) used.push(c); }));
     used.sort();
-    el.textContent = used.map(c => CATERERS[c].short + " " + labelsOf(c).join("")).join(" + ");
+    el.textContent = used.map(c => CATERERS[c].short + " · " + labelsOf(c).join(" ")).join("   +   ");
     el.title = used.map(c => CATERERS[c].name).join(" · ");
   }
 
@@ -3466,7 +3479,7 @@
   const CY = now.getFullYear();
   const PERIODS = [
     {kind:"shut",   from:new Date(CY,6,20), to:new Date(CY,6,31), label:"Celozávodná dovolenka", who:"celý závod"},
-    {kind:"nocook", c:1, from:new Date(CY,6,1), to:new Date(CY,7,31), label:"Letné prázdniny", who:"Školská jedáleň Sever"},
+    {kind:"nocook", c:1, from:new Date(CY,6,1), to:new Date(CY,7,31), label:"Dovolenka jedálne", who:"GASTRO ABM"},
     {kind:"shut",   from:new Date(CY,11,24), to:new Date(CY,11,31), label:"Vianočná odstávka", who:"celý závod"}
   ];
 
