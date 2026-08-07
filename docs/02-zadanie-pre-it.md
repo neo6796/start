@@ -65,7 +65,25 @@ Existujúce záznamy, ktoré sme kontrolovali a **nemeníme**:
 
 ---
 
-## 4. Zálohovanie na firemný NAS
+## 4. Odblokovať IP aplikačného servera a dať ju na bielu listinu
+
+Pri testovaní odosielania sme dvakrát zadali nesprávne prihlasovacie meno a ochrana proti hádaniu hesla zablokovala celú IP adresu:
+
+```
+* Connected to mail.pdvrable.sk (62.169.176.222) port 587
+* This IP [46.225.236.143] is blocked.
+```
+
+**Prosíme o dve veci:**
+
+1. **Odblokovať `46.225.236.143`** *(ak sa ban po čase neuvoľní sám)*.
+2. **Pridať ju na bielu listinu** — je to server, z ktorého bude appka denne posielať objednávky do jedální. Ak ju ochrana zablokuje uprostred týždňa, v ten deň sa neuvarí správny počet obedov.
+
+Je to jediná IP adresa, prihlasuje sa vždy tým istým menom a posiela rádovo desiatky správ denne.
+
+*Na našej strane sme z toho spravili pravidlo: pri chybe prihlásenia appka pokus nikdy neopakuje, len upozorní správcu. Opakovanie ostáva len pre sieťové a dočasné chyby.*
+
+## 5. Zálohovanie na firemný NAS
 
 Zálohy sa ukladajú mimo hostingu. Dôležité je, **ktorým smerom to ide**:
 
@@ -84,7 +102,7 @@ Verejný SSH kľúč NAS-u pošlite a pridáme ho na server; alebo povedzte, či
 
 ---
 
-## Zhrnutie — štyri veci
+## Zhrnutie
 
 | | Čo | Blokuje? |
 |---|---|---|

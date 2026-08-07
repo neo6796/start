@@ -1266,11 +1266,32 @@ Preto je v prehľade **stav odoslania a potvrdenie dodávateľa oddelene** — s
 
 #### Ostatné poistky
 - appka **zaznamená každé odoslanie** so stavom a admin ho vidí v prehľade,
-- pri zlyhaní **3 pokusy** s odstupom,
+- pri zlyhaní **3 pokusy** s odstupom — **okrem zlyhania prihlásenia, tam sa neopakuje vôbec** (viď nižšie),
 - ak zlyhajú všetky, **admin dostane okamžite upozornenie s priloženým PDF**, aby objednávku poslal ručne alebo nadiktoval telefonicky,
 - admin môže ktorúkoľvek objednávku **poslať znova** — kópia je označená ako kópia, aby sa počty nezdvojili,
 - odosielanie cez službu s webhookmi (Postmark, Resend, SES) dá spoľahlivé hlásenia o odrazoch — vlastné SMTP ich vie tiež, ale treba naň nastaviť sledovanú návratovú adresu,
 - **SPF, DKIM a DMARC** na odosielacej doméne sú povinné — viď 7.2.2.
+
+#### Chybné heslo sa nikdy neskúša druhýkrát
+
+**Overené v praxi, nie teoreticky.** Pri testovaní odosielania sme dvakrát použili nesprávne prihlasovacie meno. Poštový server to vyhodnotil ako pokus o hádanie hesla a **zablokoval celú IP adresu aplikačného servera**:
+
+```
+* Connected to mail.pdvrable.sk (62.169.176.222) port 587
+* This IP [46.225.236.143] is blocked.
+```
+
+Od tej chvíle neprešla ani správna objednávka — server prestal prijímať spojenia úplne. **Dva omyly stačili na to, aby prestala fungovať jediná cesta k dodávateľovi.**
+
+Z toho plynú tri pravidlá:
+
+| | |
+|---|---|
+| **Chyba prihlásenia (SMTP 535)** | **žiadne opakovanie.** Appka to vyhodnotí ako trvalú chybu, prestane a okamžite upozorní admina |
+| **Sieťová chyba alebo dočasné odmietnutie (4xx)** | opakovanie s odstupom je v poriadku — nič nebanuje |
+| **IP aplikačného servera** | mala by byť u poštového servera **na bielej listine**, aby ju ochrana nezablokovala pri prvom preklepe |
+
+Rozdiel medzi tými dvoma druhmi chýb je celá pointa: opakovaný pokus so správnymi údajmi po výpadku siete pomôže, opakovaný pokus s nesprávnym heslom **spôsobí, že prestane fungovať aj to, čo fungovalo**. Bežné knižnice na odosielanie pošty toto nerozlišujú a skúšajú znova všetko — musí sa to ošetriť výslovne.
 
 ### 7.2.2 SPF, DKIM a DMARC — čo to je a prečo to potrebujeme
 Sú to tri záznamy v DNS domény, z ktorej appka posiela poštu (napr. `obedy.firma.sk`). Bez nich sa naše maily nedostanú do schránky dodávateľa, ale do spamu — alebo ich prijímajúci server rovno zahodí.
