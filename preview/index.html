@@ -978,6 +978,7 @@
       <button class="tab" role="tab" aria-selected="false" data-screen="admin">Admin</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="ludia">Ľudia</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="ceny">Ceny</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="spolu">Spolu</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="zamest">Zamestnanci</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="zivnost">Živnostníci</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="zostavy">Zostavy</button>
@@ -1568,6 +1569,56 @@
       </table>
     </div>
     <p class="hint" style="margin-top:10px" id="c-ziv-note"></p>
+  </div>
+</section>
+
+<section class="screen wrap wide" id="s-spolu" hidden>
+  <div class="screen-head">
+    <h2>Spolu — všetci stravníci</h2>
+    <span class="who">august 2026 · zamestnanci aj živnostníci v jednej tabuľke</span>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Koľko nás obedy stoja</h3>
+      <span class="pill neutral" id="sp-head">—</span>
+    </div>
+    <div class="seg" role="group" id="sp-kto" aria-label="Koho zahrnúť">
+      <button data-spk="v" aria-pressed="true">Všetci</button>
+      <button data-spk="z" aria-pressed="false">Len zamestnanci</button>
+      <button data-spk="s" aria-pressed="false">Len živnostníci</button>
+    </div>
+    <div class="seg" role="group" id="sp-view" aria-label="Triedenie" style="margin-top:10px">
+      <button data-spv="f" aria-pressed="true">Po firmách</button>
+      <button data-spv="p" aria-pressed="false">Po prevádzkach</button>
+      <button data-spv="c" aria-pressed="false">Po poskytovateľoch</button>
+      <button data-spv="t" aria-pressed="false">Podľa typu vzťahu</button>
+    </div>
+    <div class="scroll-x" style="border:0;margin-top:14px">
+      <table class="data" style="min-width:900px">
+        <thead><tr><th id="sp-h1">Firma</th><th class="num">Osôb</th><th class="num">Obedov</th>
+          <th class="num">Jedálňam<br>celkom</th><th class="num">Náklad<br>firmy</th>
+          <th class="num">Platia<br>stravníci</th><th class="num">Priemer<br>na obed</th></tr></thead>
+        <tbody id="sp-sum"></tbody>
+        <tfoot id="sp-foot"></tfoot>
+      </table>
+    </div>
+    <p class="swipe-hint">← tabuľka sa posúva vbok →</p>
+    <p class="hint" style="margin-top:12px"><strong>Jedálňam celkom = náklad firmy + platia stravníci.</strong> Platí to pre obe skupiny, hoci peniaze tečú úplne inak: u zamestnanca je nákladom firmy príspevok a sociálny fond, u živnostníka stabilizačný príplatok na jeho faktúre. Vďaka tomu sa dajú sčítať a porovnávať.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Čo z toho ide kam</h3>
+      <span class="pill neutral">rozdiel medzi skupinami</span>
+    </div>
+    <div class="scroll-x" style="border:0">
+      <table class="data" style="min-width:720px">
+        <thead><tr><th></th><th class="num">Zamestnanci</th><th class="num">Živnostníci</th><th class="num">Spolu</th></tr></thead>
+        <tbody id="sp-cesty"></tbody>
+      </table>
+    </div>
+    <p class="hint" style="margin-top:12px">Prvé dva riadky sú náklad firmy rozdelený podľa toho, <strong>ako sa účtuje</strong>. Príspevok a sociálny fond sú plnenie zo Zákonníka práce, stabilizačný príplatok je nákup služby — v účtovníctve to nie je to isté, hoci sumu firma vydá tak či tak.</p>
   </div>
 </section>
 
@@ -4886,6 +4937,111 @@
       renderZam(); }
   });
 
+
+  /* ================= SPOLU ================= */
+  let spKto = "v", spView = "f";
+
+  /* Jednotný riadok pre obe skupiny. Identita, ktorá drží oboje pokope:
+     jedálňam celkom = náklad firmy + platia stravníci. */
+  function spRow(osoba, typ){
+    const r = (typ === "z") ? zamRow(osoba) : zivRow(osoba);
+    const faktura = osoba.c.reduce((a, n, i) => a + n * CATERERS[i].gross, 0);
+    if (typ === "z") return { obedy:r.obedy, faktura:faktura, firma:faktura - r.zrazka,
+                              stravnik:r.zrazka, zl:r.zl, sf:r.sf, prip:0 };
+    return { obedy:r.obedy, faktura:faktura, firma:r.prip,
+             stravnik:faktura - r.prip, zl:0, sf:0, prip:r.prip };
+  }
+  function spVsetci(){
+    const out = [];
+    if (spKto !== "s") ZAM.forEach(z => out.push({o:z, typ:"z", r:spRow(z, "z")}));
+    if (spKto !== "z") ZIV.forEach(z => out.push({o:z, typ:"s", r:spRow(z, "s")}));
+    return out;
+  }
+
+  function renderSpolu(){
+    if (!document.getElementById("sp-sum")) return;
+    const all = spVsetci();
+
+    const keys = [], map = {};
+    all.forEach(({o, typ, r}) => {
+      let ks;
+      if (spView === "f") ks = [[FIRMS[o.f], r]];
+      else if (spView === "p") ks = [[PLACES[o.pl].n, r]];
+      else if (spView === "t") ks = [[typ === "z" ? "Pracovný pomer" : "Živnostníci", r]];
+      else ks = o.c.map((n, i) => n
+              ? [CATERERS[i].name, spRow({c:o.c.map((v, j) => j === i ? v : 0)}, typ)]
+              : null).filter(Boolean);
+      ks.forEach(([k, rr]) => {
+        if (!map[k]) { map[k] = {osob:0, obedy:0, faktura:0, firma:0, stravnik:0}; keys.push(k); }
+        map[k].osob++; map[k].obedy += rr.obedy; map[k].faktura += rr.faktura;
+        map[k].firma += rr.firma; map[k].stravnik += rr.stravnik;
+      });
+    });
+
+    setText("sp-h1", spView === "f" ? "Firma" : (spView === "p" ? "Prevádzka"
+             : (spView === "c" ? "Poskytovateľ" : "Typ vzťahu")));
+    document.getElementById("sp-sum").innerHTML = keys.map(k => {
+      const m = map[k];
+      return "<tr><td><strong>" + k + "</strong></td>" +
+        '<td class="num">' + m.osob + "</td>" +
+        '<td class="num">' + m.obedy + "</td>" +
+        '<td class="num">' + eur(m.faktura) + "</td>" +
+        '<td class="num"><strong>' + eur(m.firma) + "</strong></td>" +
+        '<td class="num">' + eur(m.stravnik) + "</td>" +
+        '<td class="num hint">' + eur(m.faktura / m.obedy) + "</td></tr>";
+    }).join("");
+
+    const T = all.reduce((a, x) => ({obedy:a.obedy+x.r.obedy, faktura:a.faktura+x.r.faktura,
+      firma:a.firma+x.r.firma, stravnik:a.stravnik+x.r.stravnik}), {obedy:0,faktura:0,firma:0,stravnik:0});
+    const dv = keys.reduce((a,k)=>a+map[k].osob,0);
+    document.getElementById("sp-foot").innerHTML =
+      '<tr><td><strong>Spolu</strong></td><td class="num"><strong>' + all.length + "</strong>" +
+        (dv > all.length ? ' <span class="hint">' + (dv - all.length) + " je u oboch</span>" : "") + "</td>" +
+      '<td class="num"><strong>' + T.obedy + "</strong></td>" +
+      '<td class="num"><strong>' + eur(T.faktura) + "</strong></td>" +
+      '<td class="num"><strong>' + eur(T.firma) + "</strong></td>" +
+      '<td class="num"><strong>' + eur(T.stravnik) + "</strong></td>" +
+      '<td class="num hint">' + eur(T.faktura / T.obedy) + "</td></tr>";
+
+    setText("sp-head", all.length + " osôb · " + T.obedy + " obedov · " + eur(T.firma) + " náklad firmy");
+
+    /* rozdiel medzi skupinami — vždy za všetkých, bez ohľadu na prepínač */
+    const Z = ZAM.map(z => spRow(z, "z")).reduce((a,r) => ({obedy:a.obedy+r.obedy, faktura:a.faktura+r.faktura,
+        firma:a.firma+r.firma, stravnik:a.stravnik+r.stravnik, zl:a.zl+r.zl, sf:a.sf+r.sf, prip:0}),
+        {obedy:0,faktura:0,firma:0,stravnik:0,zl:0,sf:0,prip:0});
+    const S = ZIV.map(z => spRow(z, "s")).reduce((a,r) => ({obedy:a.obedy+r.obedy, faktura:a.faktura+r.faktura,
+        firma:a.firma+r.firma, stravnik:a.stravnik+r.stravnik, zl:0, sf:0, prip:a.prip+r.prip}),
+        {obedy:0,faktura:0,firma:0,stravnik:0,zl:0,sf:0,prip:0});
+    const row = (label, a, b, hint) =>
+      "<tr><td>" + label + (hint ? ' <span class="hint">' + hint + "</span>" : "") + "</td>" +
+      '<td class="num">' + (a === null ? "—" : eur(a)) + "</td>" +
+      '<td class="num">' + (b === null ? "—" : eur(b)) + "</td>" +
+      '<td class="num"><strong>' + eur((a || 0) + (b || 0)) + "</strong></td></tr>";
+    document.getElementById("sp-cesty").innerHTML =
+      "<tr><td>počet osôb</td>" + '<td class="num">' + ZAM.length + '</td><td class="num">' + ZIV.length +
+        '</td><td class="num"><strong>' + (ZAM.length + ZIV.length) + "</strong></td></tr>" +
+      "<tr><td>počet obedov</td>" + '<td class="num">' + Z.obedy + '</td><td class="num">' + S.obedy +
+        '</td><td class="num"><strong>' + (Z.obedy + S.obedy) + "</strong></td></tr>" +
+      row("príspevok + sociálny fond", Z.firma, null, "plnenie zo Zákonníka práce") +
+      row("stabilizačné príplatky", null, S.prip, "nákup služby") +
+      '<tr style="background:#EFEEE8"><td><strong>Náklad firmy spolu</strong></td>' +
+        '<td class="num"><strong>' + eur(Z.firma) + '</strong></td><td class="num"><strong>' + eur(S.firma) +
+        '</strong></td><td class="num"><strong>' + eur(Z.firma + S.firma) + "</strong></td></tr>" +
+      row("platia stravníci", Z.stravnik, S.stravnik, "zrážka zo mzdy / vlastná platba") +
+      row("jedálňam celkom", Z.faktura, S.faktura);
+  }
+
+  document.addEventListener("click", e => {
+    const k = e.target.closest && e.target.closest("[data-spk]");
+    if (k){ spKto = k.getAttribute("data-spk");
+      Array.from(k.parentElement.children).forEach(b => b.setAttribute("aria-pressed", String(b === k)));
+      renderSpolu(); }
+    const v = e.target.closest && e.target.closest("[data-spv]");
+    if (v){ spView = v.getAttribute("data-spv");
+      Array.from(v.parentElement.children).forEach(b => b.setAttribute("aria-pressed", String(b === v)));
+      renderSpolu(); }
+  });
+
   function renderAll(){
     head(document.getElementById("th-own"));
     head(document.getElementById("th-deleg"));
@@ -4911,6 +5067,7 @@
     renderCeny();
     renderZiv();
     renderZam();
+    renderSpolu();
   }
 
   setText("pd-week", weekLabel);
