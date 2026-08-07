@@ -1910,6 +1910,38 @@
     <p class="eyebrow">Čo z toho platí za appku</p>
     <p>Denná objednávka dodávateľovi a mesačný podklad pre mzdy sú dva výstupy, kvôli ktorým celý systém existuje. Kontrola faktúry navyše ukáže nielen rozdiel oproti fakturovanej sume, ale aj deň, v ktorom vzniká.</p>
   </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Denný hárok pre výdaj</h3>
+      <span class="pill neutral">jeden na prevádzku a jedáleň</span>
+    </div>
+    <div class="grid-3" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+      <div class="field">
+        <label for="dh-den">Deň</label>
+        <select id="dh-den" style="width:100%;padding:7px 9px;border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink);font-size:14px"></select>
+      </div>
+      <div class="field">
+        <label for="dh-miesto">Prevádzka</label>
+        <select id="dh-miesto" style="width:100%;padding:7px 9px;border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink);font-size:14px"></select>
+      </div>
+      <div class="field">
+        <label for="dh-cat">Jedáleň</label>
+        <select id="dh-cat" style="width:100%;padding:7px 9px;border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink);font-size:14px"></select>
+      </div>
+    </div>
+    <div class="seg" role="group" id="dh-sort" aria-label="Zoradenie">
+      <button data-dhs="abc" aria-pressed="true">Podľa priezviska</button>
+      <button data-dhs="tim" aria-pressed="false">Po tímoch</button>
+    </div>
+    <div class="sheet" id="dh-sheet" style="margin-top:14px;max-width:560px"></div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn primary">Vytlačiť tento</button>
+      <button class="btn ghost">Vytlačiť všetky na dnes</button>
+    </div>
+    <p class="hint" style="margin-top:10px"><strong>Zvlášť pre každú jedáleň, nielen pre každé miesto.</strong> Jedlá sa označujú v rámci menu, takže <code>B</code> od jednej a <code>B</code> od druhej sú dve rôzne veci — na spoločnom hárku by sa nedali rozlíšiť.</p>
+    <p class="hint"><strong>Meno aj kód.</strong> Meno preto, že človek pri výdaji pozná ľudí podľa mena; kód preto, že samotné priezvisko nestačí. <strong>Jedlo len ako písmeno</strong> — kto potrebuje vedieť, čo je <code>B</code>, pozrie na menu vedľa, a na hárok sa tak nedostane text typu <em>bezmäsité</em>, ktorý v rade nemusí vidieť každý.</p>
+  </div>
 </section>
 
 <!-- ============ UZÁVIERKA ============ -->
@@ -5042,6 +5074,83 @@
       renderSpolu(); }
   });
 
+
+  /* ================= DENNÝ HÁROK PRE VÝDAJ ================= */
+  let dhDen = 0, dhMiesto = 0, dhCat = 0, dhSort = "abc";
+
+  /* tímy podľa toho, v ktorej matici človek je */
+  function timOf(p){ return own.indexOf(p) >= 0 ? "Údržba" : "Lisovňa"; }
+
+  /* kto má v ten deň obed od tejto jedálne na tomto mieste */
+  function dhLudia(){
+    return own.concat(deleg).filter(p =>
+      hasMeal(p, dhDen) && p.oc[dhDen] === dhCat && placeOn(p, dhDen) === dhMiesto);
+  }
+
+  function renderDenHarok(){
+    const box = document.getElementById("dh-sheet");
+    if (!box) return;
+
+    /* naplniť výbery raz */
+    const dsel = document.getElementById("dh-den");
+    if (dsel && !dsel.options.length){
+      dsel.innerHTML = DAYS.map((d, i) => '<option value="' + i + '">' + d + " " + dm(thisDays[i]) + "</option>").join("");
+      dsel.addEventListener("change", function(){ dhDen = Number(this.value); renderDenHarok(); });
+      const msel = document.getElementById("dh-miesto");
+      msel.innerHTML = PLACES.map((L, i) => '<option value="' + i + '">' + L.n + "</option>").join("");
+      msel.addEventListener("change", function(){ dhMiesto = Number(this.value); renderDenHarok(); });
+      const csel = document.getElementById("dh-cat");
+      csel.innerHTML = CATERERS.map((C, i) => '<option value="' + i + '">' + C.name + "</option>").join("");
+      csel.addEventListener("change", function(){ dhCat = Number(this.value); renderDenHarok(); });
+    }
+
+    const C = CATERERS[dhCat], L = PLACES[dhMiesto];
+    let ludia = dhLudia();
+    if (dhSort === "abc") ludia = ludia.slice().sort((a, b) => a.n.localeCompare(b.n, "sk"));
+    else ludia = ludia.slice().sort((a, b) => timOf(a).localeCompare(timOf(b), "sk") || a.n.localeCompare(b.n, "sk"));
+
+    /* súčty po jedlách */
+    const poJedle = {};
+    ludia.forEach(p => { const k = label(p.o[dhDen], dhCat); poJedle[k] = (poJedle[k] || 0) + 1; });
+    const sucty = labelsOf(dhCat).filter(k => poJedle[k]).map(k => k + ": " + poJedle[k]).join(" · ");
+
+    if (!ludia.length){
+      box.innerHTML = "<h4>Denný hárok — " + L.n + "</h4>" +
+        '<p class="meta">' + DAYS[dhDen] + " " + dm(thisDays[dhDen]) + " · " + C.name + "</p>" +
+        '<p style="font-size:12px;color:#6B7573">Na toto miesto sa v tento deň od tejto jedálne nevozí nič — hárok sa nevytlačí.</p>';
+      return;
+    }
+
+    let telo = "", posledny = null;
+    ludia.forEach(p => {
+      if (dhSort === "tim" && timOf(p) !== posledny){
+        posledny = timOf(p);
+        telo += '<tr><td colspan="4" style="background:#EFEEE8;font-weight:700">' + posledny + "</td></tr>";
+      }
+      telo += "<tr><td>" + p.n + '</td><td style="font-family:var(--mono)">' + p.p + "</td>" +
+        '<td style="text-align:center;font-weight:700">' + label(p.o[dhDen], dhCat) + "</td>" +
+        '<td class="box"></td></tr>';
+    });
+
+    box.innerHTML =
+      "<h4>Denný hárok — " + L.n + "</h4>" +
+      '<p class="meta">' + DAYS[dhDen] + " " + dm(thisDays[dhDen]) + " · " + C.name +
+        " · dovoz " + L.time + " · objednané " + ludia.length + " " + porcie(ludia.length) +
+        ", odoslané o 07:41</p>" +
+      "<table><thead><tr><th>Priezvisko a meno</th><th>Kód</th><th>Jedlo</th><th>Prevzaté</th></tr></thead>" +
+      "<tbody>" + telo + "</tbody></table>" +
+      '<p style="margin:10px 0 0;font-size:11.5px"><strong>' + sucty + "</strong> · spolu <strong>" + ludia.length +
+        "</strong> · neprevzatých ……… </p>" +
+      '<p style="margin:6px 0 0;font-size:11px;color:#6B7573">Súčet musí sedieť s počtom v hlavičke. Ak nesedí, niekto je na hárku navyše alebo chýba — a to sa má zistiť ráno, nie o mesiac pri faktúre. Označenie jedla nájdete na menu vedľa.</p>';
+  }
+
+  document.addEventListener("click", e => {
+    const t = e.target.closest && e.target.closest("[data-dhs]");
+    if (t){ dhSort = t.getAttribute("data-dhs");
+      Array.from(t.parentElement.children).forEach(b => b.setAttribute("aria-pressed", String(b === t)));
+      renderDenHarok(); }
+  });
+
   function renderAll(){
     head(document.getElementById("th-own"));
     head(document.getElementById("th-deleg"));
@@ -5068,6 +5177,7 @@
     renderZiv();
     renderZam();
     renderSpolu();
+    renderDenHarok();
   }
 
   setText("pd-week", weekLabel);
