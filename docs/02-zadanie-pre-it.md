@@ -85,40 +85,76 @@ Je to jediná IP adresa, prihlasuje sa vždy tým istým menom a posiela rádovo
 
 ## 5. Zálohovanie na firemný NAS
 
-Zálohy sa ukladajú mimo hostingu. Dôležité je, **ktorým smerom to ide**:
+Ide o jednu naplánovanú úlohu na NAS-e. Nič sa neinštaluje, nič sa neotvára vo firewalle.
 
-> **NAS sa pripája na server a sťahuje si zálohu.** Nie server na NAS.
+### Prečo to ide týmto smerom
 
-Dôvod: keby zálohu posielal server, musel by poznať prístup na NAS — a útočník, ktorý sa dostane na server, by zmazal aj zálohy. Pri sťahovaní pozná prístup len NAS a server o ňom nevie nič. Bonus: **NAS nemusí byť dostupný z internetu**, stačí mu odchádzajúce spojenie.
+> **NAS sa pripája na server a sťahuje si zálohu. Nie server na NAS.**
 
-### Väčšinu práce spraví server, NAS len sťahuje
+Keby zálohu **posielal server**, musel by mať uložený prístup na NAS. Útočník, ktorý sa dostane na server, si ten prístup prečíta — a po zašifrovaní dát zmaže aj zálohy. Presne preto zálohy zlyhávajú vtedy, keď ich najviac treba.
 
-Aby to nebolo zbytočne zložité: **datovanie a zabalenie zálohy si rieši server sám.** Každú noc vyrobí jeden súbor s dátumom v názve:
+Pri sťahovaní pozná prístupové údaje **len NAS**. Server o jeho existencii nevie nič a nemá sa ako k nemu dostať. Vedľajší efekt je príjemný: **NAS nemusí byť dostupný z internetu**, stačí mu odchádzajúce spojenie.
+
+### Čo si rieši server sám — teda čo NIE je vaša práca
+
+Každú noc server sám vyrobí jeden zabalený súbor s dátumom v názve a staršie ako týždeň si zmaže:
 
 ```
 /srv/zalohy/obedar-2026-08-07.sql.gz
 /srv/zalohy/obedar-2026-08-06.sql.gz
-...
+/srv/zalohy/obedar-2026-08-05.sql.gz
 ```
 
-Na serveri sa ich drží posledných sedem. **Úloha NAS-u je jediná: raz za noc si ten priečinok stiahnuť** a nechať si vlastnú históriu — 30 denných a 12 mesačných snímok.
+Sú to **jednotky megabajtov na deň**. Preto netreba `restic`, `borg` ani deduplikáciu — nie je čo šetriť.
 
-To je obyčajný `rsync` cez SSH, teda niečo, čo vie **Synology aj QNAP priamo z rozhrania** (Plánovač úloh → naplánovaná úloha) a na linuxovom stroji je to jeden riadok v `cron`. Netreba `restic` ani `borg`, netreba Docker na NAS-e, netreba nič inštalovať.
+### Čo treba na NAS-e — tri kroky
 
-### Čo teda potrebujeme
+**1. Vygenerovať SSH kľúč** *(ak už NAS nejaký má, stačí ten)*
 
-| | |
-|---|---|
-| **Miesto** | rezerva ~20 GB. *Reálne pôjde o jednotky MB na deň, takže je to na roky dopredu.* |
-| **Nočná úloha** | `rsync` cez SSH z `46.225.236.143`, priečinok `/srv/zalohy/` |
-| **Retencia na NAS-e** | 30 denných + 12 mesačných snímok. **Nie jedna prepisovaná kópia** — keby sa dáta poškodili a nikto si to dva dni nevšimol, prepísala by sa aj tá posledná dobrá |
-| **SSH kľúč** | verejnú časť nám pošlite, pridáme ju na server |
+```
+ssh-keygen -t ed25519 -f /volume1/.ssh/obedar -N ""
+```
 
-Účet na serveri bude mať právo **len čítať ten jeden priečinok** — z NAS-u sa nedá na serveri nič zmeniť ani zmazať.
+**Verejnú časť** (`obedar.pub`) nám pošlite — pridáme ju na server. Súkromná ostáva u vás, nikam sa neposiela.
+
+**2. Nočné stiahnutie** — naplánovaná úloha, napríklad o 3:30
+
+```
+rsync -az -e "ssh -i /volume1/.ssh/obedar" \
+      zaloha@46.225.236.143:/srv/zalohy/ \
+      /volume1/zalohy/obedar/
+```
+
+Zámerne **bez `--delete`**: server si drží týždeň, NAS si má nechať históriu. Na Synology aj QNAP sa to zadá v *Plánovači úloh* ako používateľský skript; na linuxovom stroji je to riadok v `cron`.
+
+**3. Upratovanie** — druhý riadok v tej istej úlohe
+
+```
+find /volume1/zalohy/obedar -name 'obedar-*.sql.gz' \
+     -mtime +30 ! -name '*-01.sql.gz' -delete
+```
+
+Necháva **všetko z posledných 30 dní a navyše každý prvý deň mesiaca navždy**. Mesačná história tak vznikne sama, bez snímok a bez ďalšieho nastavovania. Dvanásť súborov ročne po pár megabajtoch je zanedbateľné, takže sa neoplatí ani mazať.
+
+### Prečo nie jedna prepisovaná kópia
+
+Toto je jediná vec, na ktorej záleží viac než na zvyšku: **musia to byť datované súbory, nie jedna kópia, ktorá sa každú noc prepíše.** Keby sa dáta poškodili a nikto si to dva dni nevšimol, prepísala by sa aj tá posledná dobrá — a záloha by bola presne tak pokazená ako originál.
+
+### Účet na serveri
+
+Vytvoríme účet `zaloha` s právom **len čítať ten jeden priečinok**. Z NAS-u sa na serveri nedá nič zmeniť ani zmazať, ani keby sa niekto k NAS-u dostal.
+
+### Miesto
+
+Rezerva **20 GB** je na roky dopredu. Reálne pôjde o jednotky MB denne.
 
 ### Keby to na NAS-e nešlo
 
-Nie je to problém, len iný postup: **zálohu bude posielať server do úložiska u poskytovateľa** (Hetzner Storage Box, ~3 € mesačne) s prístupom, ktorý **smie len pridávať, nie mazať**. Tým sa zachová to podstatné — útočník, ktorý sa dostane na server, zálohy nezmaže. Povedzte, ktorá z tých dvoch ciest je vám bližšia.
+Nie je to problém, len iný postup: zálohu bude **posielať server do úložiska u poskytovateľa** (Hetzner Storage Box, ~3 € mesačne) s prístupom, ktorý **smie len pridávať, nie mazať**. Zachová sa tým to podstatné — útočník na serveri zálohy nezmaže. Stačí povedať, ktorá z tých dvoch ciest je vám bližšia.
+
+### Test obnovy — to už nie je vaša úloha
+
+Raz za štvrťrok si zálohu obnovíme na prázdny server a pozrieme sa, či tam všetko je. **Záloha, z ktorej sa nikdy neskúšalo obnoviť, nie je záloha, ale pocit.** Robíme to my, ale je dobré, aby ste o tom vedeli.
 
 ---
 
