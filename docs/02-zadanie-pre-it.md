@@ -97,7 +97,7 @@ Pri sťahovaní pozná prístupové údaje **len NAS**. Server o jeho existencii
 
 ### Čo si rieši server sám — teda čo NIE je vaša práca
 
-Každú noc server sám vyrobí jeden zabalený súbor s dátumom v názve a staršie ako týždeň si zmaže:
+Každú noc server sám vyrobí jeden zabalený súbor s dátumom v názve:
 
 ```
 /srv/zalohy/obedar-2026-08-07.sql.gz
@@ -125,7 +125,7 @@ rsync -az -e "ssh -i /volume1/.ssh/obedar" \
       /volume1/zalohy/obedar/
 ```
 
-Zámerne **bez `--delete`**: server si drží týždeň, NAS si má nechať históriu. Na Synology aj QNAP sa to zadá v *Plánovači úloh* ako používateľský skript; na linuxovom stroji je to riadok v `cron`.
+Zámerne **bez `--delete`**: NAS si má nechať vlastnú históriu nezávisle od servera. Na Synology aj QNAP sa to zadá v *Plánovači úloh* ako používateľský skript; na linuxovom stroji je to riadok v `cron`.
 
 **3. Upratovanie** — druhý riadok v tej istej úlohe
 
