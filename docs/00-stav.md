@@ -1,6 +1,6 @@
 # Stav projektu — Obedár
 
-Stav k 5. 8. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných dokumentoch.
+Stav k 7. 8. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných dokumentoch.
 
 ---
 
@@ -12,11 +12,12 @@ Stav k 5. 8. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných 
 | **Vstupné súbory** | `08-vstupne-subory.md` — hotové zadanie na prevod dochádzky, odovzdateľné tak ako je |
 | **Model rozúčtovania** | **uzavretý 5. 8.** — ekonomický predvolene, vrátane stropu a schémy pre živnostníkov (`01-koncept.md` 6.2) |
 | **Dodávatelia** | `09-dodavatelia.md` — GASTROGAL 6,30 € s dovozom, ABM 7,20 €, obaja objednávky ráno |
-| **Preview** | klikací prototyp, 11 obrazoviek, beží na **https://obedy.ahafarma.sk** |
+| **Preview** | klikací prototyp, **16 obrazoviek** vrátane cien, mzdových podkladov a denného hárku, beží na **https://obedy.ahafarma.sk** |
 | **Server** | Hetzner, Debian 13, `46.225.236.143`, zabezpečený (root aj heslá zablokované) |
 | **Docker + Caddy** | HTTPS automaticky od Let's Encrypt |
 | **Odosielanie pošty** | firemný server `mail.pdvrable.sk:587`, meno `obedy` |
 | **SPF · DKIM · DMARC** | všetky tri **PASS**, overené skutočnou správou z aplikačného servera |
+| **DKIM kľúč** | **2048-bitový** od 7. 8., záznam správne rozdelený na viac reťazcov — overené výpočtom z DNS |
 | **Prijímanie odpovedí** | tá istá schránka `obedy@ahafarma.sk` |
 
 Nič z toho nie je „malo by fungovať" — všetko je vyskúšané celou cestou.
@@ -29,7 +30,7 @@ Nič z toho nie je „malo by fungovať" — všetko je vyskúšané celou cesto
 
 - [ ] **prístup k schránke `obedy@ahafarma.sk` pre druhého človeka** (alebo presmerovanie na dve adresy) — odpovede dodávateľov musí niekto čítať aj počas dovolenky
 - [ ] **prístup na NAS pre zálohy** — datované snímky, 30 denných + 12 mesačných, ~20 GB, NAS si ťahá zo servera *(`02-zadanie-pre-it.md`)*
-- [ ] *(nie je urgentné)* vymeniť DKIM kľúč za 2048-bitový pri najbližšom zásahu do pošty
+- [ ] **odblokovať IP `46.225.236.143` a dať ju na bielu listinu** — pri teste odosielania ju ochrana proti hádaniu hesla zablokovala *(`02-zadanie-pre-it.md`)*
 
 ### ~~Od mzdového oddelenia a účtovníčky~~ — hotové
 
@@ -58,8 +59,8 @@ Firma, typ vzťahu, tím, predák a prevádzka sa **zadajú v appke** z rozbaľo
 ## Čo má spraviť Erik
 
 - [ ] **poslať odkaz na preview predákom** a pozbierať pripomienky
+- [ ] **vypýtať e-mail na objednávky** aspoň od jednej jedálne — jediná vec, ktorá blokuje pilot
 - [ ] vybrať **tím na pilot** — 5–6 ľudí, jedna prevádzka, jeden dodávateľ *(kapitola 14 konceptu; nie nadšenca, ale svedomitého vlažného predáka)*
-- [ ] určiť **zoznam prevádzok**, kam sa vozí
 - [ ] **založiť účet u SMS brány** a hlavne dať registrovať odosielateľa `OBEDAR` — trvá to dni, netreba to nechať na posledný týždeň *(koncept 8, „Cez koho posielať SMS")*
 - [ ] dať niekomu spraviť **prevod dochádzky** do dohodnutého tvaru — zadanie je hotové v `08-vstupne-subory.md`, dá sa odovzdať tak ako je
 - [ ] overiť, že heslo k `obedy@ahafarma.sk` je **náhodne generované**, nie vymyslené — port je otvorený voči internetu a schránka dostáva pokusy o uhádnutie
