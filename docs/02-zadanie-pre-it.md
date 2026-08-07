@@ -91,14 +91,34 @@ Zálohy sa ukladajú mimo hostingu. Dôležité je, **ktorým smerom to ide**:
 
 Dôvod: keby zálohu posielal server, musel by poznať prístup na NAS — a útočník, ktorý sa dostane na server, by zmazal aj zálohy. Pri sťahovaní pozná prístup len NAS a server o ňom nevie nič. Bonus: **NAS nemusí byť dostupný z internetu**, stačí mu odchádzajúce spojenie.
 
-Čo treba na strane NAS:
+### Väčšinu práce spraví server, NAS len sťahuje
 
-- miesto na **datované snímky** (30 denných + 12 mesačných), nie na jednu prepisovanú kópiu,
-- naplánovanú nočnú úlohu (`restic` alebo `borg` cez SSH na `46.225.236.143`),
-- rezervu cca **20 GB** — pri deduplikácii to bude v praxi podstatne menej,
-- **štvrťročný test obnovy.** Záloha, z ktorej sa nikdy neskúšalo obnoviť, nie je záloha.
+Aby to nebolo zbytočne zložité: **datovanie a zabalenie zálohy si rieši server sám.** Každú noc vyrobí jeden súbor s dátumom v názve:
 
-Verejný SSH kľúč NAS-u pošlite a pridáme ho na server; alebo povedzte, či ho máme vygenerovať my.
+```
+/srv/zalohy/obedar-2026-08-07.sql.gz
+/srv/zalohy/obedar-2026-08-06.sql.gz
+...
+```
+
+Na serveri sa ich drží posledných sedem. **Úloha NAS-u je jediná: raz za noc si ten priečinok stiahnuť** a nechať si vlastnú históriu — 30 denných a 12 mesačných snímok.
+
+To je obyčajný `rsync` cez SSH, teda niečo, čo vie **Synology aj QNAP priamo z rozhrania** (Plánovač úloh → naplánovaná úloha) a na linuxovom stroji je to jeden riadok v `cron`. Netreba `restic` ani `borg`, netreba Docker na NAS-e, netreba nič inštalovať.
+
+### Čo teda potrebujeme
+
+| | |
+|---|---|
+| **Miesto** | rezerva ~20 GB. *Reálne pôjde o jednotky MB na deň, takže je to na roky dopredu.* |
+| **Nočná úloha** | `rsync` cez SSH z `46.225.236.143`, priečinok `/srv/zalohy/` |
+| **Retencia na NAS-e** | 30 denných + 12 mesačných snímok. **Nie jedna prepisovaná kópia** — keby sa dáta poškodili a nikto si to dva dni nevšimol, prepísala by sa aj tá posledná dobrá |
+| **SSH kľúč** | verejnú časť nám pošlite, pridáme ju na server |
+
+Účet na serveri bude mať právo **len čítať ten jeden priečinok** — z NAS-u sa nedá na serveri nič zmeniť ani zmazať.
+
+### Keby to na NAS-e nešlo
+
+Nie je to problém, len iný postup: **zálohu bude posielať server do úložiska u poskytovateľa** (Hetzner Storage Box, ~3 € mesačne) s prístupom, ktorý **smie len pridávať, nie mazať**. Tým sa zachová to podstatné — útočník, ktorý sa dostane na server, zálohy nezmaže. Povedzte, ktorá z tých dvoch ciest je vám bližšia.
 
 ---
 
