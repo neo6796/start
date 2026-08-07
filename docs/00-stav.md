@@ -78,7 +78,17 @@ Firma, typ vzťahu, tím, predák a prevádzka sa **zadajú v appke** z rozbaľo
 
 **Stavať appku môžem hneď** — koncept aj preview sú hotové a odsúhlasené.
 
-**Spustiť ju naostro** už blokuje len jedno: **údaje aspoň od jedného dodávateľa.** Bez nich nie je čo objednávať.
+**Spustiť pilot** blokuje presne jedna vec: **e-mailová adresa aspoň jednej jedálne na objednávky.** Nič iné.
+
+Ostatné údaje od dodávateľov sú **nastavenia** — menia sa v administrácii s platnosťou od dátumu a uzavreté mesiace neprepíšu. Nemusia byť správne hneď, len nesmú byť prázdne:
+
+| Údaj | Prečo nezdrží pilot |
+|---|---|
+| **miesta výdaja a minimá** | pilot je jeden tím na jednej prevádzke — appka sa na miesto nepýta nikde |
+| **termín na odhlásenie** | nastaví sa **prísnejšie, než treba** (7:30) a keď povedia inak, posunie sa. Chyba tým smerom nikoho nepoškodí; opačná by niekomu vyrobila plnú cenu za obed, ktorý si myslel, že zrušil |
+| **potvrdenie prijatia** | predvolená hodina stačí |
+| **fakturácia živnostníkom** | v pilote sa nemusí týkať nikoho |
+| **cenník, termín faktúry** | doplní sa pred prvou uzávierkou, teda o mesiac |
 
 Zoznam ľudí je hotový, rozúčtovanie uzavreté vrátane stropu aj schémy pre živnostníkov, ceny oboch jedální známe. Zo mzdového oddelenia už nechýba nič.
 
