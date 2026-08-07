@@ -1613,11 +1613,28 @@ Celý zvyšok dokumentu opisuje **ustálený stav**. Prvý mesiac je iný a treb
 
 Presne tak, ako znel návrh. Jedna prevádzka, jeden poskytovateľ, jeden predák, hŕstka ľudí. Dôvod nie je opatrnosť — je to **rýchlosť opravy**. Keď sa niečo pokazí pri šiestich ľuďoch, vyrieši sa to jedným telefonátom. Pri stovke sa to nevyrieši vôbec.
 
+### Časový plán — august nanečisto, september naostro
+
+| Kedy | Čo sa deje |
+|---|---|
+| **pred štartom** | spätný zápis obedov **od 1. augusta** (4.5a) — mesiac musí byť celý, inak sa nedá porovnať |
+| **celý august** | appka zbiera objednávky, **odosielanie beží naprázdno** do vlastnej schránky. Počet sa jedálni nadiktuje telefónom, ako doteraz. Papier ide súbežne |
+| **prelom mesiaca** | **mesiac sa v appke uzavrie a porovná s tým, čo mzdy spravili po starom** |
+| **1. septembra** | prepne sa jedna adresa v nastavení a odosielanie ide naostro |
+
+**Uzavrieť august v appke, aj keď zrážky idú po starom.** Je to najsilnejší možný test: **dve nezávislé metódy, ten istý mesiac, porovnanie na cent.** Keď sedia, september naostro je bezpečný. Keď nesedia, rozdiel sa nájde vtedy, keď ešte nikomu nič nestrhol.
+
+**Augustové dáta sa nemažú.** Nie sú to „testovacie dáta" — sú to skutočné obedy skutočných ľudí a sú jediným dôkazom, že to počíta správne. Ostávajú v histórii.
+
+**Číselníky zadané v auguste sú tie ostré.** Firmy, prevádzky, poskytovatelia, tímy, ľudia aj ich väzby sa v septembri nezadávajú znova — sú to dáta v databáze, nie súčasť aplikácie. Prepnutie z testu na ostrú prevádzku je **zmena jednej e-mailovej adresy**, nič viac.
+
 ### Appka je od prvého dňa hlavná, papier je kontrola
 
 Toto je jediné miesto, kde by som navrhovaný postup obrátil. *„Papier ide naostro a appka vedľa neho"* znie bezpečnejšie, ale nefunguje: keď z appky nič nezávisí, predák do nej nezadá načas a nezistí sa nič. **Chyba, ktorá nikoho nebolí, sa neukáže.**
 
-Takže naopak: objednávka dodávateľovi ide z appky, papier sa vedie súbežne a **v piatok sa porovnajú**. Rozdiel medzi nimi je nález. Pri šiestich ľuďoch je najhorší možný následok šesť nesprávnych obedov a jeden telefonát.
+Jedna výnimka je ale namieste: **odosielanie**. Je to jediná časť, kde omyl znamená, že ľudia nedostanú obed — a tá sa dá odskúšať naprázdno bez akéhokoľvek rizika. Preto appka od prvého dňa **zbiera a počíta**, ale prvý mesiac **posledný meter robí človek**: prečíta si vygenerovanú objednávku vo vlastnej schránke a nadiktuje ju telefónom.
+
+Vo všetkom ostatnom platí opak: objednávka sa zadáva do appky, papier sa vedie súbežne a **v piatok sa porovnajú**. Rozdiel medzi nimi je nález. Pri šiestich ľuďoch je najhorší možný následok šesť nesprávnych obedov a jeden telefonát.
 
 ### Prvý mesiac musí obsiahnuť aj peniaze
 
