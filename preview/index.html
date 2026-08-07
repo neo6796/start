@@ -978,6 +978,7 @@
       <button class="tab" role="tab" aria-selected="false" data-screen="admin">Admin</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="ludia">Ľudia</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="ceny">Ceny</button>
+      <button class="tab" role="tab" aria-selected="false" data-screen="zamest">Zamestnanci</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="zivnost">Živnostníci</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="zostavy">Zostavy</button>
       <button class="tab" role="tab" aria-selected="false" data-screen="uzavierka">Uzávierka</button>
@@ -1567,6 +1568,89 @@
       </table>
     </div>
     <p class="hint" style="margin-top:10px" id="c-ziv-note"></p>
+  </div>
+</section>
+
+<section class="screen wrap wide" id="s-zamest" hidden>
+  <div class="screen-head">
+    <h2>Zamestnanci — mzdový podklad</h2>
+    <span class="who">august 2026 · podľa tohto sa strháva zo mzdy</span>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Za firmu</h3>
+      <span class="pill neutral">jeden súbor pre každú firmu</span>
+    </div>
+    <div class="seg" role="group" id="zm-firma" aria-label="Firma"></div>
+    <div class="scroll-x" style="border:0;margin-top:14px">
+      <table class="data" style="min-width:640px">
+        <tbody id="zm-firma-sum"></tbody>
+      </table>
+    </div>
+    <p class="swipe-hint">← tabuľka sa posúva vbok →</p>
+    <p class="hint" style="margin-top:12px">Posledné riadky sú celý zmysel tohto listu: <strong>čo očakávať na faktúre</strong> od každej jedálne. Firma vopred vie, aká suma jej má prísť — a keď nepríde, hneď vidieť z ktorej strany.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Po osobách</h3>
+      <span class="pill neutral" id="zm-count">—</span>
+    </div>
+    <div class="scroll-x" style="border:0">
+      <table class="data" style="min-width:1020px">
+        <thead><tr>
+          <th>Os. č.</th><th>Meno</th><th>Tím</th><th class="num">Obedy</th>
+          <th class="num">Cena spolu<br>bez DPH</th><th class="num">Príspevok<br>zamestnávateľa</th>
+          <th class="num">Sociálny<br>fond</th><th class="num">Podiel<br>stravníka</th>
+          <th class="num">DPH 19 %</th><th class="num">Zrážka<br>zo mzdy</th>
+        </tr></thead>
+        <tbody id="zm-osoby"></tbody>
+        <tfoot id="zm-osoby-sum"></tfoot>
+      </table>
+    </div>
+    <p class="swipe-hint">← tabuľka sa posúva vbok →</p>
+    <p class="hint" style="margin-top:12px"><strong>Zrážka zo mzdy</strong> je jediný stĺpec, ktorý ide do mzdového softvéru. Ostatné sú tam preto, aby sa dalo skontrolovať, ako vznikla — a aby sedel súčet s faktúrou.</p>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn primary">Exportovať pre mzdy (XLSX)</button>
+      <button class="btn ghost">CSV</button>
+      <button class="btn ghost">Uzavrieť mesiac</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>Súhrny</h3>
+      <span class="pill neutral">tie isté čísla, iné triedenie</span>
+    </div>
+    <div class="seg" role="group" id="zm-view" aria-label="Triedenie">
+      <button data-zm="f" aria-pressed="true">Po firmách</button>
+      <button data-zm="t" aria-pressed="false">Po tímoch</button>
+      <button data-zm="p" aria-pressed="false">Po prevádzkach</button>
+      <button data-zm="c" aria-pressed="false">Po poskytovateľoch</button>
+    </div>
+    <div class="scroll-x" style="border:0;margin-top:12px">
+      <table class="data" style="min-width:900px">
+        <thead><tr><th id="zm-h1">Firma</th><th class="num">Osôb</th><th class="num">Obedov</th>
+          <th class="num">Cena bez DPH</th><th class="num">Príspevok</th><th class="num">Soc. fond</th>
+          <th class="num">Zrážky spolu</th></tr></thead>
+        <tbody id="zm-sum"></tbody>
+        <tfoot id="zm-sum-foot"></tfoot>
+      </table>
+    </div>
+    <p class="swipe-hint">← tabuľka sa posúva vbok →</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>List pre jedného</h3>
+      <span class="pill neutral">na nástenku alebo k výplatnej páske</span>
+    </div>
+    <div class="field" style="max-width:340px">
+      <label for="zm-who">Osoba</label>
+      <select id="zm-who" style="width:100%;padding:7px 9px;border:1px solid var(--line-2);border-radius:3px;background:var(--surface);color:var(--ink);font-size:14px"></select>
+    </div>
+    <div class="sheet" id="zm-list" style="margin-top:14px;max-width:640px"></div>
   </div>
 </section>
 
@@ -4332,7 +4416,12 @@
   }
 
   /* ================= CENY ================= */
-  function eur(v){ return v.toFixed(2).replace(".", ",") + " €"; }
+  /* Zaokrúhlenie na cent — jedna funkcia pre výpočet aj zobrazenie.
+     Math.round(v*100)/100 a v.toFixed(2) sa na hranici .xx5 rozchádzajú
+     o cent (násobenie stovkou má vlastnú chybu), takže by potom rozpis
+     na doklade nesedel so súčtovým riadkom. */
+  function cent(v){ return Number(v.toFixed(2)); }
+  function eur(v){ return cent(v).toFixed(2).replace(".", ",") + " €"; }
   function pct(v){ return v.toFixed(1).replace(".", ",") + " %"; }
 
   function renderCeny(){
@@ -4622,6 +4711,181 @@
     }
   });
 
+
+  /* ================= ZAMESTNANCI ================= */
+  /* c = [počet obedov od GASTROGALu, počet od ABM] */
+  const ZAM = [
+    {p:"1101", n:"Adamcová Zuzana",  f:0, t:3, pl:0, c:[19, 0]},
+    {p:"1104", n:"Bartoš Martin",    f:0, t:0, pl:0, c:[21, 0]},
+    {p:"1109", n:"Cibuľa Jozef",     f:0, t:0, pl:0, c:[17, 0]},
+    {p:"1115", n:"Dubovský Pavol",   f:0, t:0, pl:1, c:[14, 4]},
+    {p:"1118", n:"Ferko Peter",      f:1, t:1, pl:1, c:[0, 20]},
+    {p:"1122", n:"Gajdošová Dagmar", f:1, t:3, pl:0, c:[16, 0]},
+    {p:"1130", n:"Hlavatá Veronika", f:1, t:2, pl:2, c:[18, 0]},
+    {p:"2103", n:"Ivanič Andrej",    f:1, t:1, pl:1, c:[0, 21]},
+    {p:"2107", n:"Jurkovič Marek",   f:2, t:2, pl:2, c:[20, 0]},
+    {p:"3138", n:"Tomašov Milan",    f:2, t:2, pl:2, c:[12, 0]}
+  ];
+  let zmView = "f", zmWho = 0, zmFirma = 0;
+
+  function zamRow(z){
+    let obedy = 0, net = 0, zl = 0, sf = 0, sv = 0, dph = 0;
+    z.c.forEach((n, ci) => {
+      if (!n) return;
+      const C = CATERERS[ci], r = split(C.prices[0], C.model);
+      obedy += n; net += n * r.net; zl += n * r.zl;
+      sf += n * r.sf; sv += n * r.sv; dph += n * r.dph;
+    });
+    return { obedy:obedy, net:net, zl:zl, sf:sf, sv:sv, dph:dph, zrazka:sv + dph };
+  }
+  /* čo firma zaplatí danej jedálni — celá faktúra za jej ľudí */
+  function zamFaktura(rows, ci){
+    const C = CATERERS[ci];
+    const n = rows.reduce((a, z) => a + z.c[ci], 0);
+    return { n:n, suma:n * C.gross };
+  }
+
+  function renderZam(){
+    if (!document.getElementById("zm-osoby")) return;
+
+    /* prepínač firiem */
+    const fbox = document.getElementById("zm-firma");
+    if (fbox && !fbox.children.length){
+      const used = [];
+      ZAM.forEach(z => { if (used.indexOf(z.f) < 0) used.push(z.f); });
+      used.sort();
+      fbox.innerHTML = used.map(i => '<button data-zmf="' + i + '" aria-pressed="' + (i === zmFirma) + '">' + FIRMS[i] + "</button>").join("");
+    }
+
+    const vFirme = ZAM.filter(z => z.f === zmFirma);
+    const F = vFirme.reduce((a, z) => { const r = zamRow(z);
+      return {obedy:a.obedy+r.obedy, net:a.net+r.net, zl:a.zl+r.zl, sf:a.sf+r.sf,
+              sv:a.sv+r.sv, dph:a.dph+r.dph, zrazka:a.zrazka+r.zrazka}; },
+      {obedy:0,net:0,zl:0,sf:0,sv:0,dph:0,zrazka:0});
+
+    const fak = CATERERS.map((C, i) => ({ i:i, name:C.name, x:zamFaktura(vFirme, i) })).filter(o => o.x.n > 0);
+    document.getElementById("zm-firma-sum").innerHTML =
+      '<tr><td>počet obedov</td><td class="num"><strong>' + F.obedy + "</strong></td>" +
+        '<td class="hint">' + CATERERS.map((C,i) => { const n = vFirme.reduce((a,z)=>a+z.c[i],0);
+          return n ? n + "× " + C.short : null; }).filter(Boolean).join(" + ") + "</td></tr>" +
+      '<tr><td>cena spolu bez DPH</td><td class="num">' + eur(F.net) + '</td><td class="hint">základ pre všetko ostatné</td></tr>' +
+      '<tr><td><strong>príspevok zamestnávateľa</strong></td><td class="num"><strong>' + eur(F.zl) + '</strong></td><td class="hint">náklad firmy</td></tr>' +
+      '<tr><td><strong>sociálny fond</strong></td><td class="num"><strong>' + eur(F.sf) + '</strong></td><td class="hint">druhý náklad firmy, oddelene</td></tr>' +
+      '<tr><td>podiel stravníkov</td><td class="num">' + eur(F.sv) + '</td><td class="hint">+ DPH ' + eur(F.dph) + "</td></tr>" +
+      '<tr><td><strong>zrážky zo mzdy spolu</strong></td><td class="num"><strong>' + eur(F.zrazka) + '</strong></td><td class="hint">kontrolný súčet mzdového podkladu</td></tr>' +
+      fak.map(o => '<tr style="background:#EFEEE8"><td><strong>čo očakávať na faktúre — ' + o.name + "</strong></td>" +
+        '<td class="num"><strong>' + eur(o.x.suma) + "</strong></td>" +
+        '<td class="hint">' + o.x.n + " " + porcie(o.x.n) + " s DPH</td></tr>").join("");
+
+    /* po osobách */
+    document.getElementById("zm-osoby").innerHTML = ZAM.map(z => {
+      const r = zamRow(z);
+      const rozpis = z.c.map((n, i) => n ? n + "× " + CATERERS[i].short : null).filter(Boolean).join(" + ");
+      return "<tr><td>" + z.p + "</td><td><strong>" + z.n + "</strong></td><td>" + TEAMS[z.t] + "</td>" +
+        '<td class="num">' + r.obedy + '<br><span class="hint" style="white-space:nowrap">' + rozpis + "</span></td>" +
+        '<td class="num">' + eur(r.net) + "</td>" +
+        '<td class="num">' + eur(r.zl) + "</td>" +
+        '<td class="num">' + eur(r.sf) + "</td>" +
+        '<td class="num">' + eur(r.sv) + "</td>" +
+        '<td class="num hint">' + eur(r.dph) + "</td>" +
+        '<td class="num"><strong>' + eur(r.zrazka) + "</strong></td></tr>";
+    }).join("");
+    const T = ZAM.reduce((a, z) => { const r = zamRow(z);
+      return {obedy:a.obedy+r.obedy, net:a.net+r.net, zl:a.zl+r.zl, sf:a.sf+r.sf,
+              sv:a.sv+r.sv, dph:a.dph+r.dph, zrazka:a.zrazka+r.zrazka}; },
+      {obedy:0,net:0,zl:0,sf:0,sv:0,dph:0,zrazka:0});
+    document.getElementById("zm-osoby-sum").innerHTML =
+      '<tr><td colspan="3"><strong>Spolu</strong></td>' +
+      '<td class="num"><strong>' + T.obedy + "</strong></td>" +
+      '<td class="num"><strong>' + eur(T.net) + "</strong></td>" +
+      '<td class="num"><strong>' + eur(T.zl) + "</strong></td>" +
+      '<td class="num"><strong>' + eur(T.sf) + "</strong></td>" +
+      '<td class="num"><strong>' + eur(T.sv) + "</strong></td>" +
+      '<td class="num hint">' + eur(T.dph) + "</td>" +
+      '<td class="num"><strong>' + eur(T.zrazka) + "</strong></td></tr>";
+    setText("zm-count", ZAM.length + " osôb · " + T.obedy + " obedov");
+
+    /* súhrny */
+    const keys = [], map = {};
+    ZAM.forEach(z => {
+      let ks;
+      if (zmView === "f") ks = [[FIRMS[z.f], z.c]];
+      else if (zmView === "t") ks = [[TEAMS[z.t], z.c]];
+      else if (zmView === "p") ks = [[PLACES[z.pl].n, z.c]];
+      else ks = z.c.map((n, i) => n ? [CATERERS[i].name, z.c.map((v, j) => j === i ? v : 0)] : null).filter(Boolean);
+      ks.forEach(([k, cc]) => {
+        if (!map[k]) { map[k] = {osob:0, r:{obedy:0,net:0,zl:0,sf:0,zrazka:0}}; keys.push(k); }
+        map[k].osob++;
+        const r = zamRow({c:cc});
+        map[k].r.obedy += r.obedy; map[k].r.net += r.net; map[k].r.zl += r.zl;
+        map[k].r.sf += r.sf; map[k].r.zrazka += r.zrazka;
+      });
+    });
+    setText("zm-h1", zmView === "f" ? "Firma" : (zmView === "t" ? "Tím" : (zmView === "p" ? "Prevádzka" : "Poskytovateľ")));
+    document.getElementById("zm-sum").innerHTML = keys.map(k =>
+      "<tr><td><strong>" + k + "</strong></td>" +
+      '<td class="num">' + map[k].osob + "</td>" +
+      '<td class="num">' + map[k].r.obedy + "</td>" +
+      '<td class="num">' + eur(map[k].r.net) + "</td>" +
+      '<td class="num">' + eur(map[k].r.zl) + "</td>" +
+      '<td class="num">' + eur(map[k].r.sf) + "</td>" +
+      '<td class="num"><strong>' + eur(map[k].r.zrazka) + "</strong></td></tr>").join("");
+    const dv = keys.reduce((a,k)=>a+map[k].osob,0);
+    document.getElementById("zm-sum-foot").innerHTML =
+      '<tr><td><strong>Spolu</strong></td><td class="num"><strong>' + ZAM.length + "</strong>" +
+        (dv > ZAM.length ? ' <span class="hint">' + (dv - ZAM.length) + " je u oboch</span>" : "") + "</td>" +
+      '<td class="num"><strong>' + T.obedy + "</strong></td>" +
+      '<td class="num"><strong>' + eur(T.net) + "</strong></td>" +
+      '<td class="num"><strong>' + eur(T.zl) + "</strong></td>" +
+      '<td class="num"><strong>' + eur(T.sf) + "</strong></td>" +
+      '<td class="num"><strong>' + eur(T.zrazka) + "</strong></td></tr>";
+
+    /* list pre jedného */
+    const sel = document.getElementById("zm-who");
+    if (sel && !sel.options.length){
+      sel.innerHTML = ZAM.map((z, i) => '<option value="' + i + '">' + z.n + "</option>").join("");
+      sel.addEventListener("change", function(){ zmWho = Number(this.value); renderZam(); });
+    }
+    const z = ZAM[zmWho], r = zamRow(z);
+    const faktura = z.c.reduce((a, n, i) => a + n * CATERERS[i].gross, 0);
+    /* Rozpis musí sedieť aj po zaokrúhlení: podpoložky sa zaokrúhlia
+       a posledná z nich sa dopočíta ako zvyšok, nie zaokrúhli zvlášť.
+       Inak dá súčet na papieri o cent inak než súčtový riadok. */
+    const firmaPlati = cent(cent(faktura) - cent(r.zrazka));
+    const dphFirmy   = cent(firmaPlati - cent(r.zl) - cent(r.sf));
+    const dphSv      = cent(cent(r.zrazka) - cent(r.sv));
+    document.getElementById("zm-list").innerHTML =
+      "<h4>Obedy — august 2026</h4>" +
+      '<p class="meta">' + z.n + " · os. č. " + z.p + " · " + FIRMS[z.f] + " · " + TEAMS[z.t] + "</p>" +
+      "<table><tbody>" +
+      z.c.map((n, i) => n ? "<tr><td>" + CATERERS[i].name + "</td><td>" + n + " × " + eur(CATERERS[i].gross) +
+        '</td><td style="text-align:right">' + eur(n * CATERERS[i].gross) + "</td></tr>" : "").join("") +
+      '<tr><td colspan="2"><strong>Cena obedov spolu</strong></td><td style="text-align:right"><strong>' + eur(faktura) + "</strong></td></tr>" +
+      '<tr><td colspan="2">Zaplatil zamestnávateľ a sociálny fond</td><td style="text-align:right">' + eur(firmaPlati) + "</td></tr>" +
+      '<tr><td colspan="2" style="color:#6B7573">z toho príspevok zamestnávateľa</td><td style="text-align:right;color:#6B7573">' + eur(r.zl) + "</td></tr>" +
+      '<tr><td colspan="2" style="color:#6B7573">z toho sociálny fond</td><td style="text-align:right;color:#6B7573">' + eur(r.sf) + "</td></tr>" +
+      '<tr><td colspan="2" style="color:#6B7573">z toho DPH, ktorú nesie firma</td><td style="text-align:right;color:#6B7573">' + eur(dphFirmy) + "</td></tr>" +
+      '<tr><td colspan="2">Váš podiel</td><td style="text-align:right">' + eur(r.sv) + "</td></tr>" +
+      '<tr><td colspan="2" style="color:#6B7573">DPH 19 % k vášmu podielu</td><td style="text-align:right;color:#6B7573">' + eur(dphSv) + "</td></tr>" +
+      '<tr style="background:#EFEEE8"><td colspan="2"><strong>Zrazí sa vám zo mzdy</strong></td>' +
+        '<td style="text-align:right"><strong>' + eur(r.zrazka) + "</strong></td></tr>" +
+      "</tbody></table>" +
+      '<p style="margin:12px 0 0;font-size:11px;color:#6B7573">Za ' + r.obedy + " " + (r.obedy === 1 ? "obed" : (r.obedy < 5 ? "obedy" : "obedov")) +
+      " ste zaplatili <strong>" + eur(r.zrazka) + "</strong>, zvyšok " + eur(firmaPlati) +
+      " uhradil zamestnávateľ a sociálny fond. <strong>Toto nie je výplatná páska</strong> — je to rozpis k jednej položke na nej.</p>";
+  }
+
+  document.addEventListener("click", e => {
+    const v = e.target.closest && e.target.closest("[data-zm]");
+    if (v){ zmView = v.getAttribute("data-zm");
+      Array.from(v.parentElement.children).forEach(b => b.setAttribute("aria-pressed", String(b === v)));
+      renderZam(); }
+    const f = e.target.closest && e.target.closest("[data-zmf]");
+    if (f){ zmFirma = Number(f.getAttribute("data-zmf"));
+      Array.from(f.parentElement.children).forEach(b => b.setAttribute("aria-pressed", String(b === f)));
+      renderZam(); }
+  });
+
   function renderAll(){
     head(document.getElementById("th-own"));
     head(document.getElementById("th-deleg"));
@@ -4646,6 +4910,7 @@
     renderLudia();
     renderCeny();
     renderZiv();
+    renderZam();
   }
 
   setText("pd-week", weekLabel);

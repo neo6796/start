@@ -909,7 +909,9 @@ Príklad pri základnej cene **5,00 €** — strop je teda `2,75 + 0,50 = 3,25 
 
 **Ochrana pri ukladaní:** `príspevok zamestnávateľa + horná hranica stravníka` nesmie presiahnuť 100 % — inak by fond vyšiel záporný. Appka to odmietne pri ukladaní nastavenia, nie až pri uzávierke.
 
-**Kde sa zaokrúhľuje — rozhodnuté.** Počíta sa **na obede v plnej presnosti a zaokrúhľuje sa až mesačný súčet za osobu.** Pri dvadsiatich obedoch by sa inak nazbieral rozdiel oproti tomu, čo firma zaplatila jedálni. Sociálny fond sa počíta **bez DPH z ceny bez DPH**; DPH sa pripočítava len k podielu stravníka.
+**Kde sa zaokrúhľuje — rozhodnuté.** Počíta sa **na obede v plnej presnosti a zaokrúhľuje sa až mesačný súčet za osobu.**
+
+> **A zaokrúhľovať sa musí jednou funkciou.** Pri stavbe preview sa ukázalo, že `Math.round(v*100)/100` a `v.toFixed(2)` **nedávajú vždy to isté** — na hranici polcenta sa rozídu, lebo násobenie stovkou má vlastnú chybu. Keď sa jedna použije na výpočet a druhá na zobrazenie, rozpis na doklade nesedí so súčtovým riadkom o cent. Na papieri, ktorý hovorí, koľko sa niekomu strhne zo mzdy, je to neprijateľné. **Jedna funkcia, používaná všade** — a podpoložky sa dopočítavajú ako zvyšok súčtu, nie zaokrúhľujú zvlášť. Pri dvadsiatich obedoch by sa inak nazbieral rozdiel oproti tomu, čo firma zaplatila jedálni. Sociálny fond sa počíta **bez DPH z ceny bez DPH**; DPH sa pripočítava len k podielu stravníka.
 
 ### 6.2b Nárok na príspevok a zákonný strop — dve rôzne veci
 
