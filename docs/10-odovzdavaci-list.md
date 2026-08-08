@@ -23,7 +23,7 @@ Stačí, aby bol Erik dva týždne mimo. Appka by bežala ďalej, ale **nikto by
 
 ---
 
-## 2. Päť prístupov, ktoré musí mať aspoň jeden ďalší človek
+## 2. Prístupy, ktoré nesmie mať len jeden človek
 
 Toto je jadro celého listu. **Ktorýkoľvek chýbajúci znamená, že sa systém prevziať nedá** — a nie je to zrejmé, kým sa o to niekto nepokúsi.
 
@@ -124,4 +124,4 @@ Termín je do **5.–6. dňa** nasledujúceho mesiaca. Postup je v appke na obra
 - keď sa presunie čokoľvek z časti 1,
 - **raz ročne aj tak** — spolu s testom obnovy zálohy.
 
-*Posledná aktualizácia: 7. 8. 2026*
+*Posledná aktualizácia: 8. 8. 2026*
