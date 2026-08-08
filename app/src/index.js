@@ -13,6 +13,8 @@ import { migruj, bazen, jeden } from "./db.js";
 import { podlaTokenu, zrus, prihlas, csrf, upratRelacie } from "./relacia.js";
 import { holaStranka, esc } from "./html.js";
 import * as stranky from "./stranky.js";
+import * as ciselniky from "./ciselniky.js";
+import * as ludia from "./ludia.js";
 
 const tu = dirname(fileURLToPath(import.meta.url));
 const VEREJNE = join(tu, "..", "public");
@@ -59,6 +61,18 @@ function cookies(ziad) {
   return von;
 }
 
+/* Zaškrtávacie políčka posielajú to isté meno viackrát. Object.fromEntries by
+   z nich nechal posledné a hromadné priradenie by ticho zmenilo jedného človeka
+   namiesto tridsiatich — preto sa opakované mená zbierajú do poľa. */
+function parametre(sp) {
+  const von = {};
+  for (const kluc of new Set(sp.keys())) {
+    const v = sp.getAll(kluc);
+    von[kluc] = v.length > 1 ? v : v[0];
+  }
+  return von;
+}
+
 function telo(ziad) {
   return new Promise((hotovo, zle) => {
     let d = "", n = 0;
@@ -67,7 +81,7 @@ function telo(ziad) {
       if (n > LIMIT_TELA) { zle(new Error("telo je pridlhé")); ziad.destroy(); return; }
       d += k;
     });
-    ziad.on("end", () => hotovo(Object.fromEntries(new URLSearchParams(d))));
+    ziad.on("end", () => hotovo(parametre(new URLSearchParams(d))));
     ziad.on("error", zle);
   });
 }
@@ -112,9 +126,17 @@ const CESTY = [
   ["GET",  "/",            rozcestie,               "kto"],
   ["GET",  "/moje",        stranky.moje,            "kto"],
   ["GET",  "/tim",         stranky.tim,             "predak"],
-  ["GET",  "/ludia",       stranky.ludia,           "admin"],
-  ["GET",  "/ciselniky",   stranky.ciselniky,       "admin"],
-  ["GET",  "/uzavierka",   stranky.uzavierka,       "admin"]
+  ["GET",  "/uzavierka",   stranky.uzavierka,       "admin"],
+
+  ["GET",  "/ciselniky",        ciselniky.zoznam, "admin"],
+  ["POST", "/ciselniky/pridat", ciselniky.pridat, "admin"],
+  ["POST", "/ciselniky/stav",   ciselniky.stav,   "admin"],
+
+  ["GET",  "/ludia",           ludia.zoznam,   "admin"],
+  ["POST", "/ludia/import",    ludia.importuj, "admin"],
+  ["POST", "/ludia/hromadne",  ludia.hromadne, "admin"],
+  ["GET",  "/osoba",           ludia.detail,   "admin"],
+  ["POST", "/osoba",           ludia.uloz,     "admin"]
 ];
 
 function smie(osoba, rola) {
@@ -147,7 +169,7 @@ function cookieHlavicka(token, dni) {
 }
 
 async function prihlasenieOdoslanie(k) {
-  const d = await telo(k.ziad);
+  const d = k.data;
   const v = await prihlas(d.kod ?? "", d.heslo ?? "", adresa(k.ziad));
   if (v.chyba) {
     return html(k.odp, 401, stranky.prihlasenieHtml({ chyba: v.chyba, kod: d.kod, verzia: VERZIA }));
@@ -184,8 +206,20 @@ const server = http.createServer(async (ziad, odp) => {
       return chybovaStranka(odp, 403, "Nemáte prístup", "Na túto obrazovku vaša rola nestačí.");
     }
 
-    await obsluha({ ziad, odp, osoba, token, url, verzia: VERZIA,
-                    csrf: token ? csrf(token) : null, html, json, inam, telo });
+    /* Formulárové dáta číta smerovač, nie obsluha — inak by sa na kontrolu
+       známky ľahko zabudlo práve tam, kde sa niečo mení. */
+    let data = null;
+    const znamka = token ? csrf(token) : null;
+    if (ziad.method === "POST") {
+      data = await telo(ziad);
+      if (osoba && data.znamka !== znamka) {
+        return chybovaStranka(odp, 403, "Formulár sa neprijal",
+          "Stránka bola otvorená pridlho alebo prišla odinakiaľ. Otvorte ju znova a skúste to ešte raz.");
+      }
+    }
+
+    await obsluha({ ziad, odp, osoba, token, url, data, verzia: VERZIA,
+                    csrf: znamka, html, json, inam, telo });
   } catch (e) {
     console.error("chyba pri", ziad.method, cesta, "—", e);
     if (!odp.headersSent) {

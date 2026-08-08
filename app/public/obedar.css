@@ -948,6 +948,7 @@
      prihlasovaciu stránku a lištu s menom prihláseného. */
 
   a.tab{text-decoration:none;display:inline-block}
+  a.btn{text-decoration:none;display:inline-block}
   .tab[aria-current="page"]{
     background:var(--bar-sel);
     color:var(--bar-sel-fg);
@@ -977,5 +978,27 @@
 
   /* Hláška nad kartou sa jej nesmie lepiť na okraj. */
   .warnbox + .card,.okbox + .card{margin-top:18px}
+
+  /* Formuláre číselníkov a ľudí. */
+  .field textarea{
+    width:100%;font-family:var(--mono);font-size:13.5px;line-height:1.55;
+    padding:10px 12px;background:var(--surface);color:var(--ink);
+    border:1px solid var(--line-2);border-radius:var(--r);resize:vertical;
+  }
+  .field textarea:focus{outline:2px solid var(--mustard);outline-offset:-1px;border-color:var(--mustard)}
+
+  details > summary{cursor:pointer;list-style:none}
+  details > summary::-webkit-details-marker{display:none}
+  details[open] > summary{background:var(--petrol);color:var(--on-petrol);border-color:var(--petrol)}
+
+  .riadok-akcia{display:inline}
+  .riadok-akcia .btn{padding:4px 10px;font-size:12px}
+  table.data td .btn{padding:4px 10px;font-size:12px;text-decoration:none;display:inline-block}
+  table.data a{color:var(--petrol);font-weight:600}
+  th.chk,td.chk{width:34px;text-align:center}
+
+  .hromadne{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 16px;margin:14px 0 10px}
+  .hromadne .field{margin-bottom:10px}
+  .note .btn{margin-top:6px}
 
   table.data code{font-family:var(--mono);font-size:12.5px}
