@@ -8,7 +8,7 @@ Stav k 7. 8. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných 
 
 | | |
 |---|---|
-| **Koncept** | `01-koncept.md`, v0.9 — 50 rozhodnutí, 15 kapitol |
+| **Koncept** | `01-koncept.md`, v0.9 — 53 rozhodnutí, 15 kapitol |
 | **Vstupné súbory** | `08-vstupne-subory.md` — hotové zadanie na prevod dochádzky, odovzdateľné tak ako je |
 | **Model rozúčtovania** | **uzavretý 5. 8.** — ekonomický predvolene, vrátane stropu a schémy pre živnostníkov (`01-koncept.md` 6.2) |
 | **Dodávatelia** | `09-dodavatelia.md` — GASTROGAL 6,30 € s dovozom, ABM 7,20 €, obaja objednávky ráno |

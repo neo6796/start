@@ -100,12 +100,14 @@ Pri sťahovaní pozná prístupové údaje **len NAS**. Server o jeho existencii
 Každú noc server sám vyrobí jeden zabalený súbor s dátumom v názve:
 
 ```
-/srv/zalohy/obedar-2026-08-07.sql.gz
-/srv/zalohy/obedar-2026-08-06.sql.gz
-/srv/zalohy/obedar-2026-08-05.sql.gz
+/srv/zalohy/obedar-2026-08-08.tar.gz
+/srv/zalohy/obedar-2026-08-07.tar.gz
+/srv/zalohy/obedar-2026-08-06.tar.gz
 ```
 
-Sú to **jednotky megabajtov na deň**. Preto netreba `restic`, `borg` ani deduplikáciu — nie je čo šetriť.
+Plochý priečinok, bez podpriečinkov po rokoch — dátum je v názve, takže sa to samo triedi. V každom balíku je **všetko naraz**: databáza, prílohy jedálnych lístkov, konfiguračný súbor a `INFO.txt` s verziou aplikácie. Obnova je potom rozbalenie jedného súboru a máte zaručene všetky časti z tej istej noci.
+
+Databáza sú **jednotky megabajtov**, konfigurácia kilobajty. Rastú len prílohy jedálnych lístkov — rádovo **25 MB ročne**. Preto netreba `restic`, `borg` ani deduplikáciu; nie je čo šetriť.
 
 ### Čo treba na NAS-e — tri kroky
 
@@ -130,8 +132,8 @@ Zámerne **bez `--delete`**: NAS si má nechať vlastnú históriu nezávisle od
 **3. Upratovanie** — druhý riadok v tej istej úlohe
 
 ```
-find /volume1/zalohy/obedar -name 'obedar-*.sql.gz' \
-     -mtime +30 ! -name '*-01.sql.gz' -delete
+find /volume1/zalohy/obedar -name 'obedar-*.tar.gz' \
+     -mtime +30 ! -name '*-01.tar.gz' -delete
 ```
 
 Necháva **všetko z posledných 30 dní a navyše každý prvý deň mesiaca navždy**. Mesačná história tak vznikne sama, bez snímok a bez ďalšieho nastavovania. Dvanásť súborov ročne po pár megabajtoch je zanedbateľné, takže sa neoplatí ani mazať.
@@ -146,7 +148,7 @@ Vytvoríme účet `zaloha` s právom **len čítať ten jeden priečinok**. Z NA
 
 ### Miesto
 
-Rezerva **20 GB** je na roky dopredu. Reálne pôjde o jednotky MB denne.
+Rezerva **20 GB** je na roky dopredu. Prvý rok pôjde rádovo o pol gigabajtu; keďže sa prílohy kopírujú do každej dennej zálohy znova, po troch rokoch to bude okolo štyroch. Aplikácia veľkosť zálohy hlási, takže sa to nezistí až vtedy, keď dôjde miesto.
 
 ### Keby to na NAS-e nešlo
 
