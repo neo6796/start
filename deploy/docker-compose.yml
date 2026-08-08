@@ -1,20 +1,43 @@
-# Zatiaľ jeden kontajner. Keď pribudne ostrá appka, pridajú sa sem
-# služby "app" a "db" a Caddyfile sa zmení z file_server na reverse_proxy.
-
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: obedar-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: obedar
+      POSTGRES_USER: obedar
+      POSTGRES_PASSWORD: ${DB_HESLO}
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U obedar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: ../app
+    container_name: obedar-app
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgres://obedar:${DB_HESLO}@db:5432/obedar
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_MENO: ${SMTP_MENO}
+      SMTP_HESLO: ${SMTP_HESLO}
+      ADRESA: ${ADRESA}
+    volumes:
+      - ./data/prilohy:/data/prilohy
+
   caddy:
     image: caddy:2-alpine
     container_name: obedar-caddy
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
+    ports: ["80:80", "443:443"]
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./site:/srv:ro
-      - caddy_data:/data
-      - caddy_config:/config
-
-volumes:
-  caddy_data:
-  caddy_config:
+      - ./data/caddy:/data
+      - ./data/zalohy:/zalohy:ro

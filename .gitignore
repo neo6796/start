@@ -3,3 +3,7 @@
 *.csv
 menoslov*
 dochadzka*
+
+# konfigurácia s heslami ostáva na serveri
+deploy/.env
+deploy/data/
