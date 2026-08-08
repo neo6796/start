@@ -7,3 +7,6 @@ dochadzka*
 # konfigurácia s heslami ostáva na serveri
 deploy/.env
 deploy/data/
+
+# závislosti sa inštalujú pri zostavení obrazu
+app/node_modules/
