@@ -1,6 +1,6 @@
 # Stav projektu — Obedár
 
-Stav k 7. 8. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných dokumentoch.
+Stav k 8. 8. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných dokumentoch.
 
 ---
 
@@ -12,7 +12,8 @@ Stav k 7. 8. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných 
 | **Vstupné súbory** | `08-vstupne-subory.md` — hotové zadanie na prevod dochádzky, odovzdateľné tak ako je |
 | **Model rozúčtovania** | **uzavretý 5. 8.** — ekonomický predvolene, vrátane stropu a schémy pre živnostníkov (`01-koncept.md` 6.2) |
 | **Dodávatelia** | `09-dodavatelia.md` — GASTROGAL 6,30 € s dovozom, ABM 7,20 €, obaja objednávky ráno |
-| **Preview** | klikací prototyp, **16 obrazoviek** vrátane cien, mzdových podkladov a denného hárku, beží na **https://obedy.ahafarma.sk** |
+| **Preview** | klikací prototyp, **16 obrazoviek** vrátane cien, mzdových podkladov a denného hárku, beží na **https://obedy.ahafarma.sk/preview/** |
+| **Aplikácia** | kroky 1 a 2 druhej etapy — prihlásenie, roly, číselníky, import menoslovu, hromadné väzby. Beží na **https://obedy.ahafarma.sk** (`11-etapa2-plan.md`) |
 | **Server** | Hetzner, Debian 13, `46.225.236.143`, zabezpečený (root aj heslá zablokované) |
 | **Docker + Caddy** | HTTPS automaticky od Let's Encrypt |
 | **Odosielanie pošty** | firemný server `mail.pdvrable.sk:587`, meno `obedy` |
@@ -58,7 +59,8 @@ Firma, typ vzťahu, tím, predák a prevádzka sa **zadajú v appke** z rozbaľo
 
 ## Čo má spraviť Erik
 
-- [ ] **poslať odkaz na preview predákom** a pozbierať pripomienky
+- [ ] **nasadiť appku na server** — `cd ~/obedar/deploy && ./deploy.sh`, potom založiť správcu (príkaz vypíše sám skript)
+- [ ] **poslať odkaz na preview predákom** a pozbierať pripomienky — pozor, nová adresa je `obedy.ahafarma.sk/preview/`
 - [ ] **vypýtať e-mail na objednávky** aspoň od jednej jedálne — jediná vec, ktorá blokuje pilot
 - [ ] vybrať **tím na pilot** — 5–6 ľudí, jedna prevádzka, jeden dodávateľ *(kapitola 14 konceptu; nie nadšenca, ale svedomitého vlažného predáka)*
 - [ ] **založiť účet u SMS brány** a hlavne dať registrovať odosielateľa `OBEDAR` — trvá to dni, netreba to nechať na posledný týždeň *(koncept 8, „Cez koho posielať SMS")*
@@ -69,7 +71,10 @@ Firma, typ vzťahu, tím, predák a prevádzka sa **zadajú v appke** z rozbaľo
 
 ## Čo mám spraviť ja
 
-- [ ] **Etapa 2 — samotná aplikácia**
+- [x] ~~Etapa 2, krok 1 — kostra: prihlásenie, roly, migrácie, `/zdravie`~~
+- [x] ~~Etapa 2, krok 2 — číselníky a ľudia vrátane importu menoslovu~~
+- [ ] **Etapa 2, krok 3 — menu a matica predáka** (jadro appky)
+- [ ] kroky 4–7: uzávierka týždňa a odoslanie, spätný zápis, mesačná uzávierka, zálohy
 - [ ] pri nej dve veci, ktoré odhalil test pošty: generovať `Message-ID` a `Date`, predstavovať sa rozumným menom v `EHLO`
 - [ ] *(voliteľne)* „Pridať na plochu" pre preview, aby sa otestovala PWA na telefónoch predákov
 

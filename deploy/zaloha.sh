@@ -8,6 +8,15 @@ PRAC=$(mktemp -d)
 CIEL=data/zalohy
 mkdir -p "$CIEL"
 
+# Pri úplne prvom nasadení databáza ešte nebeží a nie je čo zálohovať.
+# Rozlišuje sa to zámerne: keď kontajner nejestvuje, je to prvé spustenie;
+# keď jestvuje a pg_dump zlyhá, je to porucha a nasadenie sa musí zastaviť.
+if ! docker compose ps --status running --format '{{.Service}}' 2>/dev/null | grep -qx db; then
+  echo "· databáza ešte nebeží — prvé spustenie, niet čo zálohovať"
+  rm -rf "$PRAC"
+  exit 0
+fi
+
 docker compose exec -T db pg_dump -U obedar obedar > "$PRAC/databaza.sql"
 cp .env "$PRAC/nastavenia.env" 2>/dev/null || true
 cp -r data/prilohy "$PRAC/prilohy" 2>/dev/null || mkdir -p "$PRAC/prilohy"

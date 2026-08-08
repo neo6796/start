@@ -62,13 +62,33 @@ Nie preto, že sa na to zabudlo — preto, že to pilot nepotrebuje a každá ve
 
 Každý krok končí niečím, čo sa dá otvoriť v prehliadači a vyskúšať.
 
-1. **Kostra a databáza** — schéma, Docker, prázdna appka s prihlásením
-2. **Číselníky a ľudia** — import menoslovu, hromadné väzby
+1. ~~**Kostra a databáza** — schéma, Docker, prázdna appka s prihlásením~~ **hotové**
+2. ~~**Číselníky a ľudia** — import menoslovu, hromadné väzby~~ **hotové**
 3. **Menu a matica predáka** — jadro appky
 4. **Uzávierka týždňa a odoslanie objednávky** — prvá vec, čo ide von
 5. **Spätný zápis** — dopísanie augusta
 6. **Mesačná uzávierka a mzdový podklad**
 7. **Zálohy a upozornenia** — beží od prvého dňa, dolaďuje sa priebežne
+
+### Čo je hotové po kroku 2
+
+Pilot sa dá celý pripraviť v appke — bez zásahu do databázy.
+
+| | |
+|---|---|
+| Prihlásenie | osobným číslom a heslom; heslá cez scrypt |
+| Roly | predák a správca, strážené pri každej ceste |
+| Číselníky | firmy, prevádzky, tímy, jedálne — zakladanie aj úpravy |
+| Ľudia | import menoslovu, zaradenie, hromadné priradenie väzieb |
+| Pravidlo o pôvode | ručne zadané meno import neprepíše (1.3b) |
+| Zmena firmy | uprostred mesiaca sa odmieta, dá sa k prvému (1.3b) |
+| `/zdravie` | overenie po nasadení; `deploy.sh` sa naň pýta a pri tichu vracia predchádzajúcu verziu |
+
+Appka beží na `obedy.ahafarma.sk`, **preview sa presunulo na `obedy.ahafarma.sk/preview/`** a vozí sa priamo z repozitára — po `git pull` je aktuálne aj ono.
+
+Overené v prehliadači, nie odhadom: dvadsať skúšok cez Chromium (prihlásenie, roly, import s tabulátorom aj bodkočiarkou, úvodné nuly, pravidlo o pôvode, hromadné priradenie, odmietnutie zmeny firmy, ochrana posledného správcu).
+
+---
 
 Body 1–4 stačia na to, aby predák začal objednávať. **Body 5–6 musia byť hotové pred koncom augusta**, inak sa mesiac neuzavrie.
 

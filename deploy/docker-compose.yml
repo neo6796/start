@@ -28,6 +28,10 @@ services:
       SMTP_MENO: ${SMTP_MENO}
       SMTP_HESLO: ${SMTP_HESLO}
       ADRESA: ${ADRESA}
+      VERZIA: ${VERZIA:-neznáma}
+    # Len na slučku. Caddy chodí na appku vnútornou sieťou; tento port je preto,
+    # aby sa dalo zo servera overiť /zdravie — presne to robí deploy.sh po nasadení.
+    ports: ["127.0.0.1:3000:3000"]
     volumes:
       - ./data/prilohy:/data/prilohy
 
@@ -38,6 +42,8 @@ services:
     ports: ["80:80", "443:443"]
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./site:/srv:ro
+      # Preview sa vozí priamo z repozitára — po git pull je hneď aktuálne
+      # a odpadá kopírovanie súboru na server ručne.
+      - ../preview:/srv:ro
       - ./data/caddy:/data
       - ./data/zalohy:/zalohy:ro

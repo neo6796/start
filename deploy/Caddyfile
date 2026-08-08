@@ -1,16 +1,29 @@
-# Preview appky Obedár — statická stránka, žiadna databáza.
-# HTTPS certifikát si Caddy vybaví od Let's Encrypt sám a sám ho aj obnovuje.
+# Obedár. Caddy si certifikát od Let's Encrypt vybaví aj obnovuje sám.
+#
+# Na tej istej adrese bežia dve veci:
+#   /          — appka (krok 1 a 2 druhej etapy)
+#   /preview/  — klikací prototyp, ktorý ukazuje celý cieľový stav
+#
+# Preview zámerne neostalo na koreni: appka je to, čo majú ľudia otvárať.
+# Prototyp sa ďalej hodí na ukazovanie predákom a mzdárke, preto sa nemaže.
 
 obedy.ahafarma.sk {
-	root * /srv
-	file_server
 	encode gzip
 
-	# Nech sa preview nedostane do Google. Je to interná ukážka, nie stránka firmy.
+	# Interná appka firmy, nie stránka pre verejnosť.
 	header X-Robots-Tag "noindex, nofollow"
 
-	# Preview sa počas ladenia mení často — nech prehliadač neukazuje starú verziu.
-	header Cache-Control "no-cache"
+	redir /preview /preview/
+	handle_path /preview/* {
+		root * /srv
+		file_server
+		# Prototyp sa mení často — nech prehliadač neukazuje starú verziu.
+		header Cache-Control "no-cache"
+	}
+
+	handle {
+		reverse_proxy app:3000
+	}
 
 	log {
 		output file /data/access.log {
