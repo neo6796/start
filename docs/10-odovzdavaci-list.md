@@ -27,13 +27,39 @@ Stačí, aby bol Erik dva týždne mimo. Appka by bežala ďalej, ale **nikto by
 
 Toto je jadro celého listu. **Ktorýkoľvek chýbajúci znamená, že sa systém prevziať nedá** — a nie je to zrejmé, kým sa o to niekto nepokúsi.
 
-- [ ] **Hetzner** — pozvať druhého člena do projektu *(☰ → Members → Invite member, rola Admin)*
+- [ ] **Hetzner — zapnúť 2FA** a **záložné kódy uložiť do správcu hesiel**, nie len do telefónu
+- [ ] **Hetzner — pozvať druhého člena** do projektu *(v ponuke projektu → Members → Invite member, rola Admin)*
 - [ ] **SSH kľúč na server** — pridať druhý verejný kľúč do `~/.ssh/authorized_keys`
 - [ ] **Heslá aplikácie** — do správcu hesiel, zdieľané aspoň s jedným ďalším človekom
 - [ ] **DNS u Webglobe** — prístup alebo aspoň meno človeka, ktorý ho má
 - [ ] **GitHub** — pridať druhého spolupracovníka do repozitára
 
-Prvý bod bez druhého je bezcenný: **admin projektu vidí server, ale bez SSH kľúča sa doň neprihlási.**
+**Dve veci, na ktorých to najčastejšie stroskotá:**
+
+**Členstvo v projekte bez SSH kľúča je bezcenné.** Admin projektu server vidí, môže ho reštartovať aj obnoviť zo snímky — ale **neprihlási sa doň**. Sekcia *SSH Keys* v Hetzner konzole na tom nič nemení; použije sa len pri zakladaní nového servera, do bežiaceho stroja kľúč nepridá.
+
+**2FA bez uložených záložných kódov zhoršuje to, čo tento list rieši.** Pri jednoosobovom účte znamená stratený telefón to, že sa dnu nedostane nikto — ani s heslom. Preto sa kódy ukladajú do správcu hesiel **hneď pri zapínaní**, nie „niekedy potom".
+
+### Ako sa pridá SSH kľúč ďalšiemu človeku
+
+Kľúč si vygeneruje **on u seba**, nie na serveri:
+
+```
+ssh-keygen -t ed25519 -C "meno"
+```
+
+Pošle **verejnú** časť — jeden riadok začínajúci `ssh-ed25519 AAAA…`. Verejný kľúč nie je tajomstvo, pokojne mailom; súkromný nikam neodchádza.
+
+Pridá sa na server:
+
+```
+ssh aha@46.225.236.143 'echo "ssh-ed25519 AAAA...jeho riadok" >> ~/.ssh/authorized_keys'
+ssh aha@46.225.236.143 'cat ~/.ssh/authorized_keys'
+```
+
+**Neodhlasovať sa, kým druhý človek nepotvrdí, že sa vie prihlásiť** — kým je spojenie otvorené, dá sa chyba opraviť. Odobratie prístupu je neskôr zmazanie toho riadku.
+
+*Keby sa raz stratili všetky kľúče:* Hetzner má **rescue systém a konzolu v prehliadači**, cez ne sa dá kľúč prehodiť.
 
 ---
 
