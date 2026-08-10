@@ -15,6 +15,7 @@ import { holaStranka, esc } from "./html.js";
 import * as stranky from "./stranky.js";
 import * as ciselniky from "./ciselniky.js";
 import * as ludia from "./ludia.js";
+import * as matica from "./matica.js";
 
 const tu = dirname(fileURLToPath(import.meta.url));
 const VEREJNE = join(tu, "..", "public");
@@ -124,8 +125,9 @@ const CESTY = [
   ["POST", "/prihlasenie", prihlasenieOdoslanie,    null],
   ["POST", "/odhlasenie",  odhlasenie,              "kto"],
   ["GET",  "/",            rozcestie,               "kto"],
-  ["GET",  "/moje",        stranky.moje,            "kto"],
-  ["GET",  "/tim",         stranky.tim,             "predak"],
+  ["GET",  "/moje",        matica.moje,             "kto"],
+  ["GET",  "/tim",         matica.tim,              "predak"],
+  ["POST", "/tim",         matica.uloz,             "predak"],
   ["GET",  "/uzavierka",   stranky.uzavierka,       "admin"],
 
   ["GET",  "/ciselniky",        ciselniky.zoznam, "admin"],

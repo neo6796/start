@@ -1004,4 +1004,41 @@
   .hromadne .field{margin-bottom:10px}
   .note .btn{margin-top:6px}
 
+  /* Bunky matice sú v appke prepínače (radio) v popiske, nie tlačidlá.
+     Vyzerajú rovnako ako v preview, ale klávesnica aj odoslanie formulára
+     fungujú bez jediného riadku JavaScriptu. */
+  .opt-b{position:relative}
+  .opt-b input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+  .opt-b:has(input:checked){
+    background:var(--mustard-soft);
+    color:var(--mustard);
+    border-color:var(--mustard);
+    font-weight:700;
+  }
+  .opt-b.none:has(input:checked){
+    background:var(--ink-3);
+    color:var(--surface);
+    border-color:var(--ink-3);
+    font-weight:700;
+  }
+  .opt-b:has(input:focus-visible){outline:2px solid var(--mustard);outline-offset:2px}
+  .opt-b.vzor{cursor:default}
+
+  /* Text len pre čítačku obrazovky — bunka ukazuje „B", čítačka povie
+     „GASTROGAL, jedlo B". */
+  .len-pre-citacku{
+    position:absolute;width:1px;height:1px;overflow:hidden;
+    clip-path:inset(50%);white-space:nowrap;
+  }
+
+  table.matrix td.cnt,table.matrix th.cnt{
+    text-align:center;font-family:var(--mono);font-weight:700;
+    padding:0 10px;font-variant-numeric:tabular-nums;
+  }
+  table.matrix td.gap{background:var(--surface-2)}
+  table.matrix td.bez-jedalne{
+    padding:10px 12px;font-size:12.5px;color:var(--ink-3);
+  }
+  table.matrix td.bez-jedalne a{color:var(--petrol);font-weight:600}
+
   table.data code{font-family:var(--mono);font-size:12.5px}
