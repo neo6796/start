@@ -999,6 +999,9 @@
   table.data td .btn{padding:4px 10px;font-size:12px;text-decoration:none;display:inline-block}
   table.data a{color:var(--petrol);font-weight:600}
   th.chk,td.chk{width:34px;text-align:center}
+  /* Zaškrtávacie políčko v širokom stĺpci — nie tá úzka bunka zo zoznamu ľudí. */
+  td.tick{text-align:center}
+  td.tick .check{display:inline-flex;justify-content:center}
 
   .hromadne{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 16px;margin:14px 0 10px}
   .hromadne .field{margin-bottom:10px}

@@ -272,6 +272,36 @@ export async function tim(k) {
             </div>
           </form>
         </details>
+      </div>
+
+      <div class="card">
+        <details${k.url.searchParams.get("jed") ? " open" : ""}>
+          <summary class="btn">Pridelenie jedální</summary>
+          <form method="post" action="/tim/jedalne" style="margin-top:16px">
+            <input type="hidden" name="znamka" value="${esc(k.csrf)}">
+            <input type="hidden" name="tyzden" value="${po}">
+            <div class="scroll-x"><table class="data">
+              <thead><tr><th>Stravník</th>
+                ${jedla.map(j => `<th>${esc(j.nazov)}</th>`).join("")}</tr></thead>
+              <tbody>${ludia.map(o => {
+                const moje = pridelenia.get(o.id) ?? [];
+                return `<tr>
+                  <td>${esc(o.priezvisko)} ${esc(o.meno)}</td>
+                  ${jedla.map(j => `<td class="tick"><label class="check">
+                    <input type="checkbox" name="j-${o.id}" value="${j.id}"${moje.includes(j.id) ? " checked" : ""}
+                      aria-label="${esc(o.priezvisko)} ${esc(o.meno)}, ${esc(j.nazov)}">
+                  </label></td>`).join("")}
+                </tr>`;
+              }).join("")}</tbody>
+            </table></div>
+            <button class="btn primary" type="submit" style="margin-top:14px">Uložiť pridelenie</button>
+            <div class="note">
+              Kto má zaškrtnuté dve, dostane v matici ponuky pod sebou — jeden riadok na jedáleň.
+              Odobrať jedáleň, z ktorej už niekto v otvorenom týždni má objednané, appka nedovolí:
+              najprv treba zmeniť tú objednávku.
+            </div>
+          </form>
+        </details>
       </div>`}
 </section>
 
@@ -387,6 +417,75 @@ export async function uloz(k) {
     (odmietnutych ? "&chyba=" + encodeURIComponent(
       `${mnoho(odmietnutych, ["voľba sa neuložila", "voľby sa neuložili", "volieb sa neuložilo"])} — ` +
       "jedáleň nie je danému stravníkovi pridelená.") : ""));
+}
+
+/* ---------- pridelenie jedální ---------- */
+
+/* Predák to smie meniť vo svojom tíme, admin komukoľvek. Bolo to Erikovo
+   rozhodnutie: predák je bližšie k realite a vie, kto kde je. */
+export async function jedalne_uloz(k) {
+  const po = pondelok(k.data.tyzden || dnes());
+  const spat = t => k.inam(k.odp, `/tim?tyzden=${po}&jed=1&chyba=` + encodeURIComponent(t));
+
+  const { ludia } = k.osoba.je_admin && !k.osoba.je_predak
+    ? await tymZaTyzden("true", [], po)
+    : await tymZaTyzden("o.tim_id IN (SELECT id FROM tim WHERE predak_id = $1)", [k.osoba.id], po);
+  if (!ludia.length) return spat("Nemáš nikoho v tíme.");
+
+  const platne = new Set((await jedalne()).map(j => j.id));
+
+  let zmien = 0;
+  const branene = [];
+  const klient = await bazen.connect();
+  try {
+    await klient.query("BEGIN");
+    for (const o of ludia) {
+      const chcene = [].concat(k.data[`j-${o.id}`] ?? [])
+        .map(Number).filter(v => platne.has(v));
+
+      /* Jedáleň, z ktorej už niekto má objednané v neuzavretom týždni, sa
+         odobrať nedá. Objednávka by ostala visieť na jedálni, ktorú stravník
+         nemá — a tá istá kontrola pri ukladaní matice by ju potom odmietla. */
+      const pouzite = (await klient.query(
+        `SELECT DISTINCT o2.poskytovatel_id FROM objednavka o2
+          WHERE o2.osoba_id = $1 AND o2.poskytovatel_id IS NOT NULL
+            AND o2.datum >= date_trunc('month', current_date)`, [o.id])).rows.map(r => r.poskytovatel_id);
+
+      for (const p of pouzite) {
+        if (!chcene.includes(p)) {
+          chcene.push(p);
+          branene.push(`${o.priezvisko} ${o.meno}`);
+        }
+      }
+
+      const v = await klient.query(
+        "DELETE FROM osoba_jedalen WHERE osoba_id = $1 AND NOT (poskytovatel_id = ANY($2))",
+        [o.id, chcene.length ? chcene : [0]]);
+      zmien += v.rowCount;
+      for (const j of chcene) {
+        const w = await klient.query(
+          `INSERT INTO osoba_jedalen (osoba_id, poskytovatel_id, pridal_id)
+           VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`, [o.id, j, k.osoba.id]);
+        zmien += w.rowCount;
+      }
+    }
+    await klient.query("COMMIT");
+  } catch (e) {
+    await klient.query("ROLLBACK");
+    klient.release();
+    return spat("Neuložilo sa nič: " + e.message);
+  }
+  klient.release();
+
+  await zapis(k.osoba.id, "pridelenie.jedalne", { tyzden: po, zmien });
+
+  const chyba = branene.length
+    ? "&chyba=" + encodeURIComponent(
+        `Jedáleň sa neodobrala, lebo z nej už tento mesiac niekto má objednané: ` +
+        [...new Set(branene)].join(", ") + ".")
+    : "";
+  k.inam(k.odp, `/tim?tyzden=${po}&sprava=` +
+    encodeURIComponent(zmien ? `Pridelenie uložené (${zmien}).` : "Nič sa nezmenilo.") + chyba);
 }
 
 /* ---------- hromadné odhlásenie ---------- */

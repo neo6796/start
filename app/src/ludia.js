@@ -316,6 +316,14 @@ export async function hromadne(k) {
 
   hodnoty.push(kto);
   const r = await dopyt(`UPDATE osoba SET ${zmeny.join(", ")} WHERE id = ANY($${hodnoty.length})`, hodnoty);
+
+  /* Domovská jedáleň patrí do pridelených vždy — bez toho by hromadné
+     priradenie nastavilo jedáleň, z ktorej si potom nikto nemôže vybrať. */
+  if (k.data.poskytovatel_id)
+    await dopyt(`INSERT INTO osoba_jedalen (osoba_id, poskytovatel_id, pridal_id)
+                 SELECT unnest($1::int[]), $2, $3 ON CONFLICT DO NOTHING`,
+                [kto, Number(k.data.poskytovatel_id), k.osoba.id]);
+
   await zapis(k.osoba.id, "ludia.hromadne", { kolko: r.rowCount, zmeny: zmeny.join(", ") });
 
   k.inam(k.odp, "/ludia?sprava=" + encodeURIComponent(
@@ -330,6 +338,9 @@ export async function detail(k) {
   if (!o) return k.inam(k.odp, "/ludia?chyba=" + encodeURIComponent("Taký človek tu nie je."));
 
   const c = await ciselniky();
+  const pridelene = new Set((await vsetky(
+    "SELECT poskytovatel_id FROM osoba_jedalen WHERE osoba_id = $1", [id]))
+    .map(r => r.poskytovatel_id));
   const chyba = k.url.searchParams.get("chyba");
   const sprava = k.url.searchParams.get("sprava");
 
@@ -392,7 +403,20 @@ export async function detail(k) {
         </div>
         <div>
           <div class="field"><label for="p-prevadzka_id">Prevádzka</label>${vyber("prevadzka_id", c.prevadzky, o.prevadzka_id)}</div>
-          <div class="field"><label for="p-poskytovatel_id">Jedáleň</label>${vyber("poskytovatel_id", c.jedalne, o.poskytovatel_id)}</div>
+          <div class="field"><label for="p-poskytovatel_id">Domovská jedáleň</label>
+            ${vyber("poskytovatel_id", c.jedalne, o.poskytovatel_id)}
+            <p class="hint">Tá, z ktorej dostáva obed bežne.</p></div>
+          <div class="field">
+            <label>Môže si vybrať aj z</label>
+            ${c.jedalne.filter(j => j.id !== o.poskytovatel_id).length === 0
+              ? `<p class="hint">Iná aktívna jedáleň nie je.</p>`
+              : c.jedalne.filter(j => j.id !== o.poskytovatel_id).map(j =>
+                  `<label class="check" style="margin-bottom:6px">
+                     <input type="checkbox" name="jedalne" value="${j.id}"${pridelene.has(j.id) ? " checked" : ""}>
+                     <span>${esc(j.nazov)}</span></label>`).join("")}
+            <p class="hint">Kto má pridelené dve, dostane v matici ponuky pod sebou —
+              jeden riadok na jedáleň. Domovská je pridelená vždy.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -435,7 +459,8 @@ export async function uloz(k) {
   const povod = rucnaZmenaMena ? "rucne" : o.povod_mena;
 
   const cislo = v => (k.data[v] ?? "").trim() ? Number(k.data[v]) : null;
-  const zaskrtnute = v => k.data[v] === "1";
+  const zapnute = v => k.data[v] === "1";
+  const novaJedalen = cislo("poskytovatel_id");
 
   try {
     await dopyt(`
@@ -449,8 +474,8 @@ export async function uloz(k) {
       (k.data.kod_mzdy ?? "").trim() || null,
       novaFirma, (k.data.vztah ?? "").trim() || null, cislo("tim_id"),
       cislo("prevadzka_id"), cislo("poskytovatel_id"),
-      zaskrtnute("je_predak"), zaskrtnute("je_admin"), zaskrtnute("platca_dph"),
-      zaskrtnute("aktivny"), povod
+      zapnute("je_predak"), zapnute("je_admin"), zapnute("platca_dph"),
+      zapnute("aktivny"), povod
     ]);
   } catch (e) {
     return naspat(e.code === "23505"
@@ -459,7 +484,7 @@ export async function uloz(k) {
   }
 
   /* Kto si zoberie sám sebe správcu, vyrobí appku bez správcu. */
-  if (o.je_admin && !zaskrtnute("je_admin")) {
+  if (o.je_admin && !zapnute("je_admin")) {
     const zvysok = await jeden("SELECT count(*)::int AS n FROM osoba WHERE je_admin AND aktivny");
     if (zvysok.n === 0) {
       await dopyt("UPDATE osoba SET je_admin = true WHERE id = $1", [id]);
@@ -468,6 +493,18 @@ export async function uloz(k) {
     }
   }
 
-  await zapis(k.osoba.id, "osoba.upravena", { id, kto: `${priezvisko} ${meno_}` });
+  /* Pridelenia sa prepíšu nanovo: domovská jedáleň plus zaškrtnuté.
+     Domovská je v zozname vždy — inak by si človek nemohol objednať tam,
+     kde má chodiť bežne. */
+  const zaskrtnute = [].concat(k.data.jedalne ?? []).map(Number).filter(Number.isInteger);
+  const chcene = [...new Set([...(novaJedalen ? [novaJedalen] : []), ...zaskrtnute])];
+  await dopyt("DELETE FROM osoba_jedalen WHERE osoba_id = $1 AND NOT (poskytovatel_id = ANY($2))",
+              [id, chcene.length ? chcene : [0]]);
+  for (const j of chcene)
+    await dopyt(`INSERT INTO osoba_jedalen (osoba_id, poskytovatel_id, pridal_id)
+                 VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`, [id, j, k.osoba.id]);
+
+  await zapis(k.osoba.id, "osoba.upravena",
+              { id, kto: `${priezvisko} ${meno_}`, jedalne: chcene });
   k.inam(k.odp, `/osoba?id=${id}&sprava=` + encodeURIComponent("Uložené."));
 }
