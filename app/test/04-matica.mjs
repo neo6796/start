@@ -110,6 +110,66 @@ await p.waitForLoadState("networkidle");
 ok("neposlané bunky sa vrátili na nerozhodnuté a odmietnutá si nechala pôvodné",
    (await p.locator("table.matrix input:checked").count()) === 1);
 
+/* Panel sa otvára a zatvára; klikať naň naslepo by ho raz otvorilo a raz zavrelo. */
+const otvorPanel = () => p.evaluate(() => {
+  const d = document.getElementById("n-kto")?.closest("details");
+  if (d) d.open = true;
+});
+
+console.log("— hromadné odhlásenie —");
+await p.goto(A + "/tim");
+await otvorPanel();
+await p.selectOption("#n-kto", "vsetci");
+await p.selectOption("#n-dovod", "dovolenka");
+await p.click("button:has-text('Označiť')");
+await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("odhlásenie potvrdené", /Odhlásené: \d+ ľud/.test(t));
+ok("hlási aj počet pracovných dní", /5 pracovných dní/.test(t));
+ok("všetky bunky sú krížiky",
+   (await p.locator("table.matrix input[value=x]:checked").count()) === 30);
+ok("dôvod je pri dni vidieť",
+   (await p.locator(".precmark").first().getAttribute("title")) === "dovolenka");
+ok("bez voľby kleslo na nulu", !/BEZ VOĽBY[\s\S]{0,60}[1-9]/i.test(
+   (await p.locator(".deadline").innerText())));
+
+console.log("— neprítomnosť neblokuje —");
+const jedna = p.locator("table.matrix tbody tr").first().locator("td").nth(0);
+await jedna.locator("input[value$=':2']").first().check();
+await p.click("button:has-text('Uložiť')");
+await p.waitForLoadState("networkidle");
+ok("deň označený dovolenkou sa dá prebiť jedlom",
+   await p.locator("table.matrix tbody tr").first().locator("td").nth(0)
+     .locator("input[value$=':2']").first().isChecked());
+ok("značka dovolenky pri prebitom dni ostala",
+   (await p.locator("table.matrix tbody tr").first().locator("td").nth(0)
+     .locator(".precmark").count()) === 1);
+
+console.log("— bez vybratej osoby —");
+await p.goto(A + "/tim");
+await otvorPanel();
+await p.click("button:has-text('Označiť')");
+await p.waitForTimeout(300);
+ok("bez vybratej osoby prehliadač formulár nepustí", p.url().endsWith("/tim"));
+
+console.log("— nezmyselný rozsah —");
+await otvorPanel();
+await p.selectOption("#n-kto", "vsetci");     // po znovunačítaní je výber prázdny
+await p.fill("#n-od", "2026-09-10");
+await p.fill("#n-do", "2026-09-01");
+await p.click("button:has-text('Označiť')");
+await p.waitForLoadState("networkidle");
+ok("koniec pred začiatkom sa odmietne", (await p.content()).includes("Koniec je skôr"));
+
+console.log("— víkend sa preskočí —");
+await otvorPanel();
+await p.selectOption("#n-kto", "vsetci");
+await p.fill("#n-od", "2026-09-05");   // sobota
+await p.fill("#n-do", "2026-09-06");   // nedeľa
+await p.click("button:has-text('Označiť')");
+await p.waitForLoadState("networkidle");
+ok("samé víkendové dni sa odmietnu", (await p.content()).includes("ani jeden pracovný deň"));
+
 console.log("— stravník vidí svoj týždeň —");
 await p.goto(A + "/moje");
 ok("vlastný týždeň sa otvorí", (await p.content()).includes("Môj týždeň"));

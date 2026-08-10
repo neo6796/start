@@ -128,6 +128,7 @@ const CESTY = [
   ["GET",  "/moje",        matica.moje,             "kto"],
   ["GET",  "/tim",         matica.tim,              "predak"],
   ["POST", "/tim",         matica.uloz,             "predak"],
+  ["POST", "/tim/nepritomnost", matica.nepritomnost, "predak"],
   ["GET",  "/uzavierka",   stranky.uzavierka,       "admin"],
 
   ["GET",  "/ciselniky",        ciselniky.zoznam, "admin"],
