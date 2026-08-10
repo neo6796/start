@@ -1,9 +1,12 @@
 /* Ľudia — zoznam, import menoslovu, zaradenie.
 
    Import nesie len identitu: osobné číslo, priezvisko, meno. Firma, vzťah,
-   tím, predák, prevádzka a jedáleň sa vyberajú tu z rozbaľovacích zoznamov
+   tím, prevádzka a jedáleň sa vyberajú tu z rozbaľovacích zoznamov
    (koncept 1.3b). Dôvod je praktický: v Exceli sa tie väzby píšu ako text,
-   preklep založí druhú „firmu" a nikto si to nevšimne. */
+   preklep založí druhú „firmu" a nikto si to nevšimne.
+
+   Predák sa tu nenastavuje — patrí tímu (koncept 1.2). Stĺpec „Predák"
+   v zozname je len na čítanie, ukazuje predáka toho tímu, v ktorom človek je. */
 
 import { stranka, esc, meno, mnoho } from "./html.js";
 import { bazen, dopyt, jeden, vsetky, zapis } from "./db.js";
@@ -14,15 +17,13 @@ const VZTAHY = [["", "—"], ["pp", "pracovný pomer"], ["zivnostnik", "živnost
 const nazovVztahu = v => (VZTAHY.find(x => x[0] === (v ?? "")) ?? ["", "—"])[1];
 
 async function ciselniky() {
-  const [firmy, timy, prevadzky, jedalne, predaci] = await Promise.all([
+  const [firmy, timy, prevadzky, jedalne] = await Promise.all([
     vsetky("SELECT id, nazov FROM firma WHERE aktivna ORDER BY nazov"),
     vsetky("SELECT id, nazov FROM tim WHERE aktivny ORDER BY nazov"),
     vsetky("SELECT id, nazov FROM prevadzka WHERE aktivna ORDER BY nazov"),
-    vsetky("SELECT id, nazov FROM poskytovatel WHERE aktivny ORDER BY nazov"),
-    vsetky("SELECT id, priezvisko, meno FROM osoba WHERE aktivny AND je_predak ORDER BY priezvisko")
+    vsetky("SELECT id, nazov FROM poskytovatel WHERE aktivny ORDER BY nazov")
   ]);
-  return { firmy, timy, prevadzky, jedalne,
-           predaci: predaci.map(p => ({ id: p.id, nazov: `${p.priezvisko} ${p.meno}` })) };
+  return { firmy, timy, prevadzky, jedalne };
 }
 
 function vyber(nazov, zoznam, vybrane, prazdne = "—") {
@@ -49,7 +50,7 @@ export async function zoznam(k) {
       LEFT JOIN tim   t        ON t.id  = o.tim_id
       LEFT JOIN prevadzka p    ON p.id  = o.prevadzka_id
       LEFT JOIN poskytovatel j ON j.id  = o.poskytovatel_id
-      LEFT JOIN osoba pr       ON pr.id = o.predak_id
+      LEFT JOIN osoba pr       ON pr.id = t.predak_id
      WHERE ${podmienky.join(" AND ")}
      ORDER BY o.priezvisko, o.meno`);
 
@@ -131,7 +132,6 @@ export async function zoznam(k) {
          <div class="hromadne">
            <div class="field"><label for="p-firma_id">Firma</label>${vyber("firma_id", c.firmy, "", "nemeniť")}</div>
            <div class="field"><label for="p-tim_id">Tím</label>${vyber("tim_id", c.timy, "", "nemeniť")}</div>
-           <div class="field"><label for="p-predak_id">Predák</label>${vyber("predak_id", c.predaci, "", "nemeniť")}</div>
            <div class="field"><label for="p-prevadzka_id">Prevádzka</label>${vyber("prevadzka_id", c.prevadzky, "", "nemeniť")}</div>
            <div class="field"><label for="p-poskytovatel_id">Jedáleň</label>${vyber("poskytovatel_id", c.jedalne, "", "nemeniť")}</div>
            <div class="field"><label for="p-vztah">Vzťah</label>
@@ -274,10 +274,12 @@ export async function importuj(k) {
 
 /* ---------- hromadné priradenie ---------- */
 
+/* Predák tu nie je zámerne — patrí tímu (koncept 1.2), nastavuje sa
+   v číselníku tímov. Nastaviť ho človeku by znamenalo, že dvaja ľudia
+   v tom istom tíme môžu mať dvoch rôznych. */
 const VAZBY = {
   firma_id: ["firma", "Firma"], tim_id: ["tim", "Tím"],
-  predak_id: ["osoba", "Predák"], prevadzka_id: ["prevadzka", "Prevádzka"],
-  poskytovatel_id: ["poskytovatel", "Jedáleň"]
+  prevadzka_id: ["prevadzka", "Prevádzka"], poskytovatel_id: ["poskytovatel", "Jedáleň"]
 };
 
 /* Firma delí peniaze. Zmeniť ju uprostred mesiaca by prerozdelilo náklad,
@@ -330,7 +332,6 @@ export async function detail(k) {
   const c = await ciselniky();
   const chyba = k.url.searchParams.get("chyba");
   const sprava = k.url.searchParams.get("sprava");
-  const predaci = c.predaci.filter(p => p.id !== o.id);   // sám sebe predákom nie je
 
   const prep = (kluc, popis, zapnute, vysvetlenie) => `
     <label class="check" style="margin-bottom:10px">
@@ -385,10 +386,11 @@ export async function detail(k) {
             <select name="vztah" id="p-vztah">
               ${VZTAHY.map(v => `<option value="${v[0]}"${(o.vztah ?? "") === v[0] ? " selected" : ""}>${esc(v[1])}</option>`).join("")}
             </select></div>
-          <div class="field"><label for="p-tim_id">Tím</label>${vyber("tim_id", c.timy, o.tim_id)}</div>
+          <div class="field"><label for="p-tim_id">Tím</label>${vyber("tim_id", c.timy, o.tim_id)}
+            <p class="hint">Určuje, kto za neho objednáva. Predáka nesie tím —
+              nastavuje sa v <a href="/ciselniky">Číselníkoch</a>.</p></div>
         </div>
         <div>
-          <div class="field"><label for="p-predak_id">Predák</label>${vyber("predak_id", predaci, o.predak_id)}</div>
           <div class="field"><label for="p-prevadzka_id">Prevádzka</label>${vyber("prevadzka_id", c.prevadzky, o.prevadzka_id)}</div>
           <div class="field"><label for="p-poskytovatel_id">Jedáleň</label>${vyber("poskytovatel_id", c.jedalne, o.poskytovatel_id)}</div>
         </div>
@@ -438,14 +440,14 @@ export async function uloz(k) {
   try {
     await dopyt(`
       UPDATE osoba SET priezvisko=$2, meno=$3, kod_dochadzka=$4, kod_mzdy=$5,
-             firma_id=$6, vztah=$7, tim_id=$8, predak_id=$9, prevadzka_id=$10,
-             poskytovatel_id=$11, je_predak=$12, je_admin=$13, platca_dph=$14,
-             aktivny=$15, povod_mena=$16
+             firma_id=$6, vztah=$7, tim_id=$8, prevadzka_id=$9,
+             poskytovatel_id=$10, je_predak=$11, je_admin=$12, platca_dph=$13,
+             aktivny=$14, povod_mena=$15
        WHERE id=$1`, [
       id, priezvisko, meno_,
       (k.data.kod_dochadzka ?? "").trim() || null,
       (k.data.kod_mzdy ?? "").trim() || null,
-      novaFirma, (k.data.vztah ?? "").trim() || null, cislo("tim_id"), cislo("predak_id"),
+      novaFirma, (k.data.vztah ?? "").trim() || null, cislo("tim_id"),
       cislo("prevadzka_id"), cislo("poskytovatel_id"),
       zaskrtnute("je_predak"), zaskrtnute("je_admin"), zaskrtnute("platca_dph"),
       zaskrtnute("aktivny"), povod

@@ -617,6 +617,7 @@
   .field input[type="text"],
   .field input[type="password"],
   .field input[type="number"],
+  .field input[type="time"],
   .field select{
     width:100%;
     font-family:var(--sans);
@@ -992,6 +993,8 @@
   details[open] > summary{background:var(--petrol);color:var(--on-petrol);border-color:var(--petrol)}
 
   .riadok-akcia{display:inline}
+  td.akcie{white-space:nowrap}
+  td.akcie .btn{margin-right:4px}
   .riadok-akcia .btn{padding:4px 10px;font-size:12px}
   table.data td .btn{padding:4px 10px;font-size:12px;text-decoration:none;display:inline-block}
   table.data a{color:var(--petrol);font-weight:600}

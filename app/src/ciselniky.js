@@ -1,7 +1,8 @@
 /* Číselníky — firmy, prevádzky, tímy, jedálne.
 
    Nič sa nemaže. Položka sa dá len zneaktívniť: v uzavretých mesiacoch na ňu
-   ukazujú objednávky a zmazaním by sa minulosť prepísala (koncept 6.1). */
+   ukazujú objednávky a zmazaním by sa minulosť prepísala (koncept 6.1).
+   Upraviť sa dá čokoľvek — cenník, e-mail aj preklep v názve. */
 
 import { stranka, esc } from "./html.js";
 import { dopyt, jeden, vsetky, zapis } from "./db.js";
@@ -21,10 +22,15 @@ const DRUHY = {
     prazdne: "Zatiaľ žiadna prevádzka.",
     polia: [["nazov", "Názov", "text", true], ["skratka", "Skratka", "text", true]]
   },
+  /* Tím nesie predáka (koncept 1.2: „Tím = entita s prideleným predákom,
+     nie pole »nadriadený« na osobe"). Keby predák visel na každom človeku
+     zvlášť, dvaja ľudia v tom istom tíme by mohli mať dvoch rôznych — stav,
+     ktorý nič neznamená a v matici sa nedá rozhodnúť. */
   tim: {
     tabulka: "tim", nazov: "Tímy", jednotne: "tím", stav: "aktivny",
-    prazdne: "Zatiaľ žiadny tím.",
-    polia: [["nazov", "Názov", "text", true]]
+    prazdne: "Zatiaľ žiadny tím. Tím určuje, kto za koho objednáva.",
+    polia: [["nazov", "Názov", "text", true],
+            ["predak_id", "Predák", "predak", false, null, "smie byť prázdne"]]
   },
   jedalen: {
     tabulka: "poskytovatel", nazov: "Jedálne", jednotne: "jedáleň", stav: "aktivny",
@@ -39,34 +45,54 @@ const DRUHY = {
       ["model", "Model rozúčtovania", "vyber", false,
         [["eko", "ekonomický"], ["std", "štandardný"]]],
       ["odhlasenie_do", "Odhlásenie do", "cas", false],
-      ["email", "E-mail na objednávky", "text", false],
-      ["telefon", "Telefón", "text", false]
+      ["email", "E-mail na objednávky", "text", false, null, "smie byť prázdne"],
+      ["telefon", "Telefón", "text", false, null, "smie byť prázdne"]
     ]
   }
 };
 
-/* Identifikátor nesie aj druh číselníka. Na stránke sú štyri formuláre a každý
-   má pole „Názov" — bez rozlíšenia by všetky štyri popisky ukazovali na prvé
-   pole a kliknutie na „Názov" pri tímoch by skočilo do firiem. */
-function pole(druhKluc, [kluc, popis, druh, povinne, moznosti], hodnota = "") {
-  const id = `p-${druhKluc}-${kluc}`;
+/* Identifikátor nesie aj druh číselníka a účel formulára. Na stránke je päť
+   formulárov a väčšina má pole „Názov" — bez rozlíšenia by všetky popisky
+   ukazovali na to prvé a kliknutie na „Názov" pri tímoch by skočilo do firiem. */
+function pole(predpona, [kluc, popis, druh, povinne, moznosti], hodnota, kontext) {
+  const id = `p-${predpona}-${kluc}`;
   const spolocne = `id="${id}" name="${kluc}"${povinne ? " required" : ""}`;
+  const v = hodnota ?? "";
   let vstup;
   if (druh === "vyber") {
-    vstup = `<select ${spolocne}>${moznosti.map(([v, t]) =>
-      `<option value="${esc(v)}"${String(hodnota) === v ? " selected" : ""}>${esc(t)}</option>`).join("")}</select>`;
+    vstup = `<select ${spolocne}>${moznosti.map(([m, t]) =>
+      `<option value="${esc(m)}"${String(v) === m ? " selected" : ""}>${esc(t)}</option>`).join("")}</select>`;
+  } else if (druh === "predak") {
+    const zoznam = kontext?.predaci ?? [];
+    vstup = `<select ${spolocne}>
+      <option value="">—</option>
+      ${zoznam.map(o => `<option value="${o.id}"${Number(v) === o.id ? " selected" : ""}>${esc(o.nazov)}</option>`).join("")}
+    </select>`;
   } else if (druh === "cislo") {
-    vstup = `<input type="number" step="0.01" min="0" ${spolocne} value="${esc(hodnota)}">`;
+    vstup = `<input type="number" step="0.01" min="0" ${spolocne} value="${esc(v)}">`;
   } else if (druh === "cas") {
-    vstup = `<input type="time" ${spolocne} value="${esc(String(hodnota).slice(0, 5))}">`;
+    vstup = `<input type="time" ${spolocne} value="${esc(String(v).slice(0, 5))}">`;
   } else {
-    vstup = `<input type="text" ${spolocne} value="${esc(hodnota)}">`;
+    vstup = `<input type="text" ${spolocne} value="${esc(v)}">`;
   }
-  return `<div class="field"><label for="${id}">${esc(popis)}</label>${vstup}</div>`;
+  let pod = "";
+  if (druh === "predak" && !(kontext?.predaci ?? []).length)
+    pod = `<p class="hint">Zatiaľ nie je koho vybrať. Predák je stravník s príznakom —
+           najprv ho označ v <a href="/ludia">Ľuďoch</a>.</p>`;
+  return `<div class="field"><label for="${id}">${esc(popis)}</label>${vstup}${pod}</div>`;
 }
 
-function karta(druh, d, riadky, csrf, otvorene) {
-  const stlpce = d.polia.map(p => p[1]);
+function bunka([kluc, , dr, , moz], r, kontext) {
+  let v = r[kluc];
+  if (dr === "predak") v = r.predak_meno;
+  if (v === null || v === undefined || v === "") return "—";
+  if (kluc === "cena_s_dph") return eur(v);
+  if (dr === "cas") return String(v).slice(0, 5);
+  if (dr === "vyber") return (moz.find(m => m[0] === String(v)) ?? [, v])[1];
+  return v;
+}
+
+function karta(druh, d, riadky, k, otvorene, kontext) {
   return `
 <div class="card">
   <div class="card-head">
@@ -76,45 +102,57 @@ function karta(druh, d, riadky, csrf, otvorene) {
   ${riadky.length === 0
     ? `<p class="hint" style="margin:0 0 14px">${esc(d.prazdne)}</p>`
     : `<div class="scroll-x"><table class="data">
-        <thead><tr>${stlpce.map(s => `<th>${esc(s)}</th>`).join("")}<th>Stav</th><th></th></tr></thead>
+        <thead><tr>${d.polia.map(p => `<th>${esc(p[1])}</th>`).join("")}<th>Stav</th><th></th></tr></thead>
         <tbody>${riadky.map(r => `<tr${r[d.stav] ? "" : ' class="is-off"'}>
-          ${d.polia.map(([kluc, , dr, , moz]) => {
-            let v = r[kluc];
-            if (v === null || v === undefined || v === "") v = "—";
-            else if (kluc === "cena_s_dph") v = eur(v);
-            else if (dr === "cas") v = String(v).slice(0, 5);
-            else if (dr === "vyber") v = (moz.find(m => m[0] === String(v)) ?? [, v])[1];
-            return `<td>${esc(v)}</td>`;
-          }).join("")}
+          ${d.polia.map(p => `<td>${esc(bunka(p, r, kontext))}</td>`).join("")}
           <td>${r[d.stav] ? "aktívna" : "neaktívna"}</td>
-          <td><form method="post" action="/ciselniky/stav" class="riadok-akcia">
-            <input type="hidden" name="znamka" value="${esc(csrf)}">
-            <input type="hidden" name="druh" value="${esc(druh)}">
-            <input type="hidden" name="id" value="${r.id}">
-            <input type="hidden" name="na" value="${r[d.stav] ? "0" : "1"}">
-            <button class="btn" type="submit">${r[d.stav] ? "Zneaktívniť" : "Obnoviť"}</button>
-          </form></td>
+          <td class="akcie">
+            <a class="btn" href="/ciselnik?druh=${esc(druh)}&id=${r.id}">Upraviť</a>
+            <form method="post" action="/ciselniky/stav" class="riadok-akcia">
+              <input type="hidden" name="znamka" value="${esc(k.csrf)}">
+              <input type="hidden" name="druh" value="${esc(druh)}">
+              <input type="hidden" name="id" value="${r.id}">
+              <input type="hidden" name="na" value="${r[d.stav] ? "0" : "1"}">
+              <button class="btn" type="submit">${r[d.stav] ? "Zneaktívniť" : "Obnoviť"}</button>
+            </form>
+          </td>
         </tr>`).join("")}</tbody>
        </table></div>`}
 
   <details${otvorene === druh ? " open" : ""}>
     <summary class="btn" style="display:inline-block;margin-top:4px">Pridať ${esc(d.jednotne)}</summary>
     <form method="post" action="/ciselniky/pridat" class="pridat" style="margin-top:14px;max-width:420px">
-      <input type="hidden" name="znamka" value="${esc(csrf)}">
+      <input type="hidden" name="znamka" value="${esc(k.csrf)}">
       <input type="hidden" name="druh" value="${esc(druh)}">
-      ${d.polia.map(p => pole(druh, p)).join("")}
+      ${d.polia.map(p => pole(druh, p, "", kontext)).join("")}
       <button class="btn primary" type="submit">Uložiť</button>
     </form>
   </details>
 </div>`;
 }
 
+/* Predáci sa ponúkajú pri tímoch, tak ich načítame raz pre celú stránku. */
+async function kontextUdajov() {
+  const predaci = await vsetky(
+    "SELECT id, priezvisko || ' ' || meno AS nazov FROM osoba WHERE aktivny AND je_predak ORDER BY priezvisko");
+  return { predaci };
+}
+
+function dotaz(d) {
+  if (d.tabulka === "tim")
+    return `SELECT t.*, p.priezvisko || ' ' || p.meno AS predak_meno
+              FROM tim t LEFT JOIN osoba p ON p.id = t.predak_id
+             ORDER BY t.aktivny DESC, t.nazov`;
+  return `SELECT * FROM ${d.tabulka} ORDER BY ${d.stav} DESC, nazov`;
+}
+
 export async function zoznam(k) {
+  const kontext = await kontextUdajov();
   const data = {};
-  for (const [druh, d] of Object.entries(DRUHY)) {
-    data[druh] = await vsetky(`SELECT * FROM ${d.tabulka} ORDER BY ${d.stav} DESC, nazov`);
-  }
+  for (const [druh, d] of Object.entries(DRUHY)) data[druh] = await vsetky(dotaz(d));
+
   const chyba = k.url.searchParams.get("chyba");
+  const sprava = k.url.searchParams.get("sprava");
   const otvorene = k.url.searchParams.get("otvor");
 
   k.html(k.odp, 200, stranka({
@@ -125,49 +163,136 @@ export async function zoznam(k) {
     <h2>Číselníky</h2>
     <span class="who">firmy · prevádzky · tímy · jedálne</span>
   </div>
+  ${sprava ? `<div class="okbox">${esc(sprava)}</div>` : ""}
   ${chyba ? `<div class="warnbox">${esc(chyba)}</div>` : ""}
-  ${Object.entries(DRUHY).map(([druh, d]) => karta(druh, d, data[druh], k.csrf, otvorene)).join("")}
+  ${Object.entries(DRUHY).map(([druh, d]) => karta(druh, d, data[druh], k, otvorene, kontext)).join("")}
   <div class="card">
     <div class="card-head"><h3>Prečo sa nič nemaže</h3></div>
     <p class="hint" style="margin:0">Na uzavreté mesiace ukazujú objednávky s odfotenou cenou.
       Zmazaná jedáleň by z nich spravila riadky bez pôvodu. Zneaktívnená sa neponúka pri
-      novej objednávke, ale minulosť ostáva čitateľná.</p>
+      novej objednávke, ale minulosť ostáva čitateľná. Upraviť sa dá všetko — nová cena
+      platí odteraz a odfotené objednávky neprepíše.</p>
   </div>
 </section>`
   }));
 }
 
-export async function pridat(k) {
-  const d = DRUHY[k.data.druh];
-  if (!d) return k.inam(k.odp, "/ciselniky");
-
+/* Prevedie hodnoty z formulára na stĺpce a hodnoty do SQL.
+   Vracia buď { stlpce, hodnoty }, alebo { chyba }. */
+function zoberPolia(d, data, iba = null) {
   const stlpce = [], hodnoty = [];
-  for (const [kluc, popis, druh, povinne] of d.polia) {
-    let v = (k.data[kluc] ?? "").trim();
+  for (const [kluc, popis, druh, povinne, , smiePrazdne] of d.polia) {
+    let v = (data[kluc] ?? "").trim();
     if (!v) {
-      if (povinne) return k.inam(k.odp, `/ciselniky?otvor=${k.data.druh}&chyba=` +
-        encodeURIComponent(`${popis} treba vyplniť.`));
-      continue;                                   // prázdne nepovinné pole nechá predvolenú hodnotu
+      if (povinne) return { chyba: `${popis} treba vyplniť.` };
+      /* Pri zakladaní necháme prázdne pole na predvolenej hodnote z databázy.
+         Pri úprave to nejde: hodnota tam už je a nechať ju „ako je" by
+         znamenalo, že sa vymazať nedá. Preto sa prázdne pole zapíše ako
+         prázdne — ale len tam, kde to databáza dovolí. */
+      if (iba === "pridat") continue;
+      if (!smiePrazdne) return { chyba: `${popis} sa nedá vymazať — vyplňte hodnotu.` };
+      stlpce.push(kluc); hodnoty.push(null);
+      continue;
     }
     if (druh === "cislo") {
       v = Number(v.replace(",", "."));
-      if (!Number.isFinite(v) || v < 0) return k.inam(k.odp, `/ciselniky?otvor=${k.data.druh}&chyba=` +
-        encodeURIComponent(`${popis}: „${k.data[kluc]}" nie je číslo.`));
+      if (!Number.isFinite(v) || v < 0) return { chyba: `${popis}: „${data[kluc]}" nie je číslo.` };
     }
+    if (druh === "predak") v = Number(v);
     stlpce.push(kluc); hodnoty.push(v);
   }
+  return { stlpce, hodnoty };
+}
+
+export async function pridat(k) {
+  const d = DRUHY[k.data.druh];
+  if (!d) return k.inam(k.odp, "/ciselniky");
+  const spat = t => k.inam(k.odp, `/ciselniky?otvor=${k.data.druh}&chyba=` + encodeURIComponent(t));
+
+  const v = zoberPolia(d, k.data, "pridat");
+  if (v.chyba) return spat(v.chyba);
 
   try {
     const r = await jeden(
-      `INSERT INTO ${d.tabulka} (${stlpce.join(",")})
-       VALUES (${stlpce.map((_, i) => `$${i + 1}`).join(",")}) RETURNING id, nazov`, hodnoty);
-    await zapis(k.osoba.id, `ciselnik.pridane`, { druh: k.data.druh, id: r.id, nazov: r.nazov });
-    k.inam(k.odp, "/ciselniky");
+      `INSERT INTO ${d.tabulka} (${v.stlpce.join(",")})
+       VALUES (${v.stlpce.map((_, i) => `$${i + 1}`).join(",")}) RETURNING id, nazov`, v.hodnoty);
+    await zapis(k.osoba.id, "ciselnik.pridane", { druh: k.data.druh, id: r.id, nazov: r.nazov });
+    k.inam(k.odp, "/ciselniky?sprava=" + encodeURIComponent(`Pridané: ${r.nazov}.`));
   } catch (e) {
-    const text = e.code === "23505"
+    spat(e.code === "23505"
       ? `${d.jednotne} s názvom „${k.data.nazov}" už existuje.`
-      : `Nepodarilo sa uložiť: ${e.message}`;
-    k.inam(k.odp, `/ciselniky?otvor=${k.data.druh}&chyba=` + encodeURIComponent(text));
+      : `Nepodarilo sa uložiť: ${e.message}`);
+  }
+}
+
+/* ---------- úprava jednej položky ---------- */
+
+export async function detail(k) {
+  const druh = k.url.searchParams.get("druh");
+  const d = DRUHY[druh];
+  if (!d) return k.inam(k.odp, "/ciselniky");
+
+  const r = await jeden(`SELECT * FROM ${d.tabulka} WHERE id = $1`, [Number(k.url.searchParams.get("id"))]);
+  if (!r) return k.inam(k.odp, "/ciselniky?chyba=" + encodeURIComponent("Taká položka tu nie je."));
+
+  const kontext = await kontextUdajov();
+  const chyba = k.url.searchParams.get("chyba");
+  const sprava = k.url.searchParams.get("sprava");
+
+  /* Kde všade sa hodnota používa — nech je vidieť, čoho sa zmena dotkne. */
+  const kdeSaPouziva = {
+    firma: "Delí peniaze. Premenovanie je bezpečné, prejaví sa aj na uzavretých mesiacoch.",
+    prevadzka: "Určuje, kam sa vezie jedlo.",
+    tim: "Určuje, kto za koho objednáva. Zmena predáka platí od najbližšej objednávky.",
+    jedalen: "Nová cena platí odteraz. Objednávky z minulých dní majú cenu odfotenú a neprepíšu sa."
+  }[druh];
+
+  k.html(k.odp, 200, stranka({
+    titulok: r.nazov, osoba: k.osoba, cesta: "/ciselniky", verzia: k.verzia,
+    obsah: `
+<section class="wrap">
+  <div class="screen-head">
+    <h2>${esc(r.nazov)}</h2>
+    <span class="who">${esc(d.jednotne)}</span>
+  </div>
+  ${sprava ? `<div class="okbox">${esc(sprava)}</div>` : ""}
+  ${chyba ? `<div class="warnbox">${esc(chyba)}</div>` : ""}
+
+  <form method="post" action="/ciselnik" class="card" style="max-width:520px">
+    <input type="hidden" name="znamka" value="${esc(k.csrf)}">
+    <input type="hidden" name="druh" value="${esc(druh)}">
+    <input type="hidden" name="id" value="${r.id}">
+    ${d.polia.map(p => pole("u", p, r[p[0]], kontext)).join("")}
+    <div class="btn-row">
+      <button class="btn primary" type="submit">Uložiť</button>
+      <a class="btn" href="/ciselniky">Späť na číselníky</a>
+    </div>
+    <p class="hint" style="margin:14px 0 0">${esc(kdeSaPouziva)}</p>
+  </form>
+</section>`
+  }));
+}
+
+export async function uloz(k) {
+  const d = DRUHY[k.data.druh];
+  if (!d) return k.inam(k.odp, "/ciselniky");
+  const id = Number(k.data.id);
+  const spat = t => k.inam(k.odp, `/ciselnik?druh=${k.data.druh}&id=${id}&chyba=` + encodeURIComponent(t));
+
+  const v = zoberPolia(d, k.data);
+  if (v.chyba) return spat(v.chyba);
+
+  try {
+    const nastav = v.stlpce.map((s, i) => `${s} = $${i + 2}`).join(", ");
+    const r = await jeden(`UPDATE ${d.tabulka} SET ${nastav} WHERE id = $1 RETURNING nazov`,
+                          [id, ...v.hodnoty]);
+    if (!r) return k.inam(k.odp, "/ciselniky?chyba=" + encodeURIComponent("Taká položka tu nie je."));
+    await zapis(k.osoba.id, "ciselnik.upravene", { druh: k.data.druh, id, nazov: r.nazov });
+    k.inam(k.odp, `/ciselnik?druh=${k.data.druh}&id=${id}&sprava=` + encodeURIComponent("Uložené."));
+  } catch (e) {
+    spat(e.code === "23505"
+      ? `${d.jednotne} s názvom „${k.data.nazov}" už existuje.`
+      : `Nepodarilo sa uložiť: ${e.message}`);
   }
 }
 
