@@ -12,6 +12,7 @@ import { text } from "node:stream/consumers";
 import { stdin, stdout } from "node:process";
 import { migruj, bazen, dopyt, jeden, zapis } from "./db.js";
 import { hashHesla } from "./relacia.js";
+import { posli, postaJeNastavena } from "./posta.js";
 
 /* Dva spôsoby čítania, lebo readline sa na rúre správa inak než na termináli:
    pri rúre si načíta celý blok naraz a všetky riadky vypustí hneď — druhá
@@ -99,7 +100,42 @@ async function zaklad() {
   console.log("\nPrevádzky, tímy a ľudia sa zakladajú v appke — tie sa z dokumentov odvodiť nedajú.");
 }
 
-const PRIKAZY = { spravca, heslo, zaklad };
+/* --- posta: skúšobná správa, aby sa dalo overiť odosielanie --- */
+async function posta([kam]) {
+  if (!kam) throw new Error("Použitie: nastroj.js posta <adresa>");
+  if (!postaJeNastavena())
+    throw new Error("V .env chýba SMTP_HOST, SMTP_MENO alebo SMTP_HESLO.");
+
+  console.log(`Posielam na ${kam} cez ${process.env.SMTP_HOST}:${process.env.SMTP_PORT ?? 587} …`);
+  try {
+    const v = await posli({
+      komu: kam,
+      predmet: "Obedár — skúšobná správa",
+      text: [
+        "Toto je skúšobná správa z aplikácie Obedár.",
+        "",
+        `Server:  ${process.env.SMTP_HOST}`,
+        `Meno:    ${process.env.SMTP_MENO}`,
+        `Odosiela: ${process.env.SMTP_OD ?? "obedy@ahafarma.sk"}`,
+        "",
+        "Ak vám prišla, odosielanie objednávok bude fungovať.",
+        "Skontrolujte aj to, či neskončila v priečinku nevyžiadanej pošty."
+      ].join("\n")
+    });
+    console.log("Odoslané. Server odpovedal:", v.odpoved);
+  } catch (e) {
+    console.error("Nepodarilo sa:", e.message);
+    if (e.prihlasenie) {
+      console.error("");
+      console.error("Zlyhalo prihlásenie. ĎALEJ TO NESKÚŠAJTE — po niekoľkých pokusoch");
+      console.error("ochrana mailového servera zablokuje IP celého servera.");
+      console.error("Overte SMTP_MENO a SMTP_HESLO v .env a skúste až potom.");
+    }
+    throw e;
+  }
+}
+
+const PRIKAZY = { spravca, heslo, zaklad, posta };
 
 const [prikaz, ...zvysok] = process.argv.slice(2);
 if (!PRIKAZY[prikaz]) {

@@ -27,6 +27,8 @@ services:
       SMTP_PORT: ${SMTP_PORT}
       SMTP_MENO: ${SMTP_MENO}
       SMTP_HESLO: ${SMTP_HESLO}
+      SMTP_OD: ${SMTP_OD:-obedy@ahafarma.sk}
+      SMTP_EHLO: ${SMTP_EHLO:-obedy.ahafarma.sk}
       ADRESA: ${ADRESA}
       VERZIA: ${VERZIA:-neznáma}
     # Len na slučku. Caddy chodí na appku vnútornou sieťou; tento port je preto,
