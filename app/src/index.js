@@ -143,7 +143,8 @@ const CESTY = [
   ["POST", "/ludia/import",    ludia.importuj, "admin"],
   ["POST", "/ludia/hromadne",  ludia.hromadne, "admin"],
   ["GET",  "/osoba",           ludia.detail,   "admin"],
-  ["POST", "/osoba",           ludia.uloz,     "admin"]
+  ["POST", "/osoba",           ludia.uloz,     "admin"],
+  ["POST", "/osoba/zmazat",    ludia.zmazat,   "admin"]
 ];
 
 function smie(osoba, rola) {

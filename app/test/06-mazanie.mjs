@@ -58,6 +58,41 @@ console.log("— použitá jedáleň —");
 await p.click("tr:has-text('GASTROGAL') a:has-text('Upraviť')");
 ok("jedáleň s objednávkami sa zmazať nedá", !(await p.content()).includes("Naozaj zmazať"));
 
+console.log("— človek bez histórie —");
+await p.goto(A + "/ludia");
+await p.fill("#p-riadky", "9911;Omylný;Fero");
+await p.click("form[action='/ludia/import'] button[type=submit]");
+await p.waitForLoadState("networkidle");
+await p.click("tr:has-text('Omylný') a:has-text('Upraviť')");
+ok("človek bez objednávok sa dá zmazať", (await p.content()).includes("Naozaj zmazať"));
+await p.click("summary:has-text('Naozaj zmazať')");
+await p.click("button:has-text('Zmazať natrvalo')");
+await p.waitForLoadState("networkidle");
+ok("zmazanie človeka potvrdené", (await p.content()).includes("Zmazaný: Omylný Fero"));
+ok("zo zoznamu zmizol", (await p.locator("table.data tr:has-text('Omylný')").count()) === 0);
+
+console.log("— človek s objednávkou —");
+await p.click("tr:has-text('Hrušovský') a:has-text('Upraviť')");
+const dh = await p.content();
+ok("s objednávkou sa zmazať nedá", !dh.includes("Naozaj zmazať"));
+ok("povie čo mu bráni", /má[^<]*objedn/.test(dh));
+ok("počty sú v správnom tvare", !/\b1 (objednávok|záznamov|tímov|týždňov)/.test(dh));
+ok("odkáže na zneaktívnenie", dh.includes("Aktívny"));
+
+console.log("— sám seba —");
+await p.goto(A + "/ludia");
+/* Meno predáka je v každom riadku, tak sa riadok hľadá podľa osobného čísla. */
+await p.click("tr:has(td.num:text-is('4021')) a:has-text('Upraviť')");
+const znamka2 = await p.locator('input[name="znamka"]').first().inputValue();
+const idJa = await p.locator('input[name="id"]').first().inputValue();
+const kam2 = await p.evaluate(async ([z, i]) => {
+  const t = new URLSearchParams({ znamka: z, id: i });
+  const r = await fetch("/osoba/zmazat", { method: "POST", body: t, redirect: "follow",
+    headers: { "content-type": "application/x-www-form-urlencoded" } });
+  return r.url;
+}, [znamka2, idJa]);
+ok("sám seba zmazať nemôže", decodeURIComponent(kam2).includes("Sám seba zmazať nemôžete"));
+
 await b.close();
 console.log(chyby.length ? "CHYBY: " + chyby.join(" | ") : "— žiadne chyby v prehliadači —");
 process.exit(zle ? 1 : 0);

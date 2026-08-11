@@ -332,6 +332,34 @@ export async function hromadne(k) {
 
 /* ---------- jeden človek ---------- */
 
+/* Čo z človeka robí históriu. Zámerne to nie je „všetko, čo naň ukazuje":
+   prihlásenie do appky ani pridelená jedáleň históriou nie sú a nesmú brániť
+   zmazaniu človeka, ktorý sa naimportoval omylom. Bránia veci, po ktorých by
+   ostala diera v objednávkach alebo v peniazoch. */
+const CO_JE_HISTORIA = [
+  ["SELECT count(*)::int AS n FROM objednavka WHERE osoba_id = $1",
+   ["objednávku", "objednávky", "objednávok"]],
+  ["SELECT count(*)::int AS n FROM objednavka WHERE zadal_id = $1",
+   ["objednávku zadanú iným", "objednávky zadané iným", "objednávok zadaných iným"]],
+  ["SELECT count(*)::int AS n FROM nepritomnost WHERE osoba_id = $1",
+   ["záznam o neprítomnosti", "záznamy o neprítomnosti", "záznamov o neprítomnosti"]],
+  ["SELECT count(*)::int AS n FROM nepritomnost WHERE zadal_id = $1",
+   ["odhlásenie zadané iným", "odhlásenia zadané iným", "odhlásení zadaných iným"]],
+  ["SELECT count(*)::int AS n FROM tim WHERE predak_id = $1",
+   ["tím, ktorému je predákom", "tímy, ktorým je predákom", "tímov, ktorým je predákom"]],
+  ["SELECT count(*)::int AS n FROM tyzden_stav WHERE uzavrel_id = $1",
+   ["uzavretý týždeň", "uzavreté týždne", "uzavretých týždňov"]]
+];
+
+async function historiaOsoby(id) {
+  const von = [];
+  for (const [sql, tvary] of CO_JE_HISTORIA) {
+    const r = await jeden(sql, [id]);
+    if (Number(r?.n ?? 0) > 0) von.push(mnoho(r.n, tvary));
+  }
+  return von;
+}
+
 export async function detail(k) {
   const id = Number(k.url.searchParams.get("id"));
   const o = await jeden("SELECT * FROM osoba WHERE id = $1", [id]);
@@ -341,6 +369,7 @@ export async function detail(k) {
   const pridelene = new Set((await vsetky(
     "SELECT poskytovatel_id FROM osoba_jedalen WHERE osoba_id = $1", [id]))
     .map(r => r.poskytovatel_id));
+  const historia = await historiaOsoby(id);
   const chyba = k.url.searchParams.get("chyba");
   const sprava = k.url.searchParams.get("sprava");
 
@@ -434,6 +463,28 @@ export async function detail(k) {
       <a class="btn" href="/ludia">Späť na zoznam</a>
     </div>
   </form>
+
+  <div class="card">
+    <div class="card-head"><h3>Zmazať</h3></div>
+    ${historia.length === 0 ? `
+      <p style="margin:0 0 12px">Tento človek nemá žiadnu objednávku ani inú históriu,
+        takže sa dá zmazať bez toho, aby po ňom ostala diera. Typicky ide o riadok,
+        ktorý sa naimportoval omylom.</p>
+      <details>
+        <summary class="btn">Naozaj zmazať</summary>
+        <form method="post" action="/osoba/zmazat" style="margin-top:14px">
+          <input type="hidden" name="znamka" value="${esc(k.csrf)}">
+          <input type="hidden" name="id" value="${o.id}">
+          <p style="margin:0 0 12px">Zmazať <strong>${esc(o.priezvisko)} ${esc(o.meno)}</strong>?
+            Späť sa to vrátiť nedá.</p>
+          <button class="btn primary" type="submit">Zmazať natrvalo</button>
+        </form>
+      </details>` : `
+      <p style="margin:0 0 12px">Zmazať sa nedá — má ${esc(historia.join(", "))}.</p>
+      <p class="hint" style="margin:0">Zmazaním by vznikli riadky bez pôvodu vo faktúre
+        aj v mzdovom podklade. Odškrtnite <em>Aktívny</em> vyššie — človek zmizne z matice
+        aj zo zoznamov, ale minulosť ostane čitateľná.</p>`}
+  </div>
 </section>`
   }));
 }
@@ -507,4 +558,54 @@ export async function uloz(k) {
   await zapis(k.osoba.id, "osoba.upravena",
               { id, kto: `${priezvisko} ${meno_}`, jedalne: chcene });
   k.inam(k.odp, `/osoba?id=${id}&sprava=` + encodeURIComponent("Uložené."));
+}
+
+/* Mazanie človeka. Rovnaké pravidlo ako pri číselníkoch, len s dlhším
+   zoznamom toho, čo je história. */
+export async function zmazat(k) {
+  const id = Number(k.data.id);
+  const o = await jeden("SELECT * FROM osoba WHERE id = $1", [id]);
+  if (!o) return k.inam(k.odp, "/ludia?chyba=" + encodeURIComponent("Taký človek tu nie je."));
+  const spat = t => k.inam(k.odp, `/osoba?id=${id}&chyba=` + encodeURIComponent(t));
+
+  if (o.id === k.osoba.id) return spat("Sám seba zmazať nemôžete.");
+
+  /* Kontrola znova na serveri: medzi zobrazením stránky a kliknutím mohol
+     človek dostať objednávku a formulár sa dá poslať aj bez toho tlačidla. */
+  const historia = await historiaOsoby(id);
+  if (historia.length)
+    return spat(`Medzitým pribudla história (${historia.join(", ")}). Nezmazalo sa nič — ` +
+                "odškrtnite Aktívny namiesto mazania.");
+
+  if (o.je_admin) {
+    const ini = await jeden("SELECT count(*)::int AS n FROM osoba WHERE je_admin AND aktivny AND id <> $1", [id]);
+    if (ini.n === 0) return spat("Toto je posledný správca. Najprv určte iného.");
+  }
+
+  const klient = await bazen.connect();
+  try {
+    await klient.query("BEGIN");
+    /* Do denníka sa najprv zapíše meno ako text. Riadky, ktoré ten človek
+       v denníku zanechal, potom stratia odkaz na jeho id — ale zápis o zmazaní
+       drží, o koho išlo. Denník tak ostáva čitateľný aj po zmazaní. */
+    await klient.query(
+      "INSERT INTO audit (kto_id, co, detail) VALUES ($1,$2,$3)",
+      [k.osoba.id, "osoba.zmazana",
+       JSON.stringify({ id, kto: `${o.priezvisko} ${o.meno}`, kod: o.kod_dochadzka })]);
+    await klient.query("UPDATE audit SET kto_id = NULL WHERE kto_id = $1", [id]);
+    await klient.query("DELETE FROM relacia WHERE osoba_id = $1", [id]);
+    await klient.query("UPDATE osoba_jedalen SET pridal_id = NULL WHERE pridal_id = $1", [id]);
+    await klient.query("UPDATE osoba SET predak_id = NULL WHERE predak_id = $1", [id]);
+    await klient.query("DELETE FROM osoba WHERE id = $1", [id]);
+    await klient.query("COMMIT");
+  } catch (e) {
+    await klient.query("ROLLBACK");
+    klient.release();
+    /* Poistka na väzbu, ktorú zoznam vyššie nepokrýva. */
+    return spat("Databáza mazanie odmietla — na tohto človeka niečo ukazuje. " +
+                "Odškrtnite Aktívny namiesto mazania.");
+  }
+  klient.release();
+
+  k.inam(k.odp, "/ludia?sprava=" + encodeURIComponent(`Zmazaný: ${o.priezvisko} ${o.meno}.`));
 }
