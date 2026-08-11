@@ -16,6 +16,7 @@
 import { stranka, esc, meno, mnoho } from "./html.js";
 import { bazen, jeden, vsetky, zapis } from "./db.js";
 import { DNI, DNI_SKRATKA, dnes, pondelok, dniTyzdna, denMesiac, tyzdenPopis, oznacenie } from "./datum.js";
+import { menuTyzdna } from "./menu.js";
 
 const BEZ_OBEDA = -1;
 
@@ -86,7 +87,7 @@ function precPreč(nepritomnosti, osobaId, datum) {
 
 /* ---------- vykreslenie ---------- */
 
-function bunka(o, datum, zaznam, moje, vsetkyJedalne, prec) {
+function bunka(o, datum, zaznam, moje, vsetkyJedalne, prec, menu, denIndex) {
   const hodnota = zaznam?.jedlo;
   const nerozhodnute = hodnota === null || hodnota === undefined;
   const menoPola = `b-${o.id}-${datum}`;
@@ -105,10 +106,13 @@ function bunka(o, datum, zaznam, moje, vsetkyJedalne, prec) {
       const zvolene = !nerozhodnute && hodnota === n &&
                       (zaznam.poskytovatel_id === jid || moje.length === 1);
       const znak = oznacenie(j.znacenie, n);
-      h += `<label class="opt-b">
+      /* Ak je názov jedla zadaný, ukáže sa po najdení myšou aj čítačke. */
+      const nazovJedla = menu?.get(jid)?.nazov(denIndex, n) ?? null;
+      const popis = nazovJedla ? `${j.nazov}, ${znak} — ${nazovJedla}` : `${j.nazov}, jedlo ${znak}`;
+      h += `<label class="opt-b"${nazovJedla ? ` title="${esc(nazovJedla)}"` : ""}>
         <input type="radio" name="${menoPola}" value="${jid}:${n}"${zvolene ? " checked" : ""}>
         <span aria-hidden="true">${esc(znak)}</span>
-        <span class="len-pre-citacku">${esc(j.nazov)}, jedlo ${esc(znak)}</span></label>`;
+        <span class="len-pre-citacku">${esc(popis)}</span></label>`;
     }
     if (!viac && i === moje.length - 1) h += krizik;
     h += `</span>`;
@@ -120,7 +124,7 @@ function bunka(o, datum, zaznam, moje, vsetkyJedalne, prec) {
   return h;
 }
 
-function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti) {
+function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti, menu) {
   const dni = dniTyzdna(po);
   return `
 <div class="scroll-x"><table class="matrix">
@@ -149,11 +153,11 @@ function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti
       return `<tr>
         <th><span class="nm">${esc(o.priezvisko)} ${esc(o.meno)}</span>
           <span class="pn">${esc(o.kod_dochadzka ?? "—")}</span></th>
-        ${dni.map(d => {
+        ${dni.map((d, i) => {
           const z = objednavky.get(`${o.id}|${d}`);
           const prazdna = z?.jedlo === null || z?.jedlo === undefined;
           const prec = precPreč(nepritomnosti, o.id, d);
-          return `<td${prazdna ? ' class="gap"' : ""}>${bunka(o, d, z, moje, vsetkyJedalne, prec)}</td>`;
+          return `<td${prazdna ? ' class="gap"' : ""}>${bunka(o, d, z, moje, vsetkyJedalne, prec, menu, i)}</td>`;
         }).join("")}
         <td class="cnt${chyba ? " gap" : ""}">${chyba || "—"}</td>
       </tr>`;
@@ -170,6 +174,33 @@ const LEGENDA = `
   <span><i class="sw empty"></i> bez voľby — nikto nekonal</span>
 </div>`;
 
+/* Menu pre tie jedálne, ktoré tím naozaj používa. */
+async function menuPreTyzden(pridelenia, ludia, po) {
+  const idcka = new Set();
+  for (const o of ludia)
+    for (const j of pridelenia.get(o.id) ?? (o.poskytovatel_id ? [o.poskytovatel_id] : []))
+      idcka.add(j);
+  const m = new Map();
+  for (const id of idcka) {
+    const x = await menuTyzdna(id, po);
+    if (x) m.set(id, x);
+  }
+  return m;
+}
+
+function kartaMenu(menu, jedla, po) {
+  const s = [...menu.entries()].filter(([, m]) => m.priloha_nazov);
+  if (!s.length) return "";
+  return `<div class="note">
+    <strong>Jedálny lístok na tento týždeň:</strong>
+    ${s.map(([id, m]) => {
+      const j = jedla.find(x => x.id === id);
+      return `<a href="/menu/priloha?jedalen=${id}&tyzden=${po}">${esc(j?.nazov ?? "jedáleň")} —
+              ${esc(m.priloha_nazov)}</a>`;
+    }).join(" · ")}
+  </div>`;
+}
+
 /* ---------- obrazovka predáka ---------- */
 
 export async function tim(k) {
@@ -181,6 +212,7 @@ export async function tim(k) {
     ? await tymZaTyzden("true", [], po)
     : await tymZaTyzden("o.tim_id IN (SELECT id FROM tim WHERE predak_id = $1)", [k.osoba.id], po);
 
+  const menu = await menuPreTyzden(pridelenia, ludia, po);
   const zamok = await jeden("SELECT * FROM tyzden_stav WHERE pondelok = $1", [po]);
   const sprava = k.url.searchParams.get("sprava");
   const chyba = k.url.searchParams.get("chyba");
@@ -232,7 +264,8 @@ export async function tim(k) {
           <h3>${esc(ludia[0].tim ?? "Bez tímu")}</h3>
           <span class="pill neutral">${mnoho(ludia.length, ["človek", "ľudia", "ľudí"])}</span>
         </div>
-        ${tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti)}
+        ${kartaMenu(menu, jedla, po)}
+        ${tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu)}
         ${LEGENDA}
         <div class="btn-row" style="margin-top:16px">
           <button class="btn primary" type="submit"${zamok?.uzavrety ? " disabled" : ""}>Uložiť</button>
@@ -580,6 +613,7 @@ export async function moje(k) {
   const po = pondelok(k.url.searchParams.get("tyzden") || dnes());
   const jedla = await jedalne();
   const { ludia, objednavky, pridelenia, nepritomnosti } = await tymZaTyzden("o.id = $1", [k.osoba.id], po);
+  const menu = await menuPreTyzden(pridelenia, ludia, po);
   const zamok = await jeden("SELECT * FROM tyzden_stav WHERE pondelok = $1", [po]);
 
   k.html(k.odp, 200, stranka({
@@ -601,7 +635,7 @@ export async function moje(k) {
   </div>
   ${zamok?.uzavrety ? `<div class="warnbox">Týždeň je uzavretý — zmenu už vie spraviť len predák alebo admin.</div>` : ""}
   <div class="card">
-    ${ludia.length ? tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti) : "<p>Nenašiel som ťa v zozname.</p>"}
+    ${ludia.length ? kartaMenu(menu, jedla, po) + tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu) : "<p>Nenašiel som ťa v zozname.</p>"}
     ${LEGENDA}
     <p class="hint" style="margin-top:12px">Zatiaľ len na pozeranie — vlastné objednávanie
       pribudne hneď po tom, ako sa matica overí v pilote. Zmenu ti dovtedy spraví predák.</p>

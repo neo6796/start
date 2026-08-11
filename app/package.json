@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "test": "node test/00-datumy.mjs && ./test/posta.sh && ./test/obnov.sh && node test/01-ciselniky-import.mjs && node test/02-pravidla.mjs && node test/03-uprava.mjs && node test/04-matica.mjs && node test/05-jedalne.mjs && node test/06-mazanie.mjs && node test/07-hladanie.mjs"
+    "test": "node test/00-datumy.mjs && ./test/posta.sh && ./test/obnov.sh && node test/01-ciselniky-import.mjs && node test/02-pravidla.mjs && node test/03-uprava.mjs && node test/04-matica.mjs && node test/05-jedalne.mjs && node test/06-mazanie.mjs && node test/07-hladanie.mjs && node test/09-menu.mjs"
   },
   "dependencies": {
     "pg": "^8.11.5"

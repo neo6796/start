@@ -64,7 +64,7 @@ Každý krok končí niečím, čo sa dá otvoriť v prehliadači a vyskúšať.
 
 1. ~~**Kostra a databáza** — schéma, Docker, prázdna appka s prihlásením~~ **hotové**
 2. ~~**Číselníky a ľudia** — import menoslovu, hromadné väzby~~ **hotové**
-3. **Menu a matica predáka** — jadro appky
+3. ~~**Menu a matica predáka** — jadro appky~~ **hotové**
 4. **Uzávierka týždňa a odoslanie objednávky** — prvá vec, čo ide von
 5. **Spätný zápis** — dopísanie augusta
 6. **Mesačná uzávierka a mzdový podklad**

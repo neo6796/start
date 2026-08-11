@@ -16,6 +16,8 @@ import * as stranky from "./stranky.js";
 import * as ciselniky from "./ciselniky.js";
 import * as ludia from "./ludia.js";
 import * as matica from "./matica.js";
+import * as menu from "./menu.js";
+import { jeMultipart, citaj } from "./multipart.js";
 
 const tu = dirname(fileURLToPath(import.meta.url));
 const VEREJNE = join(tu, "..", "public");
@@ -132,6 +134,10 @@ const CESTY = [
   ["POST", "/tim/jedalne",      matica.jedalne_uloz, "predak"],
   ["GET",  "/uzavierka",   stranky.uzavierka,       "admin"],
 
+  ["GET",  "/menu",         menu.zobraz,  "predak"],
+  ["POST", "/menu",         menu.uloz,    "admin"],
+  ["GET",  "/menu/priloha", menu.priloha, "kto"],
+
   ["GET",  "/ciselniky",        ciselniky.zoznam, "admin"],
   ["POST", "/ciselniky/pridat", ciselniky.pridat, "admin"],
   ["POST", "/ciselniky/stav",   ciselniky.stav,   "admin"],
@@ -216,17 +222,20 @@ const server = http.createServer(async (ziad, odp) => {
 
     /* Formulárové dáta číta smerovač, nie obsluha — inak by sa na kontrolu
        známky ľahko zabudlo práve tam, kde sa niečo mení. */
-    let data = null;
+    let data = null, subory = null;
     const znamka = token ? csrf(token) : null;
     if (ziad.method === "POST") {
-      data = await telo(ziad);
+      /* Formulár s prílohou príde inak než obyčajný. Rozhoduje o tom hlavička,
+         nie cesta — inak by sa na to pri pridaní ďalšieho formulára zabudlo. */
+      if (jeMultipart(ziad)) ({ polia: data, subory } = await citaj(ziad));
+      else data = await telo(ziad);
       if (osoba && data.znamka !== znamka) {
         return chybovaStranka(odp, 403, "Formulár sa neprijal",
           "Stránka bola otvorená pridlho alebo prišla odinakiaľ. Otvorte ju znova a skúste to ešte raz.");
       }
     }
 
-    await obsluha({ ziad, odp, osoba, token, url, data, verzia: VERZIA,
+    await obsluha({ ziad, odp, osoba, token, url, data, subory, verzia: VERZIA,
                     csrf: znamka, html, json, inam, telo });
   } catch (e) {
     console.error("chyba pri", ziad.method, cesta, "—", e);

@@ -26,6 +26,7 @@ const ZNACKA = `<svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="tru
 function polozky(osoba) {
   const p = [["/moje", "Môj týždeň"]];
   if (osoba.je_predak) p.unshift(["/tim", "Môj tím"]);
+  if (osoba.je_predak || osoba.je_admin) p.push(["/menu", "Menu"]);
   if (osoba.je_admin) p.push(["/ludia", "Ľudia"], ["/ciselniky", "Číselníky"], ["/uzavierka", "Uzávierka"]);
   return p;
 }
