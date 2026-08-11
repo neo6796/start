@@ -1023,6 +1023,9 @@
   }
   table.menu-mriezka input:focus{outline:2px solid var(--mustard);outline-offset:-1px;border-color:var(--mustard)}
   table.menu-mriezka input[readonly]{background:var(--surface-2);color:var(--ink-2)}
+  /* Návrh prečítaný z lístka — kým sa neuloží, je vidieť, že ho nikto
+     nepotvrdil. */
+  table.menu-mriezka input.navrh{background:var(--mustard-soft);border-color:var(--mustard)}
 
   .field input[type="file"]{
     font-family:var(--sans);font-size:13.5px;color:var(--ink-2);

@@ -9,6 +9,7 @@
 import { stranka, esc, mnoho } from "./html.js";
 import { bazen, jeden, vsetky, zapis } from "./db.js";
 import { DNI, dnes, pondelok, dniTyzdna, denMesiac, tyzdenPopis, oznacenie } from "./datum.js";
+import { precitaj } from "./listok.js";
 
 const LIMIT_PRILOHY = 8 * 1024 * 1024;
 const POVOLENE = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
@@ -47,6 +48,17 @@ export async function zobraz(k) {
   const vybrana = jedalne.find(j => j.id === Number(k.url.searchParams.get("jedalen"))) ?? jedalne[0];
   const m = await menuTyzdna(vybrana.id, po);
   const dni = dniTyzdna(po);
+
+  /* Návrh z priloženého lístka. Číta sa až na požiadanie a nikdy sa neuloží
+     sám — vypíše sa do políčok a človek ho potvrdí tlačidlom Uložiť. Lístok
+     robí dodávateľ a môže si ho kedykoľvek prerobiť; keby appka zapisovala
+     potichu, pokazené čítanie by si nikto nevšimol. */
+  let navrh = null, navrhChyba = null;
+  if (k.url.searchParams.get("navrh") && m?.priloha_nazov) {
+    const p = await jeden("SELECT priloha_data FROM menu_tyzden WHERE id = $1", [m.id]);
+    const v = precitaj(m.priloha_nazov, m.priloha_typ, p.priloha_data);
+    if (v.podarilo) navrh = v.najdene; else navrhChyba = v.dovod;
+  }
   const sprava = k.url.searchParams.get("sprava");
   const chyba = k.url.searchParams.get("chyba");
   const smieMenit = k.osoba.je_admin;
@@ -90,8 +102,16 @@ export async function zobraz(k) {
     ${m?.priloha_nazov
       ? `<p style="margin:0 0 12px">Priložené:
           <a href="/menu/priloha?jedalen=${vybrana.id}&tyzden=${po}">${esc(m.priloha_nazov)}</a>
-          <span class="hint">(${Math.round(m.priloha_velkost / 1024)} kB)</span></p>`
+          <span class="hint">(${Math.round(m.priloha_velkost / 1024)} kB)</span>
+          ${smieMenit ? ` · <a href="/menu?jedalen=${vybrana.id}&tyzden=${po}&navrh=1">prečítať z neho názvy</a>` : ""}</p>`
       : `<p class="hint" style="margin:0 0 12px">Zatiaľ bez prílohy.</p>`}
+
+    ${navrh ? `<div class="okbox">Z lístka som prečítal
+        ${mnoho(navrh.size, ["názov jedla", "názvy jedál", "názvov jedál"])} — sú
+        <strong>podfarbené</strong> nižšie. <strong>Nič sa zatiaľ neuložilo.</strong>
+        Prejdite ich očami a stlačte Uložiť; čo je zle, prepíšte.</div>` : ""}
+    ${navrhChyba ? `<div class="warnbox">Z lístka sa názvy prečítať nedali:
+        ${esc(navrhChyba)}. Dajú sa dopísať ručne — príloha funguje aj tak.</div>` : ""}
     ${smieMenit ? `
       <div class="field">
         <label for="p-priloha">Nahrať lístok (PDF alebo fotka)</label>
@@ -110,7 +130,8 @@ export async function zobraz(k) {
           <th class="oznak">${esc(oznacenie(vybrana.znacenie, poradie))}</th>
           ${dni.map((_, den) => `<td>
             <input type="text" name="j-${den}-${poradie}"
-                   value="${esc(m?.nazov(den, poradie) ?? "")}"
+                   value="${esc(m?.nazov(den, poradie) ?? navrh?.get(`${den}|${poradie}`) ?? "")}"
+                   ${!m?.nazov(den, poradie) && navrh?.get(`${den}|${poradie}`) ? 'class="navrh"' : ""}
                    ${smieMenit ? "" : "readonly"}
                    aria-label="${DNI[den]}, jedlo ${esc(oznacenie(vybrana.znacenie, poradie))}">
           </td>`).join("")}
@@ -185,6 +206,12 @@ export async function uloz(k) {
     const casti = [];
     if (priloha) casti.push(`príloha ${priloha.nazov}`);
     casti.push(mnoho(kolko, ["názov jedla", "názvy jedál", "názvov jedál"]));
+
+    /* Po nahratí lístka má zmysel rovno ponúknuť, čo sa z neho dá prečítať —
+       ale len keď názvy ešte nie sú vyplnené, aby sa nič neprebilo. */
+    if (priloha && kolko === 0)
+      return k.inam(k.odp, `/menu?jedalen=${jedalenId}&tyzden=${po}&navrh=1&sprava=` +
+        encodeURIComponent(`Uložené: ${casti.join(", ")}.`));
     return spat("sprava", `Uložené: ${casti.join(", ")}.`);
   } catch (e) {
     await klient.query("ROLLBACK");
