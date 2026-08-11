@@ -709,6 +709,21 @@
   .badge.lead{color:var(--petrol)}
   .badge.adm{color:var(--miss)}
   .badge.ziv{color:var(--ink-3)}
+  .badge.ok{color:var(--ok)}
+  .badge.zle{color:var(--miss)}
+
+  /* Znenie objednávky tak, ako odišlo do kuchyne. Zalamovať sa nesmie inak,
+     než ako sa odoslalo — inak by sme na obrazovke ukazovali iný text. */
+  .znenie{
+    font-family:var(--mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;
+    background:var(--surface-2);border:1px solid var(--line-2);border-radius:var(--r);
+    padding:12px 14px;margin:12px 0 0;overflow-x:auto;color:var(--ink);
+  }
+  .zoznam-mien{margin:8px 0 0;padding-left:20px;columns:2;column-gap:28px}
+  .zoznam-mien li{break-inside:avoid;margin-bottom:3px}
+  @media (max-width:720px){ .zoznam-mien{columns:1} }
+  table.data tr.sucet td,table.data tr.sucet th{border-top:2px solid var(--line-2);background:var(--surface-2)}
+  table.data th.oznak{font-family:var(--mono);font-weight:700;text-align:center;background:var(--surface-2)}
   tr.is-lead td:first-child{box-shadow:inset 3px 0 0 var(--petrol)}
   tr.is-adm td:first-child{box-shadow:inset 3px 0 0 var(--miss)}
   tr.is-off td{opacity:.5}

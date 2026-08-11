@@ -17,6 +17,8 @@ import * as ciselniky from "./ciselniky.js";
 import * as ludia from "./ludia.js";
 import * as matica from "./matica.js";
 import * as menu from "./menu.js";
+import * as uzavierkaObr from "./uzavierka.js";
+import * as objednavka from "./objednavka.js";
 import { jeMultipart, citaj } from "./multipart.js";
 
 const tu = dirname(fileURLToPath(import.meta.url));
@@ -132,7 +134,14 @@ const CESTY = [
   ["POST", "/tim",         matica.uloz,             "predak"],
   ["POST", "/tim/nepritomnost", matica.nepritomnost, "predak"],
   ["POST", "/tim/jedalne",      matica.jedalne_uloz, "predak"],
-  ["GET",  "/uzavierka",   stranky.uzavierka,       "admin"],
+  ["GET",  "/uzavierka",           uzavierkaObr.zobraz,   "admin"],
+  ["POST", "/uzavierka/uzavriet",  uzavierkaObr.uzavriet, "admin"],
+  ["POST", "/uzavierka/otvorit",   uzavierkaObr.otvorit,  "admin"],
+
+  /* Potvrdenie prijatia otvára kuchár z e-mailu — bez prihlásenia.
+     Tajomstvom je jednorazový token v odkaze, nie relácia. */
+  ["GET",  "/potvrdenie",  objednavka.potvrdenieZobraz, null],
+  ["POST", "/potvrdenie",  objednavka.potvrdenieUloz,   null],
 
   ["GET",  "/menu",         menu.zobraz,  "predak"],
   ["POST", "/menu",         menu.uloz,    "admin"],

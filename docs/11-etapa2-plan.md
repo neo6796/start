@@ -65,10 +65,26 @@ Každý krok končí niečím, čo sa dá otvoriť v prehliadači a vyskúšať.
 1. ~~**Kostra a databáza** — schéma, Docker, prázdna appka s prihlásením~~ **hotové**
 2. ~~**Číselníky a ľudia** — import menoslovu, hromadné väzby~~ **hotové**
 3. ~~**Menu a matica predáka** — jadro appky~~ **hotové**
-4. **Uzávierka týždňa a odoslanie objednávky** — prvá vec, čo ide von
+4. ~~**Uzávierka týždňa a odoslanie objednávky** — prvá vec, čo ide von~~ **hotové**
 5. **Spätný zápis** — dopísanie augusta
 6. **Mesačná uzávierka a mzdový podklad**
 7. **Zálohy a upozornenia** — beží od prvého dňa, dolaďuje sa priebežne
+
+### Čo je hotové po kroku 4
+
+Objednávka vie odísť do kuchyne — nateraz na adresu správcu, kým sa to odladí.
+
+| | |
+|---|---|
+| Menu na týždeň | príloha od dodávateľa, názvy jedál, čítanie názvov z prílohy aj z vloženého textu |
+| Matica predáka | trojstavový deň, viac jedální na človeka, neprítomnosti, hromadné odhlásenie |
+| Uzávierka týždňa | počty po jedlách, menovitý zoznam nerozhodnutých, znenie správy pred odoslaním |
+| Objednávka | e-mail s počtami v tele správy aj so zošitom v prílohe, na adresu z karty jedálne |
+| Záznam | čo presne odišlo, komu a kedy — aj keď odoslanie zlyhalo, aj s dôvodom |
+| Potvrdenie | odkaz bez prihlásenia; zapíše ho až stlačenie tlačidla, nie otvorenie odkazu |
+
+**Adresa jedálne je jediné, čo treba prepnúť pri ostrom spustení.** Berie sa
+z karty jedálne v Číselníkoch; kým sa ladí, je v nej adresa správcu.
 
 ### Čo je hotové po kroku 2
 

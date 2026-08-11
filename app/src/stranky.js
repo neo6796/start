@@ -97,9 +97,3 @@ export async function tim(k) {
   }));
 }
 
-export async function uzavierka(k) {
-  k.html(k.odp, 200, rozrobene({
-    titulok: "Uzávierka", kto: k.osoba, cesta: "/uzavierka", verzia: k.verzia, krok: "6",
-    coBude: "Uzávierka mesiaca v dvoch zámkoch — mzdový podklad do 5.–6. dňa a kontrola faktúry, keď príde."
-  }));
-}
