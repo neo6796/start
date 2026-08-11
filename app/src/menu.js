@@ -9,7 +9,7 @@
 import { stranka, esc, mnoho } from "./html.js";
 import { bazen, jeden, vsetky, zapis } from "./db.js";
 import { DNI, dnes, pondelok, dniTyzdna, denMesiac, tyzdenPopis, oznacenie } from "./datum.js";
-import { precitaj } from "./listok.js";
+import { precitaj, zTextu } from "./listok.js";
 
 const LIMIT_PRILOHY = 8 * 1024 * 1024;
 const POVOLENE = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
@@ -34,8 +34,12 @@ export async function menuTyzdna(poskytovatelId, po) {
 
 /* ---------- obrazovka ---------- */
 
-export async function zobraz(k) {
-  const po = pondelok(k.url.searchParams.get("tyzden") || dnes());
+/* `zvonku` naplní čítanie vloženého textu — to sa nedá presmerovať späť na
+   GET, lebo pár tisíc znakov sa do adresy nezmestí. Obrazovka sa preto po
+   vložení vykreslí rovno z POST-u; nič sa neukladá, tak nie je čo pokaziť
+   opakovaným odoslaním. */
+export async function zobraz(k, zvonku = {}) {
+  const po = pondelok(zvonku.tyzden || k.url.searchParams.get("tyzden") || dnes());
   const jedalne = await vsetky("SELECT * FROM poskytovatel WHERE aktivny ORDER BY nazov");
   if (!jedalne.length)
     return k.html(k.odp, 200, stranka({
@@ -45,7 +49,8 @@ export async function zobraz(k) {
         Založí sa v <a href="/ciselniky">Číselníkoch</a>.</p></div></section>`
     }));
 
-  const vybrana = jedalne.find(j => j.id === Number(k.url.searchParams.get("jedalen"))) ?? jedalne[0];
+  const ktora = Number(zvonku.jedalen || k.url.searchParams.get("jedalen"));
+  const vybrana = jedalne.find(j => j.id === ktora) ?? jedalne[0];
   const m = await menuTyzdna(vybrana.id, po);
   const dni = dniTyzdna(po);
 
@@ -53,11 +58,18 @@ export async function zobraz(k) {
      sám — vypíše sa do políčok a človek ho potvrdí tlačidlom Uložiť. Lístok
      robí dodávateľ a môže si ho kedykoľvek prerobiť; keby appka zapisovala
      potichu, pokazené čítanie by si nikto nevšimol. */
-  let navrh = null, navrhChyba = null;
-  if (k.url.searchParams.get("navrh") && m?.priloha_nazov) {
+  let navrh = zvonku.navrh ?? null, navrhChyba = zvonku.navrhChyba ?? null;
+  let zdroj = zvonku.zdroj ?? "vloženého textu", inyTyzden = zvonku.inyTyzden ?? null;
+  if (!navrh && !navrhChyba && k.url.searchParams.get("navrh") && m?.priloha_nazov) {
     const p = await jeden("SELECT priloha_data FROM menu_tyzden WHERE id = $1", [m.id]);
     const v = precitaj(m.priloha_nazov, m.priloha_typ, p.priloha_data);
-    if (v.podarilo) navrh = v.najdene; else navrhChyba = v.dovod;
+    zdroj = "prílohy";
+    /* Lístok si nesie vlastné dátumy. Keď sedia na iný týždeň, než ktorý je
+       na obrazovke, návrh sa nevypíše — inak by stačilo stlačiť Uložiť a
+       minulotýždňové menu by ticho pretlačilo tento týždeň. */
+    if (v.podarilo && v.tyzden && v.tyzden !== po) inyTyzden = v.tyzden;
+    else if (v.podarilo) navrh = v.najdene;
+    else navrhChyba = v.dovod;
   }
   const sprava = k.url.searchParams.get("sprava");
   const chyba = k.url.searchParams.get("chyba");
@@ -106,18 +118,45 @@ export async function zobraz(k) {
           ${smieMenit ? ` · <a href="/menu?jedalen=${vybrana.id}&tyzden=${po}&navrh=1">prečítať z neho názvy</a>` : ""}</p>`
       : `<p class="hint" style="margin:0 0 12px">Zatiaľ bez prílohy.</p>`}
 
-    ${navrh ? `<div class="okbox">Z lístka som prečítal
+    ${navrh ? `<div class="okbox">Z ${esc(zdroj)} som prečítal
         ${mnoho(navrh.size, ["názov jedla", "názvy jedál", "názvov jedál"])} — sú
         <strong>podfarbené</strong> nižšie. <strong>Nič sa zatiaľ neuložilo.</strong>
         Prejdite ich očami a stlačte Uložiť; čo je zle, prepíšte.</div>` : ""}
-    ${navrhChyba ? `<div class="warnbox">Z lístka sa názvy prečítať nedali:
+    ${navrhChyba ? `<div class="warnbox">Z ${esc(zdroj)} sa názvy prečítať nedali:
         ${esc(navrhChyba)}. Dajú sa dopísať ručne — príloha funguje aj tak.</div>` : ""}
+    ${inyTyzden ? `<div class="warnbox"><strong>Pozor, iný týždeň.</strong>
+        Podľa dátumov je tento lístok na týždeň <strong>${tyzdenPopis(inyTyzden)}</strong>,
+        ale na obrazovke máte ${tyzdenPopis(po)}. Nič som nevyplnil — takto by sa
+        dalo omylom uložiť menu na nesprávny týždeň.
+        ${zdroj === "vloženého textu"
+          ? `<div class="btn-row" style="margin-top:10px">
+               <button class="btn" type="submit" formaction="/menu/text"
+                       name="tyzden_iny" value="${esc(inyTyzden)}">Prečítať na ${tyzdenPopis(inyTyzden)}</button>
+             </div>`
+          : `<div class="btn-row" style="margin-top:10px">
+               <a class="btn" href="/menu?jedalen=${vybrana.id}&tyzden=${esc(inyTyzden)}&navrh=1">Prejsť na ${tyzdenPopis(inyTyzden)}</a>
+             </div>`}
+      </div>` : ""}
     ${smieMenit ? `
       <div class="field">
         <label for="p-priloha">Nahrať lístok (PDF alebo fotka)</label>
         <input type="file" id="p-priloha" name="priloha" accept=".pdf,image/*">
         <p class="hint">Nahratím sa nahradí ten predchádzajúci. Najviac 8 MB.</p>
-      </div>` : ""}
+      </div>
+
+      <details class="vlozenie"${zvonku.vlozeny ? " open" : ""}>
+        <summary class="btn">Vložiť lístok ako text (Ctrl+C / Ctrl+V)</summary>
+        <div class="field" style="margin-top:12px">
+          <label for="p-vlozeny">Text lístka</label>
+          <textarea id="p-vlozeny" name="vlozeny" rows="8"
+            placeholder="Otvorte lístok, označte ho celý (Ctrl+A), skopírujte (Ctrl+C) a sem vložte (Ctrl+V).">${esc(zvonku.vlozeny ?? "")}</textarea>
+          <p class="hint">Text sa nikam neukladá — slúži len na prečítanie názvov.
+            Funguje aj vtedy, keď sa zo súboru prečítať nedajú.</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn" type="submit" formaction="/menu/text">Prečítať názvy z textu</button>
+        </div>
+      </details>` : ""}
 
     <div class="card-head" style="margin-top:22px"><h3>Názvy jedál</h3>
       <span class="hint">nepovinné</span></div>
@@ -153,6 +192,25 @@ export async function zobraz(k) {
   </form>
 </section>`
   }));
+}
+
+/* ---------- prečítanie z vloženého textu ---------- */
+
+/* Nič neukladá — prečíta, čo sa dá, a vykreslí tú istú obrazovku s návrhom.
+   Presmerovanie by tu bolo na škodu: text by sa stratil a človek by ho pri
+   oprave musel vkladať znova. */
+export async function zText(k) {
+  const v = zTextu(k.data.vlozeny);
+  /* `tyzden_iny` posiela tlačidlo z upozornenia — je to potvrdenie od človeka,
+     že áno, chcem ten týždeň, ktorý je v lístku. */
+  const po = pondelok(k.data.tyzden_iny || k.data.tyzden || dnes());
+  const inde = v.podarilo && v.tyzden && v.tyzden !== po;
+  return zobraz(k, {
+    jedalen: k.data.jedalen, tyzden: po, vlozeny: k.data.vlozeny ?? "",
+    zdroj: "vloženého textu", inyTyzden: inde ? v.tyzden : null,
+    navrh: v.podarilo && !inde ? v.najdene : null,
+    navrhChyba: v.podarilo ? null : v.dovod
+  });
 }
 
 /* ---------- uloženie ---------- */

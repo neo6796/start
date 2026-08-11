@@ -979,6 +979,8 @@
 
   /* Hláška nad kartou sa jej nesmie lepiť na okraj. */
   .warnbox + .card,.okbox + .card{margin-top:18px}
+  /* Hláška vnútri karty — nesmie sa lepiť na popisku poľa pod sebou. */
+  .card > .warnbox,.card > .okbox{margin-bottom:18px}
 
   /* Formuláre číselníkov a ľudí. */
   .field textarea{
@@ -991,6 +993,10 @@
   details > summary{cursor:pointer;list-style:none}
   details > summary::-webkit-details-marker{display:none}
   details[open] > summary{background:var(--petrol);color:var(--on-petrol);border-color:var(--petrol)}
+  /* Zhrnutie je štandardne blokové a rozťahovalo by sa cez celú kartu —
+     ako tlačidlo má byť široké presne toľko, koľko je v ňom textu. */
+  details.vlozenie{margin-top:6px}
+  details.vlozenie > summary{display:inline-block}
 
   .riadok-akcia{display:inline}
   td.akcie{white-space:nowrap}

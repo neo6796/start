@@ -63,6 +63,81 @@ ok("typ je PDF", odp.headers()["content-type"].includes("application/pdf"));
    ako stránku na našej doméne. */
 ok("príloha beží v pieskovisku", (odp.headers()["content-security-policy"] ?? "").includes("sandbox"));
 
+console.log("— vloženie lístka cez schránku —");
+/* Toto je cesta, ktorá musí fungovať aj vtedy, keď sa zo súboru názvy
+   prečítať nedajú — a hlavne nesmie nič uložiť sama od seba. */
+/* Vkladá sa do týždňa, ktorý je práve na obrazovke — nech dátumy v texte
+   sedia, musí sa lístok poskladať na ten istý týždeň. */
+const PO = await (async () => {
+  await p.goto(A + "/menu");
+  return new URL(await p.getAttribute('a:has-text("tento týždeň")', "href"), A)
+    .searchParams.get("tyzden");
+})();
+const denVTyzdni = (po, i) => {
+  const d = new Date(po + "T12:00:00Z");
+  d.setUTCDate(d.getUTCDate() + i);
+  return `${String(d.getUTCDate()).padStart(2, "0")}.${String(d.getUTCMonth() + 1).padStart(2, "0")}.${d.getUTCFullYear()}`;
+};
+const listok = (datum, dna) => `${dna} | ${datum}
+Hrášková polievka so zemiakmi • 0,3l (1)
+1. Vyprážaný kurací rezeň plnený šunkou, dusená ryža • 120g (1,3,7)
+2. Pečené bravčové výpečky, dusená kapusta • 150/250g (1)`;
+
+await p.click("details.vlozenie > summary");
+await p.fill("#p-vlozeny", listok(denVTyzdni(PO, 2), "Streda"));
+await p.click("button:has-text('Prečítať názvy z textu')");
+await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("z textu sa prečítali názvy", /Z vloženého textu som prečítal\s+2 názvy jedál/.test(t));
+ok("povie, že sa nič neuložilo", /Nič sa zatiaľ neuložilo/.test(t));
+ok("deň sa určil podľa dátumu, nie podľa poradia",
+   (await p.inputValue('input[name="j-2-0"]')).startsWith("Vyprážaný kurací rezeň"));
+/* Bez dátumu by stredajší kus lístka spadol na pondelok a prebil,
+   čo tam už bolo uložené. */
+ok("pondelok ostal, ako bol",
+   await p.inputValue('input[name="j-0-0"]') === "Fazuľová polievka, vyprážaný syr");
+ok("návrh je podfarbený",
+   (await p.getAttribute('input[name="j-2-0"]', "class") ?? "").includes("navrh"));
+ok("vložený text ostal v políčku, aby sa dal opraviť",
+   (await p.inputValue("#p-vlozeny")).includes("Hrášková polievka"));
+ok("čo bolo uložené, návrh neprebil", await p.inputValue('input[name="j-2-1"]') === "Guláš s knedľou");
+
+/* Kým to človek nepotvrdí, v databáze nesmie byť nič nové. */
+await p.goto(A + "/menu");
+ok("bez potvrdenia sa návrh neuložil", await p.inputValue('input[name="j-2-0"]') === "");
+
+console.log("— lístok na iný týždeň —");
+/* Toto je tá pomýlená situácia: v schránke je minulotýždňový lístok.
+   Nesmie sa ticho vyplniť do týždňa, ktorý je na obrazovke. */
+const minuly = new Date(PO + "T12:00:00Z");
+minuly.setUTCDate(minuly.getUTCDate() - 7);
+const poMinuly = minuly.toISOString().slice(0, 10);
+await p.click("details.vlozenie > summary");
+await p.fill("#p-vlozeny", listok(denVTyzdni(poMinuly, 2), "Streda"));
+await p.click("button:has-text('Prečítať názvy z textu')");
+await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("iný týždeň sa zachytil", /Pozor, iný týždeň/.test(t));
+ok("nič sa nevyplnilo", await p.inputValue('input[name="j-2-0"]') === "");
+ok("ponúkne prečítať na ten správny týždeň",
+   (await p.locator('button[name="tyzden_iny"]').count()) === 1);
+
+await p.click('button[name="tyzden_iny"]');
+await p.waitForLoadState("networkidle");
+ok("po potvrdení sa vyplní na tom týždni, na ktorý lístok je",
+   (await p.inputValue('input[name="j-2-0"]')).startsWith("Vyprážaný kurací rezeň"));
+ok("a obrazovka je na tom týždni",
+   (await p.inputValue('input[name="tyzden"]')) === poMinuly);
+ok("upozornenie už netreba", !/Pozor, iný týždeň/.test(await p.content()));
+
+await p.goto(A + "/menu");
+await p.click("details.vlozenie > summary");
+await p.fill("#p-vlozeny", "Dobrý deň, lístok pošlem zajtra.");
+await p.click("button:has-text('Prečítať názvy z textu')");
+await p.waitForLoadState("networkidle");
+ok("text bez jedál to povie, nezhavaruje",
+   /nenašiel označené jedlá/.test(await p.content()));
+
 console.log("— menu v matici —");
 await p.goto(A + "/tim");
 t = await p.content();

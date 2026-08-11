@@ -13,6 +13,7 @@
    ostane prázdne a doplní sa ručne. */
 
 import zlib from "node:zlib";
+import { pondelok } from "./datum.js";
 
 const DNI_NAZVY = ["Pondelok", "Utorok", "Streda", "Štvrtok", "Piatok"];
 
@@ -107,11 +108,45 @@ export function zDoc(d) {
 
 /* ---------- rozbor na dni a jedlá ---------- */
 
-/* Z textu vytiahne názvy jedál. Vracia mapu "den|poradie" → názov,
-   kde deň je 0–4 (pondelok–piatok) a poradie 0..n. */
+/* Dátumy v lístku. Sú v ňom takmer vždy a sú to najspoľahlivejší údaj:
+   povedia nielen ktorý deň, ale aj ktorý týždeň — takže sa dá zachytiť
+   lístok na iný týždeň, než na aký sa práve pozeráme. */
+const DATUM = /\b([0-3]?\d)\s*\.\s*([01]?\d)\s*\.\s*(20\d\d)\b/g;
+
+function naDatum(d, m, r) {
+  const s = `${r}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  const t = new Date(s + "T12:00:00Z");
+  /* 31.02. sa v JS ticho preklopí na marec — porovnaním sa taký dátum odhalí. */
+  if (Number.isNaN(t.getTime()) || t.getUTCDate() !== Number(d)) return null;
+  return s;
+}
+
+function odstup(od, po) {
+  return Math.round((Date.parse(po + "T12:00:00Z") - Date.parse(od + "T12:00:00Z")) / 86400000);
+}
+
+/* Z textu vytiahne názvy jedál. Vracia jedlá (mapa "den|poradie" → názov,
+   kde deň je 0–4 a poradie 0..n) a týždeň, na ktorý lístok podľa dátumov
+   je — alebo null, keď v ňom použiteľný dátum nie je. */
 export function rozober(text) {
   const cisty = text.replace(/ /g, " ").replace(/[ \t]+/g, " ");
   const von = new Map();
+
+  /* Dátumy aj s pozíciou — jedlo patrí k tomu poslednému pred ním. */
+  const datumy = [];
+  for (const m of cisty.matchAll(DATUM)) {
+    const s = naDatum(m[1], m[2], m[3]);
+    if (s) datumy.push({ kde: m.index, den: s });
+  }
+  /* V lístku bývajú aj iné dátumy (rozsah v hlavičke, pätička), tak
+     rozhoduje ten týždeň, ktorý sa v ňom vyskytuje najčastejšie. */
+  const pocty = new Map();
+  for (const d of datumy) {
+    const p = pondelok(d.den);
+    pocty.set(p, (pocty.get(p) ?? 0) + 1);
+  }
+  let tyzden = null, najviac = 0;
+  for (const [p, n] of pocty) if (n > najviac) { najviac = n; tyzden = p; }
 
   /* Rozdelí sa to podľa názvov dní; každý dodávateľ ich píše inak,
      ale nikto ich zatiaľ nevynechal. */
@@ -146,23 +181,57 @@ export function rozober(text) {
     jedla.push({ poradie, nazov: nazov.slice(0, 200), kde: m.index });
   }
 
-  /* Ku ktorému dňu jedlo patrí. Názvy dní sú spoľahlivé v PDF; vo worde sa
-     stratia, tak sa deň odvodí z poradia označení — keď sa vráti späť
-     (po E zase A), začal ďalší deň. */
+  /* Ku ktorému dňu jedlo patrí.
+
+     Najlepší údaj je dátum v hlavičke dňa — nezávisí od toho, či dodávateľ
+     vypísal všetkých päť dní, a zaradí správne aj vložený kus lístka. Lenže
+     dátumy sú použiteľné len vtedy, keď v texte naozaj stoja pri svojich dňoch.
+     Zo starého .doc súboru sa väčšina z nich stratí a tie dva, čo prežijú, sú
+     od jedál na míle ďaleko — podľa nich by celý týždeň spadol na pondelok.
+     Preto sa raz pre celý text zmeria, ako ďaleko je k najbližšiemu dátumu:
+     v poriadnom lístku je to do 370 znakov, v rozsypanom cez dvetisíc. */
+  const BLIZKO = 400;
+  const kDatumu = jedla.map(j => {
+    let posledny = null;
+    for (const d of datumy) { if (d.kde > j.kde) break; posledny = d; }
+    if (!posledny || j.kde - posledny.kde > BLIZKO) return null;
+    const o = odstup(tyzden, posledny.den);
+    return o >= 0 && o <= 4 ? o : null;
+  });
+  const podlaDatumov = tyzden !== null && jedla.length > 0 &&
+    kDatumu.filter(x => x !== null).length >= jedla.length * 0.9;
+
+  /* Keď dátumy nesedia, rozhodnú názvy dní; a keď sa stratia aj tie,
+     ostane poradie označení: keď sa vráti späť (po E zase A), ďalší deň. */
   const maVsetkyDni = hranice.every(x => x >= 0);
   let den = 0, predchadzajuce = -1;
-  for (const j of jedla) {
-    if (maVsetkyDni) {
+  for (const [i, j] of jedla.entries()) {
+    const zDatumu = podlaDatumov ? kDatumu[i] : null;
+
+    if (zDatumu !== null) den = zDatumu;
+    else if (maVsetkyDni) {
       den = 0;
       for (let i = 4; i >= 0; i--) if (j.kde >= hranice[i]) { den = i; break; }
     } else {
       if (j.poradie <= predchadzajuce) den++;
-      predchadzajuce = j.poradie;
     }
+    predchadzajuce = j.poradie;
     if (den > 4) break;
     if (!von.has(`${den}|${j.poradie}`)) von.set(`${den}|${j.poradie}`, j.nazov);
   }
-  return von;
+  return { jedla: von, tyzden };
+}
+
+/* Text vložený cez schránku (Ctrl+C / Ctrl+V). Je to najspoľahlivejšia cesta:
+   z prehliadača aj z Wordu vypadne text tak, ako ho vidno na obrazovke, takže
+   odpadá hádanie kódovania aj rozsypaný text zo starých .doc súborov. */
+export function zTextu(text) {
+  const t = (text ?? "").trim();
+  if (!t) return { podarilo: false, dovod: "políčko bolo prázdne" };
+  const { jedla, tyzden } = rozober(t);
+  return { podarilo: jedla.size > 0, najdene: jedla, tyzden,
+           dovod: jedla.size ? null
+                : "v texte som nenašiel označené jedlá — riadky musia začínať 1. alebo A." };
 }
 
 /* Jediné, čo volá zvyšok appky. */
@@ -181,11 +250,11 @@ export function precitaj(nazovSuboru, typ, data) {
     return { podarilo: false, dovod: "súbor nemá textovú vrstvu — asi je to iba obrázok" };
 
   /* Z viacerých čítaní vyhrá to, ktoré našlo najviac jedál. */
-  let najdene = new Map();
+  let najdene = new Map(), tyzden = null;
   for (const t of kandidati) {
     const v = rozober(t);
-    if (v.size > najdene.size) najdene = v;
+    if (v.jedla.size > najdene.size) ({ jedla: najdene, tyzden } = v);
   }
-  return { podarilo: najdene.size > 0, najdene,
+  return { podarilo: najdene.size > 0, najdene, tyzden,
            dovod: najdene.size ? null : "text sa prečítal, ale nenašiel som v ňom označené jedlá" };
 }
