@@ -135,6 +135,7 @@ const CESTY = [
   ["GET",  "/ciselniky",        ciselniky.zoznam, "admin"],
   ["POST", "/ciselniky/pridat", ciselniky.pridat, "admin"],
   ["POST", "/ciselniky/stav",   ciselniky.stav,   "admin"],
+  ["POST", "/ciselniky/zmazat", ciselniky.zmazat, "admin"],
   ["GET",  "/ciselnik",         ciselniky.detail, "admin"],
   ["POST", "/ciselnik",         ciselniky.uloz,   "admin"],
 

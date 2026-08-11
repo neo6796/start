@@ -14,11 +14,13 @@ const eur = v => Number(v).toFixed(2).replace(".", ",") + " €";
 const DRUHY = {
   firma: {
     tabulka: "firma", nazov: "Firmy", jednotne: "firma", stav: "aktivna",
+    pouzitie: ["SELECT count(*)::int AS n FROM osoba WHERE firma_id = $1", "ľudí"],
     prazdne: "Zatiaľ žiadna firma. Zakladá sa ako prvá — bez nej sa nedá zaradiť človek.",
     polia: [["nazov", "Názov", "text", true]]
   },
   prevadzka: {
     tabulka: "prevadzka", nazov: "Prevádzky", jednotne: "prevádzka", stav: "aktivna",
+    pouzitie: ["SELECT count(*)::int AS n FROM osoba WHERE prevadzka_id = $1", "ľudí"],
     prazdne: "Zatiaľ žiadna prevádzka.",
     polia: [["nazov", "Názov", "text", true], ["skratka", "Skratka", "text", true]]
   },
@@ -28,12 +30,19 @@ const DRUHY = {
      ktorý nič neznamená a v matici sa nedá rozhodnúť. */
   tim: {
     tabulka: "tim", nazov: "Tímy", jednotne: "tím", stav: "aktivny",
+    pouzitie: ["SELECT count(*)::int AS n FROM osoba WHERE tim_id = $1", "ľudí"],
     prazdne: "Zatiaľ žiadny tím. Tím určuje, kto za koho objednáva.",
     polia: [["nazov", "Názov", "text", true],
             ["predak_id", "Predák", "predak", false, null, "smie byť prázdne"]]
   },
   jedalen: {
     tabulka: "poskytovatel", nazov: "Jedálne", jednotne: "jedáleň", stav: "aktivny",
+    pouzitie: [`SELECT (SELECT count(*) FROM osoba WHERE poskytovatel_id = $1)
+                     + (SELECT count(*) FROM osoba_jedalen WHERE poskytovatel_id = $1)
+                     + (SELECT count(*) FROM objednavka WHERE poskytovatel_id = $1)
+                     + (SELECT count(*) FROM menu_tyzden WHERE poskytovatel_id = $1)
+                     + (SELECT count(*) FROM odoslanie WHERE poskytovatel_id = $1) AS n`,
+               "väzieb — ľudia, objednávky, menu alebo odoslané objednávky"],
     prazdne: "Zatiaľ žiadna jedáleň. Bez nej niet z čoho vyberať ani komu poslať objednávku.",
     polia: [
       ["nazov", "Názov", "text", true],
@@ -129,6 +138,13 @@ function karta(druh, d, riadky, k, otvorene, kontext) {
     </form>
   </details>
 </div>`;
+}
+
+/* Koľko vecí na položku ukazuje. Nula znamená, že sa dá zmazať bez toho,
+   aby po nej ostala diera. */
+async function pocetPouziti(d, id) {
+  const r = await jeden(d.pouzitie[0], [id]);
+  return Number(r?.n ?? 0);
 }
 
 /* Predáci sa ponúkajú pri tímoch, tak ich načítame raz pre celú stránku. */
@@ -236,6 +252,7 @@ export async function detail(k) {
   if (!r) return k.inam(k.odp, "/ciselniky?chyba=" + encodeURIComponent("Taká položka tu nie je."));
 
   const kontext = await kontextUdajov();
+  const pouzitie = await pocetPouziti(d, r.id);
   const chyba = k.url.searchParams.get("chyba");
   const sprava = k.url.searchParams.get("sprava");
 
@@ -269,6 +286,28 @@ export async function detail(k) {
     </div>
     <p class="hint" style="margin:14px 0 0">${esc(kdeSaPouziva)}</p>
   </form>
+
+  <div class="card">
+    <div class="card-head"><h3>Zmazať</h3></div>
+    ${pouzitie === 0 ? `
+      <p style="margin:0 0 12px">Na túto položku zatiaľ nič neukazuje, takže sa dá zmazať
+        bez toho, aby po nej ostala diera. Typicky ide o preklep pri zakladaní.</p>
+      <details>
+        <summary class="btn">Naozaj zmazať</summary>
+        <form method="post" action="/ciselniky/zmazat" style="margin-top:14px">
+          <input type="hidden" name="znamka" value="${esc(k.csrf)}">
+          <input type="hidden" name="druh" value="${esc(druh)}">
+          <input type="hidden" name="id" value="${r.id}">
+          <p style="margin:0 0 12px">Zmazať <strong>${esc(r.nazov)}</strong>? Späť sa to vrátiť nedá.</p>
+          <button class="btn primary" type="submit">Zmazať natrvalo</button>
+        </form>
+      </details>` : `
+      <p style="margin:0 0 12px">Zmazať sa nedá — ukazuje naň
+        <strong>${pouzitie} ${esc(d.pouzitie[1])}</strong>.</p>
+      <p class="hint" style="margin:0">Zmazaním by vznikli riadky bez pôvodu: uzavreté mesiace
+        a odfotené ceny by prestali dávať zmysel. Použite <em>Zneaktívniť</em> v zozname —
+        položka sa prestane ponúkať, ale minulosť ostane čitateľná.</p>`}
+  </div>
 </section>`
   }));
 }
@@ -294,6 +333,34 @@ export async function uloz(k) {
       ? `${d.jednotne} s názvom „${k.data.nazov}" už existuje.`
       : `Nepodarilo sa uložiť: ${e.message}`);
   }
+}
+
+/* Mazanie je zámerne až tu, na detaile, a v dvoch krokoch. Zo zoznamu, kde sa
+   klikká rýchlo, sa mazať nedá. */
+export async function zmazat(k) {
+  const d = DRUHY[k.data.druh];
+  if (!d) return k.inam(k.odp, "/ciselniky");
+  const id = Number(k.data.id);
+  const r = await jeden(`SELECT nazov FROM ${d.tabulka} WHERE id = $1`, [id]);
+  if (!r) return k.inam(k.odp, "/ciselniky");
+
+  /* Kontrola sa robí znova na serveri. Tlačidlo v prehliadači je pohodlie,
+     nie záruka — medzi zobrazením stránky a kliknutím mohol niekto položku
+     použiť, a formulár sa dá poslať aj bez toho tlačidla. */
+  const pouzitie = await pocetPouziti(d, id);
+  if (pouzitie > 0)
+    return k.inam(k.odp, `/ciselnik?druh=${k.data.druh}&id=${id}&chyba=` + encodeURIComponent(
+      `Medzitým na túto položku niečo ukázalo (${pouzitie}). Nezmazalo sa nič — použite Zneaktívniť.`));
+
+  try {
+    await dopyt(`DELETE FROM ${d.tabulka} WHERE id = $1`, [id]);
+  } catch (e) {
+    /* Poistka na to, čo počítadlo nepokrýva: cudzí kľúč z databázy. */
+    return k.inam(k.odp, `/ciselnik?druh=${k.data.druh}&id=${id}&chyba=` + encodeURIComponent(
+      "Databáza mazanie odmietla — na položku niečo ukazuje. Použite Zneaktívniť."));
+  }
+  await zapis(k.osoba.id, "ciselnik.zmazane", { druh: k.data.druh, id, nazov: r.nazov });
+  k.inam(k.odp, "/ciselniky?sprava=" + encodeURIComponent(`Zmazané: ${r.nazov}.`));
 }
 
 export async function stav(k) {
