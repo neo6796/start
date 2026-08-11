@@ -1005,6 +1005,16 @@
 
   .hromadne{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 16px;margin:14px 0 10px}
   .hromadne .field{margin-bottom:10px}
+  .filtre .hromadne{margin-top:0}
+  /* Druhý riadok v bunke — predák pri názve tímu. Opakovať jeho meno
+     vo vlastnom stĺpci pri každom človeku bolo len šum. */
+  .podriadok{display:block;font-size:11.5px;color:var(--ink-3);margin-top:2px}
+  .field input[type="search"]{
+    width:100%;font-family:var(--sans);font-size:15px;padding:10px 12px;
+    background:var(--surface);color:var(--ink);
+    border:1px solid var(--line-2);border-radius:var(--r);
+  }
+  .field input[type="search"]:focus{outline:2px solid var(--mustard);outline-offset:-1px;border-color:var(--mustard)}
   .note .btn{margin-top:6px}
 
   /* Bunky matice sú v appke prepínače (radio) v popiske, nie tlačidlá.

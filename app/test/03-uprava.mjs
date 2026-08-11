@@ -79,8 +79,10 @@ await p.selectOption("#p-tim_id", { label: "Tím Sever" });
 await p.click("button:has-text('Priradiť označeným')");
 await p.waitForLoadState("networkidle");
 t = await p.content();
-ok("predák sa v zozname ľudí ťahá z tímu",
-   (await p.locator("tr:has-text('Vargová'):has-text('Sedlák Ivan')").count()) === 1);
+/* Predák je pri názve tímu, nie vo vlastnom stĺpci — opakovať to isté meno
+   v každom riadku bol len šum. */
+ok("predák sa v zozname ľudí ukazuje pri tíme",
+   (await p.locator("tr:has-text('Vargová') .podriadok").innerText()).includes("Sedlák Ivan"));
 ok("hromadné priradenie už predáka neponúka",
    (await p.locator('select[name="predak_id"]').count()) === 0);
 

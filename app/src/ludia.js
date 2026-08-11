@@ -33,44 +33,82 @@ function vyber(nazov, zoznam, vybrane, prazdne = "—") {
   </select>`;
 }
 
-export async function zoznam(k) {
-  const iba = k.url.searchParams.get("iba");           // bez-zaradenia | predaci | null
-  const sprava = k.url.searchParams.get("sprava");
-  const chyba = k.url.searchParams.get("chyba");
+/* Hľadanie a filtre. Pri stovke ľudí a rokoch neaktívnych záznamov je zoznam
+   bez nich nepoužiteľný — a hlavne: bez prepínača stavu sa neaktívny človek
+   nedá ani nájsť, ani vrátiť späť. */
+const STAVY = [["aktivni", "aktívni"], ["neaktivni", "neaktívni"], ["vsetci", "všetci"]];
+const POHLADY = [["", "všetkých"], ["bez-zaradenia", "bez zaradenia"],
+                 ["predaci", "predákov"], ["zivnostnici", "živnostníkov"]];
+const STROP = 300;
 
-  const podmienky = ["o.aktivny"];
-  if (iba === "bez-zaradenia") podmienky.push("(o.firma_id IS NULL OR o.tim_id IS NULL)");
-  if (iba === "predaci") podmienky.push("o.je_predak");
+export async function zoznam(k) {
+  const q = k.url.searchParams;
+  const hladane = (q.get("hladaj") ?? "").trim();
+  const stav = STAVY.some(x => x[0] === q.get("stav")) ? q.get("stav") : "aktivni";
+  const pohlad = POHLADY.some(x => x[0] === q.get("pohlad")) ? q.get("pohlad") : "";
+  const timId = Number(q.get("tim")) || null;
+  const firmaId = Number(q.get("firma")) || null;
+  const sprava = q.get("sprava");
+  const chyba = q.get("chyba");
+
+  const podmienky = [], hodnoty = [];
+  if (stav === "aktivni") podmienky.push("o.aktivny");
+  if (stav === "neaktivni") podmienky.push("NOT o.aktivny");
+  if (pohlad === "bez-zaradenia") podmienky.push("(o.firma_id IS NULL OR o.tim_id IS NULL)");
+  if (pohlad === "predaci") podmienky.push("o.je_predak");
+  if (pohlad === "zivnostnici") podmienky.push("o.vztah = 'zivnostnik'");
+  if (timId) { hodnoty.push(timId); podmienky.push(`o.tim_id = $${hodnoty.length}`); }
+  if (firmaId) { hodnoty.push(firmaId); podmienky.push(`o.firma_id = $${hodnoty.length}`); }
+  if (hladane) {
+    /* Hľadá sa v priezvisku, mene aj osobnom čísle naraz — človek si nepamätá,
+       ktoré z toho práve píše. unaccent tu nie je, tak aspoň bez ohľadu na
+       veľkosť písmen. */
+    hodnoty.push(`%${hladane}%`);
+    const i = hodnoty.length;
+    podmienky.push(`(o.priezvisko ILIKE $${i} OR o.meno ILIKE $${i}
+                     OR o.kod_dochadzka ILIKE $${i} OR o.kod_mzdy ILIKE $${i})`);
+  }
+  const kde = podmienky.length ? `WHERE ${podmienky.join(" AND ")}` : "";
 
   const ludia = await vsetky(`
     SELECT o.*, f.nazov AS firma, t.nazov AS tim, p.nazov AS prevadzka, j.nazov AS jedalen,
            pr.priezvisko || ' ' || pr.meno AS predak
       FROM osoba o
-      LEFT JOIN firma f        ON f.id  = o.firma_id
-      LEFT JOIN tim   t        ON t.id  = o.tim_id
-      LEFT JOIN prevadzka p    ON p.id  = o.prevadzka_id
-      LEFT JOIN poskytovatel j ON j.id  = o.poskytovatel_id
+      LEFT JOIN firma f        ON f.id = o.firma_id
+      LEFT JOIN tim   t        ON t.id = o.tim_id
       LEFT JOIN osoba pr       ON pr.id = t.predak_id
-     WHERE ${podmienky.join(" AND ")}
-     ORDER BY o.priezvisko, o.meno`);
+      LEFT JOIN prevadzka p    ON p.id = o.prevadzka_id
+      LEFT JOIN poskytovatel j ON j.id = o.poskytovatel_id
+      ${kde}
+     ORDER BY o.priezvisko, o.meno
+     LIMIT ${STROP + 1}`, hodnoty);
+  const orezane = ludia.length > STROP;
+  if (orezane) ludia.length = STROP;
 
   const s = await jeden(`
-    SELECT count(*)::int AS spolu,
-           count(*) FILTER (WHERE je_predak)::int AS predakov,
-           count(*) FILTER (WHERE je_admin)::int AS spravcov,
-           count(*) FILTER (WHERE firma_id IS NULL OR tim_id IS NULL)::int AS bez_zaradenia
-      FROM osoba WHERE aktivny`);
+    SELECT count(*) FILTER (WHERE aktivny)::int AS aktivnych,
+           count(*) FILTER (WHERE NOT aktivny)::int AS neaktivnych,
+           count(*) FILTER (WHERE aktivny AND je_predak)::int AS predakov,
+           count(*) FILTER (WHERE aktivny AND (firma_id IS NULL OR tim_id IS NULL))::int AS bez_zaradenia
+      FROM osoba`);
 
   const c = await ciselniky();
+  const timyVsetky = await vsetky("SELECT id, nazov FROM tim ORDER BY nazov");
 
   const odznaky = o => [
+    o.aktivny ? "" : '<span class="badge">neaktívny</span>',
     o.je_admin ? '<span class="badge adm">správca</span>' : "",
     o.je_predak ? '<span class="badge lead">predák</span>' : "",
     o.vztah === "zivnostnik" ? '<span class="badge ziv">živnostník</span>' : ""
   ].join("");
 
-  const filter = (kluc, popis) =>
-    `<a class="btn"${iba === kluc ? ' aria-pressed="true"' : ""} href="/ludia${kluc ? `?iba=${kluc}` : ""}">${esc(popis)}</a>`;
+  const moznosti = (zoznam, vybrane, prazdne) =>
+    `<option value="">${esc(prazdne)}</option>` +
+    zoznam.map(z => `<option value="${z.id}"${Number(vybrane) === z.id ? " selected" : ""}>${esc(z.nazov)}</option>`).join("");
+
+  /* Filtre sa nesú ďalej, aby sa po hromadnom priradení človek vrátil tam,
+     kde bol, a nie na začiatok zoznamu. */
+  const stavZoznamu = q.toString().replace(/&?(sprava|chyba)=[^&]*/g, "").replace(/^&/, "");
 
   k.html(k.odp, 200, stranka({
     titulok: "Ľudia", osoba: k.osoba, cesta: "/ludia", verzia: k.verzia, siroka: true,
@@ -78,46 +116,71 @@ export async function zoznam(k) {
 <section class="wrap wide">
   <div class="screen-head">
     <h2>Ľudia</h2>
-    <span class="who">${mnoho(s.spolu, ["aktívny", "aktívni", "aktívnych"])}
-      · ${mnoho(s.predakov, ["predák", "predáci", "predákov"])}
-      · ${mnoho(s.spravcov, ["správca", "správcovia", "správcov"])}</span>
+    <span class="who">${mnoho(s.aktivnych, ["aktívny", "aktívni", "aktívnych"])}
+      · ${mnoho(s.neaktivnych, ["neaktívny", "neaktívni", "neaktívnych"])}
+      · ${mnoho(s.predakov, ["predák", "predáci", "predákov"])}</span>
   </div>
 
   ${sprava ? `<div class="okbox">${esc(sprava)}</div>` : ""}
   ${chyba ? `<div class="warnbox">${esc(chyba)}</div>` : ""}
 
-  ${s.bez_zaradenia > 0 && iba !== "bez-zaradenia"
+  ${s.bez_zaradenia > 0 && pohlad !== "bez-zaradenia"
     ? `<div class="warnbox">Bez zaradenia: ${mnoho(s.bez_zaradenia, ["človek", "ľudia", "ľudí"])}.
         Kým človek nemá firmu a tím, neobjaví sa v matici predáka.
-        <a href="/ludia?iba=bez-zaradenia">Ukázať ich</a>.</div>` : ""}
+        <a href="/ludia?pohlad=bez-zaradenia">Ukázať ich</a>.</div>` : ""}
+
+  <form method="get" action="/ludia" class="card filtre">
+    <div class="hromadne">
+      <div class="field"><label for="f-hladaj">Hľadať</label>
+        <input type="search" id="f-hladaj" name="hladaj" value="${esc(hladane)}"
+               placeholder="priezvisko, meno alebo číslo"></div>
+      <div class="field"><label for="f-stav">Stav</label>
+        <select id="f-stav" name="stav">${STAVY.map(([v, t]) =>
+          `<option value="${v}"${stav === v ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></div>
+      <div class="field"><label for="f-pohlad">Iba</label>
+        <select id="f-pohlad" name="pohlad">${POHLADY.map(([v, t]) =>
+          `<option value="${v}"${pohlad === v ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></div>
+      <div class="field"><label for="f-tim">Tím</label>
+        <select id="f-tim" name="tim">${moznosti(timyVsetky, timId, "všetky")}</select></div>
+      <div class="field"><label for="f-firma">Firma</label>
+        <select id="f-firma" name="firma">${moznosti(c.firmy, firmaId, "všetky")}</select></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" type="submit">Hľadať</button>
+      <a class="btn" href="/ludia">Zrušiť filtre</a>
+    </div>
+  </form>
 
   <form method="post" action="/ludia/hromadne" class="card">
     <input type="hidden" name="znamka" value="${esc(k.csrf)}">
+    <input type="hidden" name="spat" value="${esc(stavZoznamu)}">
     <div class="card-head">
       <h3>Zoznam</h3>
-      <span class="hint">${ludia.length}</span>
-      <div class="btn-row" style="margin-left:auto">
-        ${filter("", "Všetci")}${filter("bez-zaradenia", "Bez zaradenia")}${filter("predaci", "Predáci")}
-      </div>
+      <span class="hint">${ludia.length}${orezane ? ` z viac než ${STROP}` : ""}</span>
     </div>
 
+    ${orezane ? `<div class="warnbox">Ukazujem prvých ${STROP}. Zúžte hľadanie —
+      hromadné priradenie sa týka len označených, takže o nič neprídete.</div>` : ""}
+
     ${ludia.length === 0
-      ? `<p class="hint" style="margin:0">Nikto nevyhovuje. Menoslov sa dá vložiť nižšie.</p>`
+      ? `<p class="hint" style="margin:0">Nikto nevyhovuje${hladane ? ` hľadaniu „${esc(hladane)}"` : ""}.
+          ${stav === "aktivni" ? "Skúste prepnúť <em>Stav</em> na neaktívnych alebo na všetkých." : ""}</p>`
       : `<div class="scroll-x"><table class="data">
           <thead><tr>
             <th class="chk"><input type="checkbox" id="vsetci" aria-label="Označiť všetkých"></th>
             <th>Osobné číslo</th><th>Priezvisko a meno</th><th>Firma</th><th>Vzťah</th>
-            <th>Tím</th><th>Predák</th><th>Prevádzka</th><th>Jedáleň</th><th></th>
+            <th>Tím</th><th>Prevádzka</th><th>Jedáleň</th><th></th>
           </tr></thead>
-          <tbody>${ludia.map(o => `<tr${o.je_admin ? ' class="is-adm"' : o.je_predak ? ' class="is-lead"' : ""}>
+          <tbody>${ludia.map(o => `<tr${!o.aktivny ? ' class="is-off"'
+              : o.je_admin ? ' class="is-adm"' : o.je_predak ? ' class="is-lead"' : ""}>
             <td class="chk"><input type="checkbox" name="kto" value="${o.id}"
                  aria-label="${esc(o.priezvisko)} ${esc(o.meno)}"></td>
             <td class="num">${esc(o.kod_dochadzka ?? "—")}</td>
             <td><a href="/osoba?id=${o.id}">${esc(o.priezvisko)} ${esc(o.meno)}</a>${odznaky(o)}</td>
             <td${o.firma ? "" : ' class="gap"'}>${esc(o.firma ?? "chýba")}</td>
             <td>${esc(nazovVztahu(o.vztah))}</td>
-            <td${o.tim ? "" : ' class="gap"'}>${esc(o.tim ?? "chýba")}</td>
-            <td>${esc(o.predak ?? "—")}</td>
+            <td${o.tim ? "" : ' class="gap"'}>${esc(o.tim ?? "chýba")}
+              ${o.predak ? `<span class="podriadok">predák ${esc(o.predak)}</span>` : ""}</td>
             <td>${esc(o.prevadzka ?? "—")}</td>
             <td>${esc(o.jedalen ?? "—")}</td>
             <td><a class="btn" href="/osoba?id=${o.id}">Upraviť</a></td>
@@ -139,6 +202,12 @@ export async function zoznam(k) {
                <option value="">nemeniť</option>
                ${VZTAHY.filter(v => v[0]).map(v => `<option value="${v[0]}">${esc(v[1])}</option>`).join("")}
              </select></div>
+           <div class="field"><label for="p-aktivny">Stav</label>
+             <select name="aktivny" id="p-aktivny">
+               <option value="">nemeniť</option>
+               <option value="1">aktívny</option>
+               <option value="0">neaktívny</option>
+             </select></div>
          </div>
          <button class="btn primary" type="submit">Priradiť označeným</button>`}
   </form>
@@ -151,7 +220,7 @@ export async function zoznam(k) {
         <label for="p-riadky">Osobné číslo · priezvisko · meno — jeden človek na riadok</label>
         <textarea id="p-riadky" name="riadky" rows="8" spellcheck="false"
           placeholder="1042;Kováč;Jozef&#10;2117;Baláž;Peter"></textarea>
-        <p class="hint">Oddeľovač je bodkočiarka, tabulátor alebo stredník z Excelu — appka si poradí
+        <p class="hint">Oddeľovač je bodkočiarka, tabulátor alebo čiarka — appka si poradí
           s každým. Osobné číslo sa berie ako text, takže úvodné nuly ostanú.</p>
       </div>
       <button class="btn primary" type="submit">Načítať</button>
@@ -292,9 +361,17 @@ async function firmaSaSmieMenit(idcka) {
 }
 
 export async function hromadne(k) {
+  /* Odkiaľ používateľ prišiel — nech sa vráti na ten istý filter a nie na
+     začiatok zoznamu. Berie sa len to, čo zoznam sám vie prečítať. */
+  const spat = new URLSearchParams();
+  for (const [kluc, hodnota] of new URLSearchParams(k.data.spat ?? ""))
+    if (["hladaj", "stav", "pohlad", "tim", "firma"].includes(kluc)) spat.set(kluc, hodnota);
+  const kam = (kluc, text) =>
+    `/ludia?${spat.toString()}${spat.toString() ? "&" : ""}${kluc}=${encodeURIComponent(text)}`;
+
   const kto = [].concat(k.data.kto ?? []).flatMap(v => String(v).split(","))
                 .map(Number).filter(Number.isInteger);
-  if (!kto.length) return k.inam(k.odp, "/ludia?chyba=" + encodeURIComponent("Nikto nebol označený."));
+  if (!kto.length) return k.inam(k.odp, kam("chyba", "Nikto nebol označený."));
 
   const zmeny = [], hodnoty = [];
   for (const [pole] of Object.entries(VAZBY)) {
@@ -306,11 +383,19 @@ export async function hromadne(k) {
   const vztah = (k.data.vztah ?? "").trim();
   if (vztah) { hodnoty.push(vztah); zmeny.push(`vztah = $${hodnoty.length}`); }
 
+  /* Hromadné zneaktívnenie aj vrátenie späť — pri odchode partie brigádnikov
+     je to jediný rozumný spôsob. */
+  const naStav = (k.data.aktivny ?? "").trim();
+  if (naStav === "1" || naStav === "0") {
+    hodnoty.push(naStav === "1");
+    zmeny.push(`aktivny = $${hodnoty.length}`);
+  }
+
   if (!zmeny.length)
-    return k.inam(k.odp, "/ludia?chyba=" + encodeURIComponent("Nebolo čo nastaviť — všetky polia ostali na „nemeniť\"."));
+    return k.inam(k.odp, kam("chyba", "Nebolo čo nastaviť — všetky polia ostali na „nemeniť\"."));
 
   if (k.data.firma_id && !(await firmaSaSmieMenit(kto)))
-    return k.inam(k.odp, "/ludia?chyba=" + encodeURIComponent(
+    return k.inam(k.odp, kam("chyba",
       "Firmu nemeníme uprostred mesiaca — niekto z označených už má v tomto mesiaci objednávku. " +
       "Zmena firmy sa dá spraviť k prvému dňu mesiaca."));
 
@@ -326,8 +411,7 @@ export async function hromadne(k) {
 
   await zapis(k.osoba.id, "ludia.hromadne", { kolko: r.rowCount, zmeny: zmeny.join(", ") });
 
-  k.inam(k.odp, "/ludia?sprava=" + encodeURIComponent(
-    `Nastavené ${mnoho(r.rowCount, ["človeku", "ľuďom", "ľuďom"])}.`));
+  k.inam(k.odp, kam("sprava", `Nastavené ${mnoho(r.rowCount, ["človeku", "ľuďom", "ľuďom"])}.`));
 }
 
 /* ---------- jeden človek ---------- */
