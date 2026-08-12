@@ -95,77 +95,79 @@ export async function zobraz(k, zvonku = {}) {
         Založí sa v <a href="/ciselniky">Číselníkoch</a>.</p></div></section>`
     }));
 
-  const ktora = Number(zvonku.jedalen || k.url.searchParams.get("jedalen"));
-  const vybrana = jedalne.find(j => j.id === ktora) ?? jedalne[0];
-  const m = await menuTyzdna(vybrana.id, po);
   const dni = dniTyzdna(po);
-
-  /* Návrh z priloženého lístka. Číta sa až na požiadanie a nikdy sa neuloží
-     sám — vypíše sa do políčok a človek ho potvrdí tlačidlom Uložiť. Lístok
-     robí dodávateľ a môže si ho kedykoľvek prerobiť; keby appka zapisovala
-     potichu, pokazené čítanie by si nikto nevšimol. */
-  let navrh = zvonku.navrh ?? null, navrhChyba = zvonku.navrhChyba ?? null;
-  let navrhPolievky = zvonku.navrhPolievky ?? null;
-  let inaJedalen = zvonku.inaJedalen ?? null;
-  let zdroj = zvonku.zdroj ?? "vloženého textu", inyTyzden = zvonku.inyTyzden ?? null;
-  if (!navrh && !navrhChyba && k.url.searchParams.get("navrh") && m?.priloha_nazov) {
-    const p = await jeden("SELECT priloha_data FROM menu_tyzden WHERE id = $1", [m.id]);
-    const v = precitaj(m.priloha_nazov, m.priloha_typ, p.priloha_data);
-    zdroj = "prílohy";
-    /* Lístok si nesie vlastné dátumy. Keď sedia na iný týždeň, než ktorý je
-       na obrazovke, návrh sa nevypíše — inak by stačilo stlačiť Uložiť a
-       minulotýždňové menu by ticho pretlačilo tento týždeň. */
-    const cudzia = v.podarilo ? komuPatri(v, vybrana, jedalne) : null;
-    if (cudzia) inaJedalen = cudzia;
-    else if (v.podarilo && v.tyzden && v.tyzden !== po) inyTyzden = v.tyzden;
-    else if (v.podarilo) { navrh = v.najdene; navrhPolievky = v.polievky; }
-    else navrhChyba = v.dovod;
-  }
   const sprava = k.url.searchParams.get("sprava");
   const chyba = k.url.searchParams.get("chyba");
   const smieMenit = k.osoba.je_admin;
 
+  /* Ktorej jedálne sa týka to, čo prišlo zvonku — návrh z vloženého textu
+     alebo prečítanie z prílohy. Obrazovka ukazuje všetky jedálne pod sebou,
+     tak sa hláška aj podfarbené políčka musia dostať len k tej jednej. */
+  const ktora = Number(zvonku.jedalen || k.url.searchParams.get("jedalen")) || 0;
+
   const odkaz = (t, popis) =>
-    `<a class="btn" href="/menu?jedalen=${vybrana.id}&tyzden=${t}">${esc(popis)}</a>`;
+    `<a class="btn" href="/menu?tyzden=${t}">${esc(popis)}</a>`;
 
-  k.html(k.odp, 200, stranka({
-    titulok: "Menu na týždeň", osoba: k.osoba, cesta: "/menu", verzia: k.verzia, siroka: true,
-    obsah: `
-<section class="wrap wide">
-  <div class="screen-head">
-    <h2>Menu na týždeň</h2>
-    <span class="who">${esc(vybrana.nazov)}</span>
-  </div>
+  /* Jedna jedáleň = jedna karta s vlastným formulárom. Prepínanie medzi
+     jedálňami tu bolo zbytočné: pri dvoch dodávateľoch sa lístky zadávajú
+     v jeden deň a preklikávanie znamenalo dvakrát prejsť tú istú cestu. */
+  const karty = [];
+  for (const j of jedalne) {
+    const m = await menuTyzdna(j.id, po);
+    const tato = j.id === ktora;
 
-  ${sprava ? `<div class="okbox">${esc(sprava)}</div>` : ""}
-  ${chyba ? `<div class="warnbox">${esc(chyba)}</div>` : ""}
+    let navrh = tato ? zvonku.navrh ?? null : null;
+    let navrhPolievky = tato ? zvonku.navrhPolievky ?? null : null;
+    let navrhChyba = tato ? zvonku.navrhChyba ?? null : null;
+    let inaJedalen = tato ? zvonku.inaJedalen ?? null : null;
+    let inyTyzden = tato ? zvonku.inyTyzden ?? null : null;
+    let zdroj = zvonku.zdroj ?? "vloženého textu";
 
-  <div class="deadline">
-    <span class="lbl">Týždeň</span>
-    <span class="val">${tyzdenPopis(po)}</span>
-    <span style="margin-left:auto" class="btn-row">
-      ${odkaz(posunTyzden(po, -7), "← predchádzajúci")}
-      ${odkaz(pondelok(dnes()), "tento týždeň")}
-      ${odkaz(posunTyzden(po, 7), "nasledujúci →")}
-    </span>
-  </div>
+    /* Návrh z priloženého lístka. Číta sa až na požiadanie a nikdy sa neuloží
+       sám — vypíše sa do políčok a človek ho potvrdí tlačidlom Uložiť. Lístok
+       robí dodávateľ a môže si ho kedykoľvek prerobiť; keby appka zapisovala
+       potichu, pokazené čítanie by si nikto nevšimol. */
+    if (tato && !navrh && !navrhChyba && !inaJedalen && !inyTyzden &&
+        k.url.searchParams.get("navrh") && m?.priloha_nazov) {
+      const p = await jeden("SELECT priloha_data FROM menu_tyzden WHERE id = $1", [m.id]);
+      const v = precitaj(m.priloha_nazov, m.priloha_typ, p.priloha_data);
+      zdroj = "prílohy";
+      const cudzia = v.podarilo ? komuPatri(v, j, jedalne) : null;
+      /* Lístok si nesie vlastné dátumy aj označenie jedál. Keď nesedia,
+         návrh sa nevypíše — inak by stačilo stlačiť Uložiť a do tohto týždňa
+         by sa ticho dostalo menu z iného týždňa alebo od iného dodávateľa. */
+      if (cudzia) inaJedalen = cudzia;
+      else if (v.podarilo && v.tyzden && v.tyzden !== po) inyTyzden = v.tyzden;
+      else if (v.podarilo) { navrh = v.najdene; navrhPolievky = v.polievky; }
+      else navrhChyba = v.dovod;
+    }
 
-  ${jedalne.length > 1 ? `<div class="btn-row" style="margin-bottom:18px">
-    ${jedalne.map(j => `<a class="btn"${j.id === vybrana.id ? ' aria-pressed="true"' : ""}
-      href="/menu?jedalen=${j.id}&tyzden=${po}">${esc(j.nazov)}</a>`).join("")}
-  </div>` : ""}
+    const hodnota = (den, poradie) => poradie === POLIEVKA
+      ? [m?.polievka(den), navrhPolievky?.get(den)]
+      : [m?.nazov(den, poradie), navrh?.get(`${den}|${poradie}`)];
 
+    const policko = (den, poradie, popis) => {
+      const [ulozene, navrhnute] = hodnota(den, poradie);
+      return `<td><input type="text" name="${poradie === POLIEVKA ? `pol-${den}` : `j-${den}-${poradie}`}"
+        value="${esc(ulozene ?? navrhnute ?? "")}"
+        ${!ulozene && navrhnute ? 'class="navrh"' : ""}
+        ${smieMenit ? "" : "readonly"}
+        aria-label="${DNI[den]}, ${esc(popis)}"></td>`;
+    };
+
+    karty.push(`
+<details class="listok" open>
+  <summary class="btn">Jedálny lístok — ${esc(j.nazov)}</summary>
   <form method="post" action="/menu" enctype="multipart/form-data" class="card">
     <input type="hidden" name="znamka" value="${esc(k.csrf)}">
-    <input type="hidden" name="jedalen" value="${vybrana.id}">
+    <input type="hidden" name="jedalen" value="${j.id}">
     <input type="hidden" name="tyzden" value="${po}">
 
-    <div class="card-head"><h3>Jedálny lístok</h3></div>
     ${m?.priloha_nazov
       ? `<p style="margin:0 0 12px">Priložené:
-          <a href="/menu/priloha?jedalen=${vybrana.id}&tyzden=${po}">${esc(m.priloha_nazov)}</a>
+          <a href="/menu/priloha?jedalen=${j.id}&tyzden=${po}">${esc(m.priloha_nazov)}</a>
           <span class="hint">(${Math.round(m.priloha_velkost / 1024)} kB)</span>
-          ${smieMenit ? ` · <a href="/menu?jedalen=${vybrana.id}&tyzden=${po}&navrh=1">prečítať z neho názvy</a>` : ""}</p>`
+          ${smieMenit ? ` · <a href="/menu?jedalen=${j.id}&tyzden=${po}&navrh=1">prečítať z neho názvy</a>` : ""}</p>`
       : `<p class="hint" style="margin:0 0 12px">Zatiaľ bez prílohy.</p>`}
 
     ${navrh ? `<div class="okbox">Z ${esc(zdroj)} som prečítal
@@ -175,7 +177,7 @@ export async function zobraz(k, zvonku = {}) {
     ${navrhChyba ? `<div class="warnbox">Z ${esc(zdroj)} sa názvy prečítať nedali:
         ${esc(navrhChyba)}. Dajú sa dopísať ručne — príloha funguje aj tak.</div>` : ""}
     ${inaJedalen ? `<div class="warnbox"><strong>Pozor, cudzí lístok.</strong>
-        Tento lístok podľa všetkého nie je od jedálne ${esc(vybrana.nazov)} —
+        Tento lístok podľa všetkého nie je od jedálne ${esc(j.nazov)} —
         ${esc(inaJedalen.dovod)}. Nič som nevyplnil.
         ${inaJedalen.ina ? `<div class="btn-row" style="margin-top:10px">
              ${zdroj === "vloženého textu"
@@ -196,22 +198,23 @@ export async function zobraz(k, zvonku = {}) {
                        name="tyzden_iny" value="${esc(inyTyzden)}">Prečítať na ${tyzdenPopis(inyTyzden)}</button>
              </div>`
           : `<div class="btn-row" style="margin-top:10px">
-               <a class="btn" href="/menu?jedalen=${vybrana.id}&tyzden=${esc(inyTyzden)}&navrh=1">Prejsť na ${tyzdenPopis(inyTyzden)}</a>
+               <a class="btn" href="/menu?jedalen=${j.id}&tyzden=${esc(inyTyzden)}&navrh=1">Prejsť na ${tyzdenPopis(inyTyzden)}</a>
              </div>`}
       </div>` : ""}
+
     ${smieMenit ? `
       <div class="field">
-        <label for="p-priloha">Nahrať lístok (PDF alebo fotka)</label>
-        <input type="file" id="p-priloha" name="priloha" accept=".pdf,image/*">
+        <label for="p-priloha-${j.id}">Nahrať lístok (PDF alebo fotka)</label>
+        <input type="file" id="p-priloha-${j.id}" name="priloha" accept=".pdf,image/*">
         <p class="hint">Nahratím sa nahradí ten predchádzajúci. Najviac 8 MB.</p>
       </div>
 
-      <details class="vlozenie"${zvonku.vlozeny ? " open" : ""}>
+      <details class="vlozenie"${tato && zvonku.vlozeny ? " open" : ""}>
         <summary class="btn">Vložiť lístok ako text (Ctrl+C / Ctrl+V)</summary>
         <div class="field" style="margin-top:12px">
-          <label for="p-vlozeny">Text lístka</label>
-          <textarea id="p-vlozeny" name="vlozeny" rows="8"
-            placeholder="Otvorte lístok, označte ho celý (Ctrl+A), skopírujte (Ctrl+C) a sem vložte (Ctrl+V).">${esc(zvonku.vlozeny ?? "")}</textarea>
+          <label for="p-vlozeny-${j.id}">Text lístka</label>
+          <textarea id="p-vlozeny-${j.id}" name="vlozeny" rows="8"
+            placeholder="Otvorte lístok, označte ho celý (Ctrl+A), skopírujte (Ctrl+C) a sem vložte (Ctrl+V).">${esc(tato ? zvonku.vlozeny ?? "" : "")}</textarea>
           <p class="hint">Text sa nikam neukladá — slúži len na prečítanie názvov.
             Funguje aj vtedy, keď sa zo súboru prečítať nedajú.</p>
         </div>
@@ -220,48 +223,61 @@ export async function zobraz(k, zvonku = {}) {
         </div>
       </details>` : ""}
 
-    <div class="card-head" style="margin-top:22px"><h3>Názvy jedál</h3>
-      <span class="hint">nepovinné · <strong>P</strong> = polievka, tá nie je na výber</span></div>
-    <div class="scroll-x"><table class="data menu-mriezka">
+    <div class="scroll-x"><table class="data listok-tab menu-mriezka" style="margin-top:18px">
       <thead><tr><th></th>
         ${dni.map((d, i) => `<th>${DNI[i]}<span class="podriadok">${denMesiac(d)}</span></th>`).join("")}
       </tr></thead>
       <tbody>
         <tr class="polievka-riadok">
           <th class="oznak" title="Polievka a dezert — nie sú na výber, patria k obedu">P</th>
-          ${dni.map((_, den) => `<td>
-            <input type="text" name="pol-${den}"
-                   value="${esc(m?.polievka(den) ?? navrhPolievky?.get(den) ?? "")}"
-                   ${!m?.polievka(den) && navrhPolievky?.get(den) ? 'class="navrh"' : ""}
-                   ${smieMenit ? "" : "readonly"}
-                   aria-label="${DNI[den]}, polievka">
-          </td>`).join("")}
+          ${dni.map((_, den) => policko(den, POLIEVKA, "polievka")).join("")}
         </tr>
-        ${Array.from({ length: vybrana.pocet_jedal }, (_, poradie) => `<tr>
-          <th class="oznak">${esc(oznacenie(vybrana.znacenie, poradie))}</th>
-          ${dni.map((_, den) => `<td>
-            <input type="text" name="j-${den}-${poradie}"
-                   value="${esc(m?.nazov(den, poradie) ?? navrh?.get(`${den}|${poradie}`) ?? "")}"
-                   ${!m?.nazov(den, poradie) && navrh?.get(`${den}|${poradie}`) ? 'class="navrh"' : ""}
-                   ${smieMenit ? "" : "readonly"}
-                   aria-label="${DNI[den]}, jedlo ${esc(oznacenie(vybrana.znacenie, poradie))}">
-          </td>`).join("")}
+        ${Array.from({ length: j.pocet_jedal }, (_, poradie) => `<tr>
+          <th class="oznak">${esc(oznacenie(j.znacenie, poradie))}</th>
+          ${dni.map((_, den) => policko(den, poradie, `jedlo ${oznacenie(j.znacenie, poradie)}`)).join("")}
         </tr>`).join("")}
       </tbody>
     </table></div>
     <p class="swipe-hint">Tabuľka sa posúva vbok</p>
 
     ${smieMenit ? `<div class="btn-row" style="margin-top:16px">
-      <button class="btn primary" type="submit">Uložiť</button>
+      <button class="btn primary" type="submit">Uložiť ${esc(j.nazov)}</button>
     </div>` : `<p class="hint" style="margin-top:16px">Menu zadáva správca.</p>`}
-
-    <div class="note">
-      <strong>Názvy sú nepovinné.</strong> Označenia jedál určuje jedáleň
-      (${esc(vybrana.nazov)}: ${dni.length ? esc(Array.from({ length: vybrana.pocet_jedal },
-        (_, i) => oznacenie(vybrana.znacenie, i)).join(" ")) : ""}), takže matica funguje aj
-      bez nich. Vypĺňajú sa vtedy, keď stojí za to, aby predák nemusel otvárať prílohu.
-    </div>
   </form>
+</details>`);
+  }
+
+  k.html(k.odp, 200, stranka({
+    titulok: "Menu na týždeň", osoba: k.osoba, cesta: "/menu", verzia: k.verzia, siroka: true,
+    obsah: `
+<section class="wrap wide">
+  <div class="screen-head">
+    <h2>Menu na týždeň</h2>
+    <span class="who">${mnoho(jedalne.length, ["jedáleň", "jedálne", "jedální"])}</span>
+  </div>
+
+  ${sprava ? `<div class="okbox">${esc(sprava)}</div>` : ""}
+  ${chyba ? `<div class="warnbox">${esc(chyba)}</div>` : ""}
+
+  <div class="deadline">
+    <span class="lbl">Týždeň</span>
+    <span class="val">${tyzdenPopis(po)}</span>
+    <span style="margin-left:auto" class="btn-row">
+      ${odkaz(posunTyzden(po, -7), "← predchádzajúci")}
+      ${odkaz(pondelok(dnes()), "tento týždeň")}
+      ${odkaz(posunTyzden(po, 7), "nasledujúci →")}
+    </span>
+  </div>
+
+  <div class="listky">${karty.join("")}</div>
+
+  <div class="note">
+    <strong>Názvy sú nepovinné · P je polievka.</strong> Označenia jedál určuje jedáleň
+    (${jedalne.map(j => `${esc(j.nazov)}: ${esc(Array.from({ length: j.pocet_jedal },
+      (_, i) => oznacenie(j.znacenie, i)).join(" "))}`).join(" · ")}), takže matica funguje
+    aj bez názvov. Vypĺňajú sa vtedy, keď stojí za to, aby predák nemusel otvárať prílohu.
+    Každá jedáleň sa ukladá vlastným tlačidlom.
+  </div>
 </section>`
   }));
 }

@@ -124,9 +124,11 @@ await p.waitForLoadState("networkidle");
    toho, ktorý týždeň je práve dnes. Ide o to, či sa názvy dostanú do
    objednávky: kuchyňa má vidieť, čo si ľudia dali, nie iba čísla. */
 await p.goto(A + "/menu");
-await p.click('a.btn:has-text("GASTROGAL")').catch(() => {});
-await p.click("details.vlozenie > summary");
-await p.fill("#p-vlozeny", `Pondelok
+/* Obrazovka menu ukazuje všetky jedálne pod sebou — treba trafiť tú svoju. */
+const kartaGG = () => p.locator(
+  'details.listok:has(summary:text-is("Jedálny lístok — GASTROGAL"))');
+await kartaGG().locator("details.vlozenie > summary").click();
+await kartaGG().locator("textarea").fill(`Pondelok
 1. Vyprážaný kurací rezeň, dusená ryža, šalát • 120g
 2. Bravčový perkelt, domáce halušky • 284/64g
 Utorok
@@ -137,9 +139,9 @@ Streda
 1. Vyprážané čevapčiči, varené zemiaky • 120g
 Piatok
 1. Vyprážané rybie filé, varené zemiaky • 120g`);
-await p.click("button:has-text('Prečítať názvy z textu')");
+await kartaGG().locator("button:has-text('Prečítať názvy z textu')").click();
 await p.waitForLoadState("networkidle");
-await p.click("button:has-text('Uložiť')");
+await kartaGG().locator("button:has-text('Uložiť')").click();
 await p.waitForLoadState("networkidle");
 
 await p.goto(A + "/uzavierka");

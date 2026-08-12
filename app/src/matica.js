@@ -15,7 +15,7 @@
 
 import { stranka, esc, meno, mnoho } from "./html.js";
 import { bazen, jeden, vsetky, zapis } from "./db.js";
-import { DNI, DNI_SKRATKA, dnes, pondelok, dniTyzdna, denMesiac, tyzdenPopis, oznacenie } from "./datum.js";
+import { DNI, dnes, pondelok, dniTyzdna, denMesiac, tyzdenPopis, oznacenie } from "./datum.js";
 import { menuTyzdna } from "./menu.js";
 
 const BEZ_OBEDA = -1;
@@ -227,7 +227,7 @@ function kartaMenu(menu, jedla, po) {
           : ""}
         ${riadky.length ? `<div class="scroll-x"><table class="data listok-tab">
           <thead><tr><th></th>
-            ${dni.map((d, i) => `<th>${DNI_SKRATKA[i]}<span class="podriadok">${denMesiac(d)}</span></th>`).join("")}
+            ${dni.map((d, i) => `<th>${DNI[i]}<span class="podriadok">${denMesiac(d)}</span></th>`).join("")}
           </tr></thead>
           <tbody>
             ${riadky.map(([znak, texty, jePolievka]) => `<tr${jePolievka ? ' class="polievka-riadok"' : ""}>
