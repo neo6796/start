@@ -170,6 +170,34 @@ await p.click("button:has-text('Označiť')");
 await p.waitForLoadState("networkidle");
 ok("samé víkendové dni sa odmietnu", (await p.content()).includes("ani jeden pracovný deň"));
 
+console.log("— správca sa dostane aj mimo svojho tímu —");
+/* Správca je zároveň predákom, takže začína pri svojom tíme. Bez prepínača
+   by sa k ostatným tímom nedostal práve ten, kto na to má právo. */
+await p.goto(A + "/tim");
+ok("prepínač je na obrazovke", (await p.locator('a.btn:has-text("všetci")').count()) === 1);
+const vTime = await p.locator("table.matrix tbody tr").count();
+await p.click('a.btn:has-text("všetci")');
+await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("celý podnik má aspoň toľko ľudí ako tím",
+   (await p.locator("table.matrix tbody tr").count()) >= vTime);
+ok("nadpis to hovorí", /Všetci stravníci/.test(t));
+ok("pri mene je aj tím", /class="pn"[^>]*>[^<]*·/.test(t));
+
+/* Uloženie musí zapísať tomu, kto je na obrazovke — nie len vlastnému tímu. */
+const cudzi = p.locator("table.matrix tbody tr:not(.is-off)").last();
+await cudzi.locator("td .opts").first().locator("input[type=radio]").first().check();
+await p.click("button:has-text('Uložiť')");
+await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("uloženie prešlo aj v pohľade na všetkých", /Uložené — \d+ zmen/.test(t));
+ok("pohľad ostal na všetkých", /Všetci stravníci/.test(t));
+
+await p.click('a.btn:has-text("môj tím")');
+await p.waitForLoadState("networkidle");
+ok("prepnutie späť na tím funguje",
+   (await p.locator("table.matrix tbody tr").count()) === vTime);
+
 console.log("— stravník vidí svoj týždeň —");
 await p.goto(A + "/moje");
 ok("vlastný týždeň sa otvorí", (await p.content()).includes("Môj týždeň"));

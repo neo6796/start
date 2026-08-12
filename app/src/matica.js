@@ -124,7 +124,7 @@ function bunka(o, datum, zaznam, moje, vsetkyJedalne, prec, menu, denIndex) {
   return h;
 }
 
-function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti, menu) {
+function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti, menu, sTimom = false) {
   const dni = dniTyzdna(po);
   return `
 <div class="scroll-x"><table class="matrix">
@@ -143,16 +143,20 @@ function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti
       }).length;
       /* Bez jedálne sa nedá objednať nič. Povedať to raz na riadku je
          zrozumiteľnejšie než päťkrát v prázdnych bunkách. */
+      /* Pri pohľade na celý podnik treba pri mene aj tím — bez neho sa
+         v dlhom zozname nedá povedať, koho sa to týka. */
+      const kto = `<span class="nm">${esc(o.priezvisko)} ${esc(o.meno)}</span>
+        <span class="pn">${esc(o.kod_dochadzka ?? "—")}${
+          sTimom ? " · " + esc(o.tim ?? "bez tímu") : ""}</span>`;
+
       if (!moje.length) return `<tr class="is-off">
-        <th><span class="nm">${esc(o.priezvisko)} ${esc(o.meno)}</span>
-          <span class="pn">${esc(o.kod_dochadzka ?? "—")}</span></th>
+        <th>${kto}</th>
         <td colspan="6" class="bez-jedalne">Nemá pridelenú jedáleň, takže sa preň nedá objednať.
           Prideľuje sa v <a href="/osoba?id=${o.id}">jeho údajoch</a>.</td>
       </tr>`;
 
       return `<tr>
-        <th><span class="nm">${esc(o.priezvisko)} ${esc(o.meno)}</span>
-          <span class="pn">${esc(o.kod_dochadzka ?? "—")}</span></th>
+        <th>${kto}</th>
         ${dni.map((d, i) => {
           const z = objednavky.get(`${o.id}|${d}`);
           const prazdna = z?.jedlo === null || z?.jedlo === undefined;
@@ -214,16 +218,35 @@ function kartaMenu(menu, jedla, po) {
   </div>`;
 }
 
+/* ---------- koho daný človek obsluhuje ---------- */
+
+/* Predák svoj tím, správca hocikoho. Správca, ktorý je zároveň predákom,
+   začína pri svojom tíme a prepína sa — inak by sa k ostatným tímom nedostal
+   práve ten, kto na to má právo.
+
+   Je to na jednom mieste, lebo to potrebujú štyri obsluhy: matica, hromadné
+   odhlásenie, pridelenie jedální a ukladanie. Keby sa to písalo štyrikrát,
+   raz by sa jedna kópia rozišla so zvyškom a ukladalo by sa niekomu inému,
+   než kto je na obrazovke. */
+function pohladZ(osoba, ziadany) {
+  if (!osoba.je_admin) return "tim";
+  const ch = (ziadany ?? "").trim();
+  if (ch === "vsetci" || ch === "tim") return ch;
+  return osoba.je_predak ? "tim" : "vsetci";
+}
+
+const ktoPatri = (osoba, pohlad, po) => pohlad === "vsetci"
+  ? tymZaTyzden("true", [], po)
+  : tymZaTyzden("o.tim_id IN (SELECT id FROM tim WHERE predak_id = $1)", [osoba.id], po);
+
 /* ---------- obrazovka predáka ---------- */
 
 export async function tim(k) {
   const po = pondelok(k.url.searchParams.get("tyzden") || dnes());
   const jedla = await jedalne();
 
-  /* Správca vidí všetko, predák svoj tím. Predák je pri tíme, nie pri osobe. */
-  const { ludia, objednavky, pridelenia, nepritomnosti } = k.osoba.je_admin && !k.osoba.je_predak
-    ? await tymZaTyzden("true", [], po)
-    : await tymZaTyzden("o.tim_id IN (SELECT id FROM tim WHERE predak_id = $1)", [k.osoba.id], po);
+  const pohlad = pohladZ(k.osoba, k.url.searchParams.get("pohlad"));
+  const { ludia, objednavky, pridelenia, nepritomnosti } = await ktoPatri(k.osoba, pohlad, po);
 
   const menu = await menuPreTyzden(pridelenia, ludia, po);
   const zamok = await jeden("SELECT * FROM tyzden_stav WHERE pondelok = $1", [po]);
@@ -236,15 +259,21 @@ export async function tim(k) {
   }).length, 0);
 
   const odkaz = (t, popis) =>
-    `<a class="btn" href="/tim?tyzden=${t}">${esc(popis)}</a>`;
+    `<a class="btn" href="/tim?tyzden=${t}&pohlad=${pohlad}">${esc(popis)}</a>`;
+  const prepinac = p2 => `<a class="btn" href="/tim?tyzden=${po}&pohlad=${p2}"${
+    p2 === pohlad ? ' aria-pressed="true"' : ""}>${p2 === "tim" ? "môj tím" : "všetci"}</a>`;
 
   k.html(k.odp, 200, stranka({
-    titulok: "Môj tím", osoba: k.osoba, cesta: "/tim", verzia: k.verzia, siroka: true,
+    titulok: pohlad === "vsetci" ? "Všetci stravníci" : "Môj tím",
+    osoba: k.osoba, cesta: "/tim", verzia: k.verzia, siroka: true,
     obsah: `
 <section class="wrap wide">
   <div class="screen-head">
-    <h2>Môj tím</h2>
+    <h2>${pohlad === "vsetci" ? "Všetci stravníci" : "Môj tím"}</h2>
     <span class="who">${esc(meno(k.osoba))}</span>
+    ${k.osoba.je_admin && k.osoba.je_predak
+      ? `<span class="btn-row" style="margin-left:auto">${prepinac("tim")}${prepinac("vsetci")}</span>`
+      : ""}
   </div>
 
   ${sprava ? `<div class="okbox">${esc(sprava)}</div>` : ""}
@@ -263,7 +292,9 @@ export async function tim(k) {
     </span>
   </div>
 
-  ${zamok?.uzavrety ? `<div class="warnbox">Týždeň je uzavretý. Zmeny už rieši admin.</div>` : ""}
+  ${zamok?.uzavrety ? `<div class="warnbox">Týždeň je uzavretý a objednávka odišla jedálňam —
+    zapisovať sa doň nedá. Ak sa treba vrátiť, otvorí sa
+    v <a href="/uzavierka?tyzden=${po}">Uzávierke</a> a jedálni sa potom musí poslať oprava.</div>` : ""}
 
   ${ludia.length === 0
     ? `<div class="card"><p style="margin:0">Nemáš nikoho v tíme.</p>
@@ -273,12 +304,13 @@ export async function tim(k) {
     : `<form method="post" action="/tim" class="card">
         <input type="hidden" name="znamka" value="${esc(k.csrf)}">
         <input type="hidden" name="tyzden" value="${po}">
+        <input type="hidden" name="pohlad" value="${pohlad}">
         <div class="card-head">
-          <h3>${esc(ludia[0].tim ?? "Bez tímu")}</h3>
+          <h3>${pohlad === "vsetci" ? "Všetci stravníci" : esc(ludia[0].tim ?? "Bez tímu")}</h3>
           <span class="pill neutral">${mnoho(ludia.length, ["človek", "ľudia", "ľudí"])}</span>
         </div>
         ${kartaMenu(menu, jedla, po)}
-        ${tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu)}
+        ${tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu, pohlad === "vsetci")}
         ${LEGENDA}
         <div class="btn-row" style="margin-top:16px">
           <button class="btn primary" type="submit"${zamok?.uzavrety ? " disabled" : ""}>Uložiť</button>
@@ -293,11 +325,12 @@ export async function tim(k) {
           <form method="post" action="/tim/nepritomnost" style="margin-top:16px">
             <input type="hidden" name="znamka" value="${esc(k.csrf)}">
             <input type="hidden" name="tyzden" value="${po}">
+            <input type="hidden" name="pohlad" value="${pohlad}">
             <div class="hromadne">
               <div class="field"><label for="n-kto">Koho</label>
                 <select id="n-kto" name="kto" required>
                   <option value="">—</option>
-                  <option value="vsetci">celý tím (${ludia.length})</option>
+                  <option value="vsetci">${pohlad === "vsetci" ? "všetkých" : "celý tím"} (${ludia.length})</option>
                   ${ludia.map(o => `<option value="${o.id}">${esc(o.priezvisko)} ${esc(o.meno)}</option>`).join("")}
                 </select></div>
               <div class="field"><label for="n-od">Od</label>
@@ -326,6 +359,7 @@ export async function tim(k) {
           <form method="post" action="/tim/jedalne" style="margin-top:16px">
             <input type="hidden" name="znamka" value="${esc(k.csrf)}">
             <input type="hidden" name="tyzden" value="${po}">
+            <input type="hidden" name="pohlad" value="${pohlad}">
             <div class="scroll-x"><table class="data">
               <thead><tr><th>Stravník</th>
                 ${jedla.map(j => `<th>${esc(j.nazov)}</th>`).join("")}</tr></thead>
@@ -386,16 +420,16 @@ export async function uloz(k) {
 
   const zamok = await jeden("SELECT * FROM tyzden_stav WHERE pondelok = $1", [po]);
   if (zamok?.uzavrety)
-    return k.inam(k.odp, `/tim?tyzden=${po}&chyba=` +
-      encodeURIComponent("Týždeň je uzavretý, nič sa neuložilo."));
+    return k.inam(k.odp, `/tim?tyzden=${po}&chyba=` + encodeURIComponent(
+      "Týždeň je uzavretý, nič sa neuložilo. Otvoriť sa dá v Uzávierke."));
 
-  const jeAdmin = k.osoba.je_admin;
-  const { ludia, objednavky, pridelenia } = jeAdmin && !k.osoba.je_predak
-    ? await tymZaTyzden("true", [], po)
-    : await tymZaTyzden("o.tim_id IN (SELECT id FROM tim WHERE predak_id = $1)", [k.osoba.id], po);
+  const pohlad = pohladZ(k.osoba, k.data.pohlad);
+  const { ludia, objednavky, pridelenia } = await ktoPatri(k.osoba, pohlad, po);
 
   const jedla = await jedalne();
-  const akoZadane = jeAdmin && !k.osoba.je_predak ? "admin" : "predak";
+  /* Do objednávky sa zapisuje, v akej role ju niekto zadal — predák za svoj
+     tím, správca za hocikoho. Pri spore je to jediné, čo povie kto a ako. */
+  const akoZadane = pohlad === "vsetci" ? "admin" : "predak";
 
   let zmien = 0, odmietnutych = 0;
   const klient = await bazen.connect();
@@ -459,7 +493,7 @@ export async function uloz(k) {
   const sprava = zmien
     ? `Uložené — ${mnoho(zmien, ["zmena", "zmeny", "zmien"])}.`
     : "Nič sa nezmenilo.";
-  k.inam(k.odp, `/tim?tyzden=${po}&sprava=` + encodeURIComponent(sprava) +
+  k.inam(k.odp, `/tim?tyzden=${po}&pohlad=${pohlad}&sprava=` + encodeURIComponent(sprava) +
     (odmietnutych ? "&chyba=" + encodeURIComponent(
       `${mnoho(odmietnutych, ["voľba sa neuložila", "voľby sa neuložili", "volieb sa neuložilo"])} — ` +
       "jedáleň nie je danému stravníkovi pridelená.") : ""));
@@ -473,9 +507,7 @@ export async function jedalne_uloz(k) {
   const po = pondelok(k.data.tyzden || dnes());
   const spat = t => k.inam(k.odp, `/tim?tyzden=${po}&jed=1&chyba=` + encodeURIComponent(t));
 
-  const { ludia } = k.osoba.je_admin && !k.osoba.je_predak
-    ? await tymZaTyzden("true", [], po)
-    : await tymZaTyzden("o.tim_id IN (SELECT id FROM tim WHERE predak_id = $1)", [k.osoba.id], po);
+  const { ludia } = await ktoPatri(k.osoba, pohladZ(k.osoba, k.data.pohlad), po);
   if (!ludia.length) return spat("Nemáš nikoho v tíme.");
 
   const platne = new Set((await jedalne()).map(j => j.id));
@@ -549,9 +581,7 @@ export async function nepritomnost(k) {
   if (doDna < od) return spat("Koniec je skôr než začiatok.");
   if (!DOVODY.some(d => d[0] === k.data.dovod)) return spat("Chýba dôvod.");
 
-  const { ludia } = k.osoba.je_admin && !k.osoba.je_predak
-    ? await tymZaTyzden("true", [], po)
-    : await tymZaTyzden("o.tim_id IN (SELECT id FROM tim WHERE predak_id = $1)", [k.osoba.id], po);
+  const { ludia } = await ktoPatri(k.osoba, pohladZ(k.osoba, k.data.pohlad), po);
 
   const koho = k.data.kto === "vsetci"
     ? ludia
@@ -646,7 +676,8 @@ export async function moje(k) {
       <a class="btn" href="/moje?tyzden=${posunTyzden(po, 7)}">→</a>
     </span>
   </div>
-  ${zamok?.uzavrety ? `<div class="warnbox">Týždeň je uzavretý — zmenu už vie spraviť len predák alebo admin.</div>` : ""}
+  ${zamok?.uzavrety ? `<div class="warnbox">Týždeň je uzavretý a objednávka už odišla do jedálne.
+    Zmena sa dá spraviť, ale musí ju povoliť správca a jedálni sa pošle oprava — ozvi sa predákovi.</div>` : ""}
   <div class="card">
     ${ludia.length ? kartaMenu(menu, jedla, po) + tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu) : "<p>Nenašiel som ťa v zozname.</p>"}
     ${LEGENDA}
