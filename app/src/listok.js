@@ -217,9 +217,44 @@ export function rozober(text) {
     }
     predchadzajuce = j.poradie;
     if (den > 4) break;
+    j.den = den;
     if (!von.has(`${den}|${j.poradie}`)) von.set(`${den}|${j.poradie}`, j.nazov);
   }
-  return { jedla: von, tyzden };
+  return { jedla: von, polievky: polievky(cisty, hranice, jedla), tyzden };
+}
+
+/* Polievka nemá označenie, takže medzi jedlá nepatrí — ale stravníka zaujíma,
+   či k obedu je. Stojí vždy medzi hlavičkou dňa a prvým očíslovaným jedlom:
+   GASTROGAL ju píše ako „Slepačí vývar… • 0,3l", ABM ako „Polievka: Rascová".
+   Hľadá sa preto podľa miesta, nie podľa slova „polievka" — inak by z piatich
+   dní vypadli tri.
+
+   Za dezert sa berie riadok, ktorý sa tak sám nazve; zatiaľ ho ani jeden
+   dodávateľ nemá, ale keď pribudne, netreba to prepisovať. */
+function polievky(cisty, hranice, jedla) {
+  const von = new Map();
+  for (let d = 0; d < 5; d++) {
+    if (hranice[d] < 0) continue;
+    const prve = jedla.filter(j => j.den === d && j.kde > hranice[d]);
+    if (!prve.length) continue;
+    const medzi = cisty.slice(hranice[d], Math.min(...prve.map(j => j.kde)));
+
+    const text = medzi
+      /* Hlavička dňa: názov, oddeľovač a dátum. */
+      .replace(new RegExp(`^\\s*(?:${DNI_NAZVY.join("|")})\\s*[|·:,-]?\\s*`, "i"), "")
+      .replace(/^\s*[0-3]?\d\s*\.\s*[01]?\d\s*\.\s*20\d\d\s*/, "")
+      /* Alergény sa škrtajú, zloženie nie: „(1,3,7)" preč, ale
+         „(zemiaky, šampiňóny, vajcia, kôpor)" uprostred názvu je samotný názov. */
+      .replace(/\(\s*[\d,\s]+\)/g, " ")
+      .replace(/(\s*\([^)]*\))+\s*$/, "")
+      .replace(/^\s*Polievka\s*:?\s*/i, "")            // slovo „Polievka" je už v popiske
+      .replace(/\s*[•·]\s*/g, " • ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/[,;•\-–]\s*$/, "");
+    if (text.length >= 6 && text.length <= 200) von.set(d, text);
+  }
+  return von;
 }
 
 /* Text vložený cez schránku (Ctrl+C / Ctrl+V). Je to najspoľahlivejšia cesta:
@@ -228,8 +263,8 @@ export function rozober(text) {
 export function zTextu(text) {
   const t = (text ?? "").trim();
   if (!t) return { podarilo: false, dovod: "políčko bolo prázdne" };
-  const { jedla, tyzden } = rozober(t);
-  return { podarilo: jedla.size > 0, najdene: jedla, tyzden,
+  const { jedla, polievky, tyzden } = rozober(t);
+  return { podarilo: jedla.size > 0, najdene: jedla, polievky, tyzden,
            dovod: jedla.size ? null
                 : "v texte som nenašiel označené jedlá — riadky musia začínať 1. alebo A." };
 }
@@ -250,11 +285,11 @@ export function precitaj(nazovSuboru, typ, data) {
     return { podarilo: false, dovod: "súbor nemá textovú vrstvu — asi je to iba obrázok" };
 
   /* Z viacerých čítaní vyhrá to, ktoré našlo najviac jedál. */
-  let najdene = new Map(), tyzden = null;
+  let najdene = new Map(), polievky = new Map(), tyzden = null;
   for (const t of kandidati) {
     const v = rozober(t);
-    if (v.jedla.size > najdene.size) ({ jedla: najdene, tyzden } = v);
+    if (v.jedla.size > najdene.size) ({ jedla: najdene, polievky, tyzden } = v);
   }
-  return { podarilo: najdene.size > 0, najdene, tyzden,
+  return { podarilo: najdene.size > 0, najdene, polievky, tyzden,
            dovod: najdene.size ? null : "text sa prečítal, ale nenašiel som v ňom označené jedlá" };
 }

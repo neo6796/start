@@ -11,6 +11,11 @@ import { bazen, jeden, vsetky, zapis } from "./db.js";
 import { DNI, dnes, pondelok, dniTyzdna, denMesiac, tyzdenPopis, oznacenie } from "./datum.js";
 import { precitaj, zTextu } from "./listok.js";
 
+/* Polievka nie je voľba — je k obedu vždy a nikto si ju neobjednáva zvlášť.
+   V mriežke jedál preto nemá poradie; drží sa pod −1, aby sa dala uložiť
+   a zobraziť ako všetko ostatné, ale medzi ponúkané jedlá sa nedostala. */
+export const POLIEVKA = -1;
+
 const LIMIT_PRILOHY = 8 * 1024 * 1024;
 const POVOLENE = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 
@@ -29,7 +34,9 @@ export async function menuTyzdna(poskytovatelId, po) {
   const jedla = await vsetky(
     "SELECT den, poradie, nazov FROM menu_jedlo WHERE menu_id = $1", [m.id]);
   const podla = new Map(jedla.map(j => [`${j.den}|${j.poradie}`, j.nazov]));
-  return { ...m, nazov: (den, poradie) => podla.get(`${den}|${poradie}`) ?? null };
+  return { ...m,
+           nazov: (den, poradie) => podla.get(`${den}|${poradie}`) ?? null,
+           polievka: den => podla.get(`${den}|${POLIEVKA}`) ?? null };
 }
 
 /* ---------- obrazovka ---------- */
@@ -59,6 +66,7 @@ export async function zobraz(k, zvonku = {}) {
      robí dodávateľ a môže si ho kedykoľvek prerobiť; keby appka zapisovala
      potichu, pokazené čítanie by si nikto nevšimol. */
   let navrh = zvonku.navrh ?? null, navrhChyba = zvonku.navrhChyba ?? null;
+  let navrhPolievky = zvonku.navrhPolievky ?? null;
   let zdroj = zvonku.zdroj ?? "vloženého textu", inyTyzden = zvonku.inyTyzden ?? null;
   if (!navrh && !navrhChyba && k.url.searchParams.get("navrh") && m?.priloha_nazov) {
     const p = await jeden("SELECT priloha_data FROM menu_tyzden WHERE id = $1", [m.id]);
@@ -68,7 +76,7 @@ export async function zobraz(k, zvonku = {}) {
        na obrazovke, návrh sa nevypíše — inak by stačilo stlačiť Uložiť a
        minulotýždňové menu by ticho pretlačilo tento týždeň. */
     if (v.podarilo && v.tyzden && v.tyzden !== po) inyTyzden = v.tyzden;
-    else if (v.podarilo) navrh = v.najdene;
+    else if (v.podarilo) { navrh = v.najdene; navrhPolievky = v.polievky; }
     else navrhChyba = v.dovod;
   }
   const sprava = k.url.searchParams.get("sprava");
@@ -159,12 +167,22 @@ export async function zobraz(k, zvonku = {}) {
       </details>` : ""}
 
     <div class="card-head" style="margin-top:22px"><h3>Názvy jedál</h3>
-      <span class="hint">nepovinné</span></div>
+      <span class="hint">nepovinné · <strong>P</strong> = polievka, tá nie je na výber</span></div>
     <div class="scroll-x"><table class="data menu-mriezka">
       <thead><tr><th></th>
         ${dni.map((d, i) => `<th>${DNI[i]}<span class="podriadok">${denMesiac(d)}</span></th>`).join("")}
       </tr></thead>
       <tbody>
+        <tr class="polievka-riadok">
+          <th class="oznak" title="Polievka a dezert — nie sú na výber, patria k obedu">P</th>
+          ${dni.map((_, den) => `<td>
+            <input type="text" name="pol-${den}"
+                   value="${esc(m?.polievka(den) ?? navrhPolievky?.get(den) ?? "")}"
+                   ${!m?.polievka(den) && navrhPolievky?.get(den) ? 'class="navrh"' : ""}
+                   ${smieMenit ? "" : "readonly"}
+                   aria-label="${DNI[den]}, polievka">
+          </td>`).join("")}
+        </tr>
         ${Array.from({ length: vybrana.pocet_jedal }, (_, poradie) => `<tr>
           <th class="oznak">${esc(oznacenie(vybrana.znacenie, poradie))}</th>
           ${dni.map((_, den) => `<td>
@@ -209,6 +227,7 @@ export async function zText(k) {
     jedalen: k.data.jedalen, tyzden: po, vlozeny: k.data.vlozeny ?? "",
     zdroj: "vloženého textu", inyTyzden: inde ? v.tyzden : null,
     navrh: v.podarilo && !inde ? v.najdene : null,
+    navrhPolievky: v.podarilo && !inde ? v.polievky : null,
     navrhChyba: v.podarilo ? null : v.dovod
   });
 }
@@ -247,7 +266,16 @@ export async function uloz(k) {
     /* Názvy sa prepíšu nanovo — je ich najviac dvadsaťpäť a rozlišovať,
        ktorý sa zmenil, by bolo viac kódu než úžitku. */
     await klient.query("DELETE FROM menu_jedlo WHERE menu_id = $1", [m.id]);
-    let kolko = 0;
+    let kolko = 0, polievok = 0;
+    for (let den = 0; den < 5; den++) {
+      const p = (k.data[`pol-${den}`] ?? "").trim();
+      if (p) {
+        await klient.query(
+          "INSERT INTO menu_jedlo (menu_id, den, poradie, nazov) VALUES ($1,$2,$3,$4)",
+          [m.id, den, POLIEVKA, p.slice(0, 200)]);
+        polievok++;
+      }
+    }
     for (let den = 0; den < 5; den++)
       for (let poradie = 0; poradie < j.pocet_jedal; poradie++) {
         const nazov = (k.data[`j-${den}-${poradie}`] ?? "").trim();
@@ -259,15 +287,17 @@ export async function uloz(k) {
       }
     await klient.query("COMMIT");
     await zapis(k.osoba.id, "menu.ulozene",
-                { jedalen: j.nazov, tyzden: po, nazvov: kolko, priloha: priloha?.nazov ?? null });
+                { jedalen: j.nazov, tyzden: po, nazvov: kolko, polievok,
+                  priloha: priloha?.nazov ?? null });
 
     const casti = [];
     if (priloha) casti.push(`príloha ${priloha.nazov}`);
     casti.push(mnoho(kolko, ["názov jedla", "názvy jedál", "názvov jedál"]));
+    if (polievok) casti.push(mnoho(polievok, ["polievka", "polievky", "polievok"]));
 
     /* Po nahratí lístka má zmysel rovno ponúknuť, čo sa z neho dá prečítať —
        ale len keď názvy ešte nie sú vyplnené, aby sa nič neprebilo. */
-    if (priloha && kolko === 0)
+    if (priloha && kolko === 0 && polievok === 0)
       return k.inam(k.odp, `/menu?jedalen=${jedalenId}&tyzden=${po}&navrh=1&sprava=` +
         encodeURIComponent(`Uložené: ${casti.join(", ")}.`));
     return spat("sprava", `Uložené: ${casti.join(", ")}.`);

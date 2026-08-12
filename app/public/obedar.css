@@ -1047,6 +1047,17 @@
   /* Návrh prečítaný z lístka — kým sa neuloží, je vidieť, že ho nikto
      nepotvrdil. */
   table.menu-mriezka input.navrh{background:var(--mustard-soft);border-color:var(--mustard)}
+  /* Polievka nie je jedlo na výber — v mriežke je nad nimi a oddelená. */
+  table.menu-mriezka tr.polievka-riadok td,table.menu-mriezka tr.polievka-riadok th{
+    border-bottom:2px solid var(--line-2);
+  }
+  table.menu-mriezka tr.polievka-riadok th.oznak{color:var(--ink-3)}
+
+  /* Lístok nad maticou: odkaz na prílohu a polievky po dňoch. */
+  .listok + .listok{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+  .polievky{display:flex;flex-wrap:wrap;gap:2px 14px;margin-top:5px;font-size:12.5px;color:var(--ink-2)}
+  .polievky .lbl{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+  .polievky em{font-style:normal;font-family:var(--mono);font-weight:700;color:var(--ink-3);margin-right:3px}
 
   .field input[type="file"]{
     font-family:var(--sans);font-size:13.5px;color:var(--ink-2);

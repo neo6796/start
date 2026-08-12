@@ -188,16 +188,29 @@ async function menuPreTyzden(pridelenia, ludia, po) {
   return m;
 }
 
+/* Odkaz na lístok a k tomu polievky.
+
+   Polievka nie je na výber — je k obedu vždy a v matici pre ňu nie je bunka.
+   Stravníka ale zaujíma, či a aká je; keby ju appka len ticho zahodila, musel
+   by kvôli nej otvárať prílohu. Preto je tu, nad maticou, jedným riadkom. */
 function kartaMenu(menu, jedla, po) {
-  const s = [...menu.entries()].filter(([, m]) => m.priloha_nazov);
+  const s = [...menu.entries()].filter(([, m]) => m.priloha_nazov || DNI.some((_, i) => m.polievka(i)));
   if (!s.length) return "";
   return `<div class="note">
-    <strong>Jedálny lístok na tento týždeň:</strong>
     ${s.map(([id, m]) => {
       const j = jedla.find(x => x.id === id);
-      return `<a href="/menu/priloha?jedalen=${id}&tyzden=${po}">${esc(j?.nazov ?? "jedáleň")} —
-              ${esc(m.priloha_nazov)}</a>`;
-    }).join(" · ")}
+      const polievky = DNI.map((_, i) => [i, m.polievka(i)]).filter(([, p]) => p);
+      return `<div class="listok">
+        <strong>${esc(j?.nazov ?? "Jedáleň")}</strong>
+        ${m.priloha_nazov
+          ? ` · <a href="/menu/priloha?jedalen=${id}&tyzden=${po}">${esc(m.priloha_nazov)}</a>`
+          : ""}
+        ${polievky.length ? `<div class="polievky"><span class="lbl">Polievka</span>
+          ${polievky.map(([i, p]) =>
+            `<span><em>${DNI_SKRATKA[i]}</em> ${esc(p)}</span>`).join("")}
+        </div>` : ""}
+      </div>`;
+    }).join("")}
   </div>`;
 }
 

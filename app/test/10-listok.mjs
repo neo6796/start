@@ -124,6 +124,44 @@ ok("prázdne políčko to povie po slovensky", zTextu("  ").dovod === "políčko
 ok("text bez jedál to povie zrozumiteľne",
    zTextu("Dobrý deň, posielam lístok na budúci týždeň.").dovod?.includes("1. alebo A."));
 
+console.log("— polievka —");
+/* Polievka nemá označenie, tak medzi jedlá nepatrí — ale stravníka zaujíma.
+   Každý dodávateľ ju píše inak a ani jeden ju vždy nenazve „polievka". */
+const pol = rozober(`
+Pondelok | 10.08.2026
+Polievka zo sušeného hrachu so zeleninou • 0,3l (1)
+1. Vyprážaný kurací rezeň, dusená ryža • 120g (1,3,7)
+Utorok | 11.08.2026
+Slepačí vývar so zeleninou a rezancami • 0,3l (1)
+1. Vyprážaný bravčový rezeň, varené zemiaky • 120g (1,3,7)
+Streda | 12.08.2026
+Staročeská kulajda (zemiaky, šampiňóny, vajcia, kôpor) • 0,3l (1,3,7)
+1. Pečené výpečky, dusená kapusta • 150/250g (1)
+`);
+ok("polievka sa našla, aj keď sa tak nevolá",
+   pol.polievky.get(1) === "Slepačí vývar so zeleninou a rezancami • 0,3l");
+ok("slovo Polievka na začiatku sa neopakuje",
+   pol.polievky.get(0) === "zo sušeného hrachu so zeleninou • 0,3l");
+ok("zloženie v zátvorke ostáva, alergény idú preč",
+   pol.polievky.get(2) === "Staročeská kulajda (zemiaky, šampiňóny, vajcia, kôpor) • 0,3l");
+ok("medzi jedlá sa polievka nedostala", pol.jedla.size === 3 && !pol.jedla.get("0|0").includes("hrachu"));
+
+const polA = rozober(`
+Pondelok  10.08.2026
+Polievka:  Rascová s vajíčkom a zeleninou                    (múka, vajcia)
+A.  Vyprážaný bravčový rezeň /120g, ryža, kompót             (múka, vajcia, mlieko)
+Utorok  11.08.2026
+Polievka:  Richtárska                                        (múka)
+A.  Tradičný maďarský guláš /120g, domáca knedľa             (múka, vajcia, mlieko)
+`);
+ok("tvar s dvojbodkou sa prečíta", polA.polievky.get(0) === "Rascová s vajíčkom a zeleninou");
+ok("aj jednoslovná", polA.polievky.get(1) === "Richtárska");
+
+ok("bez polievky sa nič nevymyslí", rozober(`
+Pondelok | 10.08.2026
+1. Vyprážaný kurací rezeň, dusená ryža • 120g
+`).polievky.size === 0);
+
 console.log("— odmietnutia —");
 ok("obrázok sa odmietne zrozumiteľne",
    precitaj("foto.jpg", "image/jpeg", Buffer.from("x")).dovod?.includes("čítať neviem"));
