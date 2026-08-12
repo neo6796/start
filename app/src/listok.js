@@ -178,7 +178,8 @@ export function rozober(text) {
     /* Skutočné jedlo má gramáž alebo prílohu za lomkou. Bez tejto podmienky
        sa medzi jedlá votrie hocijaký očíslovaný zoznam. */
     if (nazov.length < 6 || !/\d\s*(g|ml|l|ks)\b|\//i.test(nazov)) continue;
-    jedla.push({ poradie, nazov: nazov.slice(0, 200), kde: m.index });
+    jedla.push({ poradie, nazov: nazov.slice(0, 200), kde: m.index,
+                 pismeno: /[A-E]/.test(znak) });
   }
 
   /* Ku ktorému dňu jedlo patrí.
@@ -220,7 +221,38 @@ export function rozober(text) {
     j.den = den;
     if (!von.has(`${den}|${j.poradie}`)) von.set(`${den}|${j.poradie}`, j.nazov);
   }
-  return { jedla: von, polievky: polievky(cisty, hranice, jedla), tyzden };
+  /* Čím sú jedlá označené a koľko ich je. Podľa toho sa dá spoznať, že
+     vložený lístok patrí inému dodávateľovi: GASTROGAL čísluje 1–5, ABM
+     používa A–E a obe hodnoty sú v karte jedálne. */
+  const pismen = jedla.filter(j => j.pismeno).length;
+  const znacenie = jedla.length === 0 ? null
+                 : pismen > jedla.length / 2 ? "pismena" : "cisla";
+
+  return {
+    jedla: von,
+    polievky: polievky(cisty, hranice, jedla),
+    tyzden,
+    znacenie,
+    najviacJedal: jedla.length ? Math.max(...jedla.map(j => j.poradie)) + 1 : 0,
+    kontakty: kontakty(cisty)
+  };
+}
+
+/* E-maily a telefónne čísla, ktoré v lístku stoja. Sú v pätičke a patria
+   dodávateľovi, takže sa nimi dá overiť, či lístok naozaj je od tej jedálne,
+   ku ktorej sa vkladá. Telefón sa drží len ako číslice — každý si ho píše
+   inak (0918/119 328 · 0907 650 755 · 037/633 42 32). */
+function kontakty(cisty) {
+  const maily = [...cisty.matchAll(/[\w.+-]+@[\w-]+\.[\w.-]+/g)].map(m => m[0].toLowerCase());
+  const cisla = [];
+  /* Za každou číslicou najviac jeden oddeľovač. Voľnejší zápis by dve čísla
+     stojace vedľa seba („0907 650 755 037/633 42 32") zlepil do jedného
+     trinásťciferného nezmyslu a nenašlo by sa ani jedno. */
+  for (const m of cisty.matchAll(/(?:\+421|0)(?:[\s/.-]?\d){8,9}(?!\d)/g)) {
+    const c = m[0].replace(/\D/g, "").replace(/^421/, "0");
+    if (c.length >= 9 && c.length <= 10) cisla.push(c);
+  }
+  return { maily: [...new Set(maily)], cisla: [...new Set(cisla)] };
 }
 
 /* Polievka nemá označenie, takže medzi jedlá nepatrí — ale stravníka zaujíma,
@@ -263,8 +295,9 @@ function polievky(cisty, hranice, jedla) {
 export function zTextu(text) {
   const t = (text ?? "").trim();
   if (!t) return { podarilo: false, dovod: "políčko bolo prázdne" };
-  const { jedla, polievky, tyzden } = rozober(t);
+  const { jedla, polievky, tyzden, znacenie, najviacJedal, kontakty } = rozober(t);
   return { podarilo: jedla.size > 0, najdene: jedla, polievky, tyzden,
+           znacenie, najviacJedal, kontakty,
            dovod: jedla.size ? null
                 : "v texte som nenašiel označené jedlá — riadky musia začínať 1. alebo A." };
 }
@@ -286,10 +319,13 @@ export function precitaj(nazovSuboru, typ, data) {
 
   /* Z viacerých čítaní vyhrá to, ktoré našlo najviac jedál. */
   let najdene = new Map(), polievky = new Map(), tyzden = null;
+  let znacenie = null, najviacJedal = 0, kontakty = { maily: [], cisla: [] };
   for (const t of kandidati) {
     const v = rozober(t);
-    if (v.jedla.size > najdene.size) ({ jedla: najdene, polievky, tyzden } = v);
+    if (v.jedla.size > najdene.size)
+      ({ jedla: najdene, polievky, tyzden, znacenie, najviacJedal, kontakty } = v);
   }
   return { podarilo: najdene.size > 0, najdene, polievky, tyzden,
+           znacenie, najviacJedal, kontakty,
            dovod: najdene.size ? null : "text sa prečítal, ale nenašiel som v ňom označené jedlá" };
 }

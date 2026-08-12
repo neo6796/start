@@ -39,6 +39,45 @@ export async function menuTyzdna(poskytovatelId, po) {
            polievka: den => podla.get(`${den}|${POLIEVKA}`) ?? null };
 }
 
+/* ---------- komu lístok patrí ---------- */
+
+const cifry = s => String(s ?? "").replace(/\D/g, "").replace(/^421/, "0");
+
+/* Dva nezávislé znaky toho, že lístok je od inej jedálne, než ku ktorej sa
+   vkladá:
+
+   1. Označenie jedál. GASTROGAL čísluje 1–5, ABM používa A–E — a je to
+      údaj z karty jedálne, takže netreba nič doplniť, aby to fungovalo.
+   2. Kontakt v pätičke. Keď je v texte e-mail alebo telefón, ktorý v číselníku
+      patrí inej jedálni, je to jednoznačné.
+
+   Kontrolovať to treba preto, že sa to nijako neprejaví: vložený ABM lístok
+   sa do GASTROGALu vyplní bez zaváhania a predák by v matici videl päť
+   správne vyzerajúcich názvov jedál, ktoré sa v tej kuchyni v ten deň
+   nevaria. */
+function komuPatri(v, vybrana, jedalne) {
+  const patriPodlaKontaktu = j =>
+    (j.email && v.kontakty?.maily.includes(j.email.trim().toLowerCase())) ||
+    (j.telefon && cifry(j.telefon).length >= 9 && v.kontakty?.cisla.includes(cifry(j.telefon)));
+
+  const podlaKontaktu = jedalne.find(patriPodlaKontaktu);
+  if (podlaKontaktu && podlaKontaktu.id !== vybrana.id)
+    return { ina: podlaKontaktu, dovod: `v pätičke je kontakt jedálne ${podlaKontaktu.nazov}` };
+
+  /* Označenie rozhoduje len vtedy, keď je z čoho: pri dvoch nájdených jedlách
+     by to bola hádka, nie kontrola. A keď kontakt potvrdil, že je to tá
+     správna jedáleň, značeniu už netreba veriť viac než jemu. */
+  if (podlaKontaktu?.id === vybrana.id || !v.znacenie || v.najdene.size < 3) return null;
+  const cakaSa = ["upper", "lower"].includes(vybrana.znacenie) ? "pismena" : "cisla";
+  if (v.znacenie === cakaSa) return null;
+
+  const ina = jedalne.find(j => j.id !== vybrana.id &&
+    (["upper", "lower"].includes(j.znacenie) ? "pismena" : "cisla") === v.znacenie);
+  return { ina, dovod: v.znacenie === "pismena"
+    ? `jedlá sú označené písmenami, ${vybrana.nazov} ich čísluje`
+    : `jedlá sú očíslované, ${vybrana.nazov} ich označuje písmenami` };
+}
+
 /* ---------- obrazovka ---------- */
 
 /* `zvonku` naplní čítanie vloženého textu — to sa nedá presmerovať späť na
@@ -67,6 +106,7 @@ export async function zobraz(k, zvonku = {}) {
      potichu, pokazené čítanie by si nikto nevšimol. */
   let navrh = zvonku.navrh ?? null, navrhChyba = zvonku.navrhChyba ?? null;
   let navrhPolievky = zvonku.navrhPolievky ?? null;
+  let inaJedalen = zvonku.inaJedalen ?? null;
   let zdroj = zvonku.zdroj ?? "vloženého textu", inyTyzden = zvonku.inyTyzden ?? null;
   if (!navrh && !navrhChyba && k.url.searchParams.get("navrh") && m?.priloha_nazov) {
     const p = await jeden("SELECT priloha_data FROM menu_tyzden WHERE id = $1", [m.id]);
@@ -75,7 +115,9 @@ export async function zobraz(k, zvonku = {}) {
     /* Lístok si nesie vlastné dátumy. Keď sedia na iný týždeň, než ktorý je
        na obrazovke, návrh sa nevypíše — inak by stačilo stlačiť Uložiť a
        minulotýždňové menu by ticho pretlačilo tento týždeň. */
-    if (v.podarilo && v.tyzden && v.tyzden !== po) inyTyzden = v.tyzden;
+    const cudzia = v.podarilo ? komuPatri(v, vybrana, jedalne) : null;
+    if (cudzia) inaJedalen = cudzia;
+    else if (v.podarilo && v.tyzden && v.tyzden !== po) inyTyzden = v.tyzden;
     else if (v.podarilo) { navrh = v.najdene; navrhPolievky = v.polievky; }
     else navrhChyba = v.dovod;
   }
@@ -132,6 +174,18 @@ export async function zobraz(k, zvonku = {}) {
         Prejdite ich očami a stlačte Uložiť; čo je zle, prepíšte.</div>` : ""}
     ${navrhChyba ? `<div class="warnbox">Z ${esc(zdroj)} sa názvy prečítať nedali:
         ${esc(navrhChyba)}. Dajú sa dopísať ručne — príloha funguje aj tak.</div>` : ""}
+    ${inaJedalen ? `<div class="warnbox"><strong>Pozor, cudzí lístok.</strong>
+        Tento lístok podľa všetkého nie je od jedálne ${esc(vybrana.nazov)} —
+        ${esc(inaJedalen.dovod)}. Nič som nevyplnil.
+        ${inaJedalen.ina ? `<div class="btn-row" style="margin-top:10px">
+             ${zdroj === "vloženého textu"
+               ? `<button class="btn" type="submit" formaction="/menu/text"
+                        name="jedalen_ina" value="${inaJedalen.ina.id}">Prečítať pre ${esc(inaJedalen.ina.nazov)}</button>`
+               : `<a class="btn" href="/menu?jedalen=${inaJedalen.ina.id}&tyzden=${po}&navrh=1">Prejsť na ${esc(inaJedalen.ina.nazov)}</a>`}
+           </div>`
+          : `<p class="hint" style="margin:8px 0 0">Ak je to omyl a lístok naozaj patrí sem,
+             názvy sa dajú dopísať ručne.</p>`}
+      </div>` : ""}
     ${inyTyzden ? `<div class="warnbox"><strong>Pozor, iný týždeň.</strong>
         Podľa dátumov je tento lístok na týždeň <strong>${tyzdenPopis(inyTyzden)}</strong>,
         ale na obrazovke máte ${tyzdenPopis(po)}. Nič som nevyplnil — takto by sa
@@ -219,15 +273,26 @@ export async function zobraz(k, zvonku = {}) {
    oprave musel vkladať znova. */
 export async function zText(k) {
   const v = zTextu(k.data.vlozeny);
+  /* `jedalen_ina` posiela tlačidlo z upozornenia — človek tým potvrdil,
+     ku ktorej jedálni lístok naozaj patrí. */
+  const jedalenId = k.data.jedalen_ina || k.data.jedalen;
   /* `tyzden_iny` posiela tlačidlo z upozornenia — je to potvrdenie od človeka,
      že áno, chcem ten týždeň, ktorý je v lístku. */
   const po = pondelok(k.data.tyzden_iny || k.data.tyzden || dnes());
-  const inde = v.podarilo && v.tyzden && v.tyzden !== po;
+  const jedalne = await vsetky("SELECT * FROM poskytovatel WHERE aktivny ORDER BY nazov");
+  const vybrana = jedalne.find(j => j.id === Number(jedalenId)) ?? jedalne[0];
+
+  const cudzia = v.podarilo && vybrana && !k.data.jedalen_ina
+    ? komuPatri(v, vybrana, jedalne) : null;
+  const inde = !cudzia && v.podarilo && v.tyzden && v.tyzden !== po;
+  const dobre = v.podarilo && !cudzia && !inde;
+
   return zobraz(k, {
-    jedalen: k.data.jedalen, tyzden: po, vlozeny: k.data.vlozeny ?? "",
-    zdroj: "vloženého textu", inyTyzden: inde ? v.tyzden : null,
-    navrh: v.podarilo && !inde ? v.najdene : null,
-    navrhPolievky: v.podarilo && !inde ? v.polievky : null,
+    jedalen: jedalenId, tyzden: po, vlozeny: k.data.vlozeny ?? "",
+    zdroj: "vloženého textu",
+    inaJedalen: cudzia, inyTyzden: inde ? v.tyzden : null,
+    navrh: dobre ? v.najdene : null,
+    navrhPolievky: dobre ? v.polievky : null,
     navrhChyba: v.podarilo ? null : v.dovod
   });
 }

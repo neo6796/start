@@ -81,10 +81,12 @@ const denVTyzdni = (po, i) => {
   d.setUTCDate(d.getUTCDate() + i);
   return `${String(d.getUTCDate()).padStart(2, "0")}.${String(d.getUTCMonth() + 1).padStart(2, "0")}.${d.getUTCFullYear()}`;
 };
+/* Predvolená jedáleň skúšok je GASTRO ABM a tá značí jedlá písmenami.
+   Lístok s číslami sem nepatrí a appka ho odmietne — to sa skúša nižšie. */
 const listok = (datum, dna) => `${dna} | ${datum}
 Hrášková polievka so zemiakmi • 0,3l (1)
-1. Vyprážaný kurací rezeň plnený šunkou, dusená ryža • 120g (1,3,7)
-2. Pečené bravčové výpečky, dusená kapusta • 150/250g (1)`;
+A. Vyprážaný kurací rezeň plnený šunkou, dusená ryža • 120g (1,3,7)
+B. Pečené bravčové výpečky, dusená kapusta • 150/250g (1)`;
 
 await p.click("details.vlozenie > summary");
 await p.fill("#p-vlozeny", listok(denVTyzdni(PO, 2), "Streda"));
@@ -156,6 +158,57 @@ t = await p.content();
 ok("uloženie počíta aj polievku", /1 polievka/.test(t));
 ok("polievka sa načítala späť",
    (await p.inputValue('input[name="pol-0"]')).startsWith("Hrášková polievka"));
+
+console.log("— lístok od inej jedálne —");
+/* Vložiť GASTROGALov lístok do ABM je tá istá trieda chyby ako zlý týždeň:
+   vyplnilo by sa to bez zaváhania a predák by v matici videl päť správne
+   vyzerajúcich jedál, ktoré sa v tej kuchyni nevaria. */
+await p.goto(A + "/menu");
+await p.click("details.vlozenie > summary");
+await p.fill("#p-vlozeny", `Pondelok | ${denVTyzdni(PO, 0)}
+1. Vyprážaný kurací rezeň, dusená ryža • 120g (1,3,7)
+2. Bravčový perkelt, domáce halušky • 284/64g (1,3)
+3. Pečené buchty so slivkovým lekvárom • 5ks (1,3,7)`);
+await p.click("button:has-text('Prečítať názvy z textu')");
+await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("cudzí lístok sa zachytil", /Pozor, cudzí lístok/.test(t));
+ok("povie prečo", /jedlá sú očíslované/.test(t));
+/* j-0-0 má uloženú hodnotu z predošlej skúšky; prázdne musí ostať to,
+   čo by cudzí lístok vyplnil. */
+ok("nič sa nevyplnilo", await p.inputValue('input[name="j-0-2"]') === "");
+ok("uložené názvy sa nedotklo",
+   await p.inputValue('input[name="j-0-0"]') === "Fazuľová polievka, vyprážaný syr");
+ok("ponúkne tú jedáleň, ktorej lístok je",
+   (await p.locator('button[name="jedalen_ina"]').count()) === 1);
+
+await p.click('button[name="jedalen_ina"]');
+await p.waitForLoadState("networkidle");
+ok("po potvrdení sa vyplní pre správnu jedáleň",
+   (await p.inputValue('input[name="j-0-0"]')).startsWith("Vyprážaný kurací rezeň"));
+ok("a obrazovka je na tej jedálni", /GASTROGAL<\/span>/.test(await p.content()));
+
+console.log("— aj podľa kontaktu v pätičke —");
+/* Keď obe jedálne značia rovnako, značenie nepomôže. Kontakt v pätičke áno. */
+await p.goto(A + "/ciselniky");
+await p.click("tr:has-text('GASTROGAL') a:has-text('Upraviť')");
+await p.fill("#p-u-telefon", "0918/119 328");
+await p.click("button:has-text('Uložiť')");
+await p.waitForLoadState("networkidle");
+
+await p.goto(A + "/menu");
+await p.click("details.vlozenie > summary");
+await p.fill("#p-vlozeny", `Nahlasovania objednávok od 7:00 do 09:00. Tel. kontakt: 0918/119 328
+Pondelok | ${denVTyzdni(PO, 0)}
+A. Vyprážaný kurací rezeň, dusená ryža • 120g (1,3,7)
+B. Bravčový perkelt, domáce halušky • 284/64g (1,3)
+C. Pečené buchty so slivkovým lekvárom • 5ks (1,3,7)`);
+await p.click("button:has-text('Prečítať názvy z textu')");
+await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("telefón z pätičky prezradil dodávateľa", /Pozor, cudzí lístok/.test(t));
+ok("povie, čia pätička to je", /kontakt jedálne GASTROGAL/.test(t));
+ok("ani tu sa nič nevyplnilo", await p.inputValue('input[name="j-0-2"]') === "");
 
 console.log("— menu v matici —");
 await p.goto(A + "/tim");
