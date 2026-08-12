@@ -215,7 +215,15 @@ await p.goto(A + "/tim");
 t = await p.content();
 ok("odkaz na lístok je nad maticou", t.includes("listok.pdf"));
 ok("názov jedla je popiskom bunky", t.includes('title="Guláš s knedľou"'));
-ok("stravník vidí, aká je polievka", /class="polievky"[\s\S]{0,200}Hrášková polievka/.test(t));
+/* Do buniek matice sa názov nezmestí a bublina na telefóne neexistuje —
+   celý lístok preto musí byť nad maticou ako tabuľka. */
+ok("lístok je nad maticou celý, nielen polievka",
+   (await p.locator("table.listok-tab").count()) >= 1);
+ok("v ňom sú názvy jedál", /table class="data listok-tab"[\s\S]{0,4000}Guláš s knedľou/.test(t));
+ok("polievka má vlastný riadok",
+   (await p.locator("table.listok-tab tr.polievka-riadok").count()) >= 1);
+ok("a je v ňom to, čo sa prečítalo z lístka",
+   /polievka-riadok[\s\S]{0,400}Hrášková polievka/.test(t));
 
 console.log("— predák menu vidí, ale nemení —");
 await p.goto(A + "/ludia");

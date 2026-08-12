@@ -192,28 +192,51 @@ async function menuPreTyzden(pridelenia, ludia, po) {
   return m;
 }
 
-/* Odkaz na lístok a k tomu polievky.
+/* Jedálny lístok nad maticou.
 
-   Polievka nie je na výber — je k obedu vždy a v matici pre ňu nie je bunka.
-   Stravníka ale zaujíma, či a aká je; keby ju appka len ticho zahodila, musel
-   by kvôli nej otvárať prílohu. Preto je tu, nad maticou, jedným riadkom. */
+   Musí tu byť celý, nielen polievka. V bunkách sú označenia (A–E, 1–5) a nič
+   viac sa do nich nezmestí; názov jedla je v nich len ako bublina po nadídení
+   myšou, čo na telefóne neexistuje. Bez tejto tabuľky predák pri bunke „C"
+   nemá ako zistiť, čo C v ten deň je — a to je jediné, na čo sa ho ľudia pýtajú.
+
+   Polievka má vlastný riadok, lebo nie je na výber: je k obedu vždy. */
 function kartaMenu(menu, jedla, po) {
-  const s = [...menu.entries()].filter(([, m]) => m.priloha_nazov || DNI.some((_, i) => m.polievka(i)));
+  const dni = dniTyzdna(po);
+  const maObsah = m => m.priloha_nazov ||
+    dni.some((_, i) => m.polievka(i)) ||
+    dni.some((_, i) => [...Array(9)].some((__, n) => m.nazov(i, n)));
+  const s = [...menu.entries()].filter(([, m]) => maObsah(m));
   if (!s.length) return "";
-  return `<div class="note">
+
+  return `<div class="listky">
     ${s.map(([id, m]) => {
       const j = jedla.find(x => x.id === id);
-      const polievky = DNI.map((_, i) => [i, m.polievka(i)]).filter(([, p]) => p);
-      return `<div class="listok">
-        <strong>${esc(j?.nazov ?? "Jedáleň")}</strong>
+      const pocet = j?.pocet_jedal ?? 5;
+      const riadky = [];
+      if (dni.some((_, i) => m.polievka(i)))
+        riadky.push(["P", dni.map((_, i) => m.polievka(i)), true]);
+      for (let n = 0; n < pocet; n++)
+        if (dni.some((_, i) => m.nazov(i, n)))
+          riadky.push([oznacenie(j?.znacenie ?? "upper", n), dni.map((_, i) => m.nazov(i, n)), false]);
+
+      return `<details class="listok" open>
+        <summary class="btn">Jedálny lístok — ${esc(j?.nazov ?? "jedáleň")}</summary>
         ${m.priloha_nazov
-          ? ` · <a href="/menu/priloha?jedalen=${id}&tyzden=${po}">${esc(m.priloha_nazov)}</a>`
+          ? `<p class="hint" style="margin:10px 0 0">Priložený:
+             <a href="/menu/priloha?jedalen=${id}&tyzden=${po}">${esc(m.priloha_nazov)}</a></p>`
           : ""}
-        ${polievky.length ? `<div class="polievky"><span class="lbl">Polievka</span>
-          ${polievky.map(([i, p]) =>
-            `<span><em>${DNI_SKRATKA[i]}</em> ${esc(p)}</span>`).join("")}
-        </div>` : ""}
-      </div>`;
+        ${riadky.length ? `<div class="scroll-x"><table class="data listok-tab">
+          <thead><tr><th></th>
+            ${dni.map((d, i) => `<th>${DNI_SKRATKA[i]}<span class="podriadok">${denMesiac(d)}</span></th>`).join("")}
+          </tr></thead>
+          <tbody>
+            ${riadky.map(([znak, texty, jePolievka]) => `<tr${jePolievka ? ' class="polievka-riadok"' : ""}>
+              <th class="oznak">${esc(znak)}</th>
+              ${texty.map(t => `<td>${t ? esc(t) : "<span class=\"hint\">—</span>"}</td>`).join("")}
+            </tr>`).join("")}
+          </tbody>
+        </table></div>` : `<p class="hint" style="margin:10px 0 0">Názvy jedál nie sú vyplnené.</p>`}
+      </details>`;
     }).join("")}
   </div>`;
 }

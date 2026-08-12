@@ -1053,11 +1053,18 @@
   }
   table.menu-mriezka tr.polievka-riadok th.oznak{color:var(--ink-3)}
 
-  /* Lístok nad maticou: odkaz na prílohu a polievky po dňoch. */
-  .listok + .listok{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
-  .polievky{display:flex;flex-wrap:wrap;gap:2px 14px;margin-top:5px;font-size:12.5px;color:var(--ink-2)}
-  .polievky .lbl{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
-  .polievky em{font-style:normal;font-family:var(--mono);font-weight:700;color:var(--ink-3);margin-right:3px}
+  /* Jedálny lístok nad maticou. Do buniek matice sa názov jedla nezmestí,
+     tak je celý lístok tu — inak by predák pri „C" nevedel, čo C je. */
+  .listky{margin-bottom:18px}
+  .listok + .listok{margin-top:10px}
+  .listok > summary{display:inline-block}
+  table.listok-tab{margin-top:10px;table-layout:fixed}
+  table.listok-tab td{font-size:12.5px;line-height:1.4;vertical-align:top;padding:7px 9px}
+  table.listok-tab th.oznak{width:40px}
+  table.listok-tab thead th{width:auto}
+  table.listok-tab tr.polievka-riadok td,table.listok-tab tr.polievka-riadok th{
+    border-bottom:2px solid var(--line-2);color:var(--ink-2);
+  }
 
   .field input[type="file"]{
     font-family:var(--sans);font-size:13.5px;color:var(--ink-2);
