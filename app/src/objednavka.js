@@ -99,11 +99,28 @@ export async function poctyZaTyzden(po) {
 /* Kuchyňa číta objednávku na telefóne. Preto sú počty v tele správy ako
    čistý text a nie iba v prílohe (koncept 7.2) — otvárať prílohu je
    prekážka práve tam, kde na tom najviac záleží. */
-export function textObjednavky(p, odkaz) {
+export function textObjednavky(p, odkaz, oprava = null) {
   const r = [];
-  r.push(`Objednávka obedov na týždeň ${tyzdenPopis(p.dni[0])}`);
+  r.push(`${oprava ? "OPRAVA objednávky" : "Objednávka"} obedov na týždeň ${tyzdenPopis(p.dni[0])}`);
   r.push(ODBERATEL);
   r.push("");
+
+  /* Oprava musí najprv povedať, čo sa mení. Poslať druhýkrát celý zoznam bez
+     slova o rozdiele znamená, že kuchyňa dostane dve podobné správy a musí ich
+     porovnávať sama — a pri tom sa robia chyby, ktoré stoja obed. */
+  if (oprava) {
+    r.push(`Toto nahrádza objednávku poslanú ${oprava.kedy}.`);
+    r.push("");
+    if (oprava.zmeny.length) {
+      r.push("Čo sa mení:");
+      for (const z of oprava.zmeny) r.push("  " + z);
+    } else {
+      r.push("Počty sa oproti nej nezmenili.");
+    }
+    r.push("");
+    r.push("Platí celá objednávka nižšie, nie len zmeny.");
+    r.push("");
+  }
 
   for (const [i, d] of p.dni.entries()) {
     const vDen = p.jedla.filter(j => j.poDnoch[i] > 0);
@@ -143,15 +160,48 @@ function prilohaZosit(p) {
 
 /* ---------- odoslanie ---------- */
 
+const casOdoslania = h => new Date(h).toLocaleString("sk-SK",
+  { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
+
+/* Čo sa zmenilo oproti minule. Porovnávajú sa uložené počty, nie dnešné
+   údaje — presne tie čísla, ktoré kuchyňa naozaj dostala. */
+function zmeny(stare, nove, dni) {
+  const von = [];
+  const znaky = [...new Set([...Object.keys(stare ?? {}), ...Object.keys(nove)])].sort();
+  for (const [i, d] of dni.entries()) {
+    for (const znak of znaky) {
+      const a = (stare?.[znak] ?? [])[i] ?? 0;
+      const b = (nove[znak] ?? [])[i] ?? 0;
+      if (a === b) continue;
+      const rozdiel = b - a;
+      von.push(`${DNI[i]} ${denMesiac(d)}   ${znak}   ` +
+               `${rozdiel > 0 ? "+" : "−"}${Math.abs(rozdiel)} ks   (${a} → ${b})`);
+    }
+  }
+  return von;
+}
+
 /* Jedna jedáleň. Riadok v `odoslanie` vznikne aj keď sa odoslať nepodarí. */
 async function posliJednej(p, po, ktoId) {
   const komu = (p.jedalen.email ?? "").trim();
   const kopia = KOPIA && KOPIA !== komu ? KOPIA : null;
   const token = randomBytes(24).toString("base64url");
   const odkaz = `${ADRESA}/potvrdenie?t=${token}`;
-  const predmet = `Objednávka obedov ${tyzdenPopis(po)} — PD Vráble`;
-  const telo = textObjednavky(p, odkaz);
   const poctov = Object.fromEntries(p.jedla.map(j => [j.znak, j.poDnoch]));
+
+  /* Druhé odoslanie na ten istý týždeň nie je nová objednávka, ale oprava.
+     Bez toho by kuchyňa dostala dve podobné správy a nevedela, ktorá platí. */
+  const predtym = await jeden(`
+    SELECT poctov, odoslane FROM odoslanie
+     WHERE poskytovatel_id = $1 AND datum = $2 AND druh = 'objednavka' AND stav = 'ok'
+     ORDER BY id DESC LIMIT 1`, [p.jedalen.id, po]);
+  const oprava = predtym
+    ? { kedy: casOdoslania(predtym.odoslane), zmeny: zmeny(predtym.poctov, poctov, p.dni) }
+    : null;
+
+  const predmet = `${oprava ? "OPRAVA objednávky" : "Objednávka"} obedov ` +
+                  `${tyzdenPopis(po)} — PD Vráble`;
+  const telo = textObjednavky(p, odkaz, oprava);
 
   const zapisSa = async (stav, chyba) => jeden(`
     INSERT INTO odoslanie (poskytovatel_id, datum, druh, poctov, porcii,
@@ -206,7 +256,10 @@ export async function posliObjednavky(po, ktoId) {
 /* Čo sa za týždeň odoslalo — pre obrazovku uzávierky. */
 export async function odoslania(po) {
   return vsetky(`
-    SELECT o.*, p.nazov AS jedalen, os.priezvisko, os.meno
+    SELECT o.*, p.nazov AS jedalen, os.priezvisko, os.meno,
+           EXISTS (SELECT 1 FROM odoslanie n
+                    WHERE n.poskytovatel_id = o.poskytovatel_id AND n.datum = o.datum
+                      AND n.druh = o.druh AND n.stav = 'ok' AND n.id > o.id) AS nahradene
       FROM odoslanie o
       JOIN poskytovatel p ON p.id = o.poskytovatel_id
       LEFT JOIN osoba os ON os.id = o.zadal_id
@@ -223,7 +276,11 @@ export async function odoslania(po) {
 export async function potvrdenieZobraz(k) {
   const t = k.url.searchParams.get("t") ?? "";
   const o = await jeden(`
-    SELECT o.*, o.datum::text AS datum, p.nazov AS jedalen FROM odoslanie o
+    SELECT o.*, o.datum::text AS datum, p.nazov AS jedalen,
+           EXISTS (SELECT 1 FROM odoslanie n
+                    WHERE n.poskytovatel_id = o.poskytovatel_id AND n.datum = o.datum
+                      AND n.druh = o.druh AND n.stav = 'ok' AND n.id > o.id) AS nahradene
+      FROM odoslanie o
       JOIN poskytovatel p ON p.id = o.poskytovatel_id
      WHERE o.token = $1`, [t]);
   return zobrazPotvrdenie(k, o, t, null);
@@ -232,10 +289,17 @@ export async function potvrdenieZobraz(k) {
 export async function potvrdenieUloz(k) {
   const t = k.data.t ?? "";
   const o = await jeden(`
-    SELECT o.*, o.datum::text AS datum, p.nazov AS jedalen FROM odoslanie o
+    SELECT o.*, o.datum::text AS datum, p.nazov AS jedalen,
+           EXISTS (SELECT 1 FROM odoslanie n
+                    WHERE n.poskytovatel_id = o.poskytovatel_id AND n.datum = o.datum
+                      AND n.druh = o.druh AND n.stav = 'ok' AND n.id > o.id) AS nahradene
+      FROM odoslanie o
       JOIN poskytovatel p ON p.id = o.poskytovatel_id
      WHERE o.token = $1`, [t]);
-  if (o && !o.potvrdene) {
+  /* Potvrdenie platí pre konkrétne čísla, nie pre e-mail (koncept 7.2.1).
+     Keď medzitým odišla oprava, tieto čísla už neplatia a potvrdiť sa nedajú
+     — inak by sa dodávateľ mohol brániť tým, že potvrdil niečo iné. */
+  if (o && !o.potvrdene && !o.nahradene) {
     await bazen.query("UPDATE odoslanie SET potvrdene = now() WHERE id = $1", [o.id]);
     await zapis(null, "objednavka.potvrdena", { jedalen: o.jedalen, tyzden: o.datum });
     o.potvrdene = new Date();
@@ -256,15 +320,20 @@ function zobrazPotvrdenie(k, o, t, stav) {
   const uz = o.potvrdene
     ? `<div class="okbox">Objednávka je potvrdená${stav === "dakujeme" ? " — ďakujeme" : ""}.</div>`
     : "";
+  const nahradene = o.nahradene
+    ? `<div class="warnbox"><strong>Tieto počty už neplatia.</strong> Poslali sme vám novšiu
+       objednávku na ten istý týždeň — potvrďte prosím tú. Ak vám neprišla, ozvite sa nám.</div>`
+    : "";
 
   k.html(k.odp, 200, holaStranka({ titulok: "Potvrdenie objednávky", verzia: k.verzia, obsah: `
 <section class="prihlas" style="max-width:720px">
   <div class="card">
     <h2>Potvrdenie objednávky</h2>
     <p class="hint" style="margin-top:0">${esc(o.jedalen)} · týždeň od ${esc(dlhy(o.datum))}</p>
+    ${nahradene}
     ${uz}
     <pre class="znenie">${esc(o.telo ?? "")}</pre>
-    ${o.potvrdene ? "" : `
+    ${o.potvrdene || o.nahradene ? "" : `
       <form method="post" action="/potvrdenie">
         <input type="hidden" name="t" value="${esc(t)}">
         <p>Sedia počty vyššie? Potvrďte prosím, že objednávku máte.</p>

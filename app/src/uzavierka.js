@@ -147,16 +147,18 @@ export async function zobraz(k) {
       <thead><tr><th>Jedáleň</th><th>Komu</th><th class="num">Porcií</th>
         <th>Odoslané</th><th>Stav</th><th>Potvrdené</th><th></th></tr></thead>
       <tbody>
-        ${poslane.map(o => `<tr>
+        ${poslane.map(o => `<tr${o.nahradene ? ' class="is-off"' : ""}>
           <td>${esc(o.jedalen)}</td>
           <td>${esc(o.komu ?? "—")}${o.kopia ? `<span class="podriadok">kópia ${esc(o.kopia)}</span>` : ""}</td>
           <td class="num">${o.porcii}</td>
           <td>${esc(cas(o.odoslane))}</td>
           <td>${o.stav === "ok"
-            ? '<span class="badge ok">odoslané</span>'
+            ? `<span class="badge ok">odoslané</span>${
+                o.nahradene ? '<span class="badge">nahradené</span>' : ""}`
             : `<span class="badge zle">zlyhalo</span> <span class="hint">${esc(o.chyba ?? "")}</span>`}</td>
           <td>${o.potvrdene
             ? `<span class="badge ok">${esc(cas(o.potvrdene))}</span>`
+            : o.nahradene ? '<span class="hint">už netreba</span>'
             : '<span class="hint">čaká sa</span>'}</td>
           <td class="akcie"><details><summary class="btn">znenie</summary>
             <pre class="znenie">${esc(o.telo ?? "")}</pre></details></td>
@@ -167,6 +169,9 @@ export async function zobraz(k) {
       <strong>Odoslané a potvrdené sú dve rôzne veci.</strong> „Odoslané" znamená, že
       správu prijal poštový server jedálne — o tom, či ju niekto videl, to nehovorí nič.
       Preto je v objednávke odkaz s tlačidlom a potvrdenie sa zapíše až po jeho stlačení.
+      Druhé odoslanie na ten istý týždeň odchádza ako <strong>oprava</strong> a je v ňom
+      napísané, čo sa mení; predchádzajúce sa označí ako nahradené a jeho odkaz na
+      potvrdenie prestane platiť — dodávateľ potvrdzuje konkrétne čísla, nie e-mail.
     </div>
   </div>` : ""}
 </section>`

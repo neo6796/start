@@ -212,11 +212,57 @@ const p4 = await c4.newPage();
 await p4.goto(A + "/potvrdenie?t=nezmysel");
 ok("cudzí token nič nepotvrdí", /Odkaz už neplatí/.test(await p4.content()));
 
+console.log("— druhé odoslanie je oprava —");
+/* Po uzavretí sa niečo zmení a týždeň sa zavrie znova. Kuchyňa nesmie dostať
+   druhý plný zoznam bez slova o tom, čo sa mení a ktorý platí. */
+await p.goto(A + "/uzavierka");
+await p.click("form[action='/uzavierka/otvorit'] button");
+await p.waitForLoadState("networkidle");
+await p.goto(A + "/tim");
+/* Prvému človeku sa pondelok prepne na krížik — o jednu porciu menej. */
+await p.locator("table.matrix tbody tr").nth(0).locator("td .opts").nth(0)
+  .locator("input[value=x]").first().check();
+await p.click("button:has-text('Uložiť')");
+await p.waitForLoadState("networkidle");
+await p.goto(A + "/uzavierka");
+await p.click("button:has-text('Uzavrieť týždeň a odoslať')");
+await p.waitForLoadState("networkidle");
+
+ok("odišla druhá správa", prijate.filter(z => z.data).length === 2);
+const oprava = telaSprav()[1];
+ok("predmet hovorí, že je to oprava", (() => {
+  const m = oprava.hlavicky.match(/Subject: =\?UTF-8\?B\?([^?]+)\?=/);
+  return m && Buffer.from(m[1], "base64").toString("utf8").startsWith("OPRAVA");
+})());
+ok("povie, ktorú objednávku nahrádza", /nahrádza objednávku poslanú/.test(oprava.text));
+ok("vypíše, čo sa mení", /Čo sa mení:/.test(oprava.text));
+ok("aj s rozdielom v kusoch", /−1 ks\s+\(\d+ → \d+\)/.test(oprava.text));
+ok("povie, že platí celý zoznam nižšie", /Platí celá objednávka nižšie/.test(oprava.text));
+ok("celá objednávka je v nej tiež", /Spolu za týždeň:/.test(oprava.text));
+
+t = await p.content();
+ok("staré odoslanie je označené ako nahradené", /nahradené/.test(t));
+
+/* Potvrdenie platí pre konkrétne čísla — staré už potvrdiť nejde. */
+const p5 = await (await b.newContext()).newPage();
+await p5.goto(odkaz);
+t = await p5.content();
+ok("starý odkaz povie, že počty už neplatia", /Tieto počty už neplatia/.test(t));
+ok("a tlačidlo na potvrdenie nemá",
+   (await p5.locator("button:has-text('Potvrdzujem')").count()) === 0);
+
+const novyOdkaz = oprava.text.match(/(https?:\/\/\S+\/potvrdenie\?t=[\w-]+)/)[1];
+ok("oprava má vlastný odkaz", novyOdkaz !== odkaz);
+await p5.goto(novyOdkaz);
+await p5.click("button:has-text('Potvrdzujem')");
+await p5.waitForLoadState("networkidle");
+ok("nový sa potvrdiť dá", /je potvrdená/.test(await p5.content()));
+
 console.log("— dvakrát sa neposiela —");
 await p.goto(A + "/uzavierka");
 ok("uzavretý týždeň už tlačidlo na odoslanie neponúka",
    (await p.locator("button:has-text('Uzavrieť týždeň a odoslať')").count()) === 0);
-ok("stále je odoslaná len jedna správa", prijate.filter(z => z.data).length === 1);
+ok("viac správ už nepribudlo", prijate.filter(z => z.data).length === 2);
 
 s.close();
 await b.close();
