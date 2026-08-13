@@ -9,7 +9,22 @@ export const DNI_SKRATKA = ["Po", "Ut", "St", "Št", "Pi"];
 const MESIACE = ["januára", "februára", "marca", "apríla", "mája", "júna",
                  "júla", "augusta", "septembra", "októbra", "novembra", "decembra"];
 
-export const dnes = () => new Date().toISOString().slice(0, 10);
+/* Dnešok podľa miestneho času, nie podľa UTC. `toISOString` vracia UTC dátum,
+   takže v lete by appka od polnoci do druhej v noci tvrdila, že je ešte včera —
+   a uzávierka aj denný zámok by sa o deň pomýlili. Časové pásmo nastavuje
+   docker-compose (TZ), aby sa server a appka zhodli. */
+export function dnes() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${
+    String(d.getDate()).padStart(2, "0")}`;
+}
+
+/* Miestny čas ako „HH:MM" — porovnáva sa s časom dennej uzávierky jedálne,
+   ktorý je v databáze uložený rovnako. */
+export function teraz() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
 
 /* Pondelok týždňa, na ktorý sa v ten deň objednáva.
    Cez pracovný týždeň je to pondelok toho istého týždňa. V sobotu a v nedeľu

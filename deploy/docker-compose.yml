@@ -31,6 +31,9 @@ services:
       SMTP_EHLO: ${SMTP_EHLO:-obedy.ahafarma.sk}
       ADRESA: ${ADRESA}
       VERZIA: ${VERZIA:-neznáma}
+      # Bez pásma beží kontajner v UTC a denná uzávierka o 07:30 by v lete
+      # nastala až o 09:30 nášho času.
+      TZ: ${TZ:-Europe/Bratislava}
     # Len na slučku. Caddy chodí na appku vnútornou sieťou; tento port je preto,
     # aby sa dalo zo servera overiť /zdravie — presne to robí deploy.sh po nasadení.
     ports: ["127.0.0.1:3000:3000"]

@@ -68,7 +68,19 @@ await p.selectOption("#p-tim_id", { label: "Tím Sever" });
 await p.click("button:has-text('Priradiť označeným')");
 await p.waitForLoadState("networkidle");
 
-await p.goto(A + "/tim");
+/* Denná uzávierka zamyká dni, ktoré prebehli — vrátane dnešného po jej čase.
+   Celá skúška preto beží na nasledujúcom týždni, aby dopadla rovnako
+   v pondelok ráno aj v piatok večer. */
+const TYZ = await (async () => {
+  await p.goto(A + "/tim");
+  const teraz = new URL(await p.getAttribute('a:has-text("tento týždeň")', "href"), A)
+    .searchParams.get("tyzden");
+  const d = new Date(teraz + "T12:00:00Z");
+  d.setUTCDate(d.getUTCDate() + 7);
+  return d.toISOString().slice(0, 10);
+})();
+
+await p.goto(A + "/tim?tyzden=" + TYZ);
 const riadky = p.locator("table.matrix tbody tr");
 const koľkoĽudí = await riadky.count();
 /* Prvý si dá jedlo 1 v pondelok aj utorok, druhý jedlo 2 v pondelok.
@@ -81,7 +93,7 @@ await p.click("button:has-text('Uložiť')");
 await p.waitForLoadState("networkidle");
 
 console.log("— obrazovka uzávierky —");
-await p.goto(A + "/uzavierka");
+await p.goto(A + "/uzavierka?tyzden=" + TYZ);
 let t = await p.content();
 ok("uzávierka sa otvorí", t.includes("Uzávierka týždňa"));
 ok("ukazuje počty po jedlách", (await p.locator("table.data tr.sucet").count()) >= 1);
@@ -107,16 +119,21 @@ const p2 = await c2.newPage();
 await p2.goto(A + "/prihlasenie");
 await p2.fill("#kod", KOD); await p2.fill("#heslo", HESLO);
 await p2.click("button[type=submit]"); await p2.waitForLoadState("networkidle");
-await p2.goto(A + "/tim");
-ok("predák vidí, že týždeň je uzavretý", /Týždeň je uzavretý/.test(await p2.content()));
-ok("a že zmena si vyžiada opravu", /vyžiada <strong>opravu<\/strong>/.test(await p2.content()));
+await p2.goto(A + "/tim?tyzden=" + TYZ);
+ok("predák vidí, že objednávka odišla", /už odišla\s+jedálňam/.test(await p2.content()));
+ok("a že sa dá meniť ďalej", /meniť sa dá ďalej a zmena sa uloží/.test(await p2.content()));
+/* Červená znamená „nedá sa". Keď sa dá a len to má dohru, nesmie to
+   vyzerať ako zákaz — človek to inak berie ako pokazenú obrazovku. */
+ok("nie je to červené ako chyba",
+   (await p2.locator("div.infobox").count()) >= 1 &&
+   !/Týždeň je uzavretý a objednávka odišla/.test(await p2.content()));
 ok("políčka sa dajú stlačiť aj tak",
    (await p2.locator("table.matrix input[type=radio]:not([disabled])").count()) > 0);
 ok("tlačidlo Uložiť je dostupné",
    !(await p2.locator("button:has-text('Uložiť')").first().isDisabled()));
 
 console.log("— doplní sa adresa a pošle znova —");
-await p.goto(A + "/uzavierka");
+await p.goto(A + "/uzavierka?tyzden=" + TYZ);
 await p.click("form[action='/uzavierka/otvorit'] button");
 await p.waitForLoadState("networkidle");
 await p.goto(A + "/ciselniky");
@@ -128,7 +145,7 @@ await p.waitForLoadState("networkidle");
 /* Menu bez dátumov — dni sa poznajú podľa názvov, takže skúška nezávisí od
    toho, ktorý týždeň je práve dnes. Ide o to, či sa názvy dostanú do
    objednávky: kuchyňa má vidieť, čo si ľudia dali, nie iba čísla. */
-await p.goto(A + "/menu");
+await p.goto(A + "/menu?tyzden=" + TYZ);
 /* Obrazovka menu ukazuje všetky jedálne pod sebou — treba trafiť tú svoju. */
 const kartaGG = () => p.locator(
   'details.listok:has(summary:text-is("Jedálny lístok — GASTROGAL"))');
@@ -149,7 +166,7 @@ await p.waitForLoadState("networkidle");
 await kartaGG().locator("button:has-text('Uložiť')").click();
 await p.waitForLoadState("networkidle");
 
-await p.goto(A + "/uzavierka");
+await p.goto(A + "/uzavierka?tyzden=" + TYZ);
 ok("adresa je vidieť pred odoslaním", /kuchyna@example\.test/.test(await p.content()));
 await p.click("button:has-text('Uzavrieť týždeň a odoslať')");
 await p.waitForLoadState("networkidle");
@@ -158,8 +175,7 @@ ok("odoslanie potvrdené na obrazovke", /Odoslané:/.test(t));
 ok("správa naozaj odišla", prijate.filter(z => z.data).length === 1);
 
 const [sprava] = telaSprav();
-const PO_TEST = new URL(await p.getAttribute('a:has-text("tento týždeň")', "href"), A)
-  .searchParams.get("tyzden");
+const PO_TEST = TYZ;
 console.log("— čo prišlo do kuchyne —");
 ok("príjemca je adresa jedálne",
    sprava.prikazy.some(x => /^RCPT TO:<kuchyna@example\.test>$/i.test(x)));
@@ -213,13 +229,13 @@ ok("tlačidlo tam je", (await p3.locator("button:has-text('Potvrdzujem')").count
 
 /* Samotné otvorenie odkazu potvrdenie NESMIE zapísať — odkazy v správach
    navštevujú bezpečnostné skenery samy. */
-await p.goto(A + "/uzavierka");
+await p.goto(A + "/uzavierka?tyzden=" + TYZ);
 ok("otvorenie odkazu ešte nič nepotvrdilo", /čaká sa/.test(await p.content()));
 
 await p3.click("button:has-text('Potvrdzujem')");
 await p3.waitForLoadState("networkidle");
 ok("po stlačení je potvrdené", /je potvrdená/.test(await p3.content()));
-await p.goto(A + "/uzavierka");
+await p.goto(A + "/uzavierka?tyzden=" + TYZ);
 ok("uzávierka to ukazuje", (await p.locator("td span.badge.ok").count()) >= 1);
 
 const c4 = await b.newContext();
@@ -230,7 +246,7 @@ ok("cudzí token nič nepotvrdí", /Odkaz už neplatí/.test(await p4.content())
 console.log("— zmena po odoslaní si pýta opravu —");
 /* Toto je bežný pondelok ráno: niekto ochorel. Matica sa mení bez toho, aby
    sa čokoľvek odomykalo, a uzávierka to musí ohlásiť aj poslať. */
-await p.goto(A + "/tim");
+await p.goto(A + "/tim?tyzden=" + TYZ);
 await p.locator("table.matrix tbody tr").nth(0).locator("td .opts").nth(0)
   .locator("input[value=x]").first().check();
 await p.click("button:has-text('Uložiť')");
@@ -239,7 +255,7 @@ t = await p.content();
 ok("uloženie prešlo aj v uzavretom týždni", /Uložené — \d+ zmen/.test(t));
 ok("a povie, že treba poslať opravu", /jedálni treba poslať opravu/.test(t));
 
-await p.goto(A + "/uzavierka");
+await p.goto(A + "/uzavierka?tyzden=" + TYZ);
 t = await p.content();
 ok("uzávierka ohlási, že sa počty zmenili", /sa počty zmenili/.test(t));
 ok("vypíše, čo presne", /−1 ks\s+\(\d+ → \d+\)/.test(t));
@@ -299,7 +315,7 @@ await p.waitForLoadState("networkidle");
 ok("potvrdiť sa dá aj z prihlásenej schránky", /je potvrdená/.test(await p.content()));
 
 console.log("— dvakrát sa neposiela —");
-await p.goto(A + "/uzavierka");
+await p.goto(A + "/uzavierka?tyzden=" + TYZ);
 ok("uzavretý týždeň už tlačidlo na odoslanie neponúka",
    (await p.locator("button:has-text('Uzavrieť týždeň a odoslať')").count()) === 0);
 ok("viac správ už nepribudlo", prijate.filter(z => z.data).length === 2);

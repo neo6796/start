@@ -15,7 +15,7 @@
 
 import { stranka, esc, meno, mnoho } from "./html.js";
 import { bazen, jeden, vsetky, zapis } from "./db.js";
-import { DNI, dnes, pondelok, dniTyzdna, denMesiac, tyzdenPopis, oznacenie } from "./datum.js";
+import { DNI, dnes, teraz, pondelok, dniTyzdna, denMesiac, tyzdenPopis, oznacenie } from "./datum.js";
 import { menuTyzdna } from "./menu.js";
 
 const BEZ_OBEDA = -1;
@@ -81,6 +81,22 @@ async function tymZaTyzden(podmienka, hodnoty, po) {
   return { ludia, objednavky, pridelenia, nepritomnosti };
 }
 
+/* Deň sa zamyká, keď prejde jeho denná uzávierka. Dovtedy sa dá odhlásiť,
+   potom už nie: kuchyňa varí podľa počtov, ktoré má, a čo sa uvarí, to sa
+   zaplatí. Uplynulý deň prepísať v matici by znamenalo, že si niekto v piatok
+   zmaže pondelkový obed, ktorý zjedol.
+
+   Čas berie z jedálne (`odhlasenie_do`); pri dvoch jedálňach platí tá skoršia,
+   lebo v tej sa už variť začalo. Opraviť sa taký deň dá len spätným zápisom,
+   ktorý o sebe vie, že je spätný. */
+function denZamknuty(datum, moje, vsetkyJedalne, dnesJe, cas) {
+  if (datum < dnesJe) return true;
+  if (datum > dnesJe) return false;
+  const casy = moje.map(id => vsetkyJedalne.find(j => j.id === id)?.odhlasenie_do)
+                   .filter(Boolean).map(t => String(t).slice(0, 5)).sort();
+  return casy.length ? cas >= casy[0] : false;
+}
+
 function precPreč(nepritomnosti, osobaId, datum) {
   return (nepritomnosti?.get(osobaId) ?? []).find(n => n.od <= datum && n.do_ >= datum) ?? null;
 }
@@ -133,6 +149,7 @@ function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti
   const poradie = jaId
     ? [...ludia.filter(o => o.id === jaId), ...ludia.filter(o => o.id !== jaId)]
     : ludia;
+  const dnesJe = dnes(), cas = teraz();
   return `
 <div class="scroll-x"><table class="matrix">
   <thead><tr>
@@ -170,7 +187,10 @@ function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti
           const z = objednavky.get(`${o.id}|${d}`);
           const prazdna = z?.jedlo === null || z?.jedlo === undefined;
           const prec = precPreč(nepritomnosti, o.id, d);
-          return `<td${prazdna ? ' class="gap"' : ""}>${bunka(o, d, z, moje, vsetkyJedalne, prec, menu, i, citaj)}</td>`;
+          const zamknuty = citaj || denZamknuty(d, moje, vsetkyJedalne, dnesJe, cas);
+          const triedy = [prazdna ? "gap" : "", zamknuty ? "po-case" : ""].filter(Boolean);
+          return `<td${triedy.length ? ` class="${triedy.join(" ")}"` : ""
+            }>${bunka(o, d, z, moje, vsetkyJedalne, prec, menu, i, zamknuty)}</td>`;
         }).join("")}
         <td class="cnt${chyba ? " gap" : ""}">${chyba || "—"}</td>
       </tr>`;
@@ -185,6 +205,7 @@ const LEGENDA = `
   <span><span class="opt-b vzor" aria-hidden="true">B</span> zvolené jedlo</span>
   <span><span class="opt-b none vzor" aria-hidden="true">×</span> nechce obed — je to rozhodnutie, upomienka nechodí</span>
   <span><i class="sw empty"></i> bez voľby — nikto nekonal</span>
+  <span><i class="sw zamok"></i> po dennej uzávierke — meniť sa už nedá</span>
 </div>`;
 
 /* Menu pre tie jedálne, ktoré tím naozaj používa. */
@@ -324,12 +345,12 @@ export async function tim(k) {
     </span>
   </div>
 
-  ${zamok?.uzavrety ? `<div class="warnbox"><strong>Týždeň je uzavretý — objednávka pre
-    jedálne už z neho odišla.</strong> Meniť sa dá aj tak; keď niekto ochorie, obed sa
-    musí dať odhlásiť. Každá zmena si ale vyžiada <strong>opravu</strong>, ktorá sa jedálni
-    pošle z <a href="/uzavierka?tyzden=${po}">Uzávierky</a>${
-      k.osoba.je_admin ? "" : " (posiela ju správca)"}. Bez nej bude kuchyňa variť
-    podľa starých počtov.</div>` : ""}
+  ${zamok?.uzavrety ? `<div class="infobox"><strong>Objednávka na tento týždeň už odišla
+    jedálňam — meniť sa dá ďalej a zmena sa uloží.</strong> Kto ochorie, musí sa dať
+    odhlásiť. Zmena ale sama do kuchyne nedôjde: treba jej poslať <strong>opravu</strong>
+    ${k.osoba.je_admin
+      ? `tlačidlom v <a href="/uzavierka?tyzden=${po}">Uzávierke</a>`
+      : "— posiela ju správca z Uzávierky"}. Dovtedy tam varia podľa starých počtov.</div>` : ""}
 
   ${ludia.length === 0
     ? `<div class="card"><p style="margin:0">Nemáš nikoho v tíme.</p>
@@ -465,6 +486,7 @@ export async function uloz(k) {
   const { ludia, objednavky, pridelenia } = await ktoPatri(k.osoba, pohlad, po);
 
   const jedla = await jedalne();
+  const dnesJe = dnes(), cas = teraz();
   /* Do objednávky sa zapisuje, v akej role ju niekto zadal — predák za svoj
      tím, správca za hocikoho. Pri spore je to jediné, čo povie kto a ako. */
   const akoZadane = pohlad === "vsetci" ? "admin" : "predak";
@@ -476,6 +498,10 @@ export async function uloz(k) {
     for (const o of ludia) {
       const moje = pridelenia.get(o.id) ?? (o.poskytovatel_id ? [o.poskytovatel_id] : []);
       for (const d of dni) {
+        /* Vypnuté políčko je len nápoveda pre oči. Odmietnuť uplynulý deň
+           musí server — inak stačí poslať formulár inak a obed z pondelka
+           sa v piatok stratí. */
+        if (denZamknuty(d, moje, jedla, dnesJe, cas)) continue;
         const surove = k.data[`b-${o.id}-${d}`] ?? "";
         const stare = objednavky.get(`${o.id}|${d}`);
         const staraHodnota = stare?.jedlo ?? null;
@@ -718,13 +744,12 @@ export async function moje(k) {
       <a class="btn" href="/moje?tyzden=${posunTyzden(po, 7)}">→</a>
     </span>
   </div>
-  ${zamok?.uzavrety ? `<div class="warnbox">Týždeň je uzavretý a objednávka už odišla do jedálne.
+  ${zamok?.uzavrety ? `<div class="infobox">Objednávka na tento týždeň už odišla do jedálne.
     ${k.osoba.je_admin
-      ? `Ak sa treba vrátiť, otvorte ho v <a href="/uzavierka?tyzden=${po}">Uzávierke</a>.`
+      ? `Zmeniť sa dá v <a href="/tim?tyzden=${po}">Mojom tíme</a>; jedálni sa potom pošle oprava.`
       : k.osoba.je_predak
-      ? "Ak sa treba vrátiť, otvoriť ho môže správca."
-      : "Ak sa treba vrátiť, povedzte predákovi."}
-    Jedálni sa potom pošle oprava s tým, čo sa zmenilo.</div>` : ""}
+      ? "Zmeniť sa dá v Mojom tíme; jedálni sa potom pošle oprava."
+      : "Ak sa niečo zmenilo, povedzte predákovi — pošle jedálni opravu."}</div>` : ""}
   <div class="card">
     ${ludia.length
       ? tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu, false, true) + LEGENDA

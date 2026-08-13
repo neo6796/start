@@ -27,7 +27,17 @@ await p.waitForLoadState("networkidle");
 ok("zaškrtnutie ostalo", await p.locator('input[name="jedalne"]').first().isChecked());
 
 console.log("— matica ukáže dva riadky ponúk —");
-await p.goto(A + "/tim");
+/* Denná uzávierka zamyká dni, ktoré prebehli. Skúška preto pracuje
+   s nasledujúcim týždňom, ktorý je celý otvorený. */
+const TYZ = await (async () => {
+  await p.goto(A + "/tim");
+  const teraz = new URL(await p.getAttribute('a:has-text("tento týždeň")', "href"), A)
+    .searchParams.get("tyzden");
+  const d = new Date(teraz + "T12:00:00Z");
+  d.setUTCDate(d.getUTCDate() + 7);
+  return d.toISOString().slice(0, 10);
+})();
+await p.goto(A + "/tim?tyzden=" + TYZ);
 const riadok = p.locator("table.matrix tbody tr:has-text('Vargová')");
 ok("Vargová má v bunke dva riadky jedální aj krížik",
    (await riadok.locator("td").nth(0).locator(".opt-row").count()) === 3);

@@ -777,6 +777,9 @@
   }
   .warnbox{background:var(--miss-soft);border-color:var(--miss);color:var(--miss)}
   .okbox{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+  /* Pozor, ale nie je to chyba. Červená znamená „nedá sa" — a keď sa dá,
+     len to má dohru, patrí to sem. */
+  .infobox{background:var(--mustard-soft);border-color:var(--mustard);color:var(--mustard)}
   .warnbox strong,.okbox strong{font-weight:700}
   .warnbox p,.okbox p{margin:6px 0 0}
   .warnbox p:first-child,.okbox p:first-child{margin-top:0}
@@ -999,7 +1002,7 @@
   .prihlas .warnbox{margin:0 0 16px}
 
   /* Hláška nad kartou sa jej nesmie lepiť na okraj. */
-  .warnbox + .card,.okbox + .card{margin-top:18px}
+  .warnbox + .card,.okbox + .card,.infobox + .card{margin-top:18px}
   /* Hláška vnútri karty — nesmie sa lepiť na popisku poľa pod sebou. */
   .card > .warnbox,.card > .okbox{margin-bottom:18px}
 
@@ -1058,6 +1061,14 @@
     border-bottom:2px solid var(--line-2);
   }
   table.menu-mriezka tr.polievka-riadok th.oznak{color:var(--ink-3)}
+
+  /* Deň po dennej uzávierke. Voľba ostáva čitateľná, ale je jasné, že sa
+     s ňou už nedá hýbať — kuchyňa podľa nej varila. */
+  table.matrix td.po-case{background:repeating-linear-gradient(
+    135deg,transparent,transparent 5px,var(--surface-2) 5px,var(--surface-2) 10px)}
+  .legend .sw.zamok{background:repeating-linear-gradient(
+    135deg,transparent,transparent 3px,var(--line-2) 3px,var(--line-2) 6px);
+    border:1px solid var(--line-2)}
 
   /* Vlastný riadok v matici. Predák a správca objednávajú aj sebe a v dlhom
      zozname sa hľadali — tak je ich riadok prvý a viditeľne oddelený. */

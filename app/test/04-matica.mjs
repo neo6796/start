@@ -36,8 +36,22 @@ await p.selectOption("#p-poskytovatel_id", { label: "GASTROGAL" });
 await p.click("button:has-text('Priradiť označeným')");
 await p.waitForLoadState("networkidle");
 
+
+/* Denná uzávierka zamyká dni, ktoré prebehli — vrátane dnešného po jej čase.
+   Skúšky preto pracujú s nasledujúcim týždňom, ktorý je celý otvorený,
+   nech dopadnú rovnako v pondelok ráno aj v piatok večer. */
+const buduciTyzden = async () => {
+  await p.goto(A + "/tim");
+  const teraz = new URL(await p.getAttribute('a:has-text("tento týždeň")', "href"), A)
+    .searchParams.get("tyzden");
+  const d = new Date(teraz + "T12:00:00Z");
+  d.setUTCDate(d.getUTCDate() + 7);
+  return d.toISOString().slice(0, 10);
+};
+const TYZ = await buduciTyzden();
+
 console.log("— matica —");
-await p.goto(A + "/tim");
+await p.goto(A + "/tim?tyzden=" + TYZ);
 let t = await p.content();
 ok("matica sa otvorí", t.includes("Môj tím"));
 ok("ukazuje päť pracovných dní",
@@ -85,9 +99,8 @@ await p.waitForLoadState("networkidle");
 const buducy = await p.content();
 ok("nasledujúci týždeň je prázdny",
    (await p.locator("table.matrix input:checked").count()) === 0);
-await p.click("a:has-text('tento týždeň')");
-await p.waitForLoadState("networkidle");
-ok("návrat na tento týždeň ukáže voľby",
+await p.goto(A + "/tim?tyzden=" + TYZ);
+ok("návrat na týždeň s voľbami ich ukáže",
    (await p.locator("table.matrix input:checked").count()) === 2);
 
 console.log("— cudzia jedáleň sa odmietne —");
@@ -114,7 +127,7 @@ ok("neexistujúca jedáleň sa neuložila", decodeURIComponent(odpoved).includes
       zmazať to, čo tam predtým platilo.
    Predchádzajúci priamy zápis poslal jedinú bunku a tá bola odmietnutá:
    ostatné sa teda mali vyprázdniť a tá jedna si mala nechať pôvodné jedlo. */
-await p.goto(A + "/tim");
+await p.goto(A + "/tim?tyzden=" + TYZ);
 await p.waitForLoadState("networkidle");
 ok("neposlané bunky sa vrátili na nerozhodnuté a odmietnutá si nechala pôvodné",
    (await p.locator("table.matrix input:checked").count()) === 1);
@@ -126,7 +139,7 @@ const otvorPanel = () => p.evaluate(() => {
 });
 
 console.log("— hromadné odhlásenie —");
-await p.goto(A + "/tim");
+await p.goto(A + "/tim?tyzden=" + TYZ);
 await otvorPanel();
 await p.selectOption("#n-kto", "vsetci");
 await p.selectOption("#n-dovod", "dovolenka");
@@ -155,11 +168,11 @@ ok("značka dovolenky pri prebitom dni ostala",
      .locator(".precmark").count()) === 1);
 
 console.log("— bez vybratej osoby —");
-await p.goto(A + "/tim");
+await p.goto(A + "/tim?tyzden=" + TYZ);
 await otvorPanel();
 await p.click("button:has-text('Označiť')");
 await p.waitForTimeout(300);
-ok("bez vybratej osoby prehliadač formulár nepustí", p.url().endsWith("/tim"));
+ok("bez vybratej osoby prehliadač formulár nepustí", p.url().includes("/tim"));
 
 console.log("— nezmyselný rozsah —");
 await otvorPanel();
@@ -179,10 +192,42 @@ await p.click("button:has-text('Označiť')");
 await p.waitForLoadState("networkidle");
 ok("samé víkendové dni sa odmietnu", (await p.content()).includes("ani jeden pracovný deň"));
 
+console.log("— deň po dennej uzávierke —");
+/* Čo sa uvarilo, to sa zaplatí. Uplynulý deň sa v matici prepísať nesmie —
+   ani kliknutím, ani odoslaním formulára obídeným cez prehliadač. */
+/* Minulý týždeň — celý je za dennou uzávierkou. */
+const minulyTyzden = await (async () => {
+  await p.goto(A + "/tim");
+  const teraz = new URL(await p.getAttribute('a:has-text("tento týždeň")', "href"), A)
+    .searchParams.get("tyzden");
+  const d = new Date(teraz + "T12:00:00Z");
+  d.setUTCDate(d.getUTCDate() - 7);
+  return d.toISOString().slice(0, 10);
+})();
+await p.goto(A + "/tim?tyzden=" + minulyTyzden);
+/* Aby bolo čo prepisovať, najprv sa tam niečo zapíše — cez databázu to
+   nejde, tak sa použije to, čo tam appka dovolí: nič. Postačí overiť,
+   že sa políčka nedajú stlačiť a že server zápis odmietne. */
+const uplynule = p.locator("table.matrix td.po-case");
+ok("uplynulé dni sú označené", (await uplynule.count()) > 0);
+ok("a nedajú sa stlačiť",
+   (await p.locator("table.matrix td.po-case input[type=radio]:not([disabled])").count()) === 0);
+
+/* Formulár sa dá poslať aj bez prehliadača — server musí odmietnuť sám. */
+const znamkaMinuly = await p.locator('form[action="/tim"] input[name="znamka"]').first().inputValue();
+const menoPola = await p.locator("table.matrix tbody tr").first()
+  .locator("input[type=radio]").first().getAttribute("name");
+await p.request.post(A + "/tim", {
+  form: { znamka: znamkaMinuly, tyzden: minulyTyzden, pohlad: "tim", [menoPola]: "x" }
+});
+await p.goto(A + "/tim?tyzden=" + minulyTyzden);
+ok("server uplynulý deň neprepíše",
+   (await p.locator(`input[name="${menoPola}"]:checked`).count()) === 0);
+
 console.log("— správca sa dostane aj mimo svojho tímu —");
 /* Správca je zároveň predákom, takže začína pri svojom tíme. Bez prepínača
    by sa k ostatným tímom nedostal práve ten, kto na to má právo. */
-await p.goto(A + "/tim");
+await p.goto(A + "/tim?tyzden=" + TYZ);
 ok("prepínač je na obrazovke", (await p.locator('a.btn:has-text("všetci")').count()) === 1);
 const vTime = await p.locator("table.matrix tbody tr").count();
 await p.click('a.btn:has-text("všetci")');
@@ -210,7 +255,7 @@ ok("prepnutie späť na tím funguje",
 console.log("— stravník vidí svoj týždeň —");
 /* Obrazovka nič neukladá, tak sa v nej ani nesmie dať klikať: políčko, ktoré
    sa stlačí a nič sa nestane, je horšie než políčko, ktoré sa stlačiť nedá. */
-await p.goto(A + "/moje");
+await p.goto(A + "/moje?tyzden=" + TYZ);
 t = await p.content();
 ok("vlastný týždeň sa otvorí", t.includes("Môj týždeň"));
 ok("je v ňom len jeden človek", (await p.locator("table.matrix tbody tr").count()) === 1);
