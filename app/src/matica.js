@@ -324,11 +324,12 @@ export async function tim(k) {
     </span>
   </div>
 
-  ${zamok?.uzavrety ? `<div class="warnbox">Týždeň je uzavretý a objednávka odišla jedálňam —
-    zapisovať sa doň nedá, preto sa políčka ani nedajú stlačiť. ${k.osoba.je_admin
-      ? `Ak sa treba vrátiť, otvorte ho v <a href="/uzavierka?tyzden=${po}">Uzávierke</a>;
-         jedálni sa potom pošle oprava s tým, čo sa zmenilo.`
-      : "Ak sa treba vrátiť, otvoriť ho môže správca — jedálni sa potom pošle oprava."}</div>` : ""}
+  ${zamok?.uzavrety ? `<div class="warnbox"><strong>Týždeň je uzavretý — objednávka pre
+    jedálne už z neho odišla.</strong> Meniť sa dá aj tak; keď niekto ochorie, obed sa
+    musí dať odhlásiť. Každá zmena si ale vyžiada <strong>opravu</strong>, ktorá sa jedálni
+    pošle z <a href="/uzavierka?tyzden=${po}">Uzávierky</a>${
+      k.osoba.je_admin ? "" : " (posiela ju správca)"}. Bez nej bude kuchyňa variť
+    podľa starých počtov.</div>` : ""}
 
   ${ludia.length === 0
     ? `<div class="card"><p style="margin:0">Nemáš nikoho v tíme.</p>
@@ -344,10 +345,10 @@ export async function tim(k) {
           <span class="pill neutral">${mnoho(ludia.length, ["človek", "ľudia", "ľudí"])}</span>
         </div>
         ${tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu,
-                   pohlad === "vsetci", Boolean(zamok?.uzavrety), k.osoba.id)}
+                   pohlad === "vsetci", false, k.osoba.id)}
         ${LEGENDA}
         <div class="btn-row" style="margin-top:16px">
-          <button class="btn primary" type="submit"${zamok?.uzavrety ? " disabled" : ""}>Uložiť</button>
+          <button class="btn primary" type="submit">Uložiť</button>
         </div>
         <p class="hint" style="margin-top:12px">Opätovné kliknutie na zvolenú možnosť ju zruší
           a bunka sa vráti na nerozhodnuté.</p>
@@ -378,7 +379,7 @@ export async function tim(k) {
                   ${DOVODY.map(([v, t]) => `<option value="${v}">${esc(t)}</option>`).join("")}
                 </select></div>
             </div>
-            <button class="btn primary" type="submit"${zamok?.uzavrety ? " disabled" : ""}>Označiť „bez obeda"</button>
+            <button class="btn primary" type="submit">Označiť „bez obeda"</button>
             <div class="note">
               Nastaví vybrané dni na <strong>bez obeda</strong>, nie na prázdne. Keby ostali prázdne,
               appka by človeka celý týždeň naháňala upomienkami, hoci je na dovolenke.
@@ -454,10 +455,11 @@ export async function uloz(k) {
   const po = pondelok(k.data.tyzden || dnes());
   const dni = dniTyzdna(po);
 
+  /* Uzavretý týždeň sa už nezamyká. Objednávka síce odišla, ale svet sa
+     nezastaví: kto ochorie v pondelok ráno, musí sa dať odhlásiť. Zmena sa
+     zapíše a človek dostane vetu o tom, že jedálni treba poslať opravu —
+     zamlčať zmenu by znamenalo, že sa uvarí pre niekoho, kto nepríde. */
   const zamok = await jeden("SELECT * FROM tyzden_stav WHERE pondelok = $1", [po]);
-  if (zamok?.uzavrety)
-    return k.inam(k.odp, `/tim?tyzden=${po}&chyba=` + encodeURIComponent(
-      "Týždeň je uzavretý, nič sa neuložilo. Otvoriť sa dá v Uzávierke."));
 
   const pohlad = pohladZ(k.osoba, k.data.pohlad);
   const { ludia, objednavky, pridelenia } = await ktoPatri(k.osoba, pohlad, po);
@@ -527,7 +529,8 @@ export async function uloz(k) {
   await zapis(k.osoba.id, "matica.ulozene", { tyzden: po, zmien, odmietnutych });
 
   const sprava = zmien
-    ? `Uložené — ${mnoho(zmien, ["zmena", "zmeny", "zmien"])}.`
+    ? `Uložené — ${mnoho(zmien, ["zmena", "zmeny", "zmien"])}.` +
+      (zamok?.uzavrety ? " Objednávka už odišla — jedálni treba poslať opravu z Uzávierky." : "")
     : "Nič sa nezmenilo.";
   k.inam(k.odp, `/tim?tyzden=${po}&pohlad=${pohlad}&sprava=` + encodeURIComponent(sprava) +
     (odmietnutych ? "&chyba=" + encodeURIComponent(
@@ -634,13 +637,13 @@ export async function nepritomnost(k) {
   if (!dni.length) return spat("V zadanom rozsahu nie je ani jeden pracovný deň.");
   if (dni.length > 200) return spat("Rozsah je pridlhý — zadajte kratší.");
 
-  /* Uzavreté týždne sa nechajú tak. Nie je dôvod celú akciu zrušiť, len sa
-     povie, koľko dní neprešlo. */
+  /* Dovolenka ani PN sa nepýtajú, či je týždeň uzavretý — zapíšu sa aj tam.
+     Za tie týždne, ktorých sa to dotklo, treba jedálni poslať opravu, tak sa
+     to na konci povie menovite. */
   const uzavrete = new Set((await vsetky(
     "SELECT pondelok::text AS pondelok FROM tyzden_stav WHERE uzavrety")).map(r => r.pondelok));
-  const volne = dni.filter(d => !uzavrete.has(pondelok(d)));
-  const zamknutych = dni.length - volne.length;
-  if (!volne.length) return spat("Všetky dni v rozsahu patria do uzavretých týždňov.");
+  const volne = dni;
+  const dotknuteUzavrete = [...new Set(dni.map(pondelok))].filter(t => uzavrete.has(t));
 
   let zmien = 0;
   const klient = await bazen.connect();
@@ -676,8 +679,11 @@ export async function nepritomnost(k) {
 
   k.inam(k.odp, `/tim?tyzden=${po}&sprava=` + encodeURIComponent(
     `Odhlásené: ${mnoho(koho.length, ["človek", "ľudia", "ľudí"])}, ` +
-    `${mnoho(volne.length, ["pracovný deň", "pracovné dni", "pracovných dní"])}` +
-    (zamknutych ? `. ${mnoho(zamknutych, ["deň", "dni", "dní"])} v uzavretých týždňoch sa nedotklo` : "") + "."));
+    `${mnoho(volne.length, ["pracovný deň", "pracovné dni", "pracovných dní"])}.` +
+    (dotknuteUzavrete.length
+      ? ` Objednávka za ${mnoho(dotknuteUzavrete.length, ["týždeň", "týždne", "týždňov"])}` +
+        " už odišla — jedálni treba poslať opravu z Uzávierky."
+      : "")));
 }
 
 function posunDen(iso, kolko) {

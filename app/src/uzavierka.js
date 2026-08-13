@@ -12,7 +12,7 @@
 import { stranka, esc, mnoho } from "./html.js";
 import { jeden, zapis } from "./db.js";
 import { DNI, dnes, pondelok, posun, dniTyzdna, denMesiac, tyzdenPopis } from "./datum.js";
-import { poctyZaTyzden, textObjednavky, posliObjednavky, odoslania } from "./objednavka.js";
+import { poctyZaTyzden, textObjednavky, posliObjednavky, odoslania, cakaNaOpravu } from "./objednavka.js";
 import { postaJeNastavena } from "./posta.js";
 
 const cas = h => h ? new Date(h).toLocaleString("sk-SK",
@@ -27,6 +27,9 @@ export async function zobraz(k) {
      WHERE t.pondelok = $1`, [po]);
   const poskytovatelia = await poctyZaTyzden(po);
   const poslane = await odoslania(po);
+  /* Čo sa v matici zmenilo odvtedy, čo objednávka odišla. Kým sa oprava
+     nepošle, kuchyňa varí podľa starých počtov — tak to nesmie byť schované. */
+  const opravy = await cakaNaOpravu(poskytovatelia, po);
   const sprava = k.url.searchParams.get("sprava");
   const chyba = k.url.searchParams.get("chyba");
 
@@ -39,6 +42,7 @@ export async function zobraz(k) {
 
   const karta = p => {
     const nerozhodnuti = p.nerozhodnuti;
+    const oprava = opravy.get(p.jedalen.id);
     return `
     <div class="card">
       <div class="card-head">
@@ -73,6 +77,19 @@ export async function zobraz(k) {
         <summary class="btn">Ukázať, čo presne odíde</summary>
         <pre class="znenie">${esc(textObjednavky(p, null))}</pre>
       </details>` : ""}
+
+      ${oprava ? `
+        <div class="warnbox" style="margin-top:14px">
+          <strong>Od odoslania objednávky (${esc(oprava.kedy)}) sa počty zmenili.</strong>
+          Kým sa oprava nepošle, kuchyňa varí podľa starých čísel.
+          <pre class="znenie">${esc(oprava.zmeny.join("\n"))}</pre>
+          <form method="post" action="/uzavierka/oprava" style="margin-top:10px">
+            <input type="hidden" name="znamka" value="${esc(k.csrf)}">
+            <input type="hidden" name="tyzden" value="${po}">
+            <input type="hidden" name="jedalen" value="${p.jedalen.id}">
+            <button class="btn primary" type="submit">Poslať opravu do ${esc(p.jedalen.nazov)}</button>
+          </form>
+        </div>` : ""}
 
       ${nerozhodnuti.length ? `
         <div class="warnbox" style="margin-top:14px">
@@ -119,16 +136,17 @@ export async function zobraz(k) {
     <div class="card-head"><h3>${zamok?.uzavrety ? "Týždeň je uzavretý" : "Uzavrieť a odoslať"}</h3></div>
     ${zamok?.uzavrety
       ? `<p style="margin:0 0 14px">Uzavrel ${esc(zamok.priezvisko ? zamok.meno + " " + zamok.priezvisko : "správca")} ${esc(cas(zamok.uzavrete_kedy))}.
-         Predáci už maticu meniť nemôžu.</p>
+         ${opravy.size
+           ? "<strong>Niečo sa odvtedy zmenilo — opravu pošlete tlačidlom pri jedálni vyššie.</strong>"
+           : "Matica sa dá meniť ďalej; každá zmena si vyžiada opravu, ktorá sa pošle odtiaľto."}</p>
          <form method="post" action="/uzavierka/otvorit">
            <input type="hidden" name="znamka" value="${esc(k.csrf)}">
            <input type="hidden" name="tyzden" value="${po}">
-           <button class="btn" type="submit">Otvoriť znova</button>
-           <p class="hint" style="margin:8px 0 0">Otvorením sa objednávka neruší — čo už odišlo,
-           odišlo. Po zmenách treba poslať opravu.</p>
+           <button class="btn" type="submit">Označiť ako neuzavretý</button>
+           <p class="hint" style="margin:8px 0 0">Len značka — objednávka, ktorá odišla,
+           sa tým neruší. Slúži na to, keď sa týždeň uzavrel omylom.</p>
          </form>`
-      : `<p style="margin:0 0 14px">Uzavretím sa matica zamkne pre predákov a objednávka
-         odíde jedálňam${spolu ? ` — spolu ${mnoho(spolu, ["obed", "obedy", "obedov"])}` : ""}.
+      : `<p style="margin:0 0 14px">Uzavretím objednávka odíde jedálňam${spolu ? ` — spolu ${mnoho(spolu, ["obed", "obedy", "obedov"])}` : ""}.
          ${poskytovatelia.some(p => p.nerozhodnuti.length)
            ? "<strong>Nerozhodnutí ľudia obed nedostanú.</strong>" : ""}</p>
          <form method="post" action="/uzavierka/uzavriet">
@@ -211,6 +229,21 @@ export async function uzavriet(k) {
     (zle.length ? "&chyba=" + encodeURIComponent(
       "Neodoslané: " + zle.map(v => `${v.jedalen} — ${v.chyba}`).join("; ") +
       ". Týždeň je uzavretý, objednávku treba poslať inak.") : ""));
+}
+
+/* Oprava jednej jedálni. Neuzatvára ani neotvára nič — pošle to, čo je
+   v matici teraz, a rozdiel oproti tomu, čo už kuchyňa dostala. */
+export async function oprava(k) {
+  const po = pondelok(k.data.tyzden || dnes());
+  const jedalenId = Number(k.data.jedalen);
+  const [v] = await posliObjednavky(po, k.osoba.id, jedalenId);
+  await zapis(k.osoba.id, "objednavka.oprava", { tyzden: po, jedalen: jedalenId, vysledok: v ?? null });
+
+  if (!v) return k.inam(k.odp, `/uzavierka?tyzden=${po}&chyba=` +
+    encodeURIComponent("Nebolo čo poslať — na tento týždeň nemá tá jedáleň ani jednu porciu."));
+  return k.inam(k.odp, `/uzavierka?tyzden=${po}&` + (v.ok
+    ? "sprava=" + encodeURIComponent(`Oprava odoslaná: ${v.jedalen} (${v.porcii} ks → ${v.komu}).`)
+    : "chyba=" + encodeURIComponent(`Oprava neodišla: ${v.jedalen} — ${v.chyba}.`)));
 }
 
 export async function otvorit(k) {

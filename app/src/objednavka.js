@@ -21,7 +21,7 @@
    a zliať ich do jedného „doručené" by bolo klamlivé. */
 
 import { jeden, vsetky, bazen, zapis } from "./db.js";
-import { DNI, dniTyzdna, denMesiac, tyzdenPopis, oznacenie, dlhy } from "./datum.js";
+import { DNI, dnes, dniTyzdna, denMesiac, tyzdenPopis, oznacenie, dlhy } from "./datum.js";
 import { holaStranka, esc, mnoho } from "./html.js";
 import { menuTyzdna } from "./menu.js";
 import { posli, postaJeNastavena } from "./posta.js";
@@ -123,11 +123,31 @@ export function textObjednavky(p, odkaz, oprava = null) {
       r.push("Počty sa oproti nej nezmenili.");
     }
     r.push("");
-    r.push("Platí celá objednávka nižšie, nie len zmeny.");
+    r.push("Platí celý zoznam nižšie, nie len zmeny.");
+    r.push("");
+  }
+
+  /* V OPRAVE sa dni, ktoré už prebehli, nevypisujú. V oprave poslanej vo
+     štvrtok je „Pondelok — bez objednávky" iba šum: uvariť sa to už nedá
+     a kuchár musí preskakovať štyri riadky, kým nájde ten, ktorého sa to týka.
+     V prvej objednávke ostávajú všetky dni — tá je dokladom na celý týždeň
+     a zamlčať v nej pondelok by znamenalo, že sa oň kuchyňa nedozvie vôbec. */
+  const dnesJe = oprava ? dnes() : "0000-00-00";
+  const zostava = p.dni.filter(d => d >= dnesJe);
+  const vynechane = p.dni.length - zostava.length;
+
+  if (!zostava.length) {
+    r.push("Všetky dni tohto týždňa už prebehli.");
+    r.push("");
+  }
+  if (vynechane && zostava.length) {
+    r.push(`Dni, ktoré už prebehli (${p.dni.slice(0, vynechane).map((_, i) => DNI[i]).join(", ")}),` +
+           " tu nie sú — tie sa už nemenia.");
     r.push("");
   }
 
   for (const [i, d] of p.dni.entries()) {
+    if (d < dnesJe) continue;
     const vDen = p.jedla.filter(j => j.poDnoch[i] > 0);
     if (!vDen.length) { r.push(`${DNI[i]} ${denMesiac(d)} — bez objednávky`, ""); continue; }
     r.push(`${DNI[i]} ${denMesiac(d)}`);
@@ -139,7 +159,10 @@ export function textObjednavky(p, odkaz, oprava = null) {
     r.push("");
   }
 
-  r.push(`Spolu za týždeň: ${mnoho(p.spolu, ["obed", "obedy", "obedov"])}.`);
+  const spoluZostatok = p.dni.reduce((a, d, i) => a + (d >= dnesJe ? p.poDnoch[i] : 0), 0);
+  r.push(vynechane
+    ? `Spolu za zostávajúce dni: ${mnoho(spoluZostatok, ["obed", "obedy", "obedov"])}.`
+    : `Spolu za týždeň: ${mnoho(p.spolu, ["obed", "obedy", "obedov"])}.`);
   r.push("");
   if (odkaz) {
     r.push("Prosíme o potvrdenie prijatia — otvorte odkaz a stlačte tlačidlo:");
@@ -241,11 +264,32 @@ async function posliJednej(p, po, ktoId) {
   }
 }
 
-/* Pošle objednávky za celý týždeň. Jedálne bez objednaných porcií sa
-   preskočia — prázdna objednávka kuchyňu len mätie. */
-export async function posliObjednavky(po, ktoId) {
+/* Čo sa v matici zmenilo odvtedy, čo objednávka odišla.
+
+   Je to rozdiel medzi uloženými počtami posledného odoslania a tým, čo je
+   v matici teraz. Žiadny príznak sa nikde nedrží, takže sa nemá čo rozísť
+   so skutočnosťou: keď sa zmena vráti späť, rozdiel zmizne sám. */
+export async function cakaNaOpravu(poskytovatelia, po) {
+  const von = new Map();
+  for (const p of poskytovatelia) {
+    const predtym = await jeden(`
+      SELECT poctov, odoslane FROM odoslanie
+       WHERE poskytovatel_id = $1 AND datum = $2 AND druh = 'objednavka' AND stav = 'ok'
+       ORDER BY id DESC LIMIT 1`, [p.jedalen.id, po]);
+    if (!predtym) continue;
+    const teraz = Object.fromEntries(p.jedla.map(j => [j.znak, j.poDnoch]));
+    const z = zmeny(predtym.poctov, teraz, p.dni);
+    if (z.length) von.set(p.jedalen.id, { zmeny: z, kedy: casOdoslania(predtym.odoslane) });
+  }
+  return von;
+}
+
+/* Pošle objednávky za celý týždeň, alebo opravu jednej jedálni. Jedálne bez
+   objednaných porcií sa preskočia — prázdna objednávka kuchyňu len mätie. */
+export async function posliObjednavky(po, ktoId, ibaJedalen = null) {
   const vysledky = [];
   for (const p of await poctyZaTyzden(po)) {
+    if (ibaJedalen && p.jedalen.id !== ibaJedalen) continue;
     if (!p.spolu) continue;
     const v = await posliJednej(p, po, ktoId);
     vysledky.push(v);

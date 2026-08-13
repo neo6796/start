@@ -137,6 +137,7 @@ const CESTY = [
   ["GET",  "/uzavierka",           uzavierkaObr.zobraz,   "admin"],
   ["POST", "/uzavierka/uzavriet",  uzavierkaObr.uzavriet, "admin"],
   ["POST", "/uzavierka/otvorit",   uzavierkaObr.otvorit,  "admin"],
+  ["POST", "/uzavierka/oprava",    uzavierkaObr.oprava,   "admin"],
 
   /* Potvrdenie prijatia otvára kuchár z e-mailu — bez prihlásenia.
      Tajomstvom je jednorazový token v odkaze, nie relácia. */

@@ -99,23 +99,21 @@ ok("zlyhanie sa zapísalo medzi odoslania", (await p.locator('span.badge.zle').c
 ok("dôvod je pri ňom", /nemá e-mailovú adresu/.test(t));
 ok("nič sa neodoslalo", prijate.length === 0);
 
-console.log("— matica je zamknutá —");
+console.log("— po odoslaní sa dá meniť ďalej —");
+/* Uzavretý týždeň nie je zámok. Kto ochorie v pondelok ráno, musí sa dať
+   odhlásiť — appka to musí dovoliť a povedať, že treba poslať opravu. */
 const c2 = await b.newContext({ viewport: { width: 1200, height: 900 } });
 const p2 = await c2.newPage();
 await p2.goto(A + "/prihlasenie");
 await p2.fill("#kod", KOD); await p2.fill("#heslo", HESLO);
 await p2.click("button[type=submit]"); await p2.waitForLoadState("networkidle");
 await p2.goto(A + "/tim");
-ok("predák vidí, že je uzavreté", /Týždeň je uzavretý/.test(await p2.content()));
-ok("tlačidlo Uložiť je nedostupné",
-   await p2.locator("button:has-text('Uložiť')").first().isDisabled());
-/* Vypnuté tlačidlo nestačí — políčka sa dali stlačiť a menili sa, len sa
-   nikam neuložili. To je horšie než nedať klikať vôbec. */
-ok("ani políčka sa nedajú stlačiť",
-   (await p2.locator("table.matrix input[type=radio]:not([disabled])").count()) === 0);
-/* Správcu nemá appka posielať za správcom. */
-ok("správcovi povie, že si to môže otvoriť sám",
-   /otvorte ho v <a href="\/uzavierka/.test(await p2.content()));
+ok("predák vidí, že týždeň je uzavretý", /Týždeň je uzavretý/.test(await p2.content()));
+ok("a že zmena si vyžiada opravu", /vyžiada <strong>opravu<\/strong>/.test(await p2.content()));
+ok("políčka sa dajú stlačiť aj tak",
+   (await p2.locator("table.matrix input[type=radio]:not([disabled])").count()) > 0);
+ok("tlačidlo Uložiť je dostupné",
+   !(await p2.locator("button:has-text('Uložiť')").first().isDisabled()));
 
 console.log("— doplní sa adresa a pošle znova —");
 await p.goto(A + "/uzavierka");
@@ -160,6 +158,8 @@ ok("odoslanie potvrdené na obrazovke", /Odoslané:/.test(t));
 ok("správa naozaj odišla", prijate.filter(z => z.data).length === 1);
 
 const [sprava] = telaSprav();
+const PO_TEST = new URL(await p.getAttribute('a:has-text("tento týždeň")', "href"), A)
+  .searchParams.get("tyzden");
 console.log("— čo prišlo do kuchyne —");
 ok("príjemca je adresa jedálne",
    sprava.prikazy.some(x => /^RCPT TO:<kuchyna@example\.test>$/i.test(x)));
@@ -227,21 +227,30 @@ const p4 = await c4.newPage();
 await p4.goto(A + "/potvrdenie?t=nezmysel");
 ok("cudzí token nič nepotvrdí", /Odkaz už neplatí/.test(await p4.content()));
 
-console.log("— druhé odoslanie je oprava —");
-/* Po uzavretí sa niečo zmení a týždeň sa zavrie znova. Kuchyňa nesmie dostať
-   druhý plný zoznam bez slova o tom, čo sa mení a ktorý platí. */
-await p.goto(A + "/uzavierka");
-await p.click("form[action='/uzavierka/otvorit'] button");
-await p.waitForLoadState("networkidle");
+console.log("— zmena po odoslaní si pýta opravu —");
+/* Toto je bežný pondelok ráno: niekto ochorel. Matica sa mení bez toho, aby
+   sa čokoľvek odomykalo, a uzávierka to musí ohlásiť aj poslať. */
 await p.goto(A + "/tim");
-/* Prvému človeku sa pondelok prepne na krížik — o jednu porciu menej. */
 await p.locator("table.matrix tbody tr").nth(0).locator("td .opts").nth(0)
   .locator("input[value=x]").first().check();
 await p.click("button:has-text('Uložiť')");
 await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("uloženie prešlo aj v uzavretom týždni", /Uložené — \d+ zmen/.test(t));
+ok("a povie, že treba poslať opravu", /jedálni treba poslať opravu/.test(t));
+
 await p.goto(A + "/uzavierka");
-await p.click("button:has-text('Uzavrieť týždeň a odoslať')");
+t = await p.content();
+ok("uzávierka ohlási, že sa počty zmenili", /sa počty zmenili/.test(t));
+ok("vypíše, čo presne", /−1 ks\s+\(\d+ → \d+\)/.test(t));
+ok("a ponúkne tlačidlo na opravu",
+   (await p.locator("form[action='/uzavierka/oprava'] button").count()) === 1);
+
+await p.click("form[action='/uzavierka/oprava'] button");
 await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("oprava odišla", /Oprava odoslaná/.test(t));
+ok("a už sa nepýta znova", !/sa počty zmenili/.test(t));
 
 ok("odišla druhá správa", prijate.filter(z => z.data).length === 2);
 const oprava = telaSprav()[1];
@@ -252,8 +261,20 @@ ok("predmet hovorí, že je to oprava", (() => {
 ok("povie, ktorú objednávku nahrádza", /nahrádza objednávku poslanú/.test(oprava.text));
 ok("vypíše, čo sa mení", /Čo sa mení:/.test(oprava.text));
 ok("aj s rozdielom v kusoch", /−1 ks\s+\(\d+ → \d+\)/.test(oprava.text));
-ok("povie, že platí celý zoznam nižšie", /Platí celá objednávka nižšie/.test(oprava.text));
-ok("celá objednávka je v nej tiež", /Spolu za týždeň:/.test(oprava.text));
+ok("povie, že platí celý zoznam nižšie", /Platí celý zoznam nižšie/.test(oprava.text));
+/* Dni, ktoré už prebehli, v oprave nemajú čo hľadať — uvariť sa už nedajú
+   a kuchár by cez ne musel preskakovať. */
+ok("celá objednávka je v nej tiež", /Spolu za (týždeň|zostávajúce dni):/.test(oprava.text));
+ok("uplynulé dni sa nevypisujú", (() => {
+  const dnesJe = new Date().toISOString().slice(0, 10);
+  const den = ["Pondelok", "Utorok", "Streda", "Štvrtok", "Piatok"];
+  return den.every((n, i) => {
+    const d = new Date(PO_TEST + "T12:00:00Z");
+    d.setUTCDate(d.getUTCDate() + i);
+    const uplynul = d.toISOString().slice(0, 10) < dnesJe;
+    return !uplynul || !new RegExp(`^${n} `, "m").test(oprava.text);
+  });
+})());
 
 t = await p.content();
 ok("staré odoslanie je označené ako nahradené", /nahradené/.test(t));
