@@ -102,7 +102,12 @@ export async function poctyZaTyzden(po) {
 export function textObjednavky(p, odkaz, oprava = null) {
   const r = [];
   r.push(`${oprava ? "OPRAVA objednávky" : "Objednávka"} obedov na týždeň ${tyzdenPopis(p.dni[0])}`);
-  r.push(ODBERATEL);
+  r.push("");
+  /* Meno jedálne patrí hore. Kuchyňa si tým overí, že správa je naozaj pre
+     ňu, a správca — ktorému chodia objednávky pre obe jedálne do tej istej
+     schránky — inak nemá ako rozoznať, ktorá je ktorá. */
+  r.push(`Jedáleň:    ${p.jedalen.nazov}`);
+  r.push(`Odberateľ:  ${ODBERATEL}`);
   r.push("");
 
   /* Oprava musí najprv povedať, čo sa mení. Poslať druhýkrát celý zoznam bez
@@ -200,7 +205,7 @@ async function posliJednej(p, po, ktoId) {
     : null;
 
   const predmet = `${oprava ? "OPRAVA objednávky" : "Objednávka"} obedov ` +
-                  `${tyzdenPopis(po)} — PD Vráble`;
+                  `${tyzdenPopis(po)} — PD Vráble pre ${p.jedalen.nazov}`;
   const telo = textObjednavky(p, odkaz, oprava);
 
   const zapisSa = async (stav, chyba) => jeden(`
@@ -336,6 +341,11 @@ function zobrazPotvrdenie(k, o, t, stav) {
     ${o.potvrdene || o.nahradene ? "" : `
       <form method="post" action="/potvrdenie">
         <input type="hidden" name="t" value="${esc(t)}">
+        ${/* Kuchár nie je prihlásený a známku nepotrebuje — tajomstvom je token
+              v odkaze. Lenže ten istý odkaz otvára aj správca vo vlastnom
+              prehliadači, kde prihlásený je, a smerovač vtedy známku vyžaduje.
+              Bez nej sa potvrdenie odmietlo hláškou o formulári. */
+          k.csrf ? `<input type="hidden" name="znamka" value="${esc(k.csrf)}">` : ""}
         <p>Sedia počty vyššie? Potvrďte prosím, že objednávku máte.</p>
         <button class="btn primary" type="submit">Potvrdzujem prijatie objednávky</button>
       </form>`}

@@ -109,6 +109,13 @@ await p2.goto(A + "/tim");
 ok("predák vidí, že je uzavreté", /Týždeň je uzavretý/.test(await p2.content()));
 ok("tlačidlo Uložiť je nedostupné",
    await p2.locator("button:has-text('Uložiť')").first().isDisabled());
+/* Vypnuté tlačidlo nestačí — políčka sa dali stlačiť a menili sa, len sa
+   nikam neuložili. To je horšie než nedať klikať vôbec. */
+ok("ani políčka sa nedajú stlačiť",
+   (await p2.locator("table.matrix input[type=radio]:not([disabled])").count()) === 0);
+/* Správcu nemá appka posielať za správcom. */
+ok("správcovi povie, že si to môže otvoriť sám",
+   /otvorte ho v <a href="\/uzavierka/.test(await p2.content()));
 
 console.log("— doplní sa adresa a pošle znova —");
 await p.goto(A + "/uzavierka");
@@ -165,6 +172,14 @@ ok("počty sú v tele ako čistý text, nielen v prílohe",
    /Pondelok\s+\d+\.\s*\d+\./.test(sprava.text) && /\d+ ks/.test(sprava.text));
 /* Tri tvary: 1 obed · 3 obedy · 5 obedov. „3 obedov" v objednávke vyzerá,
    ako keby to písal stroj — a je to chyba. */
+/* Správcovi chodia objednávky pre obe jedálne do tej istej schránky —
+   bez mena jedálne ich od seba nerozozná. */
+ok("hore je meno jedálne", /Jedáleň:\s+GASTROGAL/.test(sprava.text));
+ok("aj odberateľ", /Odberateľ:\s+Poľnohospodárske družstvo/.test(sprava.text));
+ok("meno jedálne je aj v predmete", (() => {
+  const m = sprava.hlavicky.match(/Subject: =\?UTF-8\?B\?([^?]+)\?=/);
+  return m && Buffer.from(m[1], "base64").toString("utf8").includes("GASTROGAL");
+})());
 ok("je v ňom súčet za týždeň v správnom tvare",
    /Spolu za týždeň: (1 obed|[2-4] obedy|\d+ obedov)\./.test(sprava.text));
 ok("je v ňom odkaz na potvrdenie", /\/potvrdenie\?t=[\w-]+/.test(sprava.text));
@@ -253,10 +268,14 @@ ok("a tlačidlo na potvrdenie nemá",
 
 const novyOdkaz = oprava.text.match(/(https?:\/\/\S+\/potvrdenie\?t=[\w-]+)/)[1];
 ok("oprava má vlastný odkaz", novyOdkaz !== odkaz);
-await p5.goto(novyOdkaz);
-await p5.click("button:has-text('Potvrdzujem')");
-await p5.waitForLoadState("networkidle");
-ok("nový sa potvrdiť dá", /je potvrdená/.test(await p5.content()));
+
+/* Ten istý odkaz otvára aj správca vo vlastnom prehliadači, kde prihlásený
+   je. Smerovač vtedy vyžaduje známku a bez nej sa potvrdenie odmietlo
+   hláškou o formulári — pritom je to najbežnejšia cesta pri skúšaní. */
+await p.goto(novyOdkaz);
+await p.click("button:has-text('Potvrdzujem')");
+await p.waitForLoadState("networkidle");
+ok("potvrdiť sa dá aj z prihlásenej schránky", /je potvrdená/.test(await p.content()));
 
 console.log("— dvakrát sa neposiela —");
 await p.goto(A + "/uzavierka");

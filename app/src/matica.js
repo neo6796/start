@@ -325,8 +325,10 @@ export async function tim(k) {
   </div>
 
   ${zamok?.uzavrety ? `<div class="warnbox">Týždeň je uzavretý a objednávka odišla jedálňam —
-    zapisovať sa doň nedá. Ak sa treba vrátiť, otvorí sa
-    v <a href="/uzavierka?tyzden=${po}">Uzávierke</a> a jedálni sa potom musí poslať oprava.</div>` : ""}
+    zapisovať sa doň nedá, preto sa políčka ani nedajú stlačiť. ${k.osoba.je_admin
+      ? `Ak sa treba vrátiť, otvorte ho v <a href="/uzavierka?tyzden=${po}">Uzávierke</a>;
+         jedálni sa potom pošle oprava s tým, čo sa zmenilo.`
+      : "Ak sa treba vrátiť, otvoriť ho môže správca — jedálni sa potom pošle oprava."}</div>` : ""}
 
   ${ludia.length === 0
     ? `<div class="card"><p style="margin:0">Nemáš nikoho v tíme.</p>
@@ -342,7 +344,7 @@ export async function tim(k) {
           <span class="pill neutral">${mnoho(ludia.length, ["človek", "ľudia", "ľudí"])}</span>
         </div>
         ${tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu,
-                   pohlad === "vsetci", false, k.osoba.id)}
+                   pohlad === "vsetci", Boolean(zamok?.uzavrety), k.osoba.id)}
         ${LEGENDA}
         <div class="btn-row" style="margin-top:16px">
           <button class="btn primary" type="submit"${zamok?.uzavrety ? " disabled" : ""}>Uložiť</button>
@@ -711,7 +713,12 @@ export async function moje(k) {
     </span>
   </div>
   ${zamok?.uzavrety ? `<div class="warnbox">Týždeň je uzavretý a objednávka už odišla do jedálne.
-    Zmena sa dá spraviť, ale musí ju povoliť správca a jedálni sa pošle oprava — ozvi sa predákovi.</div>` : ""}
+    ${k.osoba.je_admin
+      ? `Ak sa treba vrátiť, otvorte ho v <a href="/uzavierka?tyzden=${po}">Uzávierke</a>.`
+      : k.osoba.je_predak
+      ? "Ak sa treba vrátiť, otvoriť ho môže správca."
+      : "Ak sa treba vrátiť, povedzte predákovi."}
+    Jedálni sa potom pošle oprava s tým, čo sa zmenilo.</div>` : ""}
   <div class="card">
     ${ludia.length
       ? tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu, false, true) + LEGENDA
