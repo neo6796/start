@@ -199,8 +199,19 @@ ok("prepnutie späť na tím funguje",
    (await p.locator("table.matrix tbody tr").count()) === vTime);
 
 console.log("— stravník vidí svoj týždeň —");
+/* Obrazovka nič neukladá, tak sa v nej ani nesmie dať klikať: políčko, ktoré
+   sa stlačí a nič sa nestane, je horšie než políčko, ktoré sa stlačiť nedá. */
 await p.goto(A + "/moje");
-ok("vlastný týždeň sa otvorí", (await p.content()).includes("Môj týždeň"));
+t = await p.content();
+ok("vlastný týždeň sa otvorí", t.includes("Môj týždeň"));
+ok("je v ňom len jeden človek", (await p.locator("table.matrix tbody tr").count()) === 1);
+ok("políčka sa nedajú stlačiť",
+   (await p.locator("table.matrix input[type=radio]:not([disabled])").count()) === 0);
+ok("čo je zvolené, je aj tak vidieť",
+   (await p.locator("table.matrix input[type=radio]:checked").count()) > 0);
+ok("povie, prečo sa nedá klikať", /len na pozeranie/.test(t));
+ok("nie je tam tlačidlo Uložiť",
+   (await p.locator("button:has-text('Uložiť')").count()) === 0);
 
 await b.close();
 console.log(chyby.length ? "CHYBY: " + chyby.join(" | ") : "— žiadne chyby v prehliadači —");

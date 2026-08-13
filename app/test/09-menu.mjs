@@ -242,6 +242,22 @@ ok("polievka má vlastný riadok",
    (await p.locator("table.listok-tab tr.polievka-riadok").count()) >= 1);
 ok("a je v ňom to, čo sa prečítalo z lístka",
    /polievka-riadok[\s\S]{0,400}Hrášková polievka/.test(t));
+/* Zoznam ľudí patrí nad lístok — kvôli nemu sa obrazovka otvára. */
+ok("matica je nad jedálnym lístkom",
+   t.indexOf('class="matrix"') > 0 && t.indexOf('class="listok"') > t.indexOf('class="matrix"'));
+
+/* Vlastný týždeň nič neukladá, tak sa v ňom ani nesmie dať klikať: políčko,
+   ktoré sa stlačí a nič sa nestane, je horšie než políčko, ktoré sa stlačiť
+   nedá. */
+await p.goto(A + "/moje");
+t = await p.content();
+ok("vlastný týždeň sa nedá klikať",
+   (await p.locator("table.matrix input[type=radio]:not([disabled])").count()) === 0);
+ok("čo je zvolené, je aj tak vidieť alebo je týždeň prázdny",
+   (await p.locator("table.matrix input[type=radio]").count()) > 0);
+ok("povie, prečo sa nedá klikať", /len na pozeranie/.test(t));
+ok("a tlačidlo Uložiť tam nie je",
+   (await p.locator("button:has-text('Uložiť')").count()) === 0);
 
 console.log("— predák menu vidí, ale nemení —");
 await p.goto(A + "/ludia");

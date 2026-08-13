@@ -87,17 +87,17 @@ function precPreč(nepritomnosti, osobaId, datum) {
 
 /* ---------- vykreslenie ---------- */
 
-function bunka(o, datum, zaznam, moje, vsetkyJedalne, prec, menu, denIndex) {
+function bunka(o, datum, zaznam, moje, vsetkyJedalne, prec, menu, denIndex, citaj = false) {
   const hodnota = zaznam?.jedlo;
   const nerozhodnute = hodnota === null || hodnota === undefined;
   const menoPola = `b-${o.id}-${datum}`;
   const viac = moje.length > 1;
 
   const krizik = `<label class="opt-b none">
-    <input type="radio" name="${menoPola}" value="x"${hodnota === BEZ_OBEDA ? " checked" : ""}>
+    <input type="radio" name="${menoPola}" value="x"${hodnota === BEZ_OBEDA ? " checked" : ""}${citaj ? " disabled" : ""}>
     <span aria-hidden="true">×</span><span class="len-pre-citacku">nechce obed</span></label>`;
 
-  let h = `<div class="opts" role="group" aria-label="${esc(o.priezvisko)} ${esc(o.meno)}">`;
+  let h = `<div class="opts${citaj ? " citaj" : ""}" role="group" aria-label="${esc(o.priezvisko)} ${esc(o.meno)}">`;
   moje.forEach((jid, i) => {
     const j = vsetkyJedalne.find(x => x.id === jid);
     if (!j) return;
@@ -110,7 +110,7 @@ function bunka(o, datum, zaznam, moje, vsetkyJedalne, prec, menu, denIndex) {
       const nazovJedla = menu?.get(jid)?.nazov(denIndex, n) ?? null;
       const popis = nazovJedla ? `${j.nazov}, ${znak} — ${nazovJedla}` : `${j.nazov}, jedlo ${znak}`;
       h += `<label class="opt-b"${nazovJedla ? ` title="${esc(nazovJedla)}"` : ""}>
-        <input type="radio" name="${menoPola}" value="${jid}:${n}"${zvolene ? " checked" : ""}>
+        <input type="radio" name="${menoPola}" value="${jid}:${n}"${zvolene ? " checked" : ""}${citaj ? " disabled" : ""}>
         <span aria-hidden="true">${esc(znak)}</span>
         <span class="len-pre-citacku">${esc(popis)}</span></label>`;
     }
@@ -124,7 +124,7 @@ function bunka(o, datum, zaznam, moje, vsetkyJedalne, prec, menu, denIndex) {
   return h;
 }
 
-function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti, menu, sTimom = false) {
+function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti, menu, sTimom = false, citaj = false) {
   const dni = dniTyzdna(po);
   return `
 <div class="scroll-x"><table class="matrix">
@@ -161,7 +161,7 @@ function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti
           const z = objednavky.get(`${o.id}|${d}`);
           const prazdna = z?.jedlo === null || z?.jedlo === undefined;
           const prec = precPreč(nepritomnosti, o.id, d);
-          return `<td${prazdna ? ' class="gap"' : ""}>${bunka(o, d, z, moje, vsetkyJedalne, prec, menu, i)}</td>`;
+          return `<td${prazdna ? ' class="gap"' : ""}>${bunka(o, d, z, moje, vsetkyJedalne, prec, menu, i, citaj)}</td>`;
         }).join("")}
         <td class="cnt${chyba ? " gap" : ""}">${chyba || "—"}</td>
       </tr>`;
@@ -332,7 +332,6 @@ export async function tim(k) {
           <h3>${pohlad === "vsetci" ? "Všetci stravníci" : esc(ludia[0].tim ?? "Bez tímu")}</h3>
           <span class="pill neutral">${mnoho(ludia.length, ["človek", "ľudia", "ľudí"])}</span>
         </div>
-        ${kartaMenu(menu, jedla, po)}
         ${tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu, pohlad === "vsetci")}
         ${LEGENDA}
         <div class="btn-row" style="margin-top:16px">
@@ -341,6 +340,8 @@ export async function tim(k) {
         <p class="hint" style="margin-top:12px">Opätovné kliknutie na zvolenú možnosť ju zruší
           a bunka sa vráti na nerozhodnuté.</p>
       </form>
+
+      ${kartaMenu(menu, jedla, po)}
 
       <div class="card">
         <details${k.url.searchParams.get("prec") ? " open" : ""}>
@@ -702,11 +703,15 @@ export async function moje(k) {
   ${zamok?.uzavrety ? `<div class="warnbox">Týždeň je uzavretý a objednávka už odišla do jedálne.
     Zmena sa dá spraviť, ale musí ju povoliť správca a jedálni sa pošle oprava — ozvi sa predákovi.</div>` : ""}
   <div class="card">
-    ${ludia.length ? kartaMenu(menu, jedla, po) + tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu) : "<p>Nenašiel som ťa v zozname.</p>"}
-    ${LEGENDA}
-    <p class="hint" style="margin-top:12px">Zatiaľ len na pozeranie — vlastné objednávanie
-      pribudne hneď po tom, ako sa matica overí v pilote. Zmenu ti dovtedy spraví predák.</p>
+    ${ludia.length
+      ? tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu, false, true) + LEGENDA
+      : "<p>Nenašiel som ťa v zozname.</p>"}
+    <p class="hint" style="margin-top:12px">Táto obrazovka je len na pozeranie — políčka sa
+      preto ani nedajú stlačiť. Vlastné objednávanie pribudne po tom, ako sa matica overí
+      v pilote; dovtedy zmenu spraví predák.</p>
   </div>
+
+  ${ludia.length ? kartaMenu(menu, jedla, po) : ""}
 </section>`
   }));
 }

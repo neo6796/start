@@ -1059,6 +1059,13 @@
   }
   table.menu-mriezka tr.polievka-riadok th.oznak{color:var(--ink-3)}
 
+  /* Týždeň stravníka je len na pozeranie. Políčka musia vyzerať ako záznam,
+     nie ako formulár — klikať sa dá a neuloží sa nič je horšie než nedať
+     klikať vôbec. */
+  .opts.citaj .opt-b{cursor:default;opacity:.6}
+  .opts.citaj .opt-b:has(input:checked){opacity:1}
+  .opts.citaj .opt-b:hover{border-color:var(--line-2)}
+
   /* Jedálny lístok nad maticou. Do buniek matice sa názov jedla nezmestí,
      tak je celý lístok tu — inak by predák pri „C" nevedel, čo C je. */
   .listky{margin-bottom:18px}
