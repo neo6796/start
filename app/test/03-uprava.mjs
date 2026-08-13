@@ -86,6 +86,30 @@ ok("predák sa v zozname ľudí ukazuje pri tíme",
 ok("hromadné priradenie už predáka neponúka",
    (await p.locator('select[name="predak_id"]').count()) === 0);
 
+console.log("— zloženie tímu na jednom mieste —");
+/* Predák bol v číselníku a členovia v zozname ľudí. Skontrolovať, či je
+   každý niekde zaradený, sa dalo len prechádzaním tímov po jednom. */
+await p.goto(A + "/ciselniky");
+const riadokTimu = p.locator("tr:has-text('Tím Sever')");
+ok("pri tíme je predák", (await riadokTimu.innerText()).includes("Sedlák Ivan"));
+ok("aj počet ľudí", (await riadokTimu.locator("details.clenovia summary").innerText()).includes("ľud"));
+await riadokTimu.locator("details.clenovia > summary").click();
+const mena = await riadokTimu.locator("ul.zoznam-clenov li").allInnerTexts();
+ok("po rozkliknutí sú v ňom mená", mena.length >= 2);
+ok("aj s osobným číslom", /\d{3,}/.test(mena.join(" ")));
+ok("a je medzi nimi ten, koho sme priradili",
+   mena.some(x => x.includes("Vargová Zuzana")));
+
+await p.goto(A + "/ciselniky");
+await p.click("details:has(input[value=tim]) summary");
+await p.fill("form.pridat:has(input[value=tim]) #p-tim-nazov", "Tím Juh");
+await p.click("form.pridat:has(input[value=tim]) button[type=submit]");
+await p.waitForLoadState("networkidle");
+/* Prázdny tím sa nesmie tváriť rovnako ako plný — práve on je ten,
+   ktorý treba nájsť. */
+ok("prázdny tím to povie",
+   (await p.locator("tr:has-text('Tím Juh')").innerText()).includes("nikto"));
+
 console.log("— prázdne polia —");
 await p.goto(A + "/ciselniky");
 await p.click("tr:has-text('GASTRO ABM') a:has-text('Upraviť')");

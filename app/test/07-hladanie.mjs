@@ -74,7 +74,9 @@ await p.waitForLoadState("networkidle");
 ok("človek je späť medzi aktívnymi", await riadkov() === vsetkych);
 
 console.log("— filter podľa tímu —");
-await p.selectOption("#f-tim", { index: 1 });
+/* Konkrétny tím, nie „prvý v poradí" — prázdny tím by dal nula riadkov
+   a skúška by padla na tom, že medzitým pribudol iný tím. */
+await p.selectOption("#f-tim", { label: "Tím Sever" });
 await p.click("button:has-text('Hľadať')");
 await p.waitForLoadState("networkidle");
 ok("filter podľa tímu zúži zoznam", await riadkov() > 0);

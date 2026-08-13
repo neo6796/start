@@ -719,6 +719,12 @@
     background:var(--surface-2);border:1px solid var(--line-2);border-radius:var(--r);
     padding:12px 14px;margin:12px 0 0;overflow-x:auto;color:var(--ink);
   }
+  /* Zloženie tímu v číselníku — mená pod počtom, nie v ďalšej obrazovke. */
+  .clenovia > summary{display:inline-block;padding:4px 10px;font-size:12px}
+  .zoznam-clenov{margin:8px 0 0;padding-left:18px;font-size:13px}
+  .zoznam-clenov li{margin-bottom:2px;white-space:nowrap}
+  .zoznam-clenov li.is-off{opacity:.55}
+
   .zoznam-mien{margin:8px 0 0;padding-left:20px;columns:2;column-gap:28px}
   .zoznam-mien li{break-inside:avoid;margin-bottom:3px}
   @media (max-width:720px){ .zoznam-mien{columns:1} }

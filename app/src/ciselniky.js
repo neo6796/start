@@ -4,7 +4,7 @@
    ukazujú objednávky a zmazaním by sa minulosť prepísala (koncept 6.1).
    Upraviť sa dá čokoľvek — cenník, e-mail aj preklep v názve. */
 
-import { stranka, esc } from "./html.js";
+import { stranka, esc, mnoho } from "./html.js";
 import { dopyt, jeden, vsetky, zapis } from "./db.js";
 
 const eur = v => Number(v).toFixed(2).replace(".", ",") + " €";
@@ -101,6 +101,19 @@ function bunka([kluc, , dr, , moz], r, kontext) {
   return v;
 }
 
+/* Zložený tím sa zbalí do počtu; rozklikne sa, keď treba vidieť mená.
+   Kto je neaktívny, je označený — v tíme ostáva, ale neobjednáva sa preň. */
+function clenoviaBunka(ludia) {
+  if (!ludia.length) return '<span class="hint">nikto</span>';
+  return `<details class="clenovia">
+    <summary class="btn">${mnoho(ludia.length, ["človek", "ľudia", "ľudí"])}</summary>
+    <ul class="zoznam-clenov">
+      ${ludia.map(o => `<li${o.aktivny ? "" : ' class="is-off"'}>${esc(o.meno)}
+        <span class="hint">${esc(o.kod_dochadzka ?? "—")}${o.aktivny ? "" : " · neaktívny"}</span></li>`).join("")}
+    </ul>
+  </details>`;
+}
+
 function karta(druh, d, riadky, k, otvorene, kontext) {
   return `
 <div class="card">
@@ -111,9 +124,11 @@ function karta(druh, d, riadky, k, otvorene, kontext) {
   ${riadky.length === 0
     ? `<p class="hint" style="margin:0 0 14px">${esc(d.prazdne)}</p>`
     : `<div class="scroll-x"><table class="data">
-        <thead><tr>${d.polia.map(p => `<th>${esc(p[1])}</th>`).join("")}<th>Stav</th><th></th></tr></thead>
+        <thead><tr>${d.polia.map(p => `<th>${esc(p[1])}</th>`).join("")}
+          ${druh === "tim" ? "<th>Ľudia</th>" : ""}<th>Stav</th><th></th></tr></thead>
         <tbody>${riadky.map(r => `<tr${r[d.stav] ? "" : ' class="is-off"'}>
           ${d.polia.map(p => `<td>${esc(bunka(p, r, kontext))}</td>`).join("")}
+          ${druh === "tim" ? `<td>${clenoviaBunka(kontext.clenovia?.get(r.id) ?? [])}</td>` : ""}
           <td>${r[d.stav] ? "aktívna" : "neaktívna"}</td>
           <td class="akcie">
             <a class="btn" href="/ciselnik?druh=${esc(druh)}&id=${r.id}">Upraviť</a>
@@ -147,11 +162,24 @@ async function pocetPouziti(d, id) {
   return Number(r?.n ?? 0);
 }
 
-/* Predáci sa ponúkajú pri tímoch, tak ich načítame raz pre celú stránku. */
+/* Predáci sa ponúkajú pri tímoch, tak ich načítame raz pre celú stránku.
+   Spolu s nimi aj zloženie tímov: predák je v jednom stĺpci, ľudia v druhom,
+   takže sa dá na jednej obrazovke skontrolovať, či je každý niekde zaradený
+   a či má ten tím koho vedie. Inak by sa to dalo zistiť len prechádzaním
+   zoznamu ľudí s filtrom po jednom tíme. */
 async function kontextUdajov() {
   const predaci = await vsetky(
     "SELECT id, priezvisko || ' ' || meno AS nazov FROM osoba WHERE aktivny AND je_predak ORDER BY priezvisko");
-  return { predaci };
+
+  const clenovia = new Map();
+  for (const r of await vsetky(`
+    SELECT tim_id, priezvisko || ' ' || meno AS meno, kod_dochadzka, aktivny
+      FROM osoba WHERE tim_id IS NOT NULL
+     ORDER BY aktivny DESC, priezvisko, meno`)) {
+    if (!clenovia.has(r.tim_id)) clenovia.set(r.tim_id, []);
+    clenovia.get(r.tim_id).push(r);
+  }
+  return { predaci, clenovia };
 }
 
 function dotaz(d) {
