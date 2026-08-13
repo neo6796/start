@@ -50,6 +50,15 @@ const bunky = prvy.locator("td .opts");
 ok("bunka ponúka jedlá aj krížik",
    (await bunky.first().locator("input[type=radio]").count()) >= 2);
 
+/* Predák objednáva aj sebe. Hľadať sa medzi tridsiatimi menami je zbytočná
+   práca, tak je jeho riadok prvý a oddelený. */
+ok("vlastný riadok je prvý",
+   (await p.locator("table.matrix tbody tr").first().innerText()).includes("Solár"));
+ok("je označený", (await p.locator("table.matrix tbody tr.ja").count()) === 1);
+/* innerText vracia to, čo je vidieť — odznak je veľkými písmenami. */
+ok("a povie, že je to on",
+   (await p.locator("table.matrix tbody tr.ja .badge").innerText()).trim().toLowerCase() === "vy");
+
 console.log("— zápis volieb —");
 await bunky.nth(0).locator("input[value$=':1']").first().check();
 await bunky.nth(1).locator("input[value=x]").check();

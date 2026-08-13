@@ -124,8 +124,15 @@ function bunka(o, datum, zaznam, moje, vsetkyJedalne, prec, menu, denIndex, cita
   return h;
 }
 
-function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti, menu, sTimom = false, citaj = false) {
+function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti, menu,
+                 sTimom = false, citaj = false, jaId = null) {
   const dni = dniTyzdna(po);
+  /* Kto sa na maticu pozerá, je v nej aj sám — objednáva si tiež. Hľadať sa
+     medzi tridsiatimi menami je zbytočná práca, tak je jeho riadok prvý
+     a oddelený. Poradie zvyšku ostáva, ako bolo: podľa tímu a priezviska. */
+  const poradie = jaId
+    ? [...ludia.filter(o => o.id === jaId), ...ludia.filter(o => o.id !== jaId)]
+    : ludia;
   return `
 <div class="scroll-x"><table class="matrix">
   <thead><tr>
@@ -135,7 +142,8 @@ function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti
     <th class="cnt">Bez voľby</th>
   </tr></thead>
   <tbody>
-    ${ludia.map(o => {
+    ${poradie.map(o => {
+      const jaSom = o.id === jaId;
       const moje = pridelenia.get(o.id) ?? (o.poskytovatel_id ? [o.poskytovatel_id] : []);
       const chyba = dni.filter(d => {
         const z = objednavky.get(`${o.id}|${d}`);
@@ -145,17 +153,18 @@ function tabulka(ludia, objednavky, pridelenia, po, vsetkyJedalne, nepritomnosti
          zrozumiteľnejšie než päťkrát v prázdnych bunkách. */
       /* Pri pohľade na celý podnik treba pri mene aj tím — bez neho sa
          v dlhom zozname nedá povedať, koho sa to týka. */
-      const kto = `<span class="nm">${esc(o.priezvisko)} ${esc(o.meno)}</span>
+      const kto = `<span class="nm">${esc(o.priezvisko)} ${esc(o.meno)}${
+          jaSom ? '<span class="badge lead">vy</span>' : ""}</span>
         <span class="pn">${esc(o.kod_dochadzka ?? "—")}${
           sTimom ? " · " + esc(o.tim ?? "bez tímu") : ""}</span>`;
 
-      if (!moje.length) return `<tr class="is-off">
+      if (!moje.length) return `<tr class="is-off${jaSom ? " ja" : ""}">
         <th>${kto}</th>
         <td colspan="6" class="bez-jedalne">Nemá pridelenú jedáleň, takže sa preň nedá objednať.
           Prideľuje sa v <a href="/osoba?id=${o.id}">jeho údajoch</a>.</td>
       </tr>`;
 
-      return `<tr>
+      return `<tr${jaSom ? ' class="ja"' : ""}>
         <th>${kto}</th>
         ${dni.map((d, i) => {
           const z = objednavky.get(`${o.id}|${d}`);
@@ -332,7 +341,8 @@ export async function tim(k) {
           <h3>${pohlad === "vsetci" ? "Všetci stravníci" : esc(ludia[0].tim ?? "Bez tímu")}</h3>
           <span class="pill neutral">${mnoho(ludia.length, ["človek", "ľudia", "ľudí"])}</span>
         </div>
-        ${tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu, pohlad === "vsetci")}
+        ${tabulka(ludia, objednavky, pridelenia, po, jedla, nepritomnosti, menu,
+                   pohlad === "vsetci", false, k.osoba.id)}
         ${LEGENDA}
         <div class="btn-row" style="margin-top:16px">
           <button class="btn primary" type="submit"${zamok?.uzavrety ? " disabled" : ""}>Uložiť</button>

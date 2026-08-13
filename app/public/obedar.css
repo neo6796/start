@@ -1059,6 +1059,13 @@
   }
   table.menu-mriezka tr.polievka-riadok th.oznak{color:var(--ink-3)}
 
+  /* Vlastný riadok v matici. Predák a správca objednávajú aj sebe a v dlhom
+     zozname sa hľadali — tak je ich riadok prvý a viditeľne oddelený. */
+  table.matrix tr.ja th:first-child{box-shadow:inset 3px 0 0 var(--petrol)}
+  table.matrix tr.ja > *{border-bottom:2px solid var(--line-2)}
+  table.matrix tr.ja .nm{font-weight:700}
+  table.matrix .nm .badge{margin-left:8px;vertical-align:2px}
+
   /* Týždeň stravníka je len na pozeranie. Políčka musia vyzerať ako záznam,
      nie ako formulár — klikať sa dá a neuloží sa nič je horšie než nedať
      klikať vôbec. */
