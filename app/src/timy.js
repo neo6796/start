@@ -19,11 +19,14 @@ async function nacitaj() {
   const ludia = await vsetky(`
     SELECT id, priezvisko, meno, kod_dochadzka, tim_id, je_admin
       FROM osoba WHERE aktivny ORDER BY priezvisko, meno`);
+  /* Poradie podľa priezviska, nie podľa toho, kto je zástupca. Keď sa triedilo
+     podľa roly, označenie zástupcu človeka preplo naspodok zoznamu — odškrtol
+     si políčko a mená sa ti pod rukou premiešali. */
   const predaci = new Map();
   for (const r of await vsetky(`
-    SELECT tp.tim_id, tp.osoba_id, tp.zastupca, o.priezvisko, o.meno
+    SELECT tp.tim_id, tp.osoba_id, tp.zastupca, o.priezvisko, o.meno, o.kod_dochadzka
       FROM tim_predak tp JOIN osoba o ON o.id = tp.osoba_id
-     ORDER BY tp.zastupca, o.priezvisko`)) {
+     ORDER BY o.priezvisko, o.meno`)) {
     if (!predaci.has(r.tim_id)) predaci.set(r.tim_id, []);
     predaci.get(r.tim_id).push(r);
   }
@@ -103,18 +106,29 @@ export async function zoznam(k) {
 
     <div class="card-head" style="margin-top:18px"><h3>Kto tím vedie</h3>
       <span class="hint">predák objednáva za celý tím</span></div>
-    ${vedu.length ? `<ul class="zoznam-clenov" style="columns:1">
-      ${vedu.map(v => `<li>
-        <label class="check">
-          <input type="checkbox" name="predak" value="${v.osoba_id}" checked>
-          <span>${esc(v.priezvisko)} ${esc(v.meno)}</span>
-        </label>
-        <label class="check" style="margin-left:18px">
-          <input type="checkbox" name="zastupca" value="${v.osoba_id}"${v.zastupca ? " checked" : ""}>
-          <span class="hint">zástupca</span>
-        </label>
-      </li>`).join("")}
-    </ul>` : `<div class="warnbox">Tím nikto nevedie — jeho matica sa nikomu neukáže
+    ${vedu.length ? `
+    <div class="scroll-x"><table class="data vedenie">
+      <thead><tr><th>Priezvisko a meno</th><th>Osobné číslo</th>
+        <th>Rola</th><th>Odobrať</th></tr></thead>
+      <tbody>${vedu.map(v => `<tr>
+        <td>${esc(v.priezvisko)} ${esc(v.meno)}</td>
+        <td class="num">${esc(v.kod_dochadzka ?? "—")}</td>
+        <td class="rola">
+          <input type="hidden" name="vedie" value="${v.osoba_id}">
+          <label class="check"><input type="radio" name="rola-${v.osoba_id}" value="predak"${
+            v.zastupca ? "" : " checked"}><span>predák</span></label>
+          <label class="check"><input type="radio" name="rola-${v.osoba_id}" value="zastupca"${
+            v.zastupca ? " checked" : ""}><span>zástupca</span></label>
+        </td>
+        <td class="tick"><label class="check">
+          <input type="checkbox" name="odobrat" value="${v.osoba_id}"
+                 aria-label="Odobrať ${esc(v.priezvisko)} ${esc(v.meno)} z vedenia tímu"></label></td>
+      </tr>`).join("")}</tbody>
+    </table></div>
+    <p class="hint" style="margin:10px 0 0">Zástupca má tie isté práva; rozdiel je
+      v tom, koho sa pýtať ako prvého — preto aspoň jeden musí ostať predákom.
+      Odobratie z vedenia človeka z tímu nevyhodí, len prestane zaň objednávať.</p>
+    ` : `<div class="warnbox">Tím nikto nevedie — jeho matica sa nikomu neukáže
       a za týchto ľudí neobjedná nikto.</div>`}
 
     <div class="field" style="max-width:380px;margin-top:12px">
@@ -265,10 +279,18 @@ export async function uloz(k) {
 
   const cisla = v => [].concat(k.data[v] ?? []).map(Number).filter(Number.isInteger);
   const clenovia = cisla("clen");
-  const predaci = new Set(cisla("predak"));
-  const zastupcovia = new Set(cisla("zastupca"));
+
+  /* Vedenie sa mení cielene, nie prepísaním celého zoznamu. Odobrať niekoho
+     sa dá len tým, že sa to naozaj zaškrtne — nie ako vedľajší účinok toho,
+     že políčko pri mene ostalo prázdne. Zároveň to znamená, že formulár
+     z medzitým zastaranej stránky nezhodí predáka, o ktorom nevie. */
+  const odobrat = new Set(cisla("odobrat"));
+  const vedie = cisla("vedie").filter(x => !odobrat.has(x));
   const novy = Number(k.data.novy_predak);
-  if (Number.isInteger(novy) && novy > 0) predaci.add(novy);
+  if (Number.isInteger(novy) && novy > 0 && !vedie.includes(novy)) vedie.push(novy);
+  /* Novo pridaný predák nemá políčko roly — a zástupca bez predáka nedáva
+     zmysel, tak začína ako predák. */
+  const jeZastupca = osobaId => k.data[`rola-${osobaId}`] === "zastupca";
 
   const klient = await bazen.connect();
   try {
@@ -284,12 +306,32 @@ export async function uloz(k) {
     if (clenovia.length)
       await klient.query("UPDATE osoba SET tim_id = $1 WHERE id = ANY($2::int[])", [id, clenovia]);
 
-    await klient.query("DELETE FROM tim_predak WHERE tim_id = $1", [id]);
-    for (const osobaId of predaci)
+    if (odobrat.size)
+      await klient.query(
+        "DELETE FROM tim_predak WHERE tim_id = $1 AND osoba_id = ANY($2::int[])",
+        [id, [...odobrat]]);
+
+    for (const osobaId of vedie)
       await klient.query(
         `INSERT INTO tim_predak (tim_id, osoba_id, zastupca, pridal_id)
-         VALUES ($1,$2,$3,$4) ON CONFLICT DO NOTHING`,
-        [id, osobaId, zastupcovia.has(osobaId), k.osoba.id]);
+         VALUES ($1,$2,$3,$4)
+         ON CONFLICT (tim_id, osoba_id) DO UPDATE SET zastupca = EXCLUDED.zastupca`,
+        [id, osobaId, jeZastupca(osobaId), k.osoba.id]);
+
+    /* Zástupca zastupuje predáka. Tím, kde sú samí zástupcovia, je stav, ktorý
+       nič neznamená — a vzniká ľahko, lebo označiť zástupcu je jedno kliknutie.
+       Kontroluje sa to na výslednom stave, nie na formulári: len ten hovorí
+       pravdu aj vtedy, keď medzitým niekto pridal predáka inde. */
+    const { rows: [p] } = await klient.query(`
+      SELECT count(*)::int AS spolu,
+             count(*) FILTER (WHERE NOT zastupca)::int AS hlavnych
+        FROM tim_predak WHERE tim_id = $1`, [id]);
+    if (p.spolu > 0 && p.hlavnych === 0) {
+      await klient.query("ROLLBACK");
+      klient.release();
+      return spat("chyba", "Zástupca zastupuje predáka, takže aspoň jeden musí ostať " +
+        "predákom. Neuložilo sa nič — ak majú byť rovnocenní, nechajte oboch ako predákov.");
+    }
 
     await klient.query("COMMIT");
   } catch (e) {
@@ -300,7 +342,9 @@ export async function uloz(k) {
   klient.release();
 
   await zapis(k.osoba.id, "tim.ulozeny",
-              { id, nazov, clenov: clenovia.length, predakov: predaci.size });
-  return spat("sprava", `${nazov}: ${mnoho(clenovia.length, ["človek", "ľudia", "ľudí"])}, ` +
-    `${mnoho(predaci.size, ["predák", "predáci", "predákov"])}.`);
+              { id, nazov, clenov: clenovia.length, vedie: vedie.length, odobranych: odobrat.size });
+  const casti = [`${mnoho(clenovia.length, ["človek", "ľudia", "ľudí"])}`];
+  if (vedie.length) casti.push(`vedie ${mnoho(vedie.length, ["predák", "predáci", "predákov"])}`);
+  if (odobrat.size) casti.push(`${mnoho(odobrat.size, ["predák odobraný", "predáci odobraní", "predákov odobraných"])}`);
+  return spat("sprava", `${nazov}: ${casti.join(", ")}.`);
 }

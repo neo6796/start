@@ -75,7 +75,63 @@ await karta().locator('select[name="novy_predak"]').selectOption({ label: "Sedl�
 await karta().locator("button:has-text('Uložiť')").click();
 await p.waitForLoadState("networkidle");
 ok("predák sa priradil tímu",
-   (await karta().locator('input[name="predak"]:checked').count()) === 1);
+   (await karta().locator('input[name="vedie"]').count()) === 1);
+/* Kto pribudne cez zoznam, je predák — nie zástupca. Zástupca bez predáka
+   nedáva zmysel a nikto ho o rolu nežiadal. */
+ok("nový predák nie je rovno zástupca",
+   (await karta().locator('input[value="zastupca"]:checked').count()) === 0);
+
+console.log("— predák a zástupca —");
+/* Toto sa v prvej verzii dalo pokaziť tromi spôsobmi naraz: políčko pri mene
+   ticho odoberalo predáka, zoznam sa po uložení preusporiadal a nič nebránilo
+   tímu, kde sú samí zástupcovia. Odvtedy má každé rozhodnutie vlastný
+   pomenovaný ovládač a skúša sa to tu. */
+await karta().locator('select[name="novy_predak"]').selectOption({ label: "Vargová Zuzana" });
+await karta().locator("button:has-text('Uložiť')").click();
+await p.waitForLoadState("networkidle");
+/* Meno je v tabuľke vedenia aj v zozname členov — riadok treba hľadať
+   v tej správnej. */
+const vedRiadok = kto => karta().locator("table.vedenie tbody tr", { hasText: kto });
+const clenRiadok = kto => karta().locator("table.data:not(.vedenie) tbody tr", { hasText: kto });
+const vedenie = async () => (await karta().locator("table.vedenie tbody tr td:first-child")
+  .allInnerTexts()).map(x => x.trim());
+const ulozTim = async () => {
+  await karta().locator("button:has-text('Uložiť')").click();
+  await p.waitForLoadState("networkidle");
+};
+ok("tím môže viesť viac ľudí naraz", (await vedenie()).length === 2);
+const poradiePred = (await vedenie()).join("|");
+
+await vedRiadok("Vargová").locator('input[value="zastupca"]').check();
+await ulozTim();
+ok("zástupca sa označil tomu, koho sme označili",
+   (await vedRiadok("Vargová").locator('input[value=zastupca]').isChecked()) &&
+   !(await vedRiadok("Sedlák").locator('input[value=zastupca]').isChecked()));
+/* Zoznam sa kedysi triedil podľa roly, takže označený človek skočil naspodok
+   a mená sa pod rukou premiešali. */
+ok("poradie sa po označení nezmenilo", (await vedenie()).join("|") === poradiePred);
+
+await vedRiadok("Sedlák").locator('input[value="zastupca"]').check();
+await ulozTim();
+ok("samí zástupcovia sa uložiť nedajú", /aspoň jeden musí ostať predákom/.test(await p.content()));
+ok("a neuložilo sa ani to ostatné",
+   !(await vedRiadok("Sedlák").locator('input[value=zastupca]').isChecked()));
+
+/* Zmena roly nesmie nikoho odobrať — presne to sa dialo, keď rolu aj členstvo
+   vo vedení niesli dve políčka nad sebou. */
+await vedRiadok("Vargová").locator('input[value="predak"]').check();
+await ulozTim();
+ok("kliknutie na rolu predáka neodoberie", (await vedenie()).length === 2);
+
+/* Odobratie z vedenia nie je vyhodenie z tímu — to sú dve rôzne veci a musia
+   sa dať urobiť nezávisle. */
+await clenRiadok("Vargová").locator('input[name="clen"]').check();
+await vedRiadok("Vargová").locator('input[name="odobrat"]').check();
+await ulozTim();
+ok("odobrať sa dá len zaškrtnutím Odobrať", (await vedenie()).length === 1);
+ok("a povie, koho odobralo", /odobran/.test(await p.content()));
+ok("z tímu ho to nevyhodilo",
+   await clenRiadok("Vargová").locator('input[name="clen"]').isChecked());
 
 /* Ľudia sa do tímu pridávajú priamo pri tíme — bez preklikávania po jednom. */
 await p.goto(A + "/timy");

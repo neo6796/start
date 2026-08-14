@@ -1179,6 +1179,16 @@
   }
   table.matrix td.bez-jedalne a{color:var(--petrol);font-weight:600}
 
+  /* Rola predáka: dve možnosti vedľa seba, nie pod sebou. `.check` je flex,
+     takže bez tohto by sa „predák" a „zástupca" zalomili na dva riadky a
+     vyzeralo by to ako odsadená podpoložka mena. */
+  /* `display:flex` priamo na bunke by z nej prestal robiť bunku a rám riadku by
+     sa rozpadol — preto sa zvnútra menia len samotné popisky. */
+  table.data.vedenie td.rola{white-space:nowrap}
+  table.data.vedenie td.rola .check{display:inline-flex;cursor:pointer;margin-right:18px}
+  table.data.vedenie th:last-child,
+  table.data.vedenie td.tick{width:80px;text-align:center}
+
   /* ---------- spätný zápis ---------- */
 
   /* Mesiac je dvadsať stĺpcov namiesto piatich. Bunka je preto jedno políčko
