@@ -98,7 +98,32 @@ docker compose up -d --build
 
 ## 3. Testovacia kópia
 
-Na tom istom serveri pobeží druhá zostava na `test.obedy.ahafarma.sk` — rovnaký compose, iná databáza, iný port. Miesto ani pamäť to prakticky neovplyvní; overíme to jedným príkazom, keď to budeme stavať.
+**Postavená.** Púšťa sa jedným príkazom na serveri:
+
+```bash
+cd ~/obedar/deploy && ./test-kopia.sh
+```
+
+Rovnaký compose, vlastná databáza (`data/db-test`), vlastný port (`127.0.0.1:3010`). Bežné nasadenie sa jej nedotkne — služby sú v profile `test`, takže bez menovitého vyžiadania pre `deploy.sh` neexistujú. To je práve to, o čo ide: **na kópii beží nová verzia, kým na ostrej ešte stará.**
+
+Prepínače:
+
+| | |
+|---|---|
+| `./test-kopia.sh` | dáta z poslednej zálohy, mená nahradené za „Zamestnanec 4021" |
+| `./test-kopia.sh --mena` | to isté, ale so skutočnými menami |
+| `./test-kopia.sh --prazdna` | bez dát |
+
+**Ako sa na ňu dostať.** Kým v `.env` nie je `TEST_DOMENA`, kópia počúva len na slučke a chodí sa na ňu tunelom — Caddy si teda ani nepýta certifikát pre adresu, ktorá ešte neexistuje:
+
+```bash
+ssh -N -L 8080:127.0.0.1:3010 root@server     # z vlastného počítača
+# a potom http://localhost:8080
+```
+
+Keď na `test.obedy.ahafarma.sk` začne ukazovať DNS (jeden `A` záznam na tú istú adresu ako `obedy`), stačí do `.env` doplniť `TEST_DOMENA=test.obedy.ahafarma.sk` a certifikát aj HTTPS vybaví Caddy sám.
+
+**Na každej obrazovke je červený pruh** „Testovacia kópia". Bez neho sa raz stane to horšie z dvoch: buď niekto zmení ostré dáta v presvedčení, že skúša, alebo hľadá chybu, ktorá „sa nedeje", lebo ju hľadá na kópii.
 
 Naplní sa **kópiou ostrých dát** (z poslednej zálohy), takže sa na nej testuje proti skutočnému tvaru dát, nie proti vymyslenej vzorke. Tam, kde sa pracuje s osobnými údajmi, sa mená pri obnove nahradia — na test stačia „Zamestnanec 41".
 
@@ -107,7 +132,7 @@ Naplní sa **kópiou ostrých dát** (z poslednej zálohy), takže sa na nej tes
 - každá zmena okolo peňazí,
 - pravidelný test obnovy zo zálohy — jedno použitie na dva účely.
 
-Testovacia kópia **nesmie posielať e-maily a SMS.** Nastaví sa jej vlastný odosielací režim, ktorý správy len zapíše do súboru. Inak sa raz stane, že dodávateľ dostane skúšobnú objednávku a uvarí podľa nej.
+Testovacia kópia **nesmie posielať e-maily a SMS.** Nemá nastavený SMTP, takže z nej neodíde nič a appka to na uzávierke rovno povie; znenie správy si aj tak prečítaš na obrazovke, lebo sa ukladá do databázy. Adresy jedální sa pri napĺňaní navyše prepíšu na `test@localhost`. Inak by sa raz stalo, že dodávateľ dostane skúšobnú objednávku a uvarí podľa nej.
 
 ---
 

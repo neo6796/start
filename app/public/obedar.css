@@ -169,6 +169,17 @@
 
   /* ---------- shell ---------- */
 
+  /* Pruh testovacej kópie. Musí byť vidieť vždy, aj po odrolovaní — preto je
+     pripnutý navrchu a stránka si pod ním spraví miesto. Farba je tá istá,
+     akou appka hovorí „pozor", lebo presne o to ide. */
+  .pruh{
+    position:fixed;top:0;left:0;right:0;z-index:60;
+    background:var(--miss);color:#fff;
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;
+    text-transform:uppercase;text-align:center;padding:5px 12px;
+  }
+  body.s-pruhom{padding-top:26px}
+
   .topbar{
     background:var(--bar-bg);
     color:var(--bar-fg);

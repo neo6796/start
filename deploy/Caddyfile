@@ -32,3 +32,19 @@ obedy.ahafarma.sk {
 		}
 	}
 }
+
+# Testovacia kópia. Kým `TEST_DOMENA` v .env nie je vyplnená, tento blok počúva
+# na slučke na porte, ktorý zvonku nikto nevidí — Caddy si teda ani nepýta
+# certifikát pre doménu, ktorá ešte neexistuje. Keď na test.obedy.ahafarma.sk
+# začne ukazovať DNS, stačí ju do .env doplniť a Caddy zvyšok vybaví sám.
+{$TEST_DOMENA:http://127.0.0.1:9999} {
+	encode gzip
+	header X-Robots-Tag "noindex, nofollow"
+
+	# Aby sa test nikdy nepomýlil s ostrou prevádzkou — ani na obrázku
+	# v hovore, ani v hlave. Pruh je vidieť na každej obrazovke.
+	header X-Obedar-Kopia "test"
+	handle {
+		reverse_proxy app-test:3000
+	}
+}

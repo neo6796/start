@@ -50,6 +50,19 @@ function rola(o) {
   return "stravník";
 }
 
+/* Pruh na testovacej kópii. Dve rovnaké appky vedľa seba sú návod na to, ako
+   raz niekto zmení ostré dáta v presvedčení, že skúša — alebo naopak nájde
+   chybu, ktorá „sa nedeje", lebo ju hľadal na kópii. Preto to musí byť vidieť
+   na každej obrazovke, nielen v drobnom čísle verzie dole. */
+const PRUH = (process.env.PRUH ?? "").trim();
+const pruh = PRUH
+  ? `<div class="pruh" role="status">${esc(PRUH)}</div>`
+  : "";
+/* Trieda na <body>, aby si stránka pod pruhom spravila miesto. Bez nej by
+   pruh ležal na hlavičke — a na prihlasovacej obrazovke, ktorá centruje
+   obsah zvislo, by sa zaradil vedľa karty. */
+const telo = PRUH ? " s-pruhom" : "";
+
 /* Celá stránka. `cesta` je aktuálna cesta, aby sa zvýraznila záložka. */
 export function stranka({ titulok, osoba, cesta, obsah, siroka = false, verzia = "" }) {
   const zalozky = osoba
@@ -79,8 +92,8 @@ export function stranka({ titulok, osoba, cesta, obsah, siroka = false, verzia =
 <link rel="stylesheet" href="/static/obedar.css?v=${esc(verzia)}">
 <link rel="icon" href="/static/ikona.svg">
 </head>
-<body>
-
+<body class="${telo.trim()}">
+${pruh}
 <div class="topbar">
   <div class="wrap${siroka ? " wide" : ""}">
     <a class="brand" href="/">
@@ -112,7 +125,8 @@ export function holaStranka({ titulok, obsah, verzia = "" }) {
 <link rel="stylesheet" href="/static/obedar.css?v=${esc(verzia)}">
 <link rel="icon" href="/static/ikona.svg">
 </head>
-<body class="hola">
+<body class="hola${telo}">
+${pruh}
 <main>
 ${obsah}
 </main>

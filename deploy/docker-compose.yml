@@ -40,11 +40,63 @@ services:
     volumes:
       - ./data/prilohy:/data/prilohy
 
+  # ---------- testovacia kópia (07-nasadenie, bod 3) ----------
+  #
+  # Tá istá appka, iná databáza, iný port. Púšťa sa zvlášť:
+  #
+  #     ./test-kopia.sh
+  #
+  # Bežné nasadenie sa jej nedotkne — `profiles` znamená, že bez menovitého
+  # vyžiadania tieto služby neexistujú. Preto ju `deploy.sh` ani nezhodí, ani
+  # neprestaví: na test sa skúša *nová* verzia, kým na ostrej beží stará.
+  db-test:
+    image: postgres:16-alpine
+    container_name: obedar-db-test
+    profiles: ["test"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: obedar
+      POSTGRES_USER: obedar
+      POSTGRES_PASSWORD: ${DB_HESLO}
+    volumes:
+      - ./data/db-test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U obedar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app-test:
+    build: ../app
+    container_name: obedar-app-test
+    profiles: ["test"]
+    restart: unless-stopped
+    depends_on:
+      db-test: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgres://obedar:${DB_HESLO}@db-test:5432/obedar
+      # SMTP tu zámerne nie je. Testovacia kópia nesmie poslať e-mail —
+      # inak sa raz stane, že kuchyňa uvarí podľa skúšobnej objednávky.
+      # Appka to povie rovno na uzávierke a znenie správy si prečítaš aj tak.
+      ADRESA: ${ADRESA_TEST:-http://localhost:8080}
+      VERZIA: ${VERZIA:-neznáma}-TEST
+      # Bez `production` nemá prihlasovacia cookie príznak Secure, takže
+      # testovacia kópia funguje aj cez obyčajné http v tuneli cez SSH.
+      NODE_ENV: test
+      TZ: ${TZ:-Europe/Bratislava}
+    ports: ["127.0.0.1:3010:3000"]
+    volumes:
+      - ./data/prilohy-test:/data/prilohy
+
   caddy:
     image: caddy:2-alpine
     container_name: obedar-caddy
     restart: unless-stopped
     ports: ["80:80", "443:443"]
+    environment:
+      # Kým nie je vyplnená, Caddy testovaciu kópiu nikam nevystaví a ani si
+      # na ňu nepýta certifikát. Vyplní sa až vtedy, keď na ňu ukazuje DNS.
+      TEST_DOMENA: ${TEST_DOMENA:-}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       # Preview sa vozí priamo z repozitára — po git pull je hneď aktuálne
