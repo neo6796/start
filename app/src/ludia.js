@@ -399,6 +399,17 @@ export async function hromadne(k) {
       "Firmu nemeníme uprostred mesiaca — niekto z označených už má v tomto mesiaci objednávku. " +
       "Zmena firmy sa dá spraviť k prvému dňu mesiaca."));
 
+  /* Hromadné zneaktívnenie sa nesmie dotknúť posledného správcu — appka by
+     ostala bez toho, kto sa do nej vie prihlásiť. */
+  if (naStav === "0") {
+    const zostane = await jeden(
+      "SELECT count(*)::int AS n FROM osoba WHERE je_admin AND aktivny AND NOT (id = ANY($1))", [kto]);
+    if (zostane.n === 0)
+      return k.inam(k.odp, kam("chyba",
+        "Medzi označenými je posledný správca — neaktívny sa už neprihlási a appka by " +
+        "ostala bez správy. Najprv určte iného správcu."));
+  }
+
   hodnoty.push(kto);
   const r = await dopyt(`UPDATE osoba SET ${zmeny.join(", ")} WHERE id = ANY($${hodnoty.length})`, hodnoty);
 
@@ -618,14 +629,22 @@ export async function uloz(k) {
       : `Nepodarilo sa uložiť: ${e.message}`);
   }
 
-  /* Kto si zoberie sám sebe správcu, vyrobí appku bez správcu. */
-  if (o.je_admin && !zapnute("je_admin")) {
-    const zvysok = await jeden("SELECT count(*)::int AS n FROM osoba WHERE je_admin AND aktivny");
-    if (zvysok.n === 0) {
-      await dopyt("UPDATE osoba SET je_admin = true WHERE id = $1", [id]);
-      return naspat("Správcu sme nechali — bol by to posledný a appka by ostala bez správy. " +
-                    "Najprv určte iného, potom tomuto rolu odoberte.");
-    }
+  /* Kto si zoberie sám sebe správcu, vyrobí appku bez správcu. To isté ale
+     spraví aj odškrtnutie „Aktívny": neaktívny človek sa neprihlási, takže
+     posledný správca sa tým sám zamkne von a dostať sa späť sa dá len cez
+     databázu na serveri. Preto sa strážia obe políčka rovnako. */
+  const zvysokSpravcov = async () =>
+    (await jeden("SELECT count(*)::int AS n FROM osoba WHERE je_admin AND aktivny")).n;
+
+  if (o.je_admin && !zapnute("je_admin") && (await zvysokSpravcov()) === 0) {
+    await dopyt("UPDATE osoba SET je_admin = true WHERE id = $1", [id]);
+    return naspat("Správcu sme nechali — bol by to posledný a appka by ostala bez správy. " +
+                  "Najprv určte iného, potom tomuto rolu odoberte.");
+  }
+  if (o.je_admin && zapnute("je_admin") && !zapnute("aktivny") && (await zvysokSpravcov()) === 0) {
+    await dopyt("UPDATE osoba SET aktivny = true WHERE id = $1", [id]);
+    return naspat("Nechali sme ho aktívneho — je to posledný správca a neaktívny sa už " +
+                  "neprihlási. Najprv určte iného správcu, potom tohto zneaktívnite.");
   }
 
   /* Pridelenia sa prepíšu nanovo: domovská jedáleň plus zaškrtnuté.

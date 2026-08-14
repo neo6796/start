@@ -55,6 +55,9 @@ await p.waitForLoadState("networkidle");
 ok("prázdny výber odmietnutý", (await p.content()).includes("Nikto nebol označený"));
 
 console.log("— posledný správca —");
+/* Zneaktívnenie zamkne von rovnako spoľahlivo ako odobratie roly: neaktívny
+   sa neprihlási. Keby to appka dovolila poslednému správcovi, dostať sa späť
+   by šlo len cez databázu na serveri. */
 await p.goto(A + "/ludia");
 await p.click("tr:has-text('Solár') a:has-text('Upraviť')");
 await p.uncheck('input[name="je_admin"]');
@@ -63,6 +66,24 @@ await p.waitForLoadState("networkidle");
 t = await p.content();
 ok("posledného správcu appka nepustí", t.includes("bol by to posledný"));
 ok("rola ostala zapnutá", await p.locator('input[name="je_admin"]').isChecked());
+
+await p.uncheck('input[name="aktivny"]');
+await p.click("button:has-text('Uložiť')");
+await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("ani zneaktívniť sa posledný správca nedá", t.includes("posledný správca a neaktívny"));
+ok("ostal aktívny", await p.locator('input[name="aktivny"]').isChecked());
+
+/* To isté cez hromadnú zmenu — inak by sa ochrana obišla o jednu obrazovku. */
+await p.goto(A + "/ludia");
+for (const ch of await p.locator('input[name="kto"]').all()) await ch.check();
+await p.selectOption("#p-aktivny", "0");
+await p.click("button:has-text('Priradiť označeným')");
+await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("hromadné zneaktívnenie posledného správcu neprejde", /posledný správca/.test(t));
+ok("a nikto sa nezneaktívnil",
+   (await p.locator("table.data tbody tr.is-off").count()) === 0);
 
 await b.close();
 console.log(chyby.length ? "CHYBY: " + chyby.join(" | ") : "— žiadne chyby v prehliadači —");

@@ -135,7 +135,35 @@ async function posta([kam]) {
   }
 }
 
-const PRIKAZY = { spravca, heslo, zaklad, posta };
+/* --- obnov: vrátiť človeka medzi aktívnych ---
+
+   Kto sa zneaktívni, sa neprihlási. Keď sa to stane poslednému správcovi,
+   appka ostane bez toho, kto to vie napraviť — a jediná cesta späť vedie
+   cez databázu na serveri. Appka to už sama nedovolí, ale príkaz tu ostáva:
+   z neaktívneho stavu sa treba vedieť dostať aj vtedy, keď sa niečo pokazí
+   inak, než na čo sme mysleli. */
+async function obnov([kod]) {
+  if (!kod) {
+    console.error("Použitie: node src/nastroj.js obnov <osobné-číslo>");
+    process.exit(2);
+  }
+  const o = await jeden("SELECT id, priezvisko, meno, aktivny, je_admin FROM osoba WHERE kod_dochadzka = $1",
+                        [String(kod).trim()]);
+  if (!o) {
+    console.error(`Osobné číslo ${kod} v zozname nie je.`);
+    process.exit(1);
+  }
+  if (o.aktivny) {
+    console.log(`${o.priezvisko} ${o.meno} je už aktívny — nič sa nemenilo.`);
+    return;
+  }
+  await dopyt("UPDATE osoba SET aktivny = true WHERE id = $1", [o.id]);
+  await zapis(null, "osoba.obnovena-cez-nastroj", { kod, meno: `${o.priezvisko} ${o.meno}` });
+  console.log(`${o.priezvisko} ${o.meno} je späť medzi aktívnymi` +
+              (o.je_admin ? " (je správca — môže sa prihlásiť)." : "."));
+}
+
+const PRIKAZY = { spravca, heslo, zaklad, posta, obnov };
 
 const [prikaz, ...zvysok] = process.argv.slice(2);
 if (!PRIKAZY[prikaz]) {
