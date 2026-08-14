@@ -1,5 +1,6 @@
 /* Dátumy sa dajú overiť bez databázy aj bez prehliadača:  node test/00-datumy.mjs */
-import { pondelok, posun, dniTyzdna, tyzdenPopis, denMesiac, dlhy, oznacenie } from "../src/datum.js";
+import { pondelok, posun, dniTyzdna, tyzdenPopis, denMesiac, dlhy, oznacenie,
+         mesiacPopis, prvyVMesiaci, posunMesiac, pracovneDni } from "../src/datum.js";
 
 let zle = 0;
 const ok = (t, v) => { if (!v) zle++; console.log((v ? "  ✓ " : "  ✗ ") + t); };
@@ -28,6 +29,22 @@ je("popis v jednom mesiaci", tyzdenPopis("2026-08-10"), "10. – 14. 8. 2026");
 je("popis cez prelom mesiaca", tyzdenPopis("2026-08-31"), "31. 8. – 4. 9. 2026");
 je("deň a mesiac", denMesiac("2026-08-04"), "4. 8.");
 je("dlhý tvar", dlhy("2026-09-01"), "1. septembra 2026");
+
+console.log("— mesiac —");
+je("prvý deň mesiaca", prvyVMesiaci("2026-08-14"), "2026-08-01");
+je("popis v prvom páde", mesiacPopis("2026-08-01"), "august 2026");
+je("mesiac späť cez prelom roka", posunMesiac("2026-01-01", -1), "2025-12-01");
+je("mesiac dopredu cez prelom roka", posunMesiac("2026-12-01", 1), "2027-01-01");
+/* Spätný zápis sa robí po pracovných dňoch — víkend v mriežke nemá čo hľadať. */
+je("pracovné dni augusta", pracovneDni("2026-08-01").length, 21);
+je("prvý je pondelok", pracovneDni("2026-08-01")[0], "2026-08-03");
+je("posledný je pondelok 31.", pracovneDni("2026-08-01").at(-1), "2026-08-31");
+ok("víkend v nich nie je",
+   pracovneDni("2026-08-01").every(d => {
+     const den = new Date(d + "T12:00:00Z").getUTCDay();
+     return den >= 1 && den <= 5;
+   }));
+je("február 2026", pracovneDni("2026-02-01").length, 20);
 
 console.log("— označenia jedál —");
 je("arabské", [0, 1, 4].map(i => oznacenie("arabic", i)).join(""), "125");

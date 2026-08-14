@@ -91,6 +91,14 @@ export async function zobraz(k) {
           </form>
         </div>` : ""}
 
+      ${p.spatne ? `
+        <div class="infobox" style="margin-top:14px">
+          <strong>${mnoho(p.spatne, ["obed je zapísaný", "obedy sú zapísané", "obedov je zapísaných"])}
+          spätne.</strong> V počtoch vyššie nie sú a jedálni sa neposielajú — tie
+          obedy sa už uvarili a zjedli. Do mzdového podkladu idú.
+          <a href="/spatne?mesiac=${po.slice(0, 7)}">Spätný zápis</a>
+        </div>` : ""}
+
       ${nerozhodnuti.length ? `
         <div class="warnbox" style="margin-top:14px">
           <strong>${mnoho(nerozhodnuti.length, ["človek sa nevyjadril", "ľudia sa nevyjadrili", "ľudí sa nevyjadrilo"])}.</strong>

@@ -53,7 +53,7 @@ async function tymZaTyzden(podmienka, hodnoty, po) {
 
   const objednavky = new Map();
   for (const r of await vsetky(
-    `SELECT osoba_id, datum::text AS datum, jedlo, poskytovatel_id, zadane_ako
+    `SELECT osoba_id, datum::text AS datum, jedlo, poskytovatel_id, zadane_ako, spatny_zapis
        FROM objednavka WHERE osoba_id = ANY($1) AND datum = ANY($2::date[])`, [idcka, dni]))
     objednavky.set(`${r.osoba_id}|${r.datum}`, r);
 
@@ -137,6 +137,10 @@ function bunka(o, datum, zaznam, moje, vsetkyJedalne, prec, menu, denIndex, cita
   h += `</div>`;
   if (prec) h += `<span class="precmark" title="${esc(dovodPopis(prec.dovod))}"
     >${esc(dovodZnak(prec.dovod))}</span>`;
+  /* Príznak spätného zápisu ostáva na dni natrvalo (koncept 4.5a) — aj tu,
+     nielen na obrazovke, kde vznikol. Ten obed jedáleň nikdy neobjednala. */
+  if (zaznam?.spatny_zapis) h += `<span class="spmark"
+    title="zapísané spätne — jedálni sa neposielalo">S</span>`;
   return h;
 }
 
@@ -206,6 +210,7 @@ const LEGENDA = `
   <span><span class="opt-b none vzor" aria-hidden="true">×</span> nechce obed — je to rozhodnutie, upomienka nechodí</span>
   <span><i class="sw empty"></i> bez voľby — nikto nekonal</span>
   <span><i class="sw zamok"></i> po dennej uzávierke — meniť sa už nedá</span>
+  <span><span class="spmark vzor" aria-hidden="true">S</span> zapísané spätne — jedálni sa neposielalo</span>
 </div>`;
 
 /* Menu pre tie jedálne, ktoré tím naozaj používa. */

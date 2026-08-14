@@ -45,11 +45,22 @@ export async function poctyZaTyzden(po) {
   const dni = dniTyzdna(po);
   const jedalne = await vsetky("SELECT * FROM poskytovatel WHERE aktivny ORDER BY nazov");
 
+  /* Spätný zápis sa do počtov nerátа (koncept 4.5a). Ten obed sa už uvaril
+     a zjedol; keby sa sem pripočítal, uzávierka by ohlásila rozdiel oproti
+     odoslanej objednávke a pýtala by si opravu — teda by jedálni poslala
+     objednávku na deň, ktorý dávno bol. Do mzdového podkladu ide, do
+     objednávky nie; koľko ich je, sa vypíše zvlášť. */
   const riadky = await vsetky(`
     SELECT poskytovatel_id, datum::text AS datum, jedlo, count(*)::int AS kolko
       FROM objednavka
-     WHERE datum BETWEEN $1 AND $2 AND jedlo >= 0
+     WHERE datum BETWEEN $1 AND $2 AND jedlo >= 0 AND NOT spatny_zapis
      GROUP BY 1, 2, 3`, [dni[0], dni[4]]);
+
+  const spatne = await vsetky(`
+    SELECT poskytovatel_id, count(*)::int AS kolko
+      FROM objednavka
+     WHERE datum BETWEEN $1 AND $2 AND jedlo >= 0 AND spatny_zapis
+     GROUP BY 1`, [dni[0], dni[4]]);
 
   /* Nerozhodnutí: kto má jedáleň pridelenú, je v ten deň v práci a nemá ani
      objednané, ani odhlásené. Práve o nich sa pri uzávierke rozhoduje —
@@ -88,6 +99,7 @@ export async function poctyZaTyzden(po) {
       jedla,
       poDnoch: dni.map((_, i) => jedla.reduce((a, x) => a + x.poDnoch[i], 0)),
       spolu: jedla.reduce((a, x) => a + x.spolu, 0),
+      spatne: spatne.find(s => s.poskytovatel_id === j.id)?.kolko ?? 0,
       nerozhodnuti: nerozhodnuti.filter(n => n.poskytovatel_id === j.id)
     });
   }

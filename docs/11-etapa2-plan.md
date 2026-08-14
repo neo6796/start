@@ -66,9 +66,24 @@ Každý krok končí niečím, čo sa dá otvoriť v prehliadači a vyskúšať.
 2. ~~**Číselníky a ľudia** — import menoslovu, hromadné väzby~~ **hotové**
 3. ~~**Menu a matica predáka** — jadro appky~~ **hotové**
 4. ~~**Uzávierka týždňa a odoslanie objednávky** — prvá vec, čo ide von~~ **hotové**
-5. **Spätný zápis** — dopísanie augusta
+5. ~~**Spätný zápis** — dopísanie augusta~~ **hotové**
 6. **Mesačná uzávierka a mzdový podklad**
 7. **Zálohy a upozornenia** — beží od prvého dňa, dolaďuje sa priebežne
+
+### Čo je hotové po kroku 5
+
+August sa dá dopísať od prvého, takže mesiac bude celý.
+
+| | |
+|---|---|
+| Spätný zápis | mesačná mriežka *ľudia × dni*, len uplynulé dni, len správca, len do otvoreného mesiaca |
+| Dôvod | povinný, uloží sa ku každému dopísanému dňu |
+| Príznak | ostáva na dni natrvalo — vidno ho aj v matici predáka (`S`), nielen tam, kde vznikol |
+| Objednávka | **spätný zápis dodávateľovi nikdy nič neposiela** a nepýta si ani opravu; do počtov na odoslanie sa neráta |
+| Počty | uzávierka týždňa aj obrazovka mesiaca ukazujú, koľko porcií appka nikdy neobjednala |
+
+Zámok mesiaca (`mesiac_stav`) už platí, hoci obrazovka mesačnej uzávierky je až
+krok 6 — inak by sa dal mesiac dopisovať aj potom, čo z neho odišiel mzdový podklad.
 
 ### Čo je hotové po kroku 4
 
@@ -106,7 +121,7 @@ Overené v prehliadači, nie odhadom: dvadsať skúšok cez Chromium (prihlásen
 
 ---
 
-Body 1–4 stačia na to, aby predák začal objednávať. **Body 5–6 musia byť hotové pred koncom augusta**, inak sa mesiac neuzavrie.
+Body 1–4 stačia na to, aby predák začal objednávať. Bod 5 je hotový, takže august sa dá dopísať od prvého. **Bod 6 musí byť hotový pred koncom augusta**, inak sa mesiac neuzavrie.
 
 ---
 

@@ -1163,9 +1163,42 @@
     cursor:help;
   }
 
+  /* Značka pri bunke vľavo: obed bol dopísaný spätne, jedáleň ho neobjednala.
+     Vpravo je značka neprítomnosti, tak sa nemajú kde stretnúť. */
+  .spmark{
+    position:absolute;top:2px;left:3px;
+    font-family:var(--mono);font-size:9.5px;font-weight:700;
+    letter-spacing:.04em;color:#fff;background:var(--mustard);
+    border-radius:2px;padding:0 3px;cursor:help;
+  }
+  /* V legende stojí tá istá značka mimo bunky, tak nesmie plávať v rohu. */
+  .spmark.vzor{position:static;cursor:default}
+
   table.matrix td.bez-jedalne{
     padding:10px 12px;font-size:12.5px;color:var(--ink-3);
   }
   table.matrix td.bez-jedalne a{color:var(--petrol);font-weight:600}
+
+  /* ---------- spätný zápis ---------- */
+
+  /* Mesiac je dvadsať stĺpcov namiesto piatich. Bunka je preto jedno políčko
+     so zoznamom, nie stĺpec prepínačov — inak sa tabuľka nezmestí ani na
+     veľkú obrazovku. */
+  table.matrix.uzka{min-width:0}
+  table.matrix.uzka td{padding:5px 4px;text-align:center}
+  table.matrix.uzka thead th{padding:8px 4px;text-align:center}
+  table.matrix.uzka thead th .dn,
+  table.matrix.uzka thead th .dnum{display:block}
+  select.sp-bunka{
+    width:100%;min-width:58px;max-width:86px;
+    padding:5px 4px;
+    font-family:var(--mono);font-size:13px;text-align:center;
+    border:1px solid var(--line-2);border-radius:var(--r);
+    background:var(--surface);color:var(--ink);
+  }
+  select.sp-bunka:focus-visible{outline:2px solid var(--petrol);outline-offset:1px}
+  /* Príznak ostáva na dni natrvalo — má byť vidieť aj o pol roka. */
+  table.matrix td.spatne{background:var(--mustard-soft)}
+  .sw.spatne{background:var(--mustard-soft);border-color:var(--mustard)}
 
   table.data code{font-family:var(--mono);font-size:12.5px}

@@ -73,8 +73,11 @@ Firma, typ vzťahu, tím, predák a prevádzka sa **zadajú v appke** z rozbaľo
 
 - [x] ~~Etapa 2, krok 1 — kostra: prihlásenie, roly, migrácie, `/zdravie`~~
 - [x] ~~Etapa 2, krok 2 — číselníky a ľudia vrátane importu menoslovu~~
-- [ ] **Etapa 2, krok 3 — menu a matica predáka** (jadro appky)
-- [ ] kroky 4–7: uzávierka týždňa a odoslanie, spätný zápis, mesačná uzávierka, zálohy
+- [x] ~~Etapa 2, krok 3 — menu a matica predáka~~ (jadro appky)
+- [x] ~~Etapa 2, krok 4 — uzávierka týždňa a odoslanie objednávky~~
+- [x] ~~Etapa 2, krok 5 — spätný zápis (dopísanie augusta)~~
+- [ ] **Etapa 2, krok 6 — mesačná uzávierka a mzdový podklad** — pred koncom augusta
+- [ ] krok 7: zálohy a upozornenia
 - [ ] pri nej dve veci, ktoré odhalil test pošty: generovať `Message-ID` a `Date`, predstavovať sa rozumným menom v `EHLO`
 - [ ] *(voliteľne)* „Pridať na plochu" pre preview, aby sa otestovala PWA na telefónoch predákov
 

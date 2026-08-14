@@ -69,6 +69,38 @@ export function tyzdenPopis(po) {
     : `${Number(dp)}. ${Number(mp)}. – ${Number(dk)}. ${Number(mk)}. ${r}`;
 }
 
+/* „august 2026" — do nadpisov a viet o mesiaci. */
+export function mesiacPopis(prvy) {
+  const [r, m] = prvy.split("-");
+  /* Názvy mesiacov sú v druhom páde („8. augusta"); v nadpise treba prvý. */
+  const prvyPad = { "januára": "január", "februára": "február", "marca": "marec",
+    "apríla": "apríl", "mája": "máj", "júna": "jún", "júla": "júl",
+    "augusta": "august", "septembra": "september", "októbra": "október",
+    "novembra": "november", "decembra": "december" }[MESIACE[Number(m) - 1]];
+  return `${prvyPad} ${r}`;
+}
+
+/* Prvý deň mesiaca, v ktorom dátum leží — `mesiac_stav` sa kľúčuje ním. */
+export const prvyVMesiaci = iso => iso.slice(0, 7) + "-01";
+
+export function posunMesiac(prvy, kolko) {
+  const [r, m] = prvy.split("-").map(Number);
+  const n = (r * 12 + (m - 1)) + kolko;
+  return `${Math.floor(n / 12)}-${String((n % 12) + 1).padStart(2, "0")}-01`;
+}
+
+/* Pracovné dni mesiaca (pondelok–piatok). Sviatky appka zatiaľ nevedie —
+   deň, keď sa nevarilo, ostane jednoducho prázdny. */
+export function pracovneDni(prvy) {
+  const koniec = posunMesiac(prvy, 1);
+  const von = [];
+  for (let d = prvy; d < koniec; d = posun(d, 1)) {
+    const den = new Date(d + "T12:00:00Z").getUTCDay();
+    if (den >= 1 && den <= 5) von.push(d);
+  }
+  return von;
+}
+
 /* Označenie jedla podľa toho, ako ho značí jedáleň. Nemôže byť napevno:
    GASTROGAL čísluje 1–5, GASTRO ABM tie isté jedlá značí A–E. */
 const RIMSKE = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];

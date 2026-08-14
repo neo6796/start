@@ -21,6 +21,7 @@ import * as uzavierkaObr from "./uzavierka.js";
 import * as objednavka from "./objednavka.js";
 import * as heslo from "./heslo.js";
 import * as timy from "./timy.js";
+import * as spatne from "./spatne.js";
 import { jeMultipart, citaj } from "./multipart.js";
 
 const tu = dirname(fileURLToPath(import.meta.url));
@@ -172,7 +173,10 @@ const CESTY = [
   ["GET",  "/osoba",           ludia.detail,   "admin"],
   ["POST", "/osoba",           ludia.uloz,     "admin"],
   ["POST", "/osoba/heslo",     ludia.nasHeslo, "admin"],
-  ["POST", "/osoba/zmazat",    ludia.zmazat,   "admin"]
+  ["POST", "/osoba/zmazat",    ludia.zmazat,   "admin"],
+
+  ["GET",  "/spatne",          spatne.obrazovka, "admin"],
+  ["POST", "/spatne/uloz",     spatne.uloz,      "admin"]
 ];
 
 function smie(osoba, rola) {
