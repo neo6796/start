@@ -93,6 +93,20 @@ Tím = entita s prideleným predákom, nie pole „nadriadený" na osobe.
 Dôvod: výmena predáka je jedna zmena, nie 15 zmien.
 Osoba patrí práve do jedného tímu. Osoba bez tímu = „Bez zaradenia", vidí ju len admin.
 
+**Predáctvo je funkcia tímu, nie vlastnosť človeka.** Nie je to osobný status ako
+zamestnanec vs. živnostník, ktorý patrí do karty stravníka — je to neoficiálna
+úloha, ktorá sa časom mení, a preto sa vedie pri tíme. Kto je pri niektorom tíme
+zapísaný, je predák; kto pri žiadnom, nie je. Nikde sa to nedrží zvlášť, tak sa to
+nemá ako rozísť so skutočnosťou.
+
+Z toho plynie aj to, čo život aj tak robí:
+- tím môže mať **viac predákov** — predáka a jeho zástupcu (rovnaké práva, rozdiel
+  je len v tom, koho sa pýtať ako prvého),
+- jeden človek môže byť predákom **vo viacerých tímoch**,
+- predák **nemusí byť členom** tímu, ktorý vedie.
+
+Ľudia aj predáci sa tímu prideľujú na jednom mieste — na obrazovke *Tímy*.
+
 ### 1.3a Firma, tím a prevádzka sú tri nezávislé veci
 
 Toto je pri tomto zákazníkovi kľúčové: obedy sa robia **naraz pre viac spriaznených firiem** a organizačne sú pomiešané. Model to zvláda len vtedy, keď sa tri veci držia oddelene a nič ich nenúti zhodovať sa:

@@ -11,7 +11,7 @@ import { createInterface } from "node:readline/promises";
 import { text } from "node:stream/consumers";
 import { stdin, stdout } from "node:process";
 import { migruj, bazen, dopyt, jeden, zapis } from "./db.js";
-import { hashHesla } from "./relacia.js";
+import { hashHesla, najmenejZnakov } from "./relacia.js";
 import { posli, postaJeNastavena } from "./posta.js";
 
 /* Dva spôsoby čítania, lebo readline sa na rúre správa inak než na termináli:
@@ -69,9 +69,11 @@ async function spravca([kod, priezvisko, meno]) {
 /* --- heslo: nastaví nové heslo hocikomu --- */
 async function heslo([kod]) {
   if (!kod) throw new Error("Použitie: nastroj.js heslo <osobné číslo>");
-  const o = await jeden("SELECT * FROM osoba WHERE kod_dochadzka = $1", [kod]);
+  const o = await jeden(
+    `SELECT o.*, EXISTS (SELECT 1 FROM tim_predak tp WHERE tp.osoba_id = o.id) AS je_predak
+       FROM osoba o WHERE o.kod_dochadzka = $1`, [kod]);
   if (!o) throw new Error(`Osobné číslo ${kod} tu nie je.`);
-  const minimum = o.je_admin ? 10 : o.je_predak ? 8 : 4;
+  const minimum = najmenejZnakov(o);
   const h = await hashHesla(await novéHeslo(minimum));
   await dopyt("UPDATE osoba SET heslo_hash = $2 WHERE id = $1", [o.id, h]);
   /* Staré prihlásenia po zmene hesla neplatia — inak by zmena hesla

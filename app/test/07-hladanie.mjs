@@ -12,7 +12,8 @@ const KOD = process.env.KOD ?? "4021";
 const HESLO = process.env.HESLO ?? "skusobne-heslo";
 let zle = 0;
 const ok = (t, v) => { if (!v) zle++; console.log((v ? "  ✓ " : "  ✗ ") + t); };
-const riadkov = () => p.locator("table.data tbody tr").count();
+/* Nad zoznamom je aj prehľad tímov — tiež tabuľka. Počíta sa len zoznam ľudí. */
+const riadkov = () => p.locator('form[action="/ludia/hromadne"] table.data tbody tr').count();
 
 await p.goto(A + "/prihlasenie");
 await p.fill("#kod", KOD); await p.fill("#heslo", HESLO);

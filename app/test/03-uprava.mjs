@@ -58,26 +58,33 @@ await p.click("form[action='/ludia/import'] button[type=submit]");
 await p.waitForLoadState("networkidle");
 
 await p.click("tr:has-text('Sedlák') a:has-text('Upraviť')");
-ok("v detaile človeka už nie je výber predáka",
+/* Predáctvo je funkcia tímu, nie vlastnosť človeka — v karte stravníka
+   preto nie je čo zaškrtávať. */
+ok("v detaile človeka nie je nič o predákovi",
+   (await p.locator('input[name="je_predak"]').count()) === 0 &&
    (await p.locator('select[name="predak_id"]').count()) === 0);
-await p.check('input[name="je_predak"]');
-await p.click("button:has-text('Uložiť')");
-await p.waitForLoadState("networkidle");
 
-await p.goto(A + "/ciselniky");
-await p.click("details:has(input[value=tim]) summary");
-await p.fill("form.pridat:has(input[value=tim]) #p-tim-nazov", "Tím Sever");
-await p.selectOption("form.pridat:has(input[value=tim]) #p-tim-predak_id", { label: "Sedlák Ivan" });
-await p.click("form.pridat:has(input[value=tim]) button[type=submit]");
+await p.goto(A + "/timy");
+await p.fill("#t-novy", "Tím Sever");
+await p.click("form[action='/timy/pridat'] button[type=submit]");
 await p.waitForLoadState("networkidle");
-ok("tím sa založil aj s predákom",
-   (await p.locator("tr:has-text('Tím Sever'):has-text('Sedlák Ivan')").count()) === 1);
+ok("tím sa založil", /Tím Sever/.test(await p.content()));
+
+const karta = () => p.locator("div.card:has(h3:text-is('Tím Sever'))");
+await karta().locator('select[name="novy_predak"]').selectOption({ label: "Sedlák Ivan" });
+await karta().locator("button:has-text('Uložiť')").click();
+await p.waitForLoadState("networkidle");
+ok("predák sa priradil tímu",
+   (await karta().locator('input[name="predak"]:checked').count()) === 1);
+
+/* Ľudia sa do tímu pridávajú priamo pri tíme — bez preklikávania po jednom. */
+await p.goto(A + "/timy");
+for (const ch of await karta().locator('input[name="clen"]').all()) await ch.check();
+await karta().locator("button:has-text('Uložiť')").click();
+await p.waitForLoadState("networkidle");
+ok("ľudia sa priradili z obrazovky tímu", /Tím Sever: \d+ ľud/.test(await p.content()));
 
 await p.goto(A + "/ludia");
-for (const ch of await p.locator('input[name="kto"]').all()) await ch.check();
-await p.selectOption("#p-tim_id", { label: "Tím Sever" });
-await p.click("button:has-text('Priradiť označeným')");
-await p.waitForLoadState("networkidle");
 t = await p.content();
 /* Predák je pri názve tímu, nie vo vlastnom stĺpci — opakovať to isté meno
    v každom riadku bol len šum. */
@@ -87,28 +94,21 @@ ok("hromadné priradenie už predáka neponúka",
    (await p.locator('select[name="predak_id"]').count()) === 0);
 
 console.log("— zloženie tímu na jednom mieste —");
-/* Predák bol v číselníku a členovia v zozname ľudí. Skontrolovať, či je
-   každý niekde zaradený, sa dalo len prechádzaním tímov po jednom. */
-await p.goto(A + "/ciselniky");
-const riadokTimu = p.locator("tr:has-text('Tím Sever')");
-ok("pri tíme je predák", (await riadokTimu.innerText()).includes("Sedlák Ivan"));
-ok("aj počet ľudí", (await riadokTimu.locator("details.clenovia summary").innerText()).includes("ľud"));
-await riadokTimu.locator("details.clenovia > summary").click();
-const mena = await riadokTimu.locator("ul.zoznam-clenov li").allInnerTexts();
-ok("po rozkliknutí sú v ňom mená", mena.length >= 2);
-ok("aj s osobným číslom", /\d{3,}/.test(mena.join(" ")));
-ok("a je medzi nimi ten, koho sme priradili",
-   mena.some(x => x.includes("Vargová Zuzana")));
+/* Kto tím vedie a kto v ňom je, musí byť vidieť naraz — inak sa to dá
+   zistiť len prechádzaním tímov po jednom. */
+await p.goto(A + "/ludia");
+const prehlad = p.locator("div.card:has(h3:text-is('Tímy'))");
+ok("nad zoznamom ľudí je prehľad tímov", (await prehlad.count()) === 1);
+ok("aj s predákom", (await prehlad.innerText()).includes("Sedlák Ivan"));
 
-await p.goto(A + "/ciselniky");
-await p.click("details:has(input[value=tim]) summary");
-await p.fill("form.pridat:has(input[value=tim]) #p-tim-nazov", "Tím Juh");
-await p.click("form.pridat:has(input[value=tim]) button[type=submit]");
+await p.goto(A + "/timy");
+await p.fill("#t-novy", "Tím Juh");
+await p.click("form[action='/timy/pridat'] button[type=submit]");
 await p.waitForLoadState("networkidle");
-/* Prázdny tím sa nesmie tváriť rovnako ako plný — práve on je ten,
-   ktorý treba nájsť. */
-ok("prázdny tím to povie",
-   (await p.locator("tr:has-text('Tím Juh')").innerText()).includes("nikto"));
+/* Tím, ktorý nikto nevedie, sa nesmie tváriť rovnako ako ostatné — jeho
+   matica sa nikomu neukáže. */
+ok("tím bez predáka to povie",
+   (await p.locator("div.card:has(h3:text-is('Tím Juh'))").innerText()).includes("nikto nevedie"));
 
 console.log("— prázdne polia —");
 await p.goto(A + "/ciselniky");

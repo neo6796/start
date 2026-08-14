@@ -27,19 +27,20 @@ await p.click("form.pridat:has(input[value=prevadzka]) button[type=submit]");
 await p.waitForLoadState("networkidle");
 ok("prevádzka pribudla", (await p.content()).includes("Stredisko Vráble"));
 
-await p.click("details:has(input[value=tim]) summary");
-await p.fill("form.pridat:has(input[value=tim]) #p-tim-nazov", "Údržba");
-await p.click("form.pridat:has(input[value=tim]) button[type=submit]");
+/* Tímy majú vlastnú obrazovku — patria k ľuďom, nie medzi číselníky. */
+await p.goto(A + "/timy");
+await p.fill("#t-novy", "Údržba");
+await p.click("form[action='/timy/pridat'] button[type=submit]");
 await p.waitForLoadState("networkidle");
 ok("tím pribudol", (await p.content()).includes("Údržba"));
 
 // duplicita
-await p.click("details:has(input[value=tim]) summary");
-await p.fill("form.pridat:has(input[value=tim]) #p-tim-nazov", "Údržba");
-await p.click("form.pridat:has(input[value=tim]) button[type=submit]");
+await p.fill("#t-novy", "Údržba");
+await p.click("form[action='/timy/pridat'] button[type=submit]");
 await p.waitForLoadState("networkidle");
 ok("duplicitný názov odmietnutý so zrozumiteľnou hláškou",
    (await p.content()).includes("už existuje"));
+await p.goto(A + "/ciselniky");
 
 // zneaktívnenie
 const predTym = await p.locator("text=neaktívna").count();

@@ -20,6 +20,7 @@ import * as menu from "./menu.js";
 import * as uzavierkaObr from "./uzavierka.js";
 import * as objednavka from "./objednavka.js";
 import * as heslo from "./heslo.js";
+import * as timy from "./timy.js";
 import { jeMultipart, citaj } from "./multipart.js";
 
 const tu = dirname(fileURLToPath(import.meta.url));
@@ -158,6 +159,12 @@ const CESTY = [
   ["POST", "/ciselniky/zmazat", ciselniky.zmazat, "admin"],
   ["GET",  "/ciselnik",         ciselniky.detail, "admin"],
   ["POST", "/ciselnik",         ciselniky.uloz,   "admin"],
+
+  ["GET",  "/timy",            timy.zoznam,    "admin"],
+  ["POST", "/timy/pridat",     timy.pridat,    "admin"],
+  ["POST", "/timy/uloz",       timy.uloz,      "admin"],
+  ["POST", "/timy/stav",       timy.stav,      "admin"],
+  ["POST", "/timy/zmazat",     timy.zmazat,    "admin"],
 
   ["GET",  "/ludia",           ludia.zoznam,   "admin"],
   ["POST", "/ludia/import",    ludia.importuj, "admin"],

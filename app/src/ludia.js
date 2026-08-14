@@ -11,6 +11,7 @@
 import { stranka, esc, meno, mnoho } from "./html.js";
 import { bazen, dopyt, jeden, vsetky, zapis } from "./db.js";
 import { hashHesla, nahodneHeslo, najmenejZnakov, zrusOstatne } from "./relacia.js";
+import { prehlad as prehladTimov } from "./timy.js";
 
 /* ---------- zoznam ---------- */
 
@@ -56,7 +57,7 @@ export async function zoznam(k) {
   if (stav === "aktivni") podmienky.push("o.aktivny");
   if (stav === "neaktivni") podmienky.push("NOT o.aktivny");
   if (pohlad === "bez-zaradenia") podmienky.push("(o.firma_id IS NULL OR o.tim_id IS NULL)");
-  if (pohlad === "predaci") podmienky.push("o.je_predak");
+  if (pohlad === "predaci") podmienky.push("EXISTS (SELECT 1 FROM tim_predak tp WHERE tp.osoba_id = o.id)");
   if (pohlad === "zivnostnici") podmienky.push("o.vztah = 'zivnostnik'");
   if (timId) { hodnoty.push(timId); podmienky.push(`o.tim_id = $${hodnoty.length}`); }
   if (firmaId) { hodnoty.push(firmaId); podmienky.push(`o.firma_id = $${hodnoty.length}`); }
@@ -73,15 +74,24 @@ export async function zoznam(k) {
 
   const ludia = await vsetky(`
     SELECT o.*, f.nazov AS firma, t.nazov AS tim, p.nazov AS prevadzka, j.nazov AS jedalen,
-           pr.priezvisko || ' ' || pr.meno AS predak
+           pr.priezvisko || ' ' || pr.meno AS predak,
+           EXISTS (SELECT 1 FROM tim_predak tp WHERE tp.osoba_id = o.id) AS je_predak
       FROM osoba o
       LEFT JOIN firma f        ON f.id = o.firma_id
       LEFT JOIN tim   t        ON t.id = o.tim_id
-      LEFT JOIN osoba pr       ON pr.id = t.predak_id
+      LEFT JOIN LATERAL (SELECT priezvisko, meno FROM tim_predak tp
+                          JOIN osoba x ON x.id = tp.osoba_id
+                         WHERE tp.tim_id = t.id AND NOT tp.zastupca
+                         ORDER BY x.priezvisko LIMIT 1) pr ON true
       LEFT JOIN prevadzka p    ON p.id = o.prevadzka_id
       LEFT JOIN poskytovatel j ON j.id = o.poskytovatel_id
       ${kde}
-     ORDER BY o.priezvisko, o.meno
+     /* Správcovia hore, za nimi predáci, potom ostatní. Kto appku spravuje
+        a kto za koho objednáva, sú tí, ktorých v zozname človek hľadá; zvyšok
+        listuje podľa abecedy. */
+     ORDER BY o.je_admin DESC,
+              EXISTS (SELECT 1 FROM tim_predak tp WHERE tp.osoba_id = o.id) DESC,
+              o.priezvisko, o.meno
      LIMIT ${STROP + 1}`, hodnoty);
   const orezane = ludia.length > STROP;
   if (orezane) ludia.length = STROP;
@@ -89,7 +99,8 @@ export async function zoznam(k) {
   const s = await jeden(`
     SELECT count(*) FILTER (WHERE aktivny)::int AS aktivnych,
            count(*) FILTER (WHERE NOT aktivny)::int AS neaktivnych,
-           count(*) FILTER (WHERE aktivny AND je_predak)::int AS predakov,
+           count(*) FILTER (WHERE aktivny AND EXISTS
+             (SELECT 1 FROM tim_predak tp WHERE tp.osoba_id = osoba.id))::int AS predakov,
            count(*) FILTER (WHERE aktivny AND (firma_id IS NULL OR tim_id IS NULL))::int AS bez_zaradenia
       FROM osoba`);
 
@@ -124,6 +135,8 @@ export async function zoznam(k) {
 
   ${sprava ? `<div class="okbox">${esc(sprava)}</div>` : ""}
   ${chyba ? `<div class="warnbox">${esc(chyba)}</div>` : ""}
+
+  ${await prehladTimov()}
 
   ${s.bez_zaradenia > 0 && pohlad !== "bez-zaradenia"
     ? `<div class="warnbox">Bez zaradenia: ${mnoho(s.bez_zaradenia, ["človek", "ľudia", "ľudí"])}.
@@ -441,7 +454,7 @@ const CO_JE_HISTORIA = [
    ["záznam o neprítomnosti", "záznamy o neprítomnosti", "záznamov o neprítomnosti"]],
   ["SELECT count(*)::int AS n FROM nepritomnost WHERE zadal_id = $1",
    ["odhlásenie zadané iným", "odhlásenia zadané iným", "odhlásení zadaných iným"]],
-  ["SELECT count(*)::int AS n FROM tim WHERE predak_id = $1",
+  ["SELECT count(*)::int AS n FROM tim_predak WHERE osoba_id = $1",
    ["tím, ktorému je predákom", "tímy, ktorým je predákom", "tímov, ktorým je predákom"]],
   ["SELECT count(*)::int AS n FROM tyzden_stav WHERE uzavrel_id = $1",
    ["uzavretý týždeň", "uzavreté týždne", "uzavretých týždňov"]]
@@ -552,7 +565,6 @@ export async function detail(k, zvonku = {}) {
 
     <div class="card">
       <div class="card-head"><h3>Roly a príznaky</h3></div>
-      ${prep("je_predak", "Predák", o.je_predak, "objednáva za svoj tím")}
       ${prep("je_admin", "Správca", o.je_admin, "číselníky, ľudia, uzávierka")}
       ${prep("platca_dph", "Platiteľ DPH", o.platca_dph, "týka sa len živnostníkov")}
       ${prep("aktivny", "Aktívny", o.aktivny, "neaktívny sa neobjaví nikde, ale história ostáva")}
@@ -644,15 +656,15 @@ export async function uloz(k) {
     await dopyt(`
       UPDATE osoba SET priezvisko=$2, meno=$3, kod_dochadzka=$4, kod_mzdy=$5,
              firma_id=$6, vztah=$7, tim_id=$8, prevadzka_id=$9,
-             poskytovatel_id=$10, je_predak=$11, je_admin=$12, platca_dph=$13,
-             aktivny=$14, povod_mena=$15
+             poskytovatel_id=$10, je_admin=$11, platca_dph=$12,
+             aktivny=$13, povod_mena=$14
        WHERE id=$1`, [
       id, priezvisko, meno_,
       (k.data.kod_dochadzka ?? "").trim() || null,
       (k.data.kod_mzdy ?? "").trim() || null,
       novaFirma, (k.data.vztah ?? "").trim() || null, cislo("tim_id"),
       cislo("prevadzka_id"), cislo("poskytovatel_id"),
-      zapnute("je_predak"), zapnute("je_admin"), zapnute("platca_dph"),
+      zapnute("je_admin"), zapnute("platca_dph"),
       zapnute("aktivny"), povod
     ]);
   } catch (e) {
@@ -749,7 +761,6 @@ export async function zmazat(k) {
     await klient.query("UPDATE audit SET kto_id = NULL WHERE kto_id = $1", [id]);
     await klient.query("DELETE FROM relacia WHERE osoba_id = $1", [id]);
     await klient.query("UPDATE osoba_jedalen SET pridal_id = NULL WHERE pridal_id = $1", [id]);
-    await klient.query("UPDATE osoba SET predak_id = NULL WHERE predak_id = $1", [id]);
     await klient.query("DELETE FROM osoba WHERE id = $1", [id]);
     await klient.query("COMMIT");
   } catch (e) {

@@ -290,7 +290,7 @@ function pohladZ(osoba, ziadany) {
 
 const ktoPatri = (osoba, pohlad, po) => pohlad === "vsetci"
   ? tymZaTyzden("true", [], po)
-  : tymZaTyzden("o.tim_id IN (SELECT id FROM tim WHERE predak_id = $1)", [osoba.id], po);
+  : tymZaTyzden("o.tim_id IN (SELECT tim_id FROM tim_predak WHERE osoba_id = $1)", [osoba.id], po);
 
 /* ---------- obrazovka predáka ---------- */
 

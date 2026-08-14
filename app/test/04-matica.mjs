@@ -18,15 +18,11 @@ await p.fill("#kod", KOD); await p.fill("#heslo", HESLO);
 await p.click("button[type=submit]"); await p.waitForLoadState("networkidle");
 
 /* Správca sa spraví aj predákom a vezme si tím, aby matica mala koho ukázať. */
-await p.goto(A + "/ludia");
-await p.click("tr:has-text('Solár') a:has-text('Upraviť')");
-await p.check('input[name="je_predak"]');
-await p.click("button:has-text('Uložiť')");
-await p.waitForLoadState("networkidle");
-await p.goto(A + "/ciselniky");
-await p.click("tr:has-text('Tím Sever') a:has-text('Upraviť')");
-await p.selectOption("#p-u-predak_id", { label: "Solár Erik" });
-await p.click("button:has-text('Uložiť')");
+/* Predák sa priraďuje tímu, nie človeku (migrácia 007). */
+await p.goto(A + "/timy");
+const kartaSever = () => p.locator("div.card:has(h3:text-is('Tím Sever'))");
+await kartaSever().locator('select[name="novy_predak"]').selectOption({ label: "Solár Erik" });
+await kartaSever().locator("button:has-text('Uložiť')").click();
 await p.waitForLoadState("networkidle");
 
 /* Bez pridelenej jedálne sa objednať nedá — matica by nemala čo ponúknuť. */

@@ -43,11 +43,7 @@ await p.fill("#kod", KOD); await p.fill("#heslo", HESLO);
 await p.click("button[type=submit]"); await p.waitForLoadState("networkidle");
 
 /* --- príprava: predák, tím, jedáleň ľuďom, pár objednávok --- */
-await p.goto(A + "/ludia");
-await p.click("tr:has-text('Solár') a:has-text('Upraviť')");
-await p.check('input[name="je_predak"]');
-await p.click("button:has-text('Uložiť')");
-await p.waitForLoadState("networkidle");
+
 /* Jedáleň dostane adresu až v druhej polovici skúšky — najprv sa overuje,
    že sa uzávierka bez nej nezasekne a že to povie nahlas. */
 await p.goto(A + "/ciselniky");
@@ -56,10 +52,10 @@ await p.fill("#p-u-email", "");
 await p.click("button:has-text('Uložiť')");
 await p.waitForLoadState("networkidle");
 
-await p.goto(A + "/ciselniky");
-await p.click("tr:has-text('Tím Sever') a:has-text('Upraviť')");
-await p.selectOption("#p-u-predak_id", { label: "Solár Erik" });
-await p.click("button:has-text('Uložiť')");
+await p.goto(A + "/timy");
+const kartaSever = () => p.locator("div.card:has(h3:text-is('Tím Sever'))");
+await kartaSever().locator('select[name="novy_predak"]').selectOption({ label: "Solár Erik" });
+await kartaSever().locator("button:has-text('Uložiť')").click();
 await p.waitForLoadState("networkidle");
 await p.goto(A + "/ludia");
 for (const ch of await p.locator('input[name="kto"]').all()) await ch.check();

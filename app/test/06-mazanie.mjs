@@ -18,43 +18,43 @@ await p.fill("#kod", KOD); await p.fill("#heslo", HESLO);
 await p.click("button[type=submit]"); await p.waitForLoadState("networkidle");
 
 console.log("— preklep sa dá zmazať —");
-await p.goto(A + "/ciselniky");
-await p.click("details:has(input[value=tim]) summary");
-await p.fill("form.pridat:has(input[value=tim]) #p-tim-nazov", "Tím Preklpe");
-await p.click("form.pridat:has(input[value=tim]) button[type=submit]");
+await p.goto(A + "/timy");
+await p.fill("#t-novy", "Tím Preklpe");
+await p.click("form[action='/timy/pridat'] button[type=submit]");
 await p.waitForLoadState("networkidle");
-await p.click("tr:has-text('Tím Preklpe') a:has-text('Upraviť')");
-ok("nepoužitá položka mazanie ponúka", (await p.content()).includes("Naozaj zmazať"));
-await p.click("summary:has-text('Naozaj zmazať')");
-await p.click("button:has-text('Zmazať natrvalo')");
+const prazdny = p.locator(".card:has(h3:text-is('Tím Preklpe'))");
+ok("prázdny tím mazanie ponúka",
+   (await prazdny.locator("summary:has-text('Naozaj zmazať')").count()) === 1);
+await prazdny.locator("summary:has-text('Naozaj zmazať')").click();
+await prazdny.locator("button:has-text('Zmazať natrvalo')").click();
 await p.waitForLoadState("networkidle");
-const t = await p.content();
-ok("zmazanie potvrdené", t.includes("Zmazané: Tím Preklpe"));
-/* Meno je aj v potvrdzovacej hláške, tak sa pozeráme do riadkov tabuľky. */
-ok("zo zoznamu zmizol", (await p.locator("table.data tr:has-text('Tím Preklpe')").count()) === 0);
+ok("zmazanie potvrdené", (await p.content()).includes("Zmazané: Tím Preklpe"));
+/* Meno je aj v potvrdzovacej hláške, tak sa pozeráme do kariet tímov. */
+ok("zo zoznamu zmizol", (await p.locator(".card:has(h3:text-is('Tím Preklpe'))").count()) === 0);
 
 console.log("— použitý tím sa zmazať nedá —");
-await p.click("tr:has-text('Tím Sever') a:has-text('Upraviť')");
-const detail = await p.content();
-ok("mazanie sa neponúka", !detail.includes("Naozaj zmazať"));
-ok("povie, koľko na to ukazuje", /ukazuje naň\s*<strong>\s*[1-9]/.test(detail));
-ok("odkáže na zneaktívnenie", detail.includes("Zneaktívniť"));
+const plny = p.locator(".card:has(h3:text-is('Tím Sever'))");
+ok("mazanie sa neponúka", (await plny.locator("summary:has-text('Naozaj zmazať')").count()) === 0);
+const dt = await plny.innerHTML();
+ok("povie, koľko na to ukazuje", /ukazuje naň\s*<strong>\s*[1-9]/.test(dt));
+ok("odkáže na zneaktívnenie", /zneaktívni/i.test(dt));
 
 console.log("— obídenie tlačidla —");
 /* Formulár sa dá poslať aj bez toho tlačidla; server musí kontrolovať znova. */
-const znamka = await p.locator('input[name="znamka"]').first().inputValue();
-const id = await p.locator('input[name="id"]').first().inputValue();
+const znamka = await plny.locator('input[name="znamka"]').first().inputValue();
+const id = await plny.locator('input[name="id"]').first().inputValue();
 const kam = await p.evaluate(async ([z, i]) => {
-  const telo = new URLSearchParams({ znamka: z, druh: "tim", id: i });
-  const r = await fetch("/ciselniky/zmazat", { method: "POST", body: telo, redirect: "follow",
+  const telo = new URLSearchParams({ znamka: z, id: i });
+  const r = await fetch("/timy/zmazat", { method: "POST", body: telo, redirect: "follow",
     headers: { "content-type": "application/x-www-form-urlencoded" } });
   return r.url;
 }, [znamka, id]);
 ok("server priame odoslanie odmietne", decodeURIComponent(kam).includes("Nezmazalo sa nič"));
-await p.goto(A + "/ciselniky");
+await p.goto(A + "/timy");
 ok("tím tam stále je", (await p.content()).includes("Tím Sever"));
 
 console.log("— použitá jedáleň —");
+await p.goto(A + "/ciselniky");
 await p.click("tr:has-text('GASTROGAL') a:has-text('Upraviť')");
 ok("jedáleň s objednávkami sa zmazať nedá", !(await p.content()).includes("Naozaj zmazať"));
 

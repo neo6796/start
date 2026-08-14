@@ -27,7 +27,8 @@ function polozky(osoba) {
   const p = [["/moje", "Môj týždeň"]];
   if (osoba.je_predak) p.unshift(["/tim", "Môj tím"]);
   if (osoba.je_predak || osoba.je_admin) p.push(["/menu", "Menu"]);
-  if (osoba.je_admin) p.push(["/ludia", "Ľudia"], ["/ciselniky", "Číselníky"], ["/uzavierka", "Uzávierka"]);
+  if (osoba.je_admin) p.push(["/ludia", "Ľudia"], ["/timy", "Tímy"],
+                             ["/ciselniky", "Číselníky"], ["/uzavierka", "Uzávierka"]);
   return p;
 }
 

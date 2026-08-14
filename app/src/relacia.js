@@ -71,8 +71,12 @@ export async function zaloz(osobaId) {
 
 export async function podlaTokenu(token) {
   if (!token) return null;
+  /* Predákom je ten, kto vedie aspoň jeden tím — nedrží sa to nikde zvlášť,
+     takže sa to nemá ako rozísť so skutočnosťou (migrácia 007). */
   const r = await jeden(
-    `SELECT o.* FROM relacia r JOIN osoba o ON o.id = r.osoba_id
+    `SELECT o.*, EXISTS (SELECT 1 FROM tim_predak tp JOIN tim t ON t.id = tp.tim_id
+                          WHERE tp.osoba_id = o.id AND t.aktivny) AS je_predak
+       FROM relacia r JOIN osoba o ON o.id = r.osoba_id
       WHERE r.token = $1 AND r.plati_do > now() AND o.aktivny`,
     [odtlacok(token)]
   );
@@ -128,7 +132,9 @@ export async function prihlas(kod, heslo, ip) {
   if (minut) return { chyba: `Priveľa pokusov. Skúste o ${minut} min.` };
 
   const osoba = await jeden(
-    "SELECT * FROM osoba WHERE kod_dochadzka = $1 AND aktivny", [kod.trim()]
+    `SELECT o.*, EXISTS (SELECT 1 FROM tim_predak tp JOIN tim t ON t.id = tp.tim_id
+                          WHERE tp.osoba_id = o.id AND t.aktivny) AS je_predak
+       FROM osoba o WHERE o.kod_dochadzka = $1 AND o.aktivny`, [kod.trim()]
   );
   /* Overujeme aj pri neznámom kóde, aby sa z rýchlosti odpovede nedalo
      vyčítať, ktoré osobné čísla existujú. */
