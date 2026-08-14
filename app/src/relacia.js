@@ -7,7 +7,7 @@
    používateľov je rozdiel akademický. Formát hashu si nesie parametre,
    takže sa dá kedykoľvek prejsť inam bez zásahu do databázy. */
 
-import { scrypt, randomBytes, timingSafeEqual, createHash } from "node:crypto";
+import { scrypt, randomBytes, randomInt, timingSafeEqual, createHash } from "node:crypto";
 import { promisify } from "node:util";
 import { dopyt, jeden, zapis } from "./db.js";
 
@@ -15,6 +15,26 @@ const scryptA = promisify(scrypt);
 
 const N = 16384, R = 8, P = 1, DLZKA = 32;
 const PLATNOST_DNI = 30;
+
+/* Najkratšie heslo podľa roly. Správca sa dostane ku všetkému a k mzdovému
+   podkladu, predák objednáva za tridsať ľudí, stravník za seba. */
+export const najmenejZnakov = o => o.je_admin ? 10 : o.je_predak ? 8 : 4;
+
+/* Vygenerované heslo. Znaky, ktoré sa na papieri pletú (0 a O, 1 a l a I),
+   v ňom nie sú — heslo sa bude prepisovať z lístka do telefónu a preklep
+   v ňom vyzerá ako pokazená appka. Delí sa pomlčkou po štyroch, aby sa dalo
+   nadiktovať aj cez telefón. */
+const ZNAKY = "abcdefghijkmnpqrstuvwxyz23456789";
+export function nahodneHeslo(najmenej = 8) {
+  const blokov = Math.max(2, Math.ceil(najmenej / 4));
+  const bloky = [];
+  for (let b = 0; b < blokov; b++) {
+    let blok = "";
+    for (let i = 0; i < 4; i++) blok += ZNAKY[randomInt(ZNAKY.length)];
+    bloky.push(blok);
+  }
+  return bloky.join("-");
+}
 
 export async function hashHesla(heslo) {
   const sol = randomBytes(16);
@@ -34,7 +54,7 @@ export async function sediHeslo(heslo, hash) {
 
 /* V databáze je odtlačok, nie samotný token. Kto sa dostane k výpisu tabuľky,
    nezíska tým prihlásenie. */
-const odtlacok = t => createHash("sha256").update(t).digest("hex");
+export const odtlacok = t => createHash("sha256").update(t).digest("hex");
 
 export function csrf(token) {
   return createHash("sha256").update(token + "·csrf").digest("base64url").slice(0, 32);
@@ -57,6 +77,13 @@ export async function podlaTokenu(token) {
     [odtlacok(token)]
   );
   return r;
+}
+
+/* Odhlási človeka zo všetkých zariadení okrem toho, z ktorého sa to robí.
+   Bez tej výnimky by si správca zmenou vlastného hesla zavrel dvere. */
+export async function zrusOstatne(osobaId, token) {
+  await dopyt("DELETE FROM relacia WHERE osoba_id = $1 AND token <> $2",
+              [osobaId, odtlacok(token ?? "")]);
 }
 
 export async function zrus(token) {

@@ -709,6 +709,17 @@
   .badge.lead{color:var(--petrol)}
   .badge.adm{color:var(--miss)}
   .badge.ziv{color:var(--ink-3)}
+  /* Vygenerované heslo — ukáže sa raz a prepisuje sa z obrazovky na papier,
+     tak musí byť veľké a jednoznačné. */
+  .heslo-raz{
+    font-family:var(--mono);font-size:24px;font-weight:700;letter-spacing:.06em;
+    margin:10px 0;padding:10px 14px;background:var(--surface);
+    border:1px dashed currentColor;border-radius:var(--r);display:inline-block;
+    user-select:all;
+  }
+  a.kto{text-decoration:none}
+  a.kto:hover{text-decoration:underline}
+
   .badge.ok{color:var(--ok)}
   .badge.zle{color:var(--miss)}
 

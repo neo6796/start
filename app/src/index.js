@@ -19,6 +19,7 @@ import * as matica from "./matica.js";
 import * as menu from "./menu.js";
 import * as uzavierkaObr from "./uzavierka.js";
 import * as objednavka from "./objednavka.js";
+import * as heslo from "./heslo.js";
 import { jeMultipart, citaj } from "./multipart.js";
 
 const tu = dirname(fileURLToPath(import.meta.url));
@@ -130,6 +131,8 @@ const CESTY = [
   ["POST", "/odhlasenie",  odhlasenie,              "kto"],
   ["GET",  "/",            rozcestie,               "kto"],
   ["GET",  "/moje",        matica.moje,             "kto"],
+  ["GET",  "/heslo",       heslo.zobraz,            "kto"],
+  ["POST", "/heslo",       heslo.uloz,              "kto"],
   ["GET",  "/tim",         matica.tim,              "predak"],
   ["POST", "/tim",         matica.uloz,             "predak"],
   ["POST", "/tim/nepritomnost", matica.nepritomnost, "predak"],
@@ -161,6 +164,7 @@ const CESTY = [
   ["POST", "/ludia/hromadne",  ludia.hromadne, "admin"],
   ["GET",  "/osoba",           ludia.detail,   "admin"],
   ["POST", "/osoba",           ludia.uloz,     "admin"],
+  ["POST", "/osoba/heslo",     ludia.nasHeslo, "admin"],
   ["POST", "/osoba/zmazat",    ludia.zmazat,   "admin"]
 ];
 

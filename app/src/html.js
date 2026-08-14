@@ -56,9 +56,13 @@ export function stranka({ titulok, osoba, cesta, obsah, siroka = false, verzia =
       ).join("")
     : "";
 
+  /* Meno vedie na zmenu vlastného hesla. Vlastná záložka by v ponuke zavadzala
+     každý deň kvôli veci, ktorú človek spraví raz za rok; pri mene ju hľadá
+     ten, kto ju potrebuje. */
   const vpravo = osoba
     ? `<form method="post" action="/odhlasenie" class="odhlas">
-         <span class="kto">${esc(meno(osoba))} · ${esc(rola(osoba))}</span>
+         <a class="kto" href="/heslo" title="Zmeniť si heslo"
+            >${esc(meno(osoba))} · ${esc(rola(osoba))}</a>
          <button class="tab" type="submit">Odhlásiť</button>
        </form>`
     : "";

@@ -10,6 +10,7 @@
 
 import { stranka, esc, meno, mnoho } from "./html.js";
 import { bazen, dopyt, jeden, vsetky, zapis } from "./db.js";
+import { hashHesla, nahodneHeslo, najmenejZnakov, zrusOstatne } from "./relacia.js";
 
 /* ---------- zoznam ---------- */
 
@@ -455,8 +456,12 @@ async function historiaOsoby(id) {
   return von;
 }
 
-export async function detail(k) {
-  const id = Number(k.url.searchParams.get("id"));
+/* `zvonku.noveHeslo` vyplní nastavenie hesla. Vygenerované heslo sa nedá
+   presmerovať späť na GET — v adrese by ostalo v histórii prehliadača —
+   a uložiť sa nedá ani do databázy, lebo tam je len jeho odtlačok. Ukáže sa
+   preto raz, priamo z POST-u, a kto si ho neodpíše, vygeneruje si nové. */
+export async function detail(k, zvonku = {}) {
+  const id = Number(zvonku.id ?? k.url.searchParams.get("id"));
   const o = await jeden("SELECT * FROM osoba WHERE id = $1", [id]);
   if (!o) return k.inam(k.odp, "/ludia?chyba=" + encodeURIComponent("Taký človek tu nie je."));
 
@@ -558,6 +563,33 @@ export async function detail(k) {
       <a class="btn" href="/ludia">Späť na zoznam</a>
     </div>
   </form>
+
+  <div class="card">
+    <div class="card-head"><h3>Prihlásenie</h3>
+      <span class="hint">${o.heslo_hash ? "heslo je nastavené" : "heslo ešte nemá"}</span></div>
+
+    ${zvonku.noveHeslo ? `<div class="okbox">
+        <strong>Nové heslo pre ${esc(o.priezvisko)} ${esc(o.meno)}:</strong>
+        <div class="heslo-raz">${esc(zvonku.noveHeslo)}</div>
+        Odpíšte si ho a odovzdajte — <strong>uvidíte ho len teraz</strong>. V databáze
+        je uložený len jeho odtlačok, takže sa už nikde nedá pozrieť. Keď sa stratí,
+        vygenerujte nové.
+      </div>` : ""}
+
+    <p style="margin:0 0 12px">Prihlasuje sa osobným číslom
+      <strong>${esc(o.kod_dochadzka ?? "—")}</strong> a heslom.
+      ${o.heslo_hash
+        ? "Heslo sa nedá pozrieť — v databáze je len jeho odtlačok. Keď ho človek zabudne, vygenerujte nové."
+        : "Bez hesla sa človek neprihlási — vygenerujte mu ho."}</p>
+    <form method="post" action="/osoba/heslo">
+      <input type="hidden" name="znamka" value="${esc(k.csrf)}">
+      <input type="hidden" name="id" value="${o.id}">
+      <button class="btn${o.heslo_hash ? "" : " primary"}" type="submit">
+        ${o.heslo_hash ? "Vygenerovať nové heslo" : "Vygenerovať heslo"}</button>
+      <p class="hint" style="margin:8px 0 0">Nové heslo odhlási tohto človeka zo všetkých
+        zariadení. Svoje vlastné si každý môže zmeniť sám cez odkaz pri svojom mene.</p>
+    </form>
+  </div>
 
   <div class="card">
     <div class="card-head"><h3>Zmazať</h3></div>
@@ -665,6 +697,25 @@ export async function uloz(k) {
 
 /* Mazanie človeka. Rovnaké pravidlo ako pri číselníkoch, len s dlhším
    zoznamom toho, čo je história. */
+/* Vygeneruje heslo a ukáže ho raz. Uložiť sa dá len odtlačok, takže druhá
+   možnosť neexistuje: buď si ho človek odpíše teraz, alebo sa vyrobí nové. */
+export async function nasHeslo(k) {
+  const id = Number(k.data.id);
+  const o = await jeden("SELECT * FROM osoba WHERE id = $1", [id]);
+  if (!o) return k.inam(k.odp, "/ludia?chyba=" + encodeURIComponent("Taký človek tu nie je."));
+
+  const heslo = nahodneHeslo(najmenejZnakov(o));
+  await dopyt("UPDATE osoba SET heslo_hash = $2 WHERE id = $1", [id, await hashHesla(heslo)]);
+  /* Staré prihlásenia po zmene hesla neplatia — inak by zmena nepomohla proti
+     niekomu, kto je práve prihlásený. Vlastnú reláciu si správca nechá, aby
+     sa pri zmene vlastného hesla sám nevyhodil. */
+  if (id === k.osoba.id) await zrusOstatne(id, k.token);
+  else await dopyt("DELETE FROM relacia WHERE osoba_id = $1", [id]);
+  await zapis(k.osoba.id, "osoba.heslo", { komu: id });
+
+  return detail(k, { id, noveHeslo: heslo });
+}
+
 export async function zmazat(k) {
   const id = Number(k.data.id);
   const o = await jeden("SELECT * FROM osoba WHERE id = $1", [id]);
