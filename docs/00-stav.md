@@ -79,6 +79,8 @@ Firma, typ vzťahu, tím, predák a prevádzka sa **zadajú v appke** z rozbaľo
 - [ ] **Etapa 2, krok 6 — mesačná uzávierka a mzdový podklad** — pred koncom augusta
 - [ ] krok 7: zálohy a upozornenia
 - [ ] pri nej dve veci, ktoré odhalil test pošty: generovať `Message-ID` a `Date`, predstavovať sa rozumným menom v `EHLO`
+- [ ] **prístup zo second PC** — vyrobiť kľúč na Windows a pridať ho z Macu (`03-nastavenie-webglobe.md`, krok 5b)
+- [ ] **`test.obedy.ahafarma.sk`** — jeden `A` záznam + `TEST_DOMENA` v `.env`; potom je testovacia kópia dostupná z prehliadača odkiaľkoľvek a SSH na ňu netreba
 - [ ] *(voliteľne)* „Pridať na plochu" pre preview, aby sa otestovala PWA na telefónoch predákov
 
 ---

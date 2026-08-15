@@ -234,6 +234,83 @@ sudo ufw status                # aktívne, otvorené 22, 80, 443
 
 ---
 
+## 5b. Ďalší počítač — prístup z dvoch miest
+
+Kľúč je viazaný na počítač, nie na človeka. Druhý počítač preto nedostane kópiu
+toho prvého kľúča — **vyrobí si vlastný** a na server sa pridá ako ďalší riadok.
+
+> **Súkromný kľúč sa nikdy nekopíruje medzi počítačmi.** Nie preto, že by to
+> nefungovalo — fungovalo by. Ale potom sa nedá povedať, ktorý stroj sa práve
+> prihlásil, a keď sa jeden stratí, treba vymeniť prístup všade. Vlastný kľúč na
+> každom stroji znamená, že odobrať jeden je zmazanie jedného riadku.
+
+### 1. Na novom počítači — vyrob kľúč
+
+Windows 10 a 11 majú SSH zabudované; stačí otvoriť **PowerShell**. (Keby príkaz
+nepoznalo: *Nastavenia → Aplikácie → Voliteľné funkcie → OpenSSH Client*.)
+
+```powershell
+ssh-keygen -t ed25519 -C "erik-windows"
+```
+
+Trikrát Enter. Heslo ku kľúču pokojne zadaj — chráni ťa, keby sa počítač stratil.
+Vzniknú dva súbory v `C:\Users\<meno>\.ssh\`:
+
+| Súbor | Čo s ním |
+|---|---|
+| `id_ed25519` | **súkromný** — ostáva tu, nikam sa neposiela |
+| `id_ed25519.pub` | **verejný** — ten sa pridáva na server |
+
+### 2. Prečítaj verejný kľúč
+
+```powershell
+Get-Content $env:USERPROFILE\.ssh\id_ed25519.pub
+```
+
+Vypíše jeden riadok, ktorý začína `ssh-ed25519 AAAA…` a končí menom, ktoré si
+zadal (`erik-windows`). **Tento riadok pokojne pošli mailom aj cez chat** — je to
+zámok, nie kľúč. Pravidlo o neposielaní tajomstiev sa týka toho druhého súboru.
+
+### 3. Z počítača, ktorý prístup už má — pridaj ho na server
+
+```bash
+ssh aha@obedy.ahafarma.sk 'cat >> ~/.ssh/authorized_keys' <<'KLUC'
+ssh-ed25519 AAAA…celý riadok z nového počítača… erik-windows
+KLUC
+```
+
+### 4. Vyskúšaj to z nového počítača
+
+```powershell
+ssh aha@obedy.ahafarma.sk
+```
+
+**Staré okno zatvor až vtedy, keď toto prejde.** Je to to isté pravidlo ako v
+kroku 5 a z toho istého dôvodu.
+
+Odvtedy funguje z nového počítača aj tunel na testovaciu kópiu:
+
+```powershell
+ssh -N -L 8080:127.0.0.1:3010 aha@obedy.ahafarma.sk
+# a v prehliadači http://localhost:8080
+```
+
+### Keď sa počítač stratí alebo prestane používať
+
+Zmaž jeho riadok — nájdeš ho podľa mena na konci:
+
+```bash
+ssh aha@obedy.ahafarma.sk
+nano ~/.ssh/authorized_keys     # zmaž riadok končiaci „erik-windows"
+```
+
+> **Keby si nemal po ruke žiadny počítač s prístupom**, dá sa kľúč pridať aj cez
+> webovú konzolu v paneli Hetznera (Console) — tá ide mimo SSH. Znamená to
+> obnoviť heslo roota v paneli a odklepať dlhý kľúč ručne, čo je otrava. Kým máš
+> Mac po ruke, nechaj to naň.
+
+---
+
 ## 6. Docker
 
 ```bash
