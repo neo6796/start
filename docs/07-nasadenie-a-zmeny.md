@@ -117,9 +117,11 @@ Prepínače:
 **Ako sa na ňu dostať.** Kým v `.env` nie je `TEST_DOMENA`, kópia počúva len na slučke a chodí sa na ňu tunelom — Caddy si teda ani nepýta certifikát pre adresu, ktorá ešte neexistuje:
 
 ```bash
-ssh -N -L 8080:127.0.0.1:3010 root@server     # z vlastného počítača
+ssh -N -L 8080:127.0.0.1:3010 <používateľ>@46.225.236.143   # z vlastného počítača
 # a potom http://localhost:8080
 ```
+
+Tunel funguje len tam, kde je nahraný SSH kľúč — server má root aj heslá zablokované. **Z cudzieho počítača sa tak dnu nedostaneš**, a to je práve dôvod, prečo sa oplatí vyplniť `TEST_DOMENA`: potom je kópia dostupná z prehliadača odkiaľkoľvek, aj z telefónu, a SSH na to netreba vôbec.
 
 Keď na `test.obedy.ahafarma.sk` začne ukazovať DNS (jeden `A` záznam na tú istú adresu ako `obedy`), stačí do `.env` doplniť `TEST_DOMENA=test.obedy.ahafarma.sk` a certifikát aj HTTPS vybaví Caddy sám.
 
