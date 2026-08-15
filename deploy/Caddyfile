@@ -5,7 +5,12 @@
 #   /preview/  — klikací prototyp, ktorý ukazuje celý cieľový stav
 #
 # Preview zámerne neostalo na koreni: appka je to, čo majú ľudia otvárať.
-# Prototyp sa ďalej hodí na ukazovanie predákom a mzdárke, preto sa nemaže.
+#
+# Odkedy appka beží, hodnota prototypu je už len v obrazovkách, ktoré ešte
+# nie sú naprogramované — ceny, mzdový podklad, mesačná uzávierka, tlačové
+# zostavy. Tie štyri, ktoré appka má (prihlásenie, Môj tím, Môj týždeň,
+# Ľudia), sú v ňom už neaktuálne a mýlia. Preto má hore vetu, že je to
+# prototyp. Po kroku 6 z neho ostane taký zvyšok, že sa zmaže celý.
 
 obedy.ahafarma.sk {
 	encode gzip
