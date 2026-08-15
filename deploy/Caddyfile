@@ -42,6 +42,12 @@ obedy.ahafarma.sk {
 # na slučke na porte, ktorý zvonku nikto nevidí — Caddy si teda ani nepýta
 # certifikát pre doménu, ktorá ešte neexistuje. Keď na test.obedy.ahafarma.sk
 # začne ukazovať DNS, stačí ju do .env doplniť a Caddy zvyšok vybaví sám.
+#
+# Náhradu za prázdnu hodnotu dosádza docker-compose, nie zápis `{$...:...}`
+# nižšie: ten platí len na **nenastavenú** premennú. Prázdna je pre Caddy
+# nastavená, dosadí prázdno a ostane mu blok bez adresy — a taký súbor odmietne
+# celý, aj s ostrou stránkou. Zápis nižšie tu ostáva pre prípad, že by Caddy
+# niekto pustil mimo compose.
 {$TEST_DOMENA:http://127.0.0.1:9999} {
 	encode gzip
 	header X-Robots-Tag "noindex, nofollow"

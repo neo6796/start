@@ -96,7 +96,13 @@ services:
     environment:
       # Kým nie je vyplnená, Caddy testovaciu kópiu nikam nevystaví a ani si
       # na ňu nepýta certifikát. Vyplní sa až vtedy, keď na ňu ukazuje DNS.
-      TEST_DOMENA: ${TEST_DOMENA:-}
+      #
+      # Náhrada musí byť tu, nie len v Caddyfile. `${TEST_DOMENA:-}` by
+      # premennú nastavilo na **prázdny reťazec** — a to nie je to isté ako
+      # nenastavená: Caddy vtedy svoju náhradu `{$TEST_DOMENA:...}` nepoužije,
+      # dosadí prázdno a ostane mu blok bez adresy. Taký súbor odmietne celý
+      # a s ním padne aj ostrá stránka. (Stalo sa 15. 8. 2026.)
+      TEST_DOMENA: ${TEST_DOMENA:-http://127.0.0.1:9999}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       # Preview sa vozí priamo z repozitára — po git pull je hneď aktuálne
