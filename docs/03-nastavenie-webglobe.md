@@ -22,7 +22,7 @@ Server: **`aha-apps`** u Hetznera, CPX22, Debian 13, IP **`46.225.236.143`**
 
 Aktualizácia preview je odvtedy jeden príkaz z Macu:
 ```
-scp ~/Downloads/index.html aha@46.225.236.143:~/obedar/site/index.html
+scp ~/Downloads/index.html aha@46.225.236.143:~/obedar-app/site/index.html
 ```
 
 ---

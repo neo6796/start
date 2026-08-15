@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Testovacia kópia Obedára (07-nasadenie, bod 3).
 #
-#   cd ~/obedar/deploy && ./test-kopia.sh
+#   cd ~/obedar-app/deploy && ./test-kopia.sh
 #
 # Postaví druhú appku na tom istom serveri: rovnaký kód, vlastná databáza,
 # vlastný port. Naplní ju kópiou ostrých dát z poslednej zálohy, aby sa
@@ -88,8 +88,13 @@ fi
 echo
 echo "✔ testovacia kópia beží, verzia $VERZIA"
 echo
-if [ -n "${TEST_DOMENA:-}" ]; then
-  echo "  Otvor:  https://$TEST_DOMENA"
+# `.env` číta docker compose, nie shell — bez tohto by skript o vyplnenej
+# doméne nevedel a posielal by človeka do tunela, hoci stránka je vonku.
+DOMENA=${TEST_DOMENA:-$(sed -n 's/^TEST_DOMENA=//p' .env 2>/dev/null | tr -d '[:space:]')}
+case "$DOMENA" in http://127.0.0.1:*|https://127.0.0.1:*) DOMENA= ;; esac
+
+if [ -n "$DOMENA" ]; then
+  echo "  Otvor:  https://$DOMENA"
 else
   echo "  Zvonku zatiaľ nie je vystavená (v .env nie je TEST_DOMENA)."
   echo "  Otvor si ju tunelom — z tvojho počítača:"

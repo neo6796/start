@@ -69,7 +69,7 @@ ssh aha@46.225.236.143 'cat ~/.ssh/authorized_keys'
 
 ```
 ssh aha@46.225.236.143
-cd ~/obedar
+cd ~/obedar-app
 docker compose ps          # čo beží
 docker compose logs --tail=100
 docker compose restart     # najčastejšie stačí

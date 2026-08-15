@@ -59,7 +59,7 @@ Firma, typ vzťahu, tím, predák a prevádzka sa **zadajú v appke** z rozbaľo
 
 ## Čo má spraviť Erik
 
-- [ ] **nasadiť appku na server** — `cd ~/obedar/deploy && ./deploy.sh`, potom založiť správcu (príkaz vypíše sám skript)
+- [ ] **nasadiť appku na server** — `cd ~/obedar-app/deploy && ./deploy.sh`, potom založiť správcu (príkaz vypíše sám skript)
 - [ ] **poslať odkaz na preview predákom** a pozbierať pripomienky — pozor, nová adresa je `obedy.ahafarma.sk/preview/`
 - [ ] **vypýtať e-mail na objednávky** aspoň od jednej jedálne — jediná vec, ktorá blokuje pilot
 - [ ] vybrať **tím na pilot** — 5–6 ľudí, jedna prevádzka, jeden dodávateľ *(kapitola 14 konceptu; nie nadšenca, ale svedomitého vlažného predáka)*

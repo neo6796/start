@@ -50,8 +50,13 @@ Certifikát, obnova certifikátu, presmerovanie z HTTP — to všetko si Caddy v
 Postup je vždy rovnaký a vojde sa do jedného príkazu na serveri:
 
 ```bash
-./deploy.sh
+cd ~/obedar-app/deploy && ./deploy.sh
 ```
+
+> Keby sa tá cesta niekedy stratila, server ju povie sám:
+> ```bash
+> docker inspect obedar-caddy --format '{{index .Config.Labels "com.docker.compose.project.working_dir"}}'
+> ```
 
 Čo ten skript spraví:
 
@@ -101,7 +106,7 @@ docker compose up -d --build
 **Postavená.** Púšťa sa jedným príkazom na serveri:
 
 ```bash
-cd ~/obedar/deploy && ./test-kopia.sh
+cd ~/obedar-app/deploy && ./test-kopia.sh
 ```
 
 Rovnaký compose, vlastná databáza (`data/db-test`), vlastný port (`127.0.0.1:3010`). Bežné nasadenie sa jej nedotkne — služby sú v profile `test`, takže bez menovitého vyžiadania pre `deploy.sh` neexistujú. To je práve to, o čo ide: **na kópii beží nová verzia, kým na ostrej ešte stará.**
