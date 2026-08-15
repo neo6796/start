@@ -107,6 +107,18 @@ Z toho plynie aj to, čo život aj tak robí:
 
 Ľudia aj predáci sa tímu prideľujú na jednom mieste — na obrazovke *Tímy*.
 
+**Kým nie sú upozornenia, zástupca nie je iná rola — je to poznámka, koho sa
+pýtať ako prvého.** Práva má rovnaké a appka sa podľa toho príznaku nikde
+nerozhoduje; číta ho jediné miesto, a to preto, aby v prehľade tímov stálo pri
+tíme meno hlavného predáka, nie ktoréhokoľvek z nich. Význam dostane až
+eskaláciou (1.3 bod 7): upozornenie na neobjednaný tím ide vo štvrtok predákovi
+a v piatok ráno zástupcovi a správcovi.
+
+> **Nedokončené:** koncept chce zástupcov **v poradí** (1., 2., …), appka má
+> zatiaľ len áno/nie. Kým má tím jedného zástupcu, je to jedno; poradie treba
+> doplniť vtedy, keď sa bude stavať eskalácia, lebo až tá sa pýta „ktorý je
+> prvý". Zapísať to teraz je lacnejšie než na to prísť vtedy.
+
 ### 1.3a Firma, tím a prevádzka sú tri nezávislé veci
 
 Toto je pri tomto zákazníkovi kľúčové: obedy sa robia **naraz pre viac spriaznených firiem** a organizačne sú pomiešané. Model to zvláda len vtedy, keď sa tri veci držia oddelene a nič ich nenúti zhodovať sa:
