@@ -974,7 +974,7 @@ strop = 55 % zo stravného 5–12 h
 
 Pri obedoch za 6,30 a 7,20 € s DPH je to 5,29 a 6,05 € bez DPH — hlboko pod akoukoľvek hodnotou stravného, aká za posledné roky platila. **Prakticky nezasiahne.** To ale nie je dôvod ho nezadať: ceny obedov rastú a stravné sa mení nezávisle od nich, takže sa raz stretnúť môžu.
 
-Preto je strop **zapnuteľný a datovaný**, appka ho vyhodnotí pri každom obede a keď zasiahne, **napíše to** namiesto tichého orezania — *„príspevok orezaný stropom, 3,85 → 3,60"*. Tichý strop je najhorší možný: čísla nesedia a nikto nevie prečo.
+Preto je strop **zapnuteľný a datovaný** *(obrazovka Rozúčtovanie — zadáva sa stravné, strop appka dopočíta; stará sada ostáva platiť pre staré dni)*, appka ho vyhodnotí pri každom obede a keď zasiahne, **napíše to** namiesto tichého orezania — *„príspevok orezaný stropom, 3,85 → 3,60"*. Tichý strop je najhorší možný: čísla nesedia a nikto nevie prečo.
 
 Keď strop zasiahne, rozdiel neplatí zamestnávateľ — dorovná ho **sociálny fond alebo stravník**, podľa modelu v 6.2. Strop teda nemení, koľko obed stojí; mení, kto ho platí.
 

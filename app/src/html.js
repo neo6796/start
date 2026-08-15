@@ -29,7 +29,7 @@ function polozky(osoba) {
   if (osoba.je_predak || osoba.je_admin) p.push(["/menu", "Menu"]);
   if (osoba.je_admin) p.push(["/ludia", "Ľudia"], ["/timy", "Tímy"],
                              ["/ciselniky", "Číselníky"], ["/uzavierka", "Uzávierka"],
-                             ["/spatne", "Spätný zápis"]);
+                             ["/spatne", "Spätný zápis"], ["/nastavenia", "Rozúčtovanie"]);
   return p;
 }
 
