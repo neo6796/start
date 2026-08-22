@@ -27,6 +27,8 @@ assets/css/style.css     všetka grafika webu (farby, typografia, komponenty)
 assets/js/main.js        mobilné menu, rok v pätičke, odoslanie formulára
 assets/img/              logo, favicon, náhľad pre sociálne siete, sken osvedčenia
 dokumenty/               sem patria PDF súbory (pozri dokumenty/README.md)
+.htaccess                nastavenie servera: HTTPS, presmerovania, 404, hlavičky
+odoslat.php              voliteľné spracovanie kontaktného formulára cez PHP
 docs/OBSAH-NA-DOPLNENIE.md   zoznam všetkého, čo treba doplniť pred spustením
 robots.txt, sitemap.xml  podklady pre vyhľadávače
 ```
@@ -90,33 +92,46 @@ v atribúte `d` — alebo mi napíšte, čo má zobrazovať.
 
 ## 4. Kontaktný formulár
 
-Statický web nemá vlastný server, takže e-maily neodošle sám. Kým nie je
-nastavená formulárová služba, formulár otvorí návštevníkovi jeho e-mailový
-program s predvyplnenou správou — funguje, ale nie je to ideálne.
+Statický web sám e-maily neodošle. Kým nie je formulár prepojený, otvorí
+návštevníkovi jeho e-mailový program s predvyplnenou správou — funguje to,
+ale nie je to ideálne.
 
-Odporúčaný postup (zdarma, cca 10 minút):
+### Ak hosting podporuje PHP (Webglobe áno) — odporúčané
 
-1. Zaregistrujte sa na [Formspree](https://formspree.io) alebo
-   [Web3Forms](https://web3forms.com).
-2. Vytvorte formulár a skopírujte adresu, ktorú služba vygeneruje.
-3. V `kontakt.html` nájdite `<form … action="">` a adresu vložte:
+V balíku je pripravený súbor `odoslat.php`. Nepotrebuje žiadnu externú službu
+ani registráciu.
+
+1. Vytvorte na hostingu e-mailovú schránku `web@adiumentum.sk`. Netreba ju
+   čítať — musí len existovať, inak správy skončia v spame.
+2. V `odoslat.php` skontrolujte nastavenia `$prijemca` a `$odosielatel`.
+3. V `kontakt.html` doplňte formuláru adresu skriptu:
 
    ```html
-   <form class="form" data-kontakt-formular action="https://formspree.io/f/VAS-KOD" method="post">
+   <form class="form" data-kontakt-formular action="odoslat.php" method="post">
    ```
 
-4. Odošlite testovací dopyt a skontrolujte, či e-mail dorazil.
+4. Odošlite skúšobný dopyt a overte doručenie.
 
-Formulár už obsahuje skrytú pascu na roboty (pole `webova-adresa`) aj
-zaškrtávacie políčko so súhlasom podľa GDPR.
+Skript overuje povinné polia, kontroluje pascu na roboty a čistí vstupy tak,
+aby sa cez ne nedali prepašovať ďalšie e-mailové hlavičky.
 
----
+### Ak PHP k dispozícii nie je
+
+Použite bezplatnú službu [Formspree](https://formspree.io) alebo
+[Web3Forms](https://web3forms.com): zaregistrujte sa, vytvorte formulár
+a vygenerovanú adresu vložte do rovnakého atribútu `action`. Doménu služby
+potom treba doplniť do `.htaccess`, do direktívy `Content-Security-Policy`
+(časť `form-action`) — inak odoslanie prehliadač zablokuje.
 
 ## 5. Nasadenie na hosting
 
+**Webglobe a výmena za WordPress —** podrobný postup krok za krokom vrátane
+zálohovania, testu v podpriečinku a kontrolného zoznamu nájdete v súbore
+[`docs/NASADENIE-WEBGLOBE.md`](docs/NASADENIE-WEBGLOBE.md).
+
 **Bežný hosting (Websupport, WebHouse, vlastný server) —** cez FTP nahrajte
 obsah tohto priečinka do koreňového priečinka webu (`/www`, `/public_html`
-alebo `/htdocs`). Nič sa nekompiluje.
+alebo `/htdocs`). Nič sa nekompiluje. Nezabudnite na skrytý súbor `.htaccess`.
 
 **GitHub Pages —** v repozitári *Settings → Pages* zvoľte vetvu a priečinok
 `/ (root)`. Web bude dostupný do niekoľkých minút.
@@ -128,7 +143,8 @@ Po nasadení nezabudnite:
 
 - nastaviť presmerovanie z `www.adiumentum.sk` na `adiumentum.sk` (alebo naopak),
 - vynútiť HTTPS,
-- nastaviť `404.html` ako chybovú stránku (na Apache: `ErrorDocument 404 /404.html`),
+- overiť, že sa nahral aj skrytý súbor `.htaccess` (rieši HTTPS, presmerovania
+  aj chybovú stránku),
 - overiť web v [PageSpeed Insights](https://pagespeed.web.dev/).
 
 ---

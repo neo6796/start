@@ -1,0 +1,82 @@
+# ==========================================================================
+#  adiumentum.sk — konfigurácia pre Apache (Webglobe a väčšina hostingov)
+#  Súbor patrí do koreňového priečinka webu, vedľa index.html.
+# ==========================================================================
+
+AddDefaultCharset UTF-8
+
+# --- 1. Úvodný súbor -------------------------------------------------------
+# DÔLEŽITÉ: index.html musí mať prednosť pred index.php. Ak by na serveri
+# zostal čo i len jeden súbor index.php z WordPressu, bez tohto riadka
+# by sa naďalej načítaval starý web.
+DirectoryIndex index.html index.php
+
+# --- 2. Chybová stránka ----------------------------------------------------
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # --- 3. Vynútenie HTTPS --------------------------------------------------
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://adiumentum.sk/$1 [R=301,L]
+
+  # --- 4. Kanonická doména bez www ----------------------------------------
+  # Ak chcete naopak www verziu, zameňte podmienku aj cieľ.
+  RewriteCond %{HTTP_HOST} ^www\.adiumentum\.sk$ [NC]
+  RewriteRule ^(.*)$ https://adiumentum.sk/$1 [R=301,L]
+
+  # --- 5. Presmerovania zo starých adries WordPressu -----------------------
+  # Bez nich stratíte pozície vo vyhľadávaní a odkazy z katalógov skončia na 404.
+  RewriteRule ^sample-page/?$      /socialny-podnik.html            [R=301,L]
+  RewriteRule ^nasa-vizia/?$       /nasa-vizia.html                 [R=301,L]
+  RewriteRule ^o-nas-2/?$          /o-nas.html                      [R=301,L]
+  RewriteRule ^poradny-vybor/?$    /o-nas.html#poradny-vybor        [R=301,NE,L]
+  RewriteRule ^vyrocne-spravy/?$   /dokumenty.html#vyrocne-spravy   [R=301,NE,L]
+  RewriteRule ^privacy-policy/?$   /dokumenty.html#gdpr             [R=301,NE,L]
+
+  # --- 6. Zvyšky WordPressu ------------------------------------------------
+  # Roboty a skenery budú tieto adresy skúšať ešte roky. Posielame ich na úvod.
+  RewriteRule ^(wp-admin|wp-login\.php|wp-content|wp-includes|wp-json|feed|comments/feed)(/.*)?$ / [R=301,L]
+  RewriteRule ^xmlrpc\.php$ - [G]
+
+  # --- 7. Pracovné súbory nepatria na verejný web -------------------------
+  RewriteRule ^(docs|\.git)/ - [F]
+  RewriteRule \.(md|py|yml|yaml|log)$ - [F]
+</IfModule>
+
+# --- 8. Bezpečnostné hlavičky ---------------------------------------------
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+
+  # Web nenačítava nič z cudzích serverov, takže si môže dovoliť prísne pravidlo.
+  # Ak niekedy pridáte externú službu (mapu, analytiku, formulárovú službu),
+  # treba jej doménu doplniť do príslušnej direktívy, inak ju prehliadač zablokuje.
+  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; form-action 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'"
+</IfModule>
+
+# --- 9. Kompresia ----------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE application/xml image/svg+xml
+</IfModule>
+
+# --- 10. Pamäť prehliadača -------------------------------------------------
+# Štýly a skript majú kratšiu platnosť zámerne — upravujete ich ručne
+# a zmena sa musí návštevníkom prejaviť v rozumnom čase.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault                        "access plus 7 days"
+  ExpiresByType text/html               "access plus 0 seconds"
+  ExpiresByType text/css                "access plus 7 days"
+  ExpiresByType application/javascript  "access plus 7 days"
+  ExpiresByType image/svg+xml           "access plus 30 days"
+  ExpiresByType image/jpeg              "access plus 30 days"
+  ExpiresByType image/png               "access plus 30 days"
+  ExpiresByType application/pdf         "access plus 7 days"
+</IfModule>

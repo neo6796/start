@@ -42,9 +42,10 @@
   );
 
   /* --- Kontaktný formulár ------------------------------------------------
-     Statický web nemá vlastný server. Formulár preto odosielame na externú
-     službu (Formspree / Web3Forms) cez fetch. Kým nie je v atribúte action
-     doplnená reálna adresa, formulár otvorí e-mailového klienta (mailto).
+     Statický web nemá vlastný server. Formulár preto odosielame na adresu
+     uvedenú v atribúte action — buď na vlastný skript odoslat.php, ak hosting
+     podporuje PHP, alebo na externú službu (Formspree, Web3Forms).
+     Kým je action prázdny, formulár otvorí e-mailového klienta (mailto).
      Podrobnosti sú v súbore README.md. */
   var form = document.querySelector("[data-kontakt-formular]");
   if (!form) { return; }
@@ -64,8 +65,8 @@
     var trap = form.querySelector("input[name=webova-adresa]");
     if (trap && trap.value) { e.preventDefault(); return; }
 
-    var action = form.getAttribute("action") || "";
-    if (action.indexOf("http") !== 0) {
+    var action = (form.getAttribute("action") || "").trim();
+    if (!action) {
       /* Zatiaľ bez servera — poskladáme e-mail. */
       e.preventDefault();
       var d = new FormData(form);
