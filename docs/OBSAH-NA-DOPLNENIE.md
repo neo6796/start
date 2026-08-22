@@ -1,165 +1,189 @@
 # Čo treba doplniť pred spustením webu
 
-Tento zoznam vznikol automaticky zo všetkých miest, ktoré sú v texte označené
-žltým rámikom. Keď údaj doplníte, zmažte v HTML iba obal
-`<span class="todo">…</span>` a nechajte samotný text.
-
-Priebežnú kontrolu urobíte príkazom:
+Zoznam vznikol automaticky zo všetkých miest, ktoré sú v texte označené žltým rámikom.
+Keď údaj doplníte, zmažte v HTML iba obal `<span class="todo">…</span>` a nechajte text.
 
 ```bash
-grep -rn 'class="todo"' *.html
+grep -rn 'class="todo"' *.html     # priebežná kontrola
 ```
 
 ---
 
-## A. Overiť pred zverejnením — právne citlivé
+## A. Najdôležitejšie: rozsah služieb
 
-Tieto údaje sme prevzali z verejných registrov a z katalógov sociálnych podnikov,
-**nie z vašich originálnych dokladov.** Pred spustením webu ich prosím porovnajte
-s papierom, ktorý máte v šanóne:
+**Stránka `sluzby.html` je pracovná verzia a v tejto podobe sa nesmie zverejniť.**
 
-| Údaj | Hodnota na webe | Kde overiť |
-|---|---|---|
-| Číslo osvedčenia o štatúte RSP | 647/2023_RSP | originál osvedčenia z MPSVR SR |
-| Dátum priznania štatútu | rok 2023 | originál osvedčenia |
-| IČO | 55406432 | výpis z obchodného registra |
-| DIČ | 2121977242 | osvedčenie o registrácii daňovníka |
-| Sídlo | Levická 1600, 952 01 Vráble | výpis z obchodného registra |
-| Telefón | +421 918 538 007 | interne |
-| E-mail | adiumentum01@gmail.com | interne |
-| Deň vzniku spoločnosti | 26. 4. 2023 | výpis z obchodného registra |
+Zoznam služieb na nej pochádza z katalógu dielne.sk a z predmetu činnosti v obchodnom
+registri — teda z druhej ruky. Váš vlastný web pritom uvádza úplne inú štruktúru činností:
 
-Ak sa niektorý údaj líši, opravte ho vo **všetkých** `.html` súboroch naraz
-(hlavička a pätička sa opakujú na každej stránke) a tiež v štruktúrovaných
-údajoch pre vyhľadávače na konci hlavičky súboru `index.html`.
+| Zdroj | Uvádzané činnosti |
+|---|---|
+| adiumentum.sk (Naša vízia) | služby informátora, administratívne služby; stavebná a realitná činnosť, finalizácia stavieb |
+| dielne.sk | marketing, tvorba web stránok, správa Facebooku, edukačné materiály, reklamné predmety, grafické práce |
+| Obchodný register | poradenstvo, upratovacie služby a údržba, dokončovacie stavebné práce, inžinierska činnosť |
 
-### Odporúčanie k e-mailu
-
-Adresa `adiumentum01@gmail.com` na webe registrovaného sociálneho podniku
-pôsobí menej dôveryhodne, než by mohla. Ak k doméne `adiumentum.sk` máte
-e-mailovú schránku, zvážte prechod na `info@adiumentum.sk` — je to jedna
-z najlacnejších vecí, ktorá zvýši dôveryhodnosť pri komunikácii s obcami
-a väčšími firmami.
-
-### Odporúčanie k tvrdeniam o náhradnom plnení
-
-Na stránke *Sociálny podnik* tvrdíme, že odberom vašich služieb si odberateľ
-môže splniť povinný podiel zamestnávania občanov so zdravotným postihnutím.
-Toto tvrdenie je pre predaj kľúčové — dajte ho prosím jednorazovo potvrdiť
-vašim účtovníkom alebo príslušným úradom práce, aby ste ho vedeli obhájiť
-pri každom rokovaní.
+Pošlite mi prosím skutočný zoznam — pri každej službe stačí názov, jedna veta popisu
+a pre koho je určená. Stránku prepíšem a pracovné upozornenie odstránim.
 
 ---
 
-## B. Doplniť obsah — zoznam z webu
+## B. Overené z osvedčenia a z vášho webu
+
+Tieto údaje sú na webe uvedené natvrdo, lebo sú doložené originálom osvedčenia
+(fotografia z vášho webu) alebo priamo vaším webom — nemusíte ich overovať:
+
+| Údaj | Hodnota |
+|---|---|
+| Číslo osvedčenia | 647/2023_RSP |
+| Druh podniku | integračný podnik |
+| Vydalo | MPSVR SR, Bratislava, 29. novembra 2023 |
+| Podpísala | Ing. Jana Halgašová, riaditeľka odboru sociálnej ekonomiky |
+| Obchodné meno | ADIUMENTUM 01 s. r. o. |
+| Sídlo | Levická 1600, 952 01 Vráble |
+| IČO | 55 406 432 |
+| E-mail | adiumentum01@gmail.com |
+| Slogan | … meníme Slovensko k lepšiemu |
+
+### Čo si naopak odporujeme
+
+**Daňové číslo.** Na vašom webe je uvedené „DRČ: SK 712 000 2076", v obchodných
+registroch je pri IČO 55406432 vedené DIČ 2121977242. Tieto dve čísla si nezodpovedajú —
+jedno z nich je zrejme preklep. Overte podľa osvedčenia o registrácii od daňového úradu
+a doplňte správne (aj s informáciou, či ste platiteľom DPH).
+
+**Telefónne čísla.** Podľa vašej odpovede slúži každé na inú vec, ale neviem na akú.
+Na stránke Kontakt sú obe uvedené s miestom na popis — doplňte napr. „zákazky a ponuky"
+a „personálne veci".
+
+---
+
+## C. Zoznam označených miest
 
 
 ### Domov (`index.html`)
 
 | Riadok | Čo doplniť |
 |---|---|
-| 123 | č. 647/2023_RSP — overiť |
-| 296, 303, 310 | Miesto pre referenciu klienta — 2 až 3 vety o tom, čo sme dodali a ako spolupráca prebiehala. |
-| 298, 305, 312 | Meno a priezvisko |
-| 299, 306, 313 | Pozícia, organizácia |
+| 304, 311, 318 | Miesto pre referenciu klienta — 2 až 3 vety o tom, čo sme dodali a ako spolupráca prebiehala. |
+| 306, 313, 320 | Meno a priezvisko |
+| 307, 314, 321 | Pozícia, organizácia |
 
 ### Služby (`sluzby.html`)
 
 | Riadok | Čo doplniť |
 |---|---|
-| 240 | doplniť — áno / nie, prípadne IČ DPH |
+| 253 | doplniť — áno / nie, prípadne IČ DPH |
 
-### Sociálny podnik (`socialny-podnik.html`)
+### Vízia (`nasa-vizia.html`)
 
 | Riadok | Čo doplniť |
 |---|---|
-| 98 | č. 647/2023_RSP — overiť podľa originálu |
+| 175 | Doplniť pripravované úrovne rozvoja — rozsah a orientačné obdobie. |
 
 ### O nás (`o-nas.html`)
 
 | Riadok | Čo doplniť |
 |---|---|
-| 183, 192, 201 | Meno a priezvisko |
-| 184, 193, 202 | Pracovná pozícia |
-| 185, 194, 203 | Jedna až dve vety — čo má na starosti a na čo sa naňho môže klient obrátiť. |
-| 220 | doplniť — alebo uviesť „nie sme platiteľom DPH“ |
-| 220 | Okresný súd Nitra, oddiel: Sro, vložka č. — doplniť |
-| 220 | meno konateľa / konateľov — doplniť |
-| 220 | č. 647/2023_RSP — overiť podľa originálu |
-| 220 | aktuálny počet — doplniť |
+| 190 | Doplniť mená a postavenie členov — zástupca zamestnancov, zástupca vedenia, prípadne externý člen. |
+| 192 | Doplniť, ako často výbor zasadá a kde sa zverejňujú závery. |
+| 234, 243, 252 | Meno a priezvisko |
+| 235, 244, 253 | Pracovná pozícia |
+| 236, 245, 254 | Jedna až dve vety — čo má na starosti a na čo sa naňho môže klient obrátiť. |
+| 271 | doplniť — na webe máte uvedené SK 712 000 2076, v registroch je DIČ 2121977242; údaje si nezodpovedajú |
+| 271 | Okresný súd Nitra, oddiel: Sro, vložka č. — doplniť |
+| 271 | meno konateľa / konateľov — doplniť |
+| 271 | aktuálny počet — doplniť |
 
 ### Kariéra (`kariera.html`)
 
 | Riadok | Čo doplniť |
 |---|---|
-| 124, 136 | Miesto výkonu práce |
-| 125, 137 | Úväzok |
-| 127, 139 | Názov pracovnej pozície |
-| 128, 140 | Krátky popis náplne práce — 2 až 3 vety zrozumiteľným jazykom, bez odborných skratiek. |
-| 129, 141 | suma v EUR brutto — zo zákona povinný údaj |
-| 170 | doplniť — napr. 6 mesiacov |
+| 125, 137 | Miesto výkonu práce |
+| 126, 138 | Úväzok |
+| 128, 140 | Názov pracovnej pozície |
+| 129, 141 | Krátky popis náplne práce — 2 až 3 vety zrozumiteľným jazykom, bez odborných skratiek. |
+| 130, 142 | suma v EUR brutto — zo zákona povinný údaj |
+| 171 | doplniť — napr. 6 mesiacov |
 
 ### Dokumenty (`dokumenty.html`)
 
 | Riadok | Čo doplniť |
 |---|---|
-| 94, 104, 114, 124, 134, 144 | veľkosť a dátum doplniť |
-| 185 | meno a kontakt, ak ste ju určili — inak celý riadok odstráňte |
-| 191, 194 | doplniť lehotu |
+| 105, 115, 125, 135 | veľkosť a dátum doplniť |
+| 162 | rok |
+| 163 | Doplniť súbor do priečinka /dokumenty/ a upraviť odkaz. |
+| 198 | meno a kontakt, ak ste ju určili — inak celý riadok odstráňte |
+| 204, 207 | doplniť lehotu |
 
 ### Kontakt (`kontakt.html`)
 
 | Riadok | Čo doplniť |
 |---|---|
-| 174 | Po – Pi, 8:00 – 16:00 — upraviť podľa skutočnosti |
-| 186 | doplniť alebo uviesť „neplatiteľ DPH“ |
-| 188 | doplniť číslo účtu |
+| 172, 174 | doplniť, na čo slúži toto číslo |
+| 178 | Po – Pi, 8:00 – 16:00 — upraviť podľa skutočnosti |
+| 190 | doplniť — na webe máte SK 712 000 2076, v registroch DIČ 2121977242 |
+| 192 | doplniť číslo účtu |
 
 ---
 
-## C. Čo web ešte potrebuje od vás
+## D. Čo web ešte potrebuje od vás
 
-### Fotografie (najdôležitejšia položka)
+### Fotografie
 
-Web je momentálne bez fotografií a to je jeho najväčšia slabina. Ľudia si sociálny
-podnik kúpia cez tváre, nie cez text. Potrebujeme:
+Web je bez fotografií a je to jeho najväčšia slabina — sociálny podnik si ľudia kúpia
+cez tváre, nie cez text. Fotografie na vašom starom webe boli stockové (podľa pätičky
+z pngegg) a nové by mali byť vlastné:
 
-1. **3 – 5 fotografií z prevádzky** — ľudia pri práci, nie prázdne priestory.
-   Na šírku, aspoň 1600 px široké.
-2. **Portréty kontaktných osôb** (stránka *O nás*, sekcia Tím) — postačí
-   fotoaparát mobilu pri okne, na neutrálnom pozadí.
-3. **Fotografie hotových zákaziek** — vytlačené letáky, zabalené zásielky,
-   upratané priestory. Slúžia ako náhrada za chýbajúce referencie.
+1. **3 – 5 fotografií z prevádzky** — ľudia pri práci, na šírku, aspoň 1600 px.
+2. **Portréty kontaktných osôb** pre stránku *O nás* a členov poradného výboru.
+3. **Fotografie hotových zákaziek** — použiteľné namiesto chýbajúcich referencií.
 
-Pri fotografovaní zamestnancov si vopred vyžiadajte **písomný súhlas
-so zverejnením podobizne**. Bez neho fotografiu nezverejňujte.
+Pri fotografovaní zamestnancov si vyžiadajte **písomný súhlas so zverejnením podobizne**.
+
+### Logo
+
+Súčasné logo (traja panáčikovia so srdiečkami) je stocková grafika z pngegg, nie vlastná
+značka — pätička starého webu to aj priznáva („Image by png egg"). Na nový web som preto
+pripravil vlastnú značku: monogram **A** s tyrkysovým brvnom, ktoré zároveň naznačuje
+oporu. Ak si chcete ponechať pôvodné logo, overte si licenciu na komerčné použitie.
 
 ### Referencie
 
-Na domovskej stránke sú tri prázdne miesta na referencie. Oslovte troch
-odberateľov, s ktorými spolupráca dopadla dobre, a požiadajte ich o dve až tri
-vety plus súhlas so zverejnením mena a organizácie. Ak referencie zatiaľ nemáte,
-celú sekciu radšej odstráňte a nahraďte ju fotografiami realizácií — prázdna
-sekcia škodí viac než žiadna.
-
-### Dokumenty (PDF)
-
-Pozrite `dokumenty/README.md` — je tam zoznam súborov aj s presnými názvami.
+Na domovskej stránke sú tri prázdne miesta. Ak referencie zatiaľ nemáte, sekciu radšej
+odstráňte a nahraďte fotografiami realizácií — prázdna sekcia škodí viac než žiadna.
 
 ### Kontaktný formulár
 
-Formulár treba prepojiť na formulárovú službu, inak sa dopyty nebudú odosielať.
-Postup je v `README.md`, kapitola 4. Je to úkon na desať minút a bez neho web
-nebude plniť svoj hlavný účel.
+Bez prepojenia na formulárovú službu sa dopyty neodošlú. Postup je v `README.md`,
+kapitola 4. Desať minút práce, bez ktorých web neplní svoj hlavný účel.
+
+### Stránky, ktoré na starom webe chýbali
+
+V pätičke starého webu odkazovali položky **Team**, **História** a **Facebook** na `#`,
+teda nikam. Na novom webe majú Team aj História miesto na stránke *O nás* — doplňte obsah.
+Ak Facebook stránku máte, pošlite adresu; ak nie, položku vynecháme.
+
+### Projekt ALTRUA
+
+Podľa vašej inštrukcie som ALTRUA na nový web nedal. Na starom webe naň odkazovalo menu
+na `altrua.sk` a vaša roadmapa ho uvádza ako tretiu a štvrtú úroveň rozvoja
+(synergická platforma zmysluplných benefitov, 2025 – ; ALTRUA BIOCHAR, 2026 –).
+Keď bude projekt pripravený, pridáme stránku aj s odkazom.
 
 ---
 
-## D. Po spustení
+## E. Po spustení
 
-- [ ] Nastaviť presmerovanie `www` → hlavná doména a vynútiť HTTPS.
-- [ ] Zaregistrovať web do [Google Search Console](https://search.google.com/search-console)
-      a odoslať `sitemap.xml`.
-- [ ] Aktualizovať odkaz na web v profile na Facebooku, v registri sociálnych
-      podnikov a v katalógoch (dielne.sk, Profesia a pod.).
-- [ ] Skontrolovať web na mobile — hlavne kontaktný formulár a telefónne číslo.
+- [ ] Presmerovať `www` → hlavná doména a vynútiť HTTPS.
+- [ ] Nastaviť presmerovania zo starých adries: `/sample-page/` → `/socialny-podnik.html`,
+      `/nasa-vizia/` → `/nasa-vizia.html`, `/o-nas-2/` → `/o-nas.html`,
+      `/poradny-vybor/` → `/o-nas.html#poradny-vybor`,
+      `/vyrocne-spravy/` → `/dokumenty.html#vyrocne-spravy`,
+      `/privacy-policy/` → `/dokumenty.html#gdpr`.
+      Bez toho stratíte pozície vo vyhľadávaní na existujúce stránky.
+- [ ] Rozhodnúť o Google Analytics. Starý web ich mal (G-RKL9CRHV5C), nový ich zámerne
+      nemá — preto nepotrebuje cookie lištu. Ak analytiku chcete späť, treba k nej
+      doplniť aj súhlas s cookies.
+- [ ] Odoslať `sitemap.xml` do Google Search Console.
+- [ ] Aktualizovať odkaz na web v registri sociálnych podnikov a v katalógoch.
 - [ ] Raz ročne doplniť novú výročnú správu do priečinka `dokumenty/`.

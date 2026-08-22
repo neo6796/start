@@ -200,6 +200,8 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
 .grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .grid--sidebar { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: var(--sp-7); }
+/* Bočný stĺpec sa nemá naťahovať na výšku hlavného textu. */
+.grid--sidebar > aside { align-self: start; }
 
 .stack > * + * { margin-top: var(--sp-4); }
 .text-center { text-align: center; }
@@ -516,6 +518,91 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
   color: #ffffff;
   text-align: right;
 }
+
+/* Slogan podniku */
+.tagline {
+  margin: var(--sp-3) 0 0;
+  font-family: var(--f-serif);
+  font-size: 1.05rem;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  color: var(--c-accent-ink);
+}
+.hero .tagline {
+  margin: 0 0 var(--sp-3);
+  font-size: 1.15rem;
+  color: #8fd3d9;
+}
+.site-footer .tagline { color: #8fd3d9; font-size: 1rem; }
+
+/* Vyobrazenie dokumentu (osvedčenie) */
+.doc-image {
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-surface);
+  padding: var(--sp-3);
+  box-shadow: var(--shadow-sm);
+}
+.doc-image img { border-radius: var(--radius-sm); width: 100%; }
+.doc-image figcaption {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+  text-align: center;
+}
+
+/* Časová os rozvoja */
+.timeline { list-style: none; margin: 0; padding: 0; }
+.timeline li {
+  position: relative;
+  margin: 0;
+  padding: 0 0 var(--sp-6) var(--sp-6);
+  border-left: 2px solid var(--c-border);
+}
+.timeline li:last-child { padding-bottom: 0; border-left-color: transparent; }
+.timeline li::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--c-surface);
+  border: 3px solid var(--c-accent);
+}
+.timeline li[data-stav="hotovo"]::before { background: var(--c-accent); }
+.timeline__rok {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--c-accent-ink);
+  margin-bottom: 0.15rem;
+}
+.timeline h3 { font-size: var(--fs-h4); margin-bottom: var(--sp-2); }
+.timeline p { color: var(--c-text-soft); font-size: var(--fs-base); margin-bottom: 0; }
+
+/* Etymológia názvu */
+.etymology {
+  font-family: var(--f-serif);
+  background: var(--c-surface-2);
+  border-left: 3px solid var(--c-accent);
+  border-radius: var(--radius);
+  padding: var(--sp-5);
+}
+.etymology dt {
+  font-family: var(--f-sans);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-text-muted);
+  margin-top: var(--sp-3);
+}
+.etymology dt:first-child { margin-top: 0; }
+.etymology dd { margin: 0.15rem 0 0; font-size: 1.05rem; color: var(--c-text); }
+.etymology .lat { font-style: italic; }
 
 /* --- 7. Karty ------------------------------------------------------------- */
 .card {
