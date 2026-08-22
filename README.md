@@ -25,7 +25,7 @@ Podporné súbory:
 ```
 assets/css/style.css     všetka grafika webu (farby, typografia, komponenty)
 assets/js/main.js        mobilné menu, rok v pätičke, odoslanie formulára
-assets/img/              logo, favicon, obrázok pre náhľad na sociálnych sieťach
+assets/img/              logo, favicon, náhľad pre sociálne siete, sken osvedčenia
 dokumenty/               sem patria PDF súbory (pozri dokumenty/README.md)
 docs/OBSAH-NA-DOPLNENIE.md   zoznam všetkého, čo treba doplniť pred spustením
 robots.txt, sitemap.xml  podklady pre vyhľadávače
@@ -67,7 +67,24 @@ telefónne číslo, urobte tú istú zmenu vo všetkých deviatich `.html` súbo
 Pomôže hromadné nahradenie v editore (Ctrl+Shift+H vo VS Code).
 
 Farby webu sú na jednom mieste — na začiatku `assets/css/style.css` v sekcii
-`:root`. Zmena jednej hodnoty prefarbí celý web.
+`:root`. Zmena jednej hodnoty prefarbí celý web vrátane ilustrácií.
+
+### Ilustrácie
+
+Web namiesto fotografií používa vlastné technické kresby. Sú napísané priamo v HTML
+ako `<svg class="ilu">` — žiadne obrázkové súbory, žiadne licencie. Každá kresba používa
+štyri triedy, ktoré určujú hrúbku a farbu čiary:
+
+| Trieda    | Použitie                                  |
+|-----------|-------------------------------------------|
+| `line`    | hlavný obrys, plná tmavomodrá čiara        |
+| `tenko`   | pomocné čiary, tenšie a svetlejšie         |
+| `akcent`  | zvýraznený prvok v tyrkysovej              |
+| `kota`    | kótovacia čiara, prerušovaná               |
+| `fill`    | výplň plochy farbou podkladu               |
+
+Kresliaca plocha má súradnice 200 × 140. Ak chcete kresbu upraviť, meňte súradnice
+v atribúte `d` — alebo mi napíšte, čo má zobrazovať.
 
 ---
 

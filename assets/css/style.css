@@ -464,6 +464,15 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
   height: 4px;
   background: linear-gradient(90deg, var(--c-accent) 0%, var(--c-navy-600) 55%, transparent 100%);
 }
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(255, 255, 255, 0.045) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, rgba(255, 255, 255, 0.045) 31px 32px);
+}
 .hero .container { position: relative; z-index: 1; }
 .hero__grid {
   display: grid;
@@ -702,6 +711,75 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
   font-size: var(--fs-xs);
   font-weight: 750;
   letter-spacing: 0.1em;
+  color: var(--c-accent-ink);
+}
+
+
+/* --- Technické ilustrácie (čiarová grafika namiesto fotografií) ---------- */
+.ilu {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--c-border);
+  background-color: var(--c-navy-050);
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 15px, var(--c-border) 15px 16px),
+    repeating-linear-gradient(90deg, transparent 0 15px, var(--c-border) 15px 16px);
+  background-position: center;
+}
+.ilu .line {
+  fill: none;
+  stroke: var(--c-navy-700);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ilu .tenko {
+  fill: none;
+  stroke: var(--c-navy-700);
+  stroke-width: 1;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+.ilu .akcent {
+  fill: none;
+  stroke: var(--c-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ilu .kota {
+  fill: none;
+  stroke: var(--c-accent-ink);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  opacity: 0.8;
+}
+.ilu .fill { fill: var(--c-surface); stroke: none; }
+.ilu .bod { fill: var(--c-accent); stroke: none; }
+
+.ilu--pas { height: 122px; }
+
+/* Rola v tíme — namiesto portrétu odborná pozícia */
+.rola__tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: var(--sp-4);
+  border-radius: var(--radius);
+  background: var(--c-navy-050);
+  border: 1px solid var(--c-navy-100);
+  color: var(--c-navy-700);
+}
+.rola__tile svg { width: 26px; height: 26px; }
+.rola__pozicia {
+  display: block;
+  margin-bottom: var(--sp-2);
+  font-size: var(--fs-sm);
+  font-weight: 650;
   color: var(--c-accent-ink);
 }
 
@@ -1282,7 +1360,10 @@ tbody tr:last-child td { border-bottom: 0; }
   .nav__link:hover { color: #ffffff; background: var(--c-surface-2); }
   .nav__link[aria-current="page"] { color: #ffffff; }
   .nav-toggle { color: #cfe0f2; }
-  .card__icon, .doc-item__icon, .lifecycle__chain svg { color: #7fb6ea; }
+  .card__icon, .doc-item__icon, .lifecycle__chain svg, .rola__tile { color: #7fb6ea; }
+  .ilu .line, .ilu .tenko { stroke: #9fc4e8; }
+  .ilu .fill { fill: var(--c-surface); }
+  .rola__pozicia { color: var(--c-accent-ink); }
   .lifecycle__band { color: #cfe0f2; }
   .lifecycle__name { color: #f1f6fb; }
   .link-arrow { color: #7fb6ea; }

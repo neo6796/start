@@ -124,17 +124,39 @@ ju sprísnim späť — pošlite mi to stanovisko.
 
 ## E. Čo web ešte potrebuje od vás
 
-### Vizualizácie a fotografie — teraz najdôležitejšie
+### Grafika — vyriešená bez fotografií
 
-Pri developmente a realitách sa predáva obrazom. Web je zatiaľ bez neho:
+Web zámerne neobsahuje fotografie ľudí. Pri tíme, ktorého znevýhodnenie nie je zvonku
+viditeľné, by portréty buď nič nepovedali, alebo by z ľudí urobili ilustráciu diagnózy.
+Namiesto toho má web **vlastný ilustračný systém**: osem technických čiarových kresieb
+na milimetrovom papieri — pozemok s lomovými bodmi a kótou, pohľad na budovu s rastrom
+okien, rozostavaná stavba so žeriavom, finančný výkaz s grafom, reklamný pútač, dom
+s kľúčom, zväzok dokumentov s pečiatkou a recepčný pult.
 
-1. **3D vizualizácie a fotografie realizovaných projektov** — nahradia prázdnu sekciu referencií
-   a zároveň dokazujú, že marketingovú službu naozaj viete dodať.
-2. **Portréty tímu** pre stránku *O nás* — pri intelektuálnom sociálnom podniku sú dôležitejšie
-   než kdekoľvek inde. Tvár architekta je najsilnejší argument proti klišé o chránenej dielni.
-3. **Fotografie z rokovaní, stavieb, predajných centier.**
+Sú napísané priamo v kóde ako SVG, takže:
 
-Pri fotografovaní zamestnancov si vyžiadajte **písomný súhlas so zverejnením podobizne**.
+- nepotrebujú licenciu, súhlas ani fotografa,
+- prispôsobujú sa svetlému aj tmavému režimu,
+- ostanú ostré na akomkoľvek displeji aj v tlači,
+- dajú sa kedykoľvek prefarbiť zmenou jednej premennej v `assets/css/style.css`.
+
+Sekcia **Tím** neobsahuje portréty — ukazuje, kto za čo zodpovedá. Doplniť stačí mená
+kontaktných osôb; meno je pri B2B klientele dôležitejšie než tvár.
+
+### Čo by grafiku ešte posunulo (bez fotenia ľudí)
+
+1. **Vlastné 3D vizualizácie projektov.** Dodávate ich ako službu vo fáze 05, takže sú
+   zároveň najlepšou referenciou na túto službu. Ideálne 3 – 5 kusov na šírku.
+2. **Fotografie hotových stavieb a interiérov.** Budovy námietky nemajú.
+3. **Skeny výkresov, situácií a pôdorysov.** V technickom webe pôsobia výborne — stačí
+   zakryť mená a podpisy v rohovej pečiatke.
+4. **Detailné zábery bez tvárí:** ruky nad výkresom, obrazovka s 3D modelom, meter
+   a projekt na stavenisku, kľúče na stole. Nikoho neidentifikujú a doplnia web o „ľudský"
+   rozmer, ktorý ilustrácie samy nedajú.
+
+Ak by ste sa niekedy pre fotografie zamestnancov rozhodli, platia dve pravidlá:
+vyžiadajte si **písomný súhlas so zverejnením podobizne** a **nikdy nespájajte konkrétnu
+tvár so zmienkou o znevýhodnení** — ani nepriamo umiestnením fotky do sekcie, ktorá o ňom hovorí.
 
 ### Referencie
 
@@ -142,11 +164,11 @@ Tri prázdne miesta na domovskej stránke. Pri B2B klientele stačia tri vety od
 investora — váži viac než celá stránka textu. Ak referencie nemáte, sekciu nahraďte
 prehľadom realizovaných projektov.
 
-### Tím a poradný výbor
+### Mená do sekcie Tím a Poradný výbor
 
-Doplňte mená, pozície a krátky popis. Pri poradnom výbore aj to, ako často zasadá.
-Na starom webe boli položky *Team* a *História* prázdne (odkazovali na `#`) — teraz majú
-na stránke *O nás* pripravené miesto.
+Šesť rolí je popísaných, chýbajú len mená kontaktných osôb. Pri poradnom výbore doplňte
+zloženie a to, ako často zasadá. Na starom webe boli položky *Team* a *História* prázdne
+(odkazovali na `#`) — teraz majú na stránke *O nás* pripravené miesto.
 
 ### Voľné pozície
 
