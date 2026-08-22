@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Značka Adiumentum — opora">
+  <rect width="48" height="48" rx="11" fill="#123a63"/>
+  <path d="M13.5 32.5 24 11 34.5 32.5" fill="none" stroke="#ffffff" stroke-width="4"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18.4 23.6h11.2" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M11 38h26" fill="none" stroke="#3fb0b8" stroke-width="4.4" stroke-linecap="round"/>
+</svg>
