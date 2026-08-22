@@ -15,6 +15,11 @@ Keď si vyberiete jeden návrh, zapracujem ho do webu a tento priečinok zmažem
 Štvrtý návrh je čisto typografický, takže nemá vlastný súbor — je to sadzba
 názvu, ktorú web vykresľuje textom.
 
+Ak si chcete dať značku navrhnúť inde, v súbore
+[`docs/ZNACKA-KONCEPT.md`](../../../docs/ZNACKA-KONCEPT.md) je ucelený
+koncepčný podklad vrátane hotového zadávacieho textu — stačí ho vložiť
+grafikovi alebo inému jazykovému modelu.
+
 ## Farby
 
 | Použitie | Hodnota |

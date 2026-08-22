@@ -30,6 +30,8 @@ dokumenty/               sem patria PDF súbory (pozri dokumenty/README.md)
 .htaccess                nastavenie servera: HTTPS, presmerovania, 404, hlavičky
 odoslat.php              voliteľné spracovanie kontaktného formulára cez PHP
 docs/OBSAH-NA-DOPLNENIE.md   zoznam všetkého, čo treba doplniť pred spustením
+docs/NASADENIE-WEBGLOBE.md   postup nasadenia na hosting namiesto WordPressu
+docs/ZNACKA-KONCEPT.md       koncepčný podklad pre tvorbu novej značky
 robots.txt, sitemap.xml  podklady pre vyhľadávače
 ```
 
