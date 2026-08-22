@@ -8,16 +8,17 @@ riadkov JavaScriptu. Súbory stačí nahrať na hosting a web funguje.
 
 ## 1. Čo web obsahuje
 
-| Súbor                   | Stránka                                                        |
-|-------------------------|----------------------------------------------------------------|
-| `index.html`            | Domov — kto sme, služby, výhody spolupráce, postup, referencie |
-| `sluzby.html`           | Detailný rozpis siedmich oblastí služieb + informácie o cenách |
-| `socialny-podnik.html`  | Čo je registrovaný sociálny podnik, náhradné plnenie, FAQ      |
-| `o-nas.html`            | Príbeh, hodnoty, koho zamestnávame, tím, údaje o podniku       |
-| `kariera.html`          | Práca u nás, voľné pozície, ako sa prihlásiť                   |
-| `dokumenty.html`        | Dokumenty na stiahnutie, povinné zverejňovanie, GDPR, cookies  |
-| `kontakt.html`          | Kontaktný formulár, kontaktné a fakturačné údaje               |
-| `404.html`              | Stránka pre neexistujúce adresy                                |
+| Súbor                   | Stránka                                                          |
+|-------------------------|------------------------------------------------------------------|
+| `index.html`            | Domov — reťazec šiestich fáz, služby, segmenty klientov, ESG      |
+| `sluzby.html`           | Šesť fáz životného cyklu + dva podporné piliere, ceny             |
+| `socialny-podnik.html`  | Intelektuálny sociálny podnik, náhradné plnenie, ESG, FAQ         |
+| `nasa-vizia.html`       | Vízia, tri piliere a časová os míľnikov rozvoja                   |
+| `o-nas.html`            | Príbeh, hodnoty, etymológia názvu, poradný výbor, údaje o podniku |
+| `kariera.html`          | Práca u nás, voľné pozície, ako sa prihlásiť                      |
+| `dokumenty.html`        | Dokumenty, výročné správy, povinné zverejňovanie, GDPR            |
+| `kontakt.html`          | Kontaktný formulár, kontaktné a fakturačné údaje                  |
+| `404.html`              | Stránka pre neexistujúce adresy                                   |
 
 Podporné súbory:
 
@@ -62,7 +63,7 @@ nechajte na mieste.
 ```
 
 **Hlavička a pätička sa opakujú v každom súbore.** Ak meníte položku menu alebo
-telefónne číslo, urobte tú istú zmenu vo všetkých ôsmich `.html` súboroch.
+telefónne číslo, urobte tú istú zmenu vo všetkých deviatich `.html` súboroch.
 Pomôže hromadné nahradenie v editore (Ctrl+Shift+H vo VS Code).
 
 Farby webu sú na jednom mieste — na začiatku `assets/css/style.css` v sekcii
