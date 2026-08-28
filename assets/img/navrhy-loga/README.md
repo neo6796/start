@@ -11,6 +11,8 @@ Keď si vyberiete jeden návrh, zapracujem ho do webu a tento priečinok zmažem
 | `2-opora-dlazdica.svg` | 02 — Opora | dlaždica pre favikonu a profily |
 | `3-krokvy.svg` | 03 — Krokvy | voľná značka na svetlý podklad |
 | `3-krokvy-dlazdica.svg` | 03 — Krokvy | dlaždica pre favikonu a profily |
+| `5-stycnik.svg` | 05 — Styčník | voľná značka na svetlý podklad |
+| `5-stycnik-dlazdica.svg` | 05 — Styčník | dlaždica pre favikonu a profily |
 
 Štvrtý návrh je čisto typografický, takže nemá vlastný súbor — je to sadzba
 názvu, ktorú web vykresľuje textom.

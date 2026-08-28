@@ -202,6 +202,32 @@ letáku o dobrovoľníctve.
 motívy ponúkajú ako prvé — práve preto ich nechceme. Ak návrh vyzerá, že by
 mohol patriť neziskovke, občianskemu združeniu alebo nadácii, je zlý.
 
+### Osobitne k dielikom skladačky
+
+Tento motív treba odmietnuť aj vtedy, keď je prevedený vkusne — a odmietnuť ho
+treba dôraznejšie než ostatné, pretože pôsobí nevinne a jazykové modely ho
+navrhujú takmer vždy.
+
+Myšlienka „celok vzniká spojením dielov" sedí. Problém je, čo dielik skladačky
+znamená **mimo úmyslu autora**: je to celosvetovo zavedený symbol autizmu
+a značná časť autistickej a neurodivergentnej komunity ho odmieta. Vyčíta mu,
+že z človeka robí hádanku — niečo neúplné, čo treba doriešiť.
+
+Pre tento podnik je to priamy rozpor s vlastným tvrdením. Celý koncept
+(kapitola 3) stojí na tom, že jeho ľudia **nie sú deficitní** a chybná je forma
+práce, nie oni. Značka so skladačkou by tvrdila presný opak — a urazila by
+práve tú skupinu, ktorej si podnik váži najviac: uchádzačov o prácu
+a organizácie v oblasti zamestnávania znevýhodnených.
+
+K tomu praktické dôvody: knoflíky dielikov sa pri 16 px zlejú do škvrny,
+mnohofarebná skladačka sa nedá previesť do jednofarebnej pečiatky a sivá
+ako hlavná farba je bez charakteru.
+
+**Ak chcete vyjadriť spojenie dielov do celku, použite stavebný slovník:**
+styčníková doska spájajúca prúty priehradoviny, spoj na čap a dlab, prípojný
+plech so skrutkami, modulárny dielec. Vyjadruje to isté a hovorí to vaším
+odborom.
+
 ---
 
 ## 9. Existujúci vizuálny systém
@@ -266,6 +292,7 @@ tvar v statike** — trojuholník.
 | 02 | **Opora** | A stojace na tyrkysovej základovej čiare — základ, ktorý nesie konštrukciu; tá istá čiara, na ktorej stoja ilustrácie na webe |
 | 03 | **Krokvy** | dve rôznofarebné krokvy opreté o seba — samostatne spadnú, spolu unesú strechu |
 | 04 | **Iba text** | slovná značka bez symbolu; „01" vysadené ako číslo výkresu v rohovej pečiatke |
+| 05 | **Styčník** | A s tyrkysovou styčníkovou doskou a dvoma skrutkami — celok zo spojených dielov v jazyku konštrukcie, ako náhrada za motív skladačky |
 
 Odporúčaný bol návrh **02 (Opora)**, pretože naraz nesie význam mena, stavebný
 obor aj sociálne poslanie.

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Značka Adiumentum — styčník">
+  <rect width="48" height="48" rx="11" fill="#123a63"/>
+  <path d="M13 36.5 24 12 35 36.5" fill="none" stroke="#ffffff" stroke-width="4.2"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="15.6" y="23.9" width="16.8" height="7.4" rx="2" fill="#3fb0b8"/>
+  <circle cx="19" cy="27.6" r="1.25" fill="#123a63"/>
+  <circle cx="29" cy="27.6" r="1.25" fill="#123a63"/>
+</svg>
