@@ -94,6 +94,39 @@ await p.click("form[action='/ludia/import'] button[type=submit]");
 await p.waitForLoadState("networkidle");
 ok("chýbajúci bodkočiarok sa ohlási", /Nezrozumiteľné riadky/.test(await p.content()));
 
+console.log("— menoslov s hlavičkami skupín —");
+/* Menoslov nesie aj firmu, prevádzku a druh pomeru. Mená sú vymyslené —
+   skutočné do repozitára nepatria. */
+await p.goto(A + "/ciselniky");
+await p.click("details:has(input[value=prevadzka]) summary");
+await p.fill("form.pridat:has(input[value=prevadzka]) #p-prevadzka-nazov", "dielňa");
+await p.fill("form.pridat:has(input[value=prevadzka]) #p-prevadzka-skratka", "DIE");
+await p.click("form.pridat:has(input[value=prevadzka]) button[type=submit]");
+await p.waitForLoadState("networkidle");
+
+await p.goto(A + "/ludia");
+await p.fill("#p-riadky", [
+  "--- Adiumentum;dielňa ---",
+  "7001;Nováková;Elena;Ž",
+  "7002;Bruk;Igor;TPP"
+].join("\n"));
+await p.click("form[action='/ludia/import'] button[type=submit]");
+await p.waitForLoadState("networkidle");
+const t2 = await p.content();
+ok("hlavička sa nepovažuje za chybný riadok", !t2.includes("Adiumentum;dielňa"));
+ok("väzby sa doplnili", /doplnených väzieb/.test(t2));
+
+await p.click("tr:has-text('Nováková') a:has-text('Upraviť')");
+const detail2 = await p.content();
+ok("firma z hlavičky sedí",
+   (await p.locator('select[name="firma_id"] option:checked').innerText()).includes("Adiumentum"));
+ok("prevádzka z hlavičky sedí",
+   (await p.locator('select[name="prevadzka_id"] option:checked').innerText()).includes("dielňa"));
+/* A hlavne: „Ž" sa nesmie zlepiť s krstným menom. */
+ok("krstné meno ostalo samo", /Elena/.test(detail2) && !/Elena Ž/.test(detail2));
+ok("živnostník je označený ako živnostník",
+   (await p.locator('select[name="vztah"] option:checked').innerText()).includes("živnostník"));
+
 await b.close();
 console.log(chyby.length ? "CHYBY: " + chyby.join(" | ") : "— žiadne chyby v prehliadači —");
 process.exit(zle ? 1 : 0);

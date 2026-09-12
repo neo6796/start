@@ -1,104 +1,50 @@
-/* Import menoslovu s väzbami. Beží po 01–03, používa ich číselníky.
+/* Čítanie menoslovu — bez databázy aj bez prehliadača:
+     node test/18-menoslov.mjs
 
-   Skúša sa tvar, ktorý naozaj príde: štyri polia s druhom pomeru a hlavičky
-   `# --- Firma, prevádzka ---`. A hlavne to, čo drží rozhodnutie 37 —
-   **neznáme hodnoty sa odmietnu, nezakladajú.** Keby import založil firmu
-   z preklepu, „Vráble · Vrable · závod Vráble" by sa objavili ako tri a
-   rozbité súčty by sa ukázali až o dva mesiace pri uzávierke. */
-import { chromium } from "playwright";
+   Mená sú vymyslené. Skutočný menoslov do repozitára nepatrí — je verejný —
+   ale **tvar** je presne ten, v akom menoslov chodí. Na tvare tu záleží, nie
+   na tom, kto v ňom je. */
 import { rozober, rozoberHlavicku } from "../src/ludia.js";
 
 let zle = 0;
 const ok = (t, v) => { if (!v) zle++; console.log((v ? "  ✓ " : "  ✗ ") + t); };
-const je = (t, a, b) => ok(`${t}: ${a}${a === b ? "" : " (čakané " + b + ")"}`, a === b);
-
-console.log("— riadok so štyrmi poľami —");
-je("živnostník", rozober("0001;Ž;Solár;Erik").vztah, "zivnostnik");
-je("pracovný pomer", rozober("2006;TPP;Murár;Martin").vztah, "pp");
-je("priezvisko sa neposunulo", rozober("0001;Ž;Solár;Erik").priezvisko, "Solár");
-je("ani meno", rozober("0001;Ž;Solár;Erik").meno, "Erik");
-/* Tri polia musia fungovať ďalej — starý menoslov nikto neprepisuje. */
-je("tri polia bez vzťahu", rozober("1042;Kováčová;Jana").vztah, null);
-je("a priezvisko ostalo priezviskom", rozober("1042;Kováčová;Jana").priezvisko, "Kováčová");
-je("bez čísla aj so vzťahom", rozober(";Ž;Valko;Kamil").vztah, "zivnostnik");
-je("a číslo je prázdne", rozober(";Ž;Valko;Kamil").kod, null);
-je("tabulátory", rozober("0011\tŽ\tZima\tMiloslav").priezvisko, "Zima");
+const je = (t, a, b) => ok(`${t}: ${JSON.stringify(a)}${a === b ? "" : " (čakané " + JSON.stringify(b) + ")"}`, a === b);
 
 console.log("— hlavička skupiny —");
-je("firma", rozoberHlavicku("# --- PD, office ---").firma, "PD");
-je("prevádzka", rozoberHlavicku("# --- PD, office ---").prevadzka, "office");
-je("názov s medzerou", rozoberHlavicku("# --- Adiumentum 01, agro ---").firma, "Adiumentum 01");
-/* Poznámky s čiarkou nesmú prejsť ako hlavičky — pomlčky sú súčasť vzoru. */
-ok("bežná poznámka nie je hlavička",
-   rozoberHlavicku("# štruktúra údajov: osobné číslo, druh pomeru") === null);
-ok("ani veta s čiarkou",
-   rozoberHlavicku("# hlavička: zamestnávateľ (platiteľ stravovania), miesto prevádzky") === null);
+/* Menoslov delí ľudí nadpismi „firma;prevádzka". Mreža na začiatku je
+   nepovinná — kto ho píše v Exceli, ju tam nedá. */
+je("bez mreže, bodkočiarka", rozoberHlavicku("--- Kolotoč;dielňa ---")?.firma, "Kolotoč");
+je("prevádzka za bodkočiarkou", rozoberHlavicku("--- Kolotoč;dielňa ---")?.prevadzka, "dielňa");
+je("s mrežou a čiarkou", rozoberHlavicku("# --- Kolotoč, dielňa ---")?.prevadzka, "dielňa");
+je("názov s medzerou a číslom", rozoberHlavicku("--- Kolotoč 01;sklad ---")?.firma, "Kolotoč 01");
+je("samotná firma", rozoberHlavicku("--- Kolotoč ---")?.prevadzka, null);
+/* Bez pomlčiek by sa za hlavičku vyhlásil každý človek — má tiež bodkočiarky. */
+ok("riadok človeka nie je hlavička", rozoberHlavicku("0001;Nováková;Elena;Ž") === null);
+ok("prázdny riadok nie je hlavička", rozoberHlavicku("") === null);
 
-/* ---------- obrazovka ---------- */
-const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
-const c = await b.newContext({ viewport: { width: 1400, height: 950 } });
-const p = await c.newPage();
-const chyby = [];
-p.on("pageerror", e => chyby.push("JS: " + e.message));
-p.on("response", x => { if (x.status() >= 500) chyby.push(x.status() + " " + x.url()); });
-const A = process.env.ADRESA ?? "http://localhost:3111";
-await p.goto(A + "/prihlasenie");
-await p.fill("#kod", process.env.KOD ?? "4021");
-await p.fill("#heslo", process.env.HESLO ?? "skusobne-heslo");
-await p.click("button[type=submit]"); await p.waitForLoadState("networkidle");
+console.log("— druh pomeru na konci riadku —");
+/* Toto je tvar, v ktorom menoslov naozaj chodí. Keby sa skratka nerozoznala,
+   zlepila by sa s krstným menom na „Elena Ž" a takto by sa aj uložila. */
+const a = rozober("0001;Nováková;Elena;Ž");
+je("meno ostane samo", a.meno, "Elena");
+je("a vzťah sa prečíta", a.vztah, "zivnostnik");
+je("TPP je pracovný pomer", rozober("0002;Bruk;Igor;TPP").vztah, "pp");
+je("aj cez tabulátory", rozober("0003\tHruška\tPavol\tŽ").meno, "Pavol");
+je("veľkosť písmen nevadí", rozober("0004;Sýkorová;Iva;ž").vztah, "zivnostnik");
 
-console.log("— neznáma firma sa nezaloží —");
-await p.goto(A + "/ludia");
-await p.fill("#p-riadky", ["# --- Vymyslená s.r.o., neznáma prevádzka ---",
-                           "7001;Ž;Skúšobný;Fero"].join("\n"));
-await p.click("form[action='/ludia/import'] button[type=submit]");
-await p.waitForLoadState("networkidle");
-let t = await p.content();
-ok("človek pribudol", /pribudlo 1/.test(t));
-ok("ale firma sa nezaložila", /V číselníku nie je/.test(t));
-ok("povie ktorá", /Vymyslená s\.r\.o\./.test(t));
-ok("aj prevádzka", /neznáma prevádzka/.test(t));
-ok("a poradí, čo s tým", /doplňte ich v Číselníkoch/i.test(t));
-await p.goto(A + "/ciselniky");
-ok("v číselníku naozaj nie je", !(await p.content()).includes("Vymyslená"));
+console.log("— ostatné tvary ostali —");
+je("tri polia bez pomeru", rozober("0055;Malý;Ján").meno, "Ján");
+je("a vzťah je vtedy prázdny", rozober("0055;Malý;Ján").vztah, null);
+je("pomer hneď za číslom", rozober("0006;Ž;Kováč;Emil").priezvisko, "Kováč");
+je("aj tam sa meno nezlepí", rozober("0006;Ž;Kováč;Emil").meno, "Emil");
+je("bez osobného čísla", rozober(";Bezčísla;Jozef").kod, null);
+je("dvojité krstné meno ostane celé", rozober("0007;Baláž;Ján Peter").meno, "Ján Peter");
+ok("poznámka sa preskočí", rozober("# toto je poznámka") === null);
+ok("prázdny riadok sa preskočí", rozober("   ") === null);
+/* Tri slová oddelené medzerou sú platný riadok — tak chodí menoslov z
+   textového súboru. Chyba je až vtedy, keď z riadku nevznikne meno. */
+je("tri slová cez medzery sú človek", rozober("0055 Malý Ján").meno, "Ján");
+ok("jedno slovo je chyba", rozober("nezmysel")?.chyba !== undefined);
+ok("nezmyselné osobné číslo je chyba", rozober("čís/lo;Malý;Ján")?.chyba !== undefined);
 
-console.log("— známa firma sa priradí —");
-/* Skúška 01 založila prevádzku „Stredisko Vráble", 03 firmu. Vezmeme tie. */
-await p.goto(A + "/ciselniky");
-const firma = await p.locator("table.data tr:has(a:has-text('Upraviť')) td").first().innerText();
-await p.goto(A + "/ludia");
-await p.fill("#p-riadky", [`# --- ${firma.trim()}, Stredisko Vráble ---`,
-                           "7002;TPP;Skúšobná;Anna"].join("\n"));
-await p.click("form[action='/ludia/import'] button[type=submit]");
-await p.waitForLoadState("networkidle");
-t = await p.content();
-ok("väzby sa doplnili", /doplnených väzieb/.test(t));
-await p.fill("#f-hladaj", "Skúšobná");
-await p.click("button:has-text('Hľadať')");
-await p.waitForLoadState("networkidle");
-const riadok = await p.locator("tr:has-text('Skúšobná')").innerText();
-ok("firma je pri človeku", riadok.includes(firma.trim()));
-ok("aj prevádzka", riadok.includes("Stredisko Vráble"));
-
-console.log("— vzťah a to, čo sa neprepisuje —");
-await p.goto(A + "/ludia");
-await p.fill("#p-riadky", "7001;Ž;Skúšobný;Fero");
-await p.click("form[action='/ludia/import'] button[type=submit]");
-await p.waitForLoadState("networkidle");
-await p.fill("#f-hladaj", "Skúšobný");
-await p.click("button:has-text('Hľadať')");
-await p.waitForLoadState("networkidle");
-ok("živnostník je označený", (await p.locator("tr:has-text('Skúšobný')").innerText()).includes("živnostník"));
-
-/* Druhý import s inou firmou nesmie prepísať tú, čo už je (rozhodnutie 38). */
-await p.goto(A + "/ludia");
-await p.fill("#p-riadky", [`# --- ${firma.trim()}, Stredisko Vráble ---`,
-                           "7002;Ž;Skúšobná;Anna"].join("\n"));
-await p.click("form[action='/ludia/import'] button[type=submit]");
-await p.waitForLoadState("networkidle");
-t = await p.content();
-ok("iný vzťah sa neprepísal, len ohlásil", /neprepísali/.test(t) && /vzťah/.test(t));
-
-await b.close();
-console.log(chyby.length ? "CHYBY: " + chyby.join(" | ") : "— žiadne chyby v prehliadači —");
 process.exit(zle ? 1 : 0);

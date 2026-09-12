@@ -279,13 +279,16 @@ const VZTAHY_SKRATKY = {
 };
 const akoVztah = s => VZTAHY_SKRATKY[String(s ?? "").trim().toLowerCase()] ?? null;
 
-/* Hlavička skupiny: `# --- PD, office ---`. Firma vľavo, prevádzka vpravo —
-   tak to menoslov aj píše. Pomlčky sú súčasťou vzoru zámerne: bez nich by sa
-   za hlavičku vyhlásila každá poznámka, v ktorej je čiarka. */
+/* Hlavička skupiny: `--- PD;office ---`, s mrežou na začiatku aj bez nej.
+   Firma vľavo, prevádzka vpravo — tak to menoslov aj píše, a oddeľuje ich
+   bodkočiarkou alebo čiarkou, podľa toho, kto ho písal.
+
+   Pomlčky sú súčasťou vzoru zámerne: bez nich by sa za hlavičku vyhlásil
+   každý riadok s bodkočiarkou, teda každý človek. */
 export function rozoberHlavicku(riadok) {
-  const m = /^#\s*-{2,}\s*(.+?)\s*-{2,}\s*$/.exec(riadok.trim());
+  const m = /^#?\s*-{2,}\s*(.+?)\s*-{2,}\s*$/.exec(riadok.trim());
   if (!m) return null;
-  const [firma, prevadzka] = m[1].split(",").map(x => x.trim());
+  const [firma, prevadzka] = m[1].split(/[;,]/).map(x => x.trim());
   if (!firma) return null;
   return { firma, prevadzka: prevadzka || null };
 }
@@ -306,10 +309,17 @@ export function rozober(riadok) {
   let [kod, priezvisko, ...zvysok] = casti.map(c => c.trim());
 
   /* Menoslov má buď tri polia (číslo, priezvisko, meno), alebo štyri — s
-     druhom pomeru na druhom mieste. Rozoznáva sa podľa obsahu, nie podľa
-     počtu polí: prázdne číslo je tiež pole a počítať sa na to nedá. */
+     druhom pomeru. Píše sa raz na koniec (`0001;Solár;Erik;Ž`), raz hneď za
+     číslo; rozoznáva sa preto podľa obsahu, nie podľa poradia či počtu polí.
+     Prázdne číslo je tiež pole a počítať sa na to nedá.
+
+     Koniec sa skúša prvý: keby sa neskúsil, „Ž" by ostalo v zvyšku a zlepilo
+     by sa s krstným menom na „Erik Ž". Meno so skratkou pomeru sa nezhoduje,
+     takže sa nemá čo pomýliť. */
   let vztah = null;
-  if (akoVztah(priezvisko) && zvysok.length >= 2) {
+  if (zvysok.length >= 2 && akoVztah(zvysok[zvysok.length - 1])) {
+    vztah = akoVztah(zvysok.pop());
+  } else if (akoVztah(priezvisko) && zvysok.length >= 2) {
     vztah = akoVztah(priezvisko);
     priezvisko = zvysok.shift();
   }
