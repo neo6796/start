@@ -86,14 +86,24 @@ function stlpec(i) {
   return s;
 }
 
-function harok(riadky) {
+/* Štyri štýly: obyčajný, tučný, suma na dve desatinné miesta a tučná suma.
+   Bez formátu sumy by v stĺpci s peniazmi stálo „3" vedľa „5,46" — Excel
+   číslo bez formátu skráti a stĺpec potom vyzerá ako preklep. Tučná suma je
+   kvôli súčtovému riadku: ten je oboje naraz. */
+function styl(tucny, suma) { return (tucny ? 1 : 0) + (suma ? 2 : 0); }
+
+function harok(riadky, { tucne = [0], peniaze = [] } = {}) {
+  const jeTucny = new Set(tucne);
+  const jePeniaz = new Set(peniaze);
   const von = riadky.map((r, i) => {
     const bunky = r.map((h, j) => {
       if (h === null || h === undefined || h === "") return "";
       const kde = `${stlpec(j)}${i + 1}`;
-      return typeof h === "number"
-        ? `<c r="${kde}"><v>${h}</v></c>`
-        : `<c r="${kde}" t="inlineStr" s="${i === 0 ? 1 : 0}"><is><t xml:space="preserve">${esc(h)}</t></is></c>`;
+      const cislo = typeof h === "number";
+      const s = styl(jeTucny.has(i), cislo && jePeniaz.has(j));
+      return cislo
+        ? `<c r="${kde}"${s ? ` s="${s}"` : ""}><v>${h}</v></c>`
+        : `<c r="${kde}" t="inlineStr"${s ? ` s="${s}"` : ""}><is><t xml:space="preserve">${esc(h)}</t></is></c>`;
     }).join("");
     return `<row r="${i + 1}">${bunky}</row>`;
   }).join("");
@@ -111,8 +121,11 @@ function harok(riadky) {
 <cols>${sirky.join("")}</cols><sheetData>${von}</sheetData></worksheet>`;
 }
 
-/* Jediné, čo volá zvyšok appky: názov hárku a riadky (čísla ostanú číslami). */
-export function zosit(nazovHarku, riadky) {
+/* Jediné, čo volá zvyšok appky: názov hárku a riadky (čísla ostanú číslami).
+   `tucne` sú indexy riadkov s nadpismi — predvolene prvý, ale keď je nad
+   tabuľkou hlavička, je to niektorý ďalší. `peniaze` sú indexy stĺpcov,
+   ktoré sa majú ukázať na dve desatinné miesta. */
+export function zosit(nazovHarku, riadky, volby = {}) {
   const s = t => Buffer.from(t, "utf8");
   return zip([
     { nazov: "[Content_Types].xml", data: s(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -144,9 +157,11 @@ export function zosit(nazovHarku, riadky) {
 <fills count="1"><fill><patternFill patternType="none"/></fill></fills>
 <borders count="1"><border/></borders>
 <cellStyleXfs count="1"><xf/></cellStyleXfs>
-<cellXfs count="2"><xf xfId="0"/><xf xfId="0" fontId="1" applyFont="1"/></cellXfs>
+<cellXfs count="4"><xf xfId="0"/><xf xfId="0" fontId="1" applyFont="1"/>
+<xf xfId="0" numFmtId="2" applyNumberFormat="1"/>
+<xf xfId="0" numFmtId="2" applyNumberFormat="1" fontId="1" applyFont="1"/></cellXfs>
 <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>`) },
-    { nazov: "xl/worksheets/sheet1.xml", data: s(harok(riadky)) }
+    { nazov: "xl/worksheets/sheet1.xml", data: s(harok(riadky, volby)) }
   ]);
 }

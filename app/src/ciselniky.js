@@ -45,6 +45,11 @@ const DRUHY = {
       ["model", "Model rozúčtovania", "vyber", false,
         [["eko", "ekonomický"], ["std", "štandardný"]]],
       ["odhlasenie_do", "Odhlásenie do", "cas", false],
+      /* Bez tohto sa nedá povedať, aká suma má prísť na firemnú faktúru —
+         rozdiel je celý mesiac porcií živnostníkov (6.3). */
+      ["fakturuje_zivnostnikom", "Porcie živnostníkov fakturuje", "vyber", false,
+        [["", "— zatiaľ nevieme —"], ["firme", "firme (preúčtujeme)"], ["priamo", "živnostníkovi priamo"]],
+        "smie byť prázdne"],
       ["email", "E-mail na objednávky", "text", false, null, "smie byť prázdne"],
       ["telefon", "Telefón", "text", false, null, "smie byť prázdne"]
     ]

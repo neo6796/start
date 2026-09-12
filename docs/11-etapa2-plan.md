@@ -67,8 +67,25 @@ Každý krok končí niečím, čo sa dá otvoriť v prehliadači a vyskúšať.
 3. ~~**Menu a matica predáka** — jadro appky~~ **hotové**
 4. ~~**Uzávierka týždňa a odoslanie objednávky** — prvá vec, čo ide von~~ **hotové**
 5. ~~**Spätný zápis** — dopísanie augusta~~ **hotové**
-6. **Mesačná uzávierka a mzdový podklad**
+6. ~~**Mesačná uzávierka a mzdový podklad**~~ **hotové**
 7. **Zálohy a upozornenia** — beží od prvého dňa, dolaďuje sa priebežne
+
+### Čo je hotové po kroku 6
+
+Pilot dôjde až po peniaze: podklad sa dá položiť vedľa hárku mzdárky, stiahnuť pre mzdový softvér a mesiac zamknúť.
+
+| | |
+|---|---|
+| Rozúčtovanie | v stotinách centa, zaokrúhlenie **raz** za osobu a mesiac; podpoložky ako zvyšok, takže súčet vždy sedí na cenu |
+| Rozúčtovanie ako nastavenie | percentá, DPH aj **zákonný strop** s platnosťou od dátumu — uzavreté mesiace sa nemenia |
+| Mesačný podklad | delený **po firmách** (tak to porovnáva mzdárka), živnostníci zvlášť a nie v mzdovom podklade |
+| Porovnanie s papierom | vloží sa hárok mzdárky, appka ukáže rozdiely po menách |
+| Export pre mzdy | **jeden súbor za firmu**, XLSX aj CSV (UTF-8 s BOM, bodkočiarka, desatinná čiarka); ide do auditu |
+| Čo očakávať na faktúre | po jedálňach, z porcií a odfotenej ceny — jediné číslo, ktoré sa porovnáva s papierom |
+| Súhrn po prevádzkach | tie isté čísla, iné triedenie |
+| Dva zámky | **mzdy** a **faktúry** samostatne (rozhodnutie 46); bežiaci mesiac sa zamknúť nedá |
+
+Čo do kroku 6 **nepatrí a nie je v ňom**: kontrola proti skutočnej faktúre s rozpisom, čím rozdiel vznikol (5.6). Faktúra ešte ani raz neprišla — kontrola sa dá napísať až proti prvej skutočnej.
 
 ### Čo je hotové po kroku 5
 
@@ -82,8 +99,8 @@ August sa dá dopísať od prvého, takže mesiac bude celý.
 | Objednávka | **spätný zápis dodávateľovi nikdy nič neposiela** a nepýta si ani opravu; do počtov na odoslanie sa neráta |
 | Počty | uzávierka týždňa aj obrazovka mesiaca ukazujú, koľko porcií appka nikdy neobjednala |
 
-Zámok mesiaca (`mesiac_stav`) už platí, hoci obrazovka mesačnej uzávierky je až
-krok 6 — inak by sa dal mesiac dopisovať aj potom, čo z neho odišiel mzdový podklad.
+Zámok mesiaca (`mesiac_stav`) platil už tu, skôr než preň vznikla obrazovka —
+inak by sa dal mesiac dopisovať aj potom, čo z neho odišiel mzdový podklad.
 
 ### Čo je hotové po kroku 4
 

@@ -43,7 +43,11 @@ const OBRAZOVKY = [
   ["spatne",    "Spätný zápis", `/spatne?mesiac=${MES}`,
    "Dopísanie obeda, ktorý sa už zjedol. Dodávateľovi sa neposiela nič."],
   ["ludia",     "Ľudia",        "/ludia",
-   "Menoslov, hromadné priradenie väzieb a heslá."]
+   "Menoslov, hromadné priradenie väzieb a heslá."],
+  ["mesiac",    "Mesiac",       `/mesiac?mesiac=${MES}`,
+   "Mzdový podklad po firmách, čo očakávať na faktúre a dva zámky mesiaca. Toto je obrazovka, ktorú si mzdárka položí vedľa svojho hárku."],
+  ["nastavenia", "Rozúčtovanie", "/nastavenia",
+   "Percentá, DPH a zákonný strop — s platnosťou od dátumu, takže uzavreté mesiace sa nemenia."]
 ];
 
 const b = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
@@ -147,7 +151,8 @@ for (const t of tlacidla) t.addEventListener("click", () => ukaz(t.dataset.obr))
 /* Odkazy vnútri appky vedú na server, ktorý tu nie je. Kam sa dá, prepne sa
    na tú obrazovku; inak sa povie, že tadiaľ cesta nevedie. */
 const KAM = { "/tim": "tim", "/moje": "moje", "/timy": "timy", "/menu": "menu",
-              "/uzavierka": "uzavierka", "/spatne": "spatne", "/ludia": "ludia" };
+              "/uzavierka": "uzavierka", "/spatne": "spatne", "/ludia": "ludia",
+              "/mesiac": "mesiac", "/nastavenia": "nastavenia" };
 document.addEventListener("click", e => {
   const a = e.target.closest("a[href^='/']");
   if (!a) return;

@@ -109,9 +109,10 @@ const vObjednavke = await p.locator("table.data tr.sucet").count();
 ok("v počtoch na odoslanie nie je", vObjednavke === 0);
 
 console.log("— zamknutý mesiac sa nedopisuje —");
-/* Mesiac sa zamkne priamo v databáze — obrazovka mesačnej uzávierky je krok 6.
-   Zámok však musí platiť už teraz, inak by sa dal mesiac dopisovať aj potom,
-   čo z neho odišiel mzdový podklad. */
+/* Mesiac sa zamkne priamo v databáze, nie cez obrazovku uzávierky. Skúša sa
+   tým totiž niečo iné: že zámok drží aj vtedy, keď ho nastavilo čokoľvek iné
+   než tá obrazovka — inak by sa dal mesiac dopisovať potom, čo z neho odišiel
+   mzdový podklad. Cestu cez obrazovku skúša 16-mesiac. */
 const { default: pg } = await import("pg");
 const db = new pg.Client({ connectionString: process.env.DATABASE_URL ??
   "postgres://obedar:test@127.0.0.1:5432/obedar_test" });

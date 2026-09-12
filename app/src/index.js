@@ -25,6 +25,7 @@ import * as spatne from "./spatne.js";
 import * as nastavenia from "./nastavenia.js";
 import * as mesiacObr from "./mesiac.js";
 import * as porovnanie from "./porovnanie.js";
+import * as exporty from "./export.js";
 import { jeMultipart, citaj } from "./multipart.js";
 
 const tu = dirname(fileURLToPath(import.meta.url));
@@ -184,7 +185,10 @@ const CESTY = [
   ["GET",  "/nastavenia",      nastavenia.zobraz, "admin"],
   ["POST", "/nastavenia",      nastavenia.uloz,   "admin"],
 
-  ["GET",  "/mesiac",          mesiacObr.zobraz,  "admin"],
+  ["GET",  "/mesiac",           mesiacObr.zobraz,   "admin"],
+  ["POST", "/mesiac/uzavriet",  mesiacObr.uzavriet, "admin"],
+  ["POST", "/mesiac/otvorit",   mesiacObr.otvorit,  "admin"],
+  ["GET",  "/export/mzdy",      exporty.mzdy,       "admin"],
   ["GET",  "/porovnanie",      porovnanie.zobraz,   "admin"],
   ["POST", "/porovnanie",      porovnanie.porovnaj, "admin"]
 ];

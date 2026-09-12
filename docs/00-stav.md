@@ -13,7 +13,7 @@ Stav k 12. 9. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných
 | **Model rozúčtovania** | **uzavretý 5. 8.** — ekonomický predvolene, vrátane stropu a schémy pre živnostníkov (`01-koncept.md` 6.2) |
 | **Dodávatelia** | `09-dodavatelia.md` — GASTROGAL 6,30 € s dovozom, ABM 7,20 €, obaja objednávky ráno |
 | **Preview** | klikací prototyp na `obedy.ahafarma.sk/preview/`. **Ďalej sa nerozvíja** — appka vie viac než on, ukazovať predákom sa má appka. Ostáva stáť ako záznam o tom, čo sa odsúhlasilo |
-| **Aplikácia** | kroky 1 – 5 druhej etapy — prihlásenie a roly, číselníky, import menoslovu, menu a matica predáka, uzávierka týždňa s odoslaním objednávky, spätný zápis. Beží na **https://obedy.ahafarma.sk** (`11-etapa2-plan.md`) |
+| **Aplikácia** | kroky 1 – 6 druhej etapy — prihlásenie a roly, číselníky, import menoslovu, menu a matica predáka, uzávierka týždňa s odoslaním objednávky, spätný zápis, **mesačný podklad s exportom pre mzdy a dvoma zámkami**. Beží na **https://obedy.ahafarma.sk** (`11-etapa2-plan.md`) |
 | **Server** | Hetzner, Debian 13, `46.225.236.143`, zabezpečený (root aj heslá zablokované) |
 | **Docker + Caddy** | HTTPS automaticky od Let's Encrypt |
 | **Odosielanie pošty** | firemný server `mail.pdvrable.sk:587`, meno `obedy` |
@@ -54,7 +54,7 @@ Firma sa píše **skratkou** (`PDV`, `CRO`, `AD1`, `HBE`), prevádzka tiež (`OF
 - [ ] **kam vozia, o koľkej a od koľkých porcií** (miesta výdaja)
 - [ ] termín na odhlásenie a do akého času potvrdia prijatie objednávky
 - [ ] ceny **bez DPH** a sadzba zvlášť, kedy sa mení cenník, dokedy po mesiaci býva faktúra
-- [ ] **či fakturujú živnostníkom priamo**, alebo všetko nám a my to preúčtujeme
+- [ ] **či fakturujú živnostníkom priamo**, alebo všetko nám a my to preúčtujeme — v appke to je pri jedálni ako nastavenie; kým nie je vyplnené, ukazuje sa očakávaná faktúra **bez porcií živnostníkov** a je pri nej otáznik
 - [ ] chcú aj nezáväznú týždennú predpoveď?
 
 ---
@@ -82,7 +82,8 @@ Firma sa píše **skratkou** (`PDV`, `CRO`, `AD1`, `HBE`), prevádzka tiež (`OF
 - [x] ~~Etapa 2, krok 3 — menu a matica predáka~~ (jadro appky)
 - [x] ~~Etapa 2, krok 4 — uzávierka týždňa a odoslanie objednávky~~
 - [x] ~~Etapa 2, krok 5 — spätný zápis (dopísanie augusta)~~
-- [ ] **Etapa 2, krok 6 — mesačná uzávierka a mzdový podklad** — rozúčtovanie, nastavenia s platnosťou od dátumu, mesačný podklad a porovnanie s papierom sú hotové; ostáva **export pre mzdy**, súhrny za prevádzku a dodávateľa a **dva zámky mesiaca** (mzdy, faktúry)
+- [x] ~~Etapa 2, krok 6 — mesačná uzávierka a mzdový podklad~~ *(export pre mzdy, čo očakávať na faktúre, súhrn po prevádzkach, dva zámky)*
+- [ ] **kontrola proti skutočnej faktúre** (5.6) — až keď príde prvá faktúra; dovtedy niet proti čomu ju písať
 - [ ] krok 7: zálohy a upozornenia
 - [ ] pri nej dve veci, ktoré odhalil test pošty: generovať `Message-ID` a `Date`, predstavovať sa rozumným menom v `EHLO`
 - [ ] **prístup zo second PC** — vyrobiť kľúč na Windows a pridať ho z Macu (`03-nastavenie-webglobe.md`, krok 5b)

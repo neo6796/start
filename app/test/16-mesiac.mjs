@@ -71,9 +71,95 @@ let rucne = 0;
 for (const r of riadky) { const x = naCisla(await r.innerText()); if (x[0] !== undefined) rucne += x[0]; }
 ok("ručný súčet stĺpca dá to isté, čo súčtový riadok", rucne === scena);
 
+console.log("— čo očakávať na faktúre —");
+/* Jediné číslo, ktoré sa porovnáva s papierom. Počíta sa z porcií a z ceny
+   odfotenej na objednávke — nie zo zaokrúhlených mesiacov ľudí, lebo jeden
+   človek môže jesť v dvoch kuchyniach a jeho mesiac sa zaokrúhľuje raz. */
+const fakt = p.locator("div.card:has(h3:text-is('Čo očakávať na faktúre')) table");
+ok("karta s faktúrami je na obrazovke", (await fakt.count()) === 1);
+/* Nadpisy sú v CSS zväčšené na verzálky, takže `innerText` by vrátil
+   „JEDÁLEŇ" — porovnáva sa preto zdrojový text, nie vykreslený. */
+const faktText = await fakt.textContent();
+ok("delí sa po jedálňach", /Jedáleň/.test(faktText));
+ok("a porcie zamestnancov aj živnostníkov sú zvlášť",
+   /Porcií zamestnancov/.test(faktText) && /Porcií živnostníkov/.test(faktText));
+const fr = await fakt.locator("tbody tr").first().innerText();
+const [bez, dph, spolu] = naCisla(fr);
+ok("bez DPH + DPH dá presne to, čo má prísť na faktúru", bez + dph === spolu);
+
+console.log("— súhrn po prevádzkach —");
+const prev = p.locator("div.card:has(h3:text-is('Súhrn po prevádzkach')) table");
+ok("karta je na obrazovke", (await prev.count()) === 1);
+const psuc = naCisla(await prev.locator("tr.sucet").innerText());
+/* „Stálo firmu" je príspevok plus fond — a musí to sedieť, lebo je to
+   jediné číslo, ktoré si z tejto tabuľky niekto odpíše. */
+ok("stĺpec „stálo firmu“ je súčet príspevku a fondu", psuc[1] + psuc[2] === psuc[3]);
+
+console.log("— export pre mzdy —");
+await p.goto(A + "/mesiac?mesiac=" + MES);
+const odkaz = p.locator('a[href*="/export/mzdy"][href*="tvar=csv"]').first();
+ok("pri firme je odkaz na export", (await odkaz.count()) === 1);
+const csvOdp = await p.context().request.get(A + (await odkaz.getAttribute("href")));
+ok("export sa stiahne", csvOdp.status() === 200);
+ok("ako súbor, nie ako stránka",
+   /attachment/.test(csvOdp.headers()["content-disposition"] ?? ""));
+/* Kým mesiac nie je uzavretý, sú čísla odhad — na súbore, ktorý medzitým
+   odišiel e-mailom, to musí byť vidieť. */
+ok("a v názve je vidieť, že je to odhad",
+   /filename="mzdy-\d{4}-\d{2}-[A-Za-z0-9-]+-odhad\.csv"/.test(csvOdp.headers()["content-disposition"] ?? ""));
+const telo = await csvOdp.body();
+ok("začína sa BOM", telo[0] === 0xEF && telo[1] === 0xBB && telo[2] === 0xBF);
+const csvText = telo.slice(3).toString("utf8");
+ok("má stĺpce, ktoré chce mzdárka",
+   /Osobné číslo;/.test(csvText) && /Zrážka zo mzdy/.test(csvText));
+/* Živnostník nie je v mzdovom podklade ani ako riadok s nulou (6.2a). */
+const ziv = await p.locator("div.card:has(h3:text-is('Živnostníci')) table.podklad tbody tr:not(.sucet) td:nth-child(2)")
+  .allInnerTexts();
+ok("živnostník v exporte nie je",
+   ziv.length === 0 || !ziv.some(m => csvText.includes(m.split(" ")[0])));
+
+console.log("— dva zámky mesiaca —");
+/* Zámky sú dva, nie jeden (rozhodnutie 46): mzdy nečakajú na faktúru. */
+const zamky = p.locator("div.card:has(h3:text-is('Uzávierka mesiaca'))");
+ok("obrazovka má uzávierku", (await zamky.count()) === 1);
+ok("a sú v nej obidva zámky",
+   /Mzdová uzávierka/.test(await zamky.textContent()) &&
+   /Fakturačná kontrola/.test(await zamky.textContent()));
+/* Bežiaci mesiac sa zamknúť nedá — zafixoval by sa podklad, do ktorého ešte
+   pribudnú obedy. */
+ok("bežiaci mesiac sa zamknúť nedá",
+   (await zamky.locator("button").count()) === 0 && /mesiac ešte beží/.test(await zamky.textContent()));
+
+const m = new Date(); m.setDate(1); m.setMonth(m.getMonth() - 1);
+const MINULY = `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}`;
+await p.goto(A + "/mesiac?mesiac=" + MINULY);
+const zamky2 = p.locator("div.card:has(h3:text-is('Uzávierka mesiaca'))");
+await zamky2.locator("tr", { hasText: "Mzdová uzávierka" }).locator("button").click();
+await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("uzavretý mesiac to povie", /je uzavretá/.test(t) && /uzavret/.test(t));
+ok("a hlavička už nehovorí o odhade", !/· odhad/.test(t));
+/* Fakturačná kontrola je samostatná — mzdy na faktúru nečakajú. */
+ok("druhý zámok ostal otvorený",
+   (await zamky2.locator("tr", { hasText: "Fakturačná kontrola" }).textContent()).includes("otvorené"));
+/* Do zamknutého mesiaca sa už nedopisuje — inak by sa podklad, ktorý odišiel
+   mzdárke, ticho rozišiel s tým, čo je v appke. */
+await p.goto(A + "/spatne?mesiac=" + MINULY);
+ok("spätný zápis do zamknutého mesiaca už neprejde", /je uzavretý/.test(await p.content()));
+
+await p.goto(A + "/mesiac?mesiac=" + MINULY);
+await p.locator("div.card:has(h3:text-is('Uzávierka mesiaca')) tr", { hasText: "Mzdová uzávierka" })
+  .locator("button").click();
+await p.waitForLoadState("networkidle");
+ok("dá sa aj otvoriť späť", /je znovu otvorená/.test(await p.content()));
+
 console.log("— prázdny mesiac —");
 await p.goto(A + "/mesiac?mesiac=2020-01");
 ok("povie, že nie je čo spočítať", /nie je čo spočítať/.test(await p.content()));
+/* Aj v mesiaci bez obedov musí byť vidieť, v akom je stave — inak sa nedá
+   zistiť, či je prázdny preto, že sa nejedlo, alebo preto, že je zamknutý. */
+ok("aj prázdny mesiac ukáže zámky",
+   (await p.locator("div.card:has(h3:text-is('Uzávierka mesiaca'))").count()) === 1);
 
 console.log("— neprihlásený sa sem nedostane —");
 const c2 = await b.newContext();
