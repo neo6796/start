@@ -89,8 +89,18 @@ async function zaklad() {
     const r = await dopyt(sql, hodnoty);
     console.log(`${r.rowCount ? "pridané" : "už bolo"}: ${co}`);
   };
-  for (const f of ["Poľnohospodárske družstvo vo Vrábľoch", "Adiumentum", "Cronus", "HBE"])
+  /* Plné obchodné názvy, nie skratky: názov firmy chodí na faktúru a do
+     mzdového podkladu. Keby sa tu raz zmenili, na bežiacom serveri sa firma
+     **premenuje v Číselníkoch** — spustiť `zaklad` s novým názvom by starú
+     nechalo stáť a založilo druhú. */
+  for (const f of ["Poľnohospodárske družstvo vo Vrábľoch", "Cronus s.r.o.",
+                   "Adiumentum 01 s.r.o. r.s.p.", "HBE"])
     await vloz("INSERT INTO firma (nazov) VALUES ($1) ON CONFLICT (nazov) DO NOTHING", [f], `firma ${f}`);
+
+  /* Prevádzky z menoslovu — kde človek býva, podľa toho sa mu vozí obed. */
+  for (const [nazov, skratka] of [["office", "OFF"], ["agro", "AGR"], ["farma", "FAR"]])
+    await vloz("INSERT INTO prevadzka (nazov, skratka) VALUES ($1,$2) ON CONFLICT (nazov) DO NOTHING",
+               [nazov, skratka], `prevádzka ${nazov}`);
 
   await vloz(`INSERT INTO poskytovatel (nazov, znacenie, pocet_jedal, cena_s_dph, sadzba_dph, model, odhlasenie_do)
               VALUES ('GASTROGAL','arabic',5,6.30,19,'eko','07:30') ON CONFLICT (nazov) DO NOTHING`,

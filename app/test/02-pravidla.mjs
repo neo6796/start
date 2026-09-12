@@ -39,13 +39,13 @@ ok("v zozname ostalo ručné meno", t.includes("Kováčová-Nová"));
 console.log("— hromadné priradenie —");
 await p.goto(A + "/ludia");
 for (const ch of await p.locator('input[name="kto"]').all()) await ch.check();
-await p.selectOption("#p-firma_id", { label: "Cronus" });
+await p.selectOption("#p-firma_id", { label: "Cronus s.r.o." });
 await p.selectOption("#p-tim_id", { label: "Údržba" });
 await p.click("button:has-text('Priradiť označeným')");
 await p.waitForLoadState("networkidle");
 t = await p.content();
 ok("hromadné priradenie ohlásené", /Nastavené \d+ ľuďom/.test(t));
-ok("firma sa zapísala", (await p.locator("td:has-text('Cronus')").count()) >= 4);
+ok("firma sa zapísala", (await p.locator("td:has-text('Cronus s.r.o.')").count()) >= 4);
 ok("upozornenie na bez zaradenia zmizlo", !t.includes("Bez zaradenia:"));
 
 console.log("— nič neoznačené —");

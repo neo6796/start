@@ -37,16 +37,16 @@ ok("nový čas odhlásenia je v zozname", t.includes("07:00"));
 
 console.log("— oprava preklepu vo firme —");
 await p.goto(A + "/ciselniky");
-await p.click("tr:has-text('Cronus') a:has-text('Upraviť')");
-await p.fill("#p-u-nazov", "Cronus s.r.o.");
+await p.click("tr:has-text('HBE') a:has-text('Upraviť')");
+await p.fill("#p-u-nazov", "HBE s.r.o.");
 await p.click("button:has-text('Uložiť')");
 await p.waitForLoadState("networkidle");
 await p.goto(A + "/ciselniky");
-ok("premenovanie firmy prešlo", (await p.content()).includes("Cronus s.r.o."));
+ok("premenovanie firmy prešlo", (await p.content()).includes("HBE s.r.o."));
 
 console.log("— duplicitný názov pri úprave —");
 await p.click("tr:has-text('Adiumentum') a:has-text('Upraviť')");
-await p.fill("#p-u-nazov", "Cronus s.r.o.");
+await p.fill("#p-u-nazov", "HBE s.r.o.");
 await p.click("button:has-text('Uložiť')");
 await p.waitForLoadState("networkidle");
 ok("duplicita odmietnutá", (await p.content()).includes("už existuje"));

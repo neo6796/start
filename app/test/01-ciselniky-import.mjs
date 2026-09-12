@@ -106,14 +106,14 @@ await p.waitForLoadState("networkidle");
 
 await p.goto(A + "/ludia");
 await p.fill("#p-riadky", [
-  "--- Adiumentum;dielňa ---",
+  "--- Adiumentum 01 s.r.o. r.s.p.;dielňa ---",
   "7001;Nováková;Elena;Ž",
   "7002;Bruk;Igor;TPP"
 ].join("\n"));
 await p.click("form[action='/ludia/import'] button[type=submit]");
 await p.waitForLoadState("networkidle");
 const t2 = await p.content();
-ok("hlavička sa nepovažuje za chybný riadok", !t2.includes("Adiumentum;dielňa"));
+ok("hlavička sa nepovažuje za chybný riadok", !t2.includes(";dielňa ---"));
 ok("väzby sa doplnili", /doplnených väzieb/.test(t2));
 
 await p.click("tr:has-text('Nováková') a:has-text('Upraviť')");
