@@ -16,7 +16,9 @@ const DRUHY = {
     tabulka: "firma", nazov: "Firmy", jednotne: "firma", stav: "aktivna",
     pouzitie: ["SELECT count(*)::int AS n FROM osoba WHERE firma_id = $1", "ľudí"],
     prazdne: "Zatiaľ žiadna firma. Zakladá sa ako prvá — bez nej sa nedá zaradiť človek.",
-    polia: [["nazov", "Názov", "text", true]]
+    /* Skratka je krátky stály kód do menoslovu a na tlačové zostavy. Nemení sa
+       pri premenovaní obchodného názvu — o to práve ide. */
+    polia: [["nazov", "Názov", "text", true], ["skratka", "Skratka", "text", false]]
   },
   prevadzka: {
     tabulka: "prevadzka", nazov: "Prevádzky", jednotne: "prevádzka", stav: "aktivna",

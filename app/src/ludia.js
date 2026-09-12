@@ -275,7 +275,8 @@ document.getElementById("vsetci")?.addEventListener("change", e => {
 const VZTAHY_SKRATKY = {
   "z": "zivnostnik", "ž": "zivnostnik", "ziv": "zivnostnik", "živ": "zivnostnik",
   "zivnostnik": "zivnostnik", "živnostník": "zivnostnik", "szco": "zivnostnik",
-  "tpp": "pp", "pp": "pp", "hpp": "pp", "pracovny pomer": "pp", "pracovný pomer": "pp"
+  "p": "pp", "tpp": "pp", "pp": "pp", "hpp": "pp",
+  "pracovny pomer": "pp", "pracovný pomer": "pp"
 };
 const akoVztah = s => VZTAHY_SKRATKY[String(s ?? "").trim().toLowerCase()] ?? null;
 
@@ -308,20 +309,27 @@ export function rozober(riadok) {
               : t.split(/\s{2,}|\s+/);
   let [kod, priezvisko, ...zvysok] = casti.map(c => c.trim());
 
-  /* Menoslov má buď tri polia (číslo, priezvisko, meno), alebo štyri — s
-     druhom pomeru. Píše sa raz na koniec (`0001;Solár;Erik;Ž`), raz hneď za
-     číslo; rozoznáva sa preto podľa obsahu, nie podľa poradia či počtu polí.
-     Prázdne číslo je tiež pole a počítať sa na to nedá.
+  /* Za menom môže nasledovať druh pomeru a za ním prevádzka:
+         1001;Solár;Erik;Z;office
+     Staršie menoslovy písali pomer hneď za číslo a prevádzku nemali vôbec.
+     Rozoznáva sa preto podľa obsahu, nie podľa poradia či počtu polí —
+     prázdne číslo je tiež pole a počítať sa na to nedá.
 
-     Koniec sa skúša prvý: keby sa neskúsil, „Ž" by ostalo v zvyšku a zlepilo
-     by sa s krstným menom na „Erik Ž". Meno so skratkou pomeru sa nezhoduje,
-     takže sa nemá čo pomýliť. */
-  let vztah = null;
-  if (zvysok.length >= 2 && akoVztah(zvysok[zvysok.length - 1])) {
-    vztah = akoVztah(zvysok.pop());
-  } else if (akoVztah(priezvisko) && zvysok.length >= 2) {
+     Kotvou je skratka pomeru: čo je pred ňou, je meno, čo za ňou, prevádzka.
+     Bez tejto kotvy by sa „Z" aj „office" zlepili s krstným menom na
+     „Erik Z office" a takto by sa to aj uložilo. Žiadne krstné meno sa so
+     skratkou pomeru nezhoduje, takže sa nemá čo pomýliť. */
+  let vztah = null, prevadzka = null;
+  if (akoVztah(priezvisko) && zvysok.length >= 2) {
     vztah = akoVztah(priezvisko);
     priezvisko = zvysok.shift();
+  } else {
+    const i = zvysok.findIndex((x, n) => n > 0 && akoVztah(x));
+    if (i > 0) {
+      vztah = akoVztah(zvysok[i]);
+      prevadzka = zvysok.slice(i + 1).join(" ").trim() || null;
+      zvysok = zvysok.slice(0, i);
+    }
   }
 
   const meno = zvysok.join(" ").trim();
@@ -331,9 +339,9 @@ export function rozober(riadok) {
      nemá a človek sa aj tak musí dostať do appky; číslo sa doplní, keď bude.
      Prázdne pole musí byť napísané, nie vynechané: „Murár;Martin" by sa inak
      čítalo ako číslo „Murár" a nedalo by sa rozoznať od preklepu. */
-  if (!kod) return { kod: null, priezvisko, meno, vztah };
+  if (!kod) return { kod: null, priezvisko, meno, vztah, prevadzka };
   if (!/^[0-9A-Za-z._-]+$/.test(kod)) return { chyba: t };
-  return { kod, priezvisko, meno, vztah };
+  return { kod, priezvisko, meno, vztah, prevadzka };
 }
 
 export async function importuj(k) {
@@ -350,8 +358,15 @@ export async function importuj(k) {
      A dopĺňa len prázdne (rozhodnutie 38): čo už v appke je, sa neprepíše —
      len sa vypíše ako rozdiel. Appka zatiaľ nevie odlíšiť ručne zadanú väzbu
      od tej z minulého importu, tak sa drží tá opatrnejšia polovica pravidla. */
-  const firmy = new Map((await vsetky("SELECT id, nazov FROM firma"))
-    .map(x => [x.nazov.toLowerCase().trim(), x]));
+  /* Firma sa v hlavičke píše plným názvom alebo skratkou — skratka preto, že
+     prežije premenovanie obchodného názvu. Vnútorné `id` sa nepoužíva zámerne:
+     v dvoch inštanciách appky znamená tá istá dvojka inú firmu, takže by
+     menoslov ticho zaradil ľudí inam. Neznámy názov zlyhá nahlas. */
+  const firmy = new Map();
+  for (const x of await vsetky("SELECT id, nazov, skratka FROM firma")) {
+    firmy.set(x.nazov.toLowerCase().trim(), x);
+    if (x.skratka) firmy.set(x.skratka.toLowerCase().trim(), x);
+  }
   const prevadzky = new Map((await vsetky("SELECT id, nazov FROM prevadzka"))
     .map(x => [x.nazov.toLowerCase().trim(), x]));
   const neznameVazby = new Set(), doplnene = [], rozdielne = [];
@@ -381,8 +396,16 @@ export async function importuj(k) {
         v.vztah === "zivnostnik" ? "živnostník" : "pracovný pomer", kto);
       await doplnJednu(osobaId, "firma_id", o.firma_id, skupina.firma?.id ?? null,
         "firma", skupina.firma?.nazov, kto);
-      await doplnJednu(osobaId, "prevadzka_id", o.prevadzka_id, skupina.prevadzka?.id ?? null,
-        "prevádzka", skupina.prevadzka?.nazov, kto);
+      /* Prevádzka pri človeku prebíja hlavičku skupiny: v jednej firme sedia
+         ľudia vo viacerých prevádzkach a rozdeliť ich na skupiny len kvôli
+         tomu by z menoslovu spravilo samé nadpisy. */
+      let pr = skupina.prevadzka;
+      if (v.prevadzka) {
+        pr = prevadzky.get(v.prevadzka.toLowerCase()) ?? null;
+        if (!pr) neznameVazby.add(`prevádzka „${v.prevadzka}"`);
+      }
+      await doplnJednu(osobaId, "prevadzka_id", o.prevadzka_id, pr?.id ?? null,
+        "prevádzka", pr?.nazov, kto);
     };
 
     for (const r of riadky) {

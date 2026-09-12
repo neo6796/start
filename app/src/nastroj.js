@@ -93,12 +93,15 @@ async function zaklad() {
      mzdového podkladu. Keby sa tu raz zmenili, na bežiacom serveri sa firma
      **premenuje v Číselníkoch** — spustiť `zaklad` s novým názvom by starú
      nechalo stáť a založilo druhú. */
-  for (const f of ["Poľnohospodárske družstvo vo Vrábľoch", "Cronus s.r.o.",
-                   "Adiumentum 01 s.r.o. r.s.p.", "HBE"])
-    await vloz("INSERT INTO firma (nazov) VALUES ($1) ON CONFLICT (nazov) DO NOTHING", [f], `firma ${f}`);
+  for (const [f, sk] of [["Poľnohospodárske družstvo vo Vrábľoch", "PDV"],
+                         ["Cronus s.r.o.", "CRO"],
+                         ["Adiumentum 01 s.r.o. r.s.p.", "AD1"], ["HBE", "HBE"]])
+    await vloz("INSERT INTO firma (nazov, skratka) VALUES ($1,$2) ON CONFLICT (nazov) DO NOTHING",
+               [f, sk], `firma ${f} (${sk})`);
 
   /* Prevádzky z menoslovu — kde človek býva, podľa toho sa mu vozí obed. */
-  for (const [nazov, skratka] of [["office", "OFF"], ["agro", "AGR"], ["farma", "FAR"]])
+  for (const [nazov, skratka] of [["office", "OFF"], ["agro", "AGR"],
+                                  ["farma", "FAR"], ["stavba", "STA"]])
     await vloz("INSERT INTO prevadzka (nazov, skratka) VALUES ($1,$2) ON CONFLICT (nazov) DO NOTHING",
                [nazov, skratka], `prevádzka ${nazov}`);
 

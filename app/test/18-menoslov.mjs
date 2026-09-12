@@ -32,6 +32,18 @@ je("TPP je pracovný pomer", rozober("0002;Bruk;Igor;TPP").vztah, "pp");
 je("aj cez tabulátory", rozober("0003\tHruška\tPavol\tŽ").meno, "Pavol");
 je("veľkosť písmen nevadí", rozober("0004;Sýkorová;Iva;ž").vztah, "zivnostnik");
 
+console.log("— prevádzka pri človeku —");
+/* V jednej firme sedia ľudia vo viacerých prevádzkach. Rozdeľovať ich na
+   skupiny len kvôli tomu by z menoslovu spravilo samé nadpisy. */
+const b2 = rozober("1001;Nováková;Elena;Z;dielňa");
+je("meno ostane samo aj s piatym políčkom", b2.meno, "Elena");
+je("vzťah sa prečíta", b2.vztah, "zivnostnik");
+je("a prevádzka tiež", b2.prevadzka, "dielňa");
+je("P je pracovný pomer", rozober("1002;Bruk;Igor;P;sklad").vztah, "pp");
+je("dvojité meno pred pomerom ostane celé",
+   rozober("1003;Baláž;Ján Peter;Z;sklad").meno, "Ján Peter");
+je("bez prevádzky ostane prázdna", rozober("1004;Sýkorová;Iva;Z").prevadzka, null);
+
 console.log("— ostatné tvary ostali —");
 je("tri polia bez pomeru", rozober("0055;Malý;Ján").meno, "Ján");
 je("a vzťah je vtedy prázdny", rozober("0055;Malý;Ján").vztah, null);
