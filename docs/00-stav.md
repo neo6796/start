@@ -1,6 +1,6 @@
 # Stav projektu — Obedár
 
-Stav k 8. 8. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných dokumentoch.
+Stav k 12. 9. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných dokumentoch.
 
 ---
 
@@ -12,8 +12,8 @@ Stav k 8. 8. 2026. Toto je vstupná stránka; podrobnosti sú v očíslovaných 
 | **Vstupné súbory** | `08-vstupne-subory.md` — hotové zadanie na prevod dochádzky, odovzdateľné tak ako je |
 | **Model rozúčtovania** | **uzavretý 5. 8.** — ekonomický predvolene, vrátane stropu a schémy pre živnostníkov (`01-koncept.md` 6.2) |
 | **Dodávatelia** | `09-dodavatelia.md` — GASTROGAL 6,30 € s dovozom, ABM 7,20 €, obaja objednávky ráno |
-| **Preview** | klikací prototyp, **16 obrazoviek** vrátane cien, mzdových podkladov a denného hárku, beží na **https://obedy.ahafarma.sk/preview/** |
-| **Aplikácia** | kroky 1 a 2 druhej etapy — prihlásenie, roly, číselníky, import menoslovu, hromadné väzby. Beží na **https://obedy.ahafarma.sk** (`11-etapa2-plan.md`) |
+| **Preview** | klikací prototyp na `obedy.ahafarma.sk/preview/`. **Ďalej sa nerozvíja** — appka vie viac než on, ukazovať predákom sa má appka. Ostáva stáť ako záznam o tom, čo sa odsúhlasilo |
+| **Aplikácia** | kroky 1 – 5 druhej etapy — prihlásenie a roly, číselníky, import menoslovu, menu a matica predáka, uzávierka týždňa s odoslaním objednávky, spätný zápis. Beží na **https://obedy.ahafarma.sk** (`11-etapa2-plan.md`) |
 | **Server** | Hetzner, Debian 13, `46.225.236.143`, zabezpečený (root aj heslá zablokované) |
 | **Docker + Caddy** | HTTPS automaticky od Let's Encrypt |
 | **Odosielanie pošty** | firemný server `mail.pdvrable.sk:587`, meno `obedy` |
@@ -39,9 +39,11 @@ Nič z toho nie je „malo by fungovať" — všetko je vyskúšané celou cesto
 
 ### Zoznam zamestnancov — hotový
 
-**Menoslov je pripravený:** 33 ľudí v tvare *osobné číslo · priezvisko · meno*, overený proti špecifikácii. Do repozitára sa neukladá — sú to skutočné osobné údaje.
+**Menoslov je pripravený:** ľudia v tvare *osobné číslo · priezvisko · meno · vzťah · prevádzka*, rozdelení hlavičkami `--- FIRMA;PREVÁDZKA ---`. Do repozitára sa neukladá — sú to skutočné osobné údaje.
 
-Firma, typ vzťahu, tím, predák a prevádzka sa **zadajú v appke** z rozbaľovacích zoznamov, nie v Exceli. Prefixy z dochádzky (`1` Adiumentum, `2` PD, `3` živnostníci) sa na nič nepoužijú — `3` nie je firma, ale typ vzťahu.
+Firma sa píše **skratkou** (`PDV`, `CRO`, `AD1`, `HBE`), prevádzka tiež (`OFF`, `AGR`, `FAR`, `STA`); vzťah je `P` (pracovný pomer) alebo `Z` (živnostník). Tím a predák sa zadajú v appke — z menoslovu sa nedajú odvodiť. Prefixy z dochádzky (`1` Adiumentum, `2` PD, `3` živnostníci) sa na nič nepoužijú — `3` nie je firma, ale typ vzťahu.
+
+> **Osobné čísla v pilote sú dočasné.** Čísla `1001`, `1002`, … v skúšobnej databáze si vymyslel Erik na skúšku — **nie sú to dochádzkové kódy** a nesmú sa za ne vydávať (kód z dochádzky je jediné, čím sa človek prihlasuje a čím sa páruje prevod dochádzky). Skúšobná databáza je jednorazová: pri ostrom spustení sa zakladá **načisto**, so skutočnými kódmi. Nič z pilotných údajov sa nepreberá.
 
 ### Od dodávateľov — jediná vec na kritickej ceste
 
@@ -60,7 +62,11 @@ Firma, typ vzťahu, tím, predák a prevádzka sa **zadajú v appke** z rozbaľo
 ## Čo má spraviť Erik
 
 - [ ] **nasadiť appku na server** — `cd ~/obedar-app/deploy && ./deploy.sh`, potom založiť správcu (príkaz vypíše sám skript)
-- [ ] **poslať odkaz na preview predákom** a pozbierať pripomienky — pozor, nová adresa je `obedy.ahafarma.sk/preview/`
+- [ ] **naplniť skúšobnú databázu** — v tomto poradí, inak import ľudí neprejde:
+      1. `docker compose exec -T app node src/nastroj.js zaklad` — firmy so skratkami, prevádzky, obe jedálne
+      2. v **Číselníkoch** skontrolovať názvy firiem *(kto `zaklad` spustil pred 12. 9., má tam ešte staré krátke názvy — premenovať, nie zakladať druhé)*
+      3. **vložiť menoslov** na `/ludia` — appka firmu ani prevádzku sama nezaloží, neznámu skratku iba nahlási
+      4. priradiť **tímy** a **jedálne** — bez jedálne si človek neobjedná a bez tímu ho nikto neuvidí v matici
 - [ ] **vypýtať e-mail na objednávky** aspoň od jednej jedálne — jediná vec, ktorá blokuje pilot
 - [ ] vybrať **tím na pilot** — 5–6 ľudí, jedna prevádzka, jeden dodávateľ *(kapitola 14 konceptu; nie nadšenca, ale svedomitého vlažného predáka)*
 - [ ] **založiť účet u SMS brány** a hlavne dať registrovať odosielateľa `OBEDAR` — trvá to dni, netreba to nechať na posledný týždeň *(koncept 8, „Cez koho posielať SMS")*
@@ -76,7 +82,7 @@ Firma, typ vzťahu, tím, predák a prevádzka sa **zadajú v appke** z rozbaľo
 - [x] ~~Etapa 2, krok 3 — menu a matica predáka~~ (jadro appky)
 - [x] ~~Etapa 2, krok 4 — uzávierka týždňa a odoslanie objednávky~~
 - [x] ~~Etapa 2, krok 5 — spätný zápis (dopísanie augusta)~~
-- [ ] **Etapa 2, krok 6 — mesačná uzávierka a mzdový podklad** — pred koncom augusta
+- [ ] **Etapa 2, krok 6 — mesačná uzávierka a mzdový podklad** — rozúčtovanie, nastavenia s platnosťou od dátumu, mesačný podklad a porovnanie s papierom sú hotové; ostáva **export pre mzdy**, súhrny za prevádzku a dodávateľa a **dva zámky mesiaca** (mzdy, faktúry)
 - [ ] krok 7: zálohy a upozornenia
 - [ ] pri nej dve veci, ktoré odhalil test pošty: generovať `Message-ID` a `Date`, predstavovať sa rozumným menom v `EHLO`
 - [ ] **prístup zo second PC** — vyrobiť kľúč na Windows a pridať ho z Macu (`03-nastavenie-webglobe.md`, krok 5b)
