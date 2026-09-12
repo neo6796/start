@@ -264,6 +264,10 @@ document.getElementById("vsetci")?.addEventListener("change", e => {
 export function rozober(riadok) {
   const t = riadok.trim();
   if (!t) return null;
+  /* Poznámka, nie človek. Menoslov skopírovaný z hárku má medzi ľuďmi
+     nadpisy stredísk; bez tohto by ich import hlásil ako nezrozumiteľné
+     riadky a skutočné chyby by sa v tom šume stratili. */
+  if (t.startsWith("#")) return null;
   const casti = t.includes("\t") ? t.split("\t")
               : t.includes(";")  ? t.split(";")
               : t.includes(",")  ? t.split(",")

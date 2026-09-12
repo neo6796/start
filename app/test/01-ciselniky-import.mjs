@@ -52,13 +52,16 @@ await p.waitForLoadState("networkidle");
 
 console.log("— import menoslovu —");
 await p.goto(A + "/ludia");
-await p.fill("#p-riadky", "1042;Kováčová;Jana\n2117\tHrušovský\tMartin\n0055,Malý,Ján\nnezmysel\n4021;Solár;Erik");
+/* Aj s poznámkovými riadkami — menoslov skopírovaný z hárku má medzi ľuďmi
+   nadpisy stredísk a tie nie sú chyba. */
+await p.fill("#p-riadky", "# --- A 01 ---\n1042;Kováčová;Jana\n2117\tHrušovský\tMartin\n0055,Malý,Ján\nnezmysel\n4021;Solár;Erik");
 await p.click("form[action='/ludia/import'] button[type=submit]");
 await p.waitForLoadState("networkidle");
 const t = await p.content();
 ok("import pridal troch", t.includes("pribudlo 3"));
 ok("existujúci správca sa nezdvojil", t.includes("bez zmeny 1"));
 ok("nezrozumiteľný riadok ohlásený", t.includes("Nezrozumiteľné riadky"));
+ok("poznámka sa za chybu nepovažuje", !t.includes("--- A 01 ---"));
 ok("úvodná nula zachovaná", (await p.locator("td.num:has-text('0055')").count()) === 1);
 ok("tabulátorový riadok prešiel", t.includes("Hrušovský"));
 
