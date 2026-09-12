@@ -367,8 +367,13 @@ export async function importuj(k) {
     firmy.set(x.nazov.toLowerCase().trim(), x);
     if (x.skratka) firmy.set(x.skratka.toLowerCase().trim(), x);
   }
-  const prevadzky = new Map((await vsetky("SELECT id, nazov FROM prevadzka"))
-    .map(x => [x.nazov.toLowerCase().trim(), x]));
+  /* Aj prevádzka sa píše skratkou alebo celým názvom — z rovnakého dôvodu
+     ako firma: skratka je krátka, stála a pri preklepe zlyhá nahlas. */
+  const prevadzky = new Map();
+  for (const x of await vsetky("SELECT id, nazov, skratka FROM prevadzka")) {
+    prevadzky.set(x.nazov.toLowerCase().trim(), x);
+    if (x.skratka) prevadzky.set(x.skratka.toLowerCase().trim(), x);
+  }
   const neznameVazby = new Set(), doplnene = [], rozdielne = [];
   let skupina = { firma: null, prevadzka: null };
 

@@ -110,8 +110,8 @@ await p.goto(A + "/ludia");
    vo viacerých. */
 await p.fill("#p-riadky", [
   "--- AD1 ---",
-  "7001;Nováková;Elena;Z;dielňa",
-  "7002;Bruk;Igor;P;office"
+  "7001;Nováková;Elena;Z;DIE",
+  "7002;Bruk;Igor;P;OFF"
 ].join("\n"));
 await p.click("form[action='/ludia/import'] button[type=submit]");
 await p.waitForLoadState("networkidle");
@@ -123,7 +123,7 @@ await p.click("tr:has-text('Nováková') a:has-text('Upraviť')");
 const detail2 = await p.content();
 ok("firma z hlavičky sedí",
    (await p.locator('select[name="firma_id"] option:checked').innerText()).includes("Adiumentum"));
-ok("prevádzka od človeka sedí",
+ok("prevádzka od človeka sedí — zadaná skratkou",
    (await p.locator('select[name="prevadzka_id"] option:checked').innerText()).includes("dielňa"));
 /* A hlavne: „Ž" sa nesmie zlepiť s krstným menom. */
 ok("krstné meno ostalo samo",
