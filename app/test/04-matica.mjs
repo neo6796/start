@@ -144,8 +144,13 @@ await p.waitForLoadState("networkidle");
 t = await p.content();
 ok("odhlásenie potvrdené", /Odhlásené: \d+ ľud/.test(t));
 ok("hlási aj počet pracovných dní", /5 pracovných dní/.test(t));
-ok("všetky bunky sú krížiky",
-   (await p.locator("table.matrix input[value=x]:checked").count()) === 30);
+/* Počet sa odvodí z matice, nie napíše napevno — inak skúška padne vždy,
+   keď v menoslove pribudne človek, a nie preto, že by hromadné odhlásenie
+   prestalo fungovať. */
+const sVolbou = await p.locator("table.matrix tbody tr:has(input[value=x])").count();
+ok(`všetky bunky sú krížiky (${sVolbou} riadkov × 5 dní)`,
+   sVolbou > 0 &&
+   (await p.locator("table.matrix input[value=x]:checked").count()) === sVolbou * 5);
 ok("dôvod je pri dni vidieť",
    (await p.locator(".precmark").first().getAttribute("title")) === "dovolenka");
 ok("bez voľby kleslo na nulu", !/BEZ VOĽBY[\s\S]{0,60}[1-9]/i.test(

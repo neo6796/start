@@ -57,13 +57,42 @@ await p.goto(A + "/ludia");
 await p.fill("#p-riadky", "# --- A 01 ---\n1042;Kováčová;Jana\n2117\tHrušovský\tMartin\n0055,Malý,Ján\nnezmysel\n4021;Solár;Erik");
 await p.click("form[action='/ludia/import'] button[type=submit]");
 await p.waitForLoadState("networkidle");
-const t = await p.content();
+let t = await p.content();
 ok("import pridal troch", t.includes("pribudlo 3"));
 ok("existujúci správca sa nezdvojil", t.includes("bez zmeny 1"));
 ok("nezrozumiteľný riadok ohlásený", t.includes("Nezrozumiteľné riadky"));
 ok("poznámka sa za chybu nepovažuje", !t.includes("--- A 01 ---"));
 ok("úvodná nula zachovaná", (await p.locator("td.num:has-text('0055')").count()) === 1);
 ok("tabulátorový riadok prešiel", t.includes("Hrušovský"));
+
+/* Menoslov od dodávateľa osobné čísla nemá. Človek sa doň aj tak musí dostať;
+   číslo sa doplní, keď bude známe. */
+console.log("— ľudia bez osobného čísla —");
+await p.fill("#p-riadky", "# --- A 01 ---\n;Murár;Martin\n;Valko;Kamil");
+await p.click("form[action='/ludia/import'] button[type=submit]");
+await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("pribudli aj bez čísla", t.includes("pribudlo 2"));
+ok("appka to nezamlčí", /bez osobného čísla/.test(t));
+ok("povie aj čo to znamená", /prihlásiť sa zatiaľ nevie/.test(t));
+ok("v zozname je to vidieť", (await p.locator("td.num.gap:text-is('chýba')").count()) >= 2);
+
+/* Druhý import tých istých ľudí ich nesmie založiť znova — bez čísla sa
+   páruje podľa mena, inak by z 25 ľudí bolo 50. */
+await p.fill("#p-riadky", ";Murár;Martin\n;Valko;Kamil");
+await p.click("form[action='/ludia/import'] button[type=submit]");
+await p.waitForLoadState("networkidle");
+t = await p.content();
+ok("opakovaný import nezaloží dvojice", t.includes("bez zmeny 2") && !t.includes("pribudlo"));
+ok("a naozaj sú v zozname raz",
+   (await p.locator("table.data tr:has-text('Murár')").count()) === 1);
+
+/* Vynechané pole je niečo iné než preklep: „Murár;Martin" sa nemá čítať ako
+   číslo „Murár", ale ohlásiť. */
+await p.fill("#p-riadky", "Murár;Martin");
+await p.click("form[action='/ludia/import'] button[type=submit]");
+await p.waitForLoadState("networkidle");
+ok("chýbajúci bodkočiarok sa ohlási", /Nezrozumiteľné riadky/.test(await p.content()));
 
 await b.close();
 console.log(chyby.length ? "CHYBY: " + chyby.join(" | ") : "— žiadne chyby v prehliadači —");

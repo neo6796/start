@@ -1,9 +1,18 @@
 /* Ľudia — zoznam, import menoslovu, zaradenie.
 
-   Import nesie len identitu: osobné číslo, priezvisko, meno. Firma, vzťah,
-   tím, prevádzka a jedáleň sa vyberajú tu z rozbaľovacích zoznamov
-   (koncept 1.3b). Dôvod je praktický: v Exceli sa tie väzby píšu ako text,
-   preklep založí druhú „firmu" a nikto si to nevšimne.
+   Import nesie identitu (osobné číslo, priezvisko, meno) a k nej to, čoho je
+   menoslov skutočným zdrojom: **druh pomeru** a — cez hlavičky skupín
+   `# --- Firma, prevádzka ---` — **firmu a prevádzku**.
+
+   Nebezpečenstvo pri väzbách v texte je známe: „Vráble · Vrable · závod
+   Vráble" by z jedného preklepu spravili tri prevádzky a rozbité súčty by sa
+   ukázali až o dva mesiace pri uzávierke. Rozhodnutie 37 ho rieši tak, že
+   import **neznáme hodnoty odmieta a nezakladá** — len ich vypíše. Tím,
+   predáka a jedáleň menoslov nenesie vôbec; tie sa vyberajú z rozbaľovacích
+   zoznamov, predák navyše patrí tímu (koncept 1.2).
+
+   A dopĺňa len prázdne (rozhodnutie 38): čo už v appke je, sa neprepíše, len
+   sa vypíše ako rozdiel.
 
    Predák sa tu nenastavuje — patrí tímu (koncept 1.2). Stĺpec „Predák"
    v zozname je len na čítanie, ukazuje predáka toho tímu, v ktorom človek je. */
@@ -189,7 +198,8 @@ export async function zoznam(k) {
               : o.je_admin ? ' class="is-adm"' : o.je_predak ? ' class="is-lead"' : ""}>
             <td class="chk"><input type="checkbox" name="kto" value="${o.id}"
                  aria-label="${esc(o.priezvisko)} ${esc(o.meno)}"></td>
-            <td class="num">${esc(o.kod_dochadzka ?? "—")}</td>
+            <td class="num${o.kod_dochadzka ? "" : " gap"}">${
+              esc(o.kod_dochadzka ?? "chýba")}</td>
             <td><a href="/osoba?id=${o.id}">${esc(o.priezvisko)} ${esc(o.meno)}</a>${odznaky(o)}</td>
             <td${o.firma ? "" : ' class="gap"'}>${esc(o.firma ?? "chýba")}</td>
             <td>${esc(nazovVztahu(o.vztah))}</td>
@@ -259,6 +269,27 @@ document.getElementById("vsetci")?.addEventListener("change", e => {
 
 /* ---------- import ---------- */
 
+/* Druh pomeru sa v menoslove píše skratkou. Nie je to voľný text — buď je to
+   živnostník, alebo pracovný pomer, a rozdiel je v tom, kade tečú peniaze
+   (koncept 6.2a): živnostník nie je v mzdovom podklade ani ako riadok s nulou. */
+const VZTAHY_SKRATKY = {
+  "z": "zivnostnik", "ž": "zivnostnik", "ziv": "zivnostnik", "živ": "zivnostnik",
+  "zivnostnik": "zivnostnik", "živnostník": "zivnostnik", "szco": "zivnostnik",
+  "tpp": "pp", "pp": "pp", "hpp": "pp", "pracovny pomer": "pp", "pracovný pomer": "pp"
+};
+const akoVztah = s => VZTAHY_SKRATKY[String(s ?? "").trim().toLowerCase()] ?? null;
+
+/* Hlavička skupiny: `# --- PD, office ---`. Firma vľavo, prevádzka vpravo —
+   tak to menoslov aj píše. Pomlčky sú súčasťou vzoru zámerne: bez nich by sa
+   za hlavičku vyhlásila každá poznámka, v ktorej je čiarka. */
+export function rozoberHlavicku(riadok) {
+  const m = /^#\s*-{2,}\s*(.+?)\s*-{2,}\s*$/.exec(riadok.trim());
+  if (!m) return null;
+  const [firma, prevadzka] = m[1].split(",").map(x => x.trim());
+  if (!firma) return null;
+  return { firma, prevadzka: prevadzka || null };
+}
+
 /* Riadok môže prísť z Excelu, z textového súboru alebo z e-mailu.
    Oddeľovač preto neurčujeme, len ho nájdeme. */
 export function rozober(riadok) {
@@ -272,51 +303,141 @@ export function rozober(riadok) {
               : t.includes(";")  ? t.split(";")
               : t.includes(",")  ? t.split(",")
               : t.split(/\s{2,}|\s+/);
-  const [kod, priezvisko, ...zvysok] = casti.map(c => c.trim());
+  let [kod, priezvisko, ...zvysok] = casti.map(c => c.trim());
+
+  /* Menoslov má buď tri polia (číslo, priezvisko, meno), alebo štyri — s
+     druhom pomeru na druhom mieste. Rozoznáva sa podľa obsahu, nie podľa
+     počtu polí: prázdne číslo je tiež pole a počítať sa na to nedá. */
+  let vztah = null;
+  if (akoVztah(priezvisko) && zvysok.length >= 2) {
+    vztah = akoVztah(priezvisko);
+    priezvisko = zvysok.shift();
+  }
+
   const meno = zvysok.join(" ").trim();
-  if (!kod || !priezvisko || !meno) return { chyba: t };
+  if (!priezvisko || !meno) return { chyba: t };
+
+  /* Riadok bez osobného čísla — `;Murár;Martin`. Menoslov od dodávateľa ho
+     nemá a človek sa aj tak musí dostať do appky; číslo sa doplní, keď bude.
+     Prázdne pole musí byť napísané, nie vynechané: „Murár;Martin" by sa inak
+     čítalo ako číslo „Murár" a nedalo by sa rozoznať od preklepu. */
+  if (!kod) return { kod: null, priezvisko, meno, vztah };
   if (!/^[0-9A-Za-z._-]+$/.test(kod)) return { chyba: t };
-  return { kod, priezvisko, meno };
+  return { kod, priezvisko, meno, vztah };
 }
 
 export async function importuj(k) {
   const riadky = (k.data.riadky ?? "").split(/\r?\n/);
   const zle = [], pridani = [], zmeneni = [], nedotknuti = [], rovnaki = [];
   const videne = new Set();
+  let bezCisla = 0;
+
+  /* Väzby z menoslovu (rozhodnutie 37): import ich niesť smie, ale **neznáme
+     hodnoty odmieta, nezakladá**. Keby zakladal, „Vráble · Vrable · závod
+     Vráble" by z jedného preklepu spravili tri prevádzky a rozbité súčty by
+     sa ukázali až o dva mesiace pri uzávierke.
+
+     A dopĺňa len prázdne (rozhodnutie 38): čo už v appke je, sa neprepíše —
+     len sa vypíše ako rozdiel. Appka zatiaľ nevie odlíšiť ručne zadanú väzbu
+     od tej z minulého importu, tak sa drží tá opatrnejšia polovica pravidla. */
+  const firmy = new Map((await vsetky("SELECT id, nazov FROM firma"))
+    .map(x => [x.nazov.toLowerCase().trim(), x]));
+  const prevadzky = new Map((await vsetky("SELECT id, nazov FROM prevadzka"))
+    .map(x => [x.nazov.toLowerCase().trim(), x]));
+  const neznameVazby = new Set(), doplnene = [], rozdielne = [];
+  let skupina = { firma: null, prevadzka: null };
 
   const klient = await bazen.connect();
+  /* Názov stĺpca je tu z pevnej trojice nižšie, nie zo vstupu — do dotazu sa
+     nikdy nedostane nič, čo napísal človek. */
+  const doplnJednu = async (osobaId, stlpec, terajsia, nova, nazov, text, kto) => {
+    if (nova === null || nova === undefined) return;
+    if (terajsia === null || terajsia === undefined) {
+      await klient.query(`UPDATE osoba SET ${stlpec} = $2 WHERE id = $1`, [osobaId, nova]);
+      doplnene.push(`${kto} — ${nazov}: ${text}`);
+    } else if (terajsia !== nova) {
+      rozdielne.push(`${kto} — ${nazov}: v appke ostáva, menoslov píše ${text}`);
+    }
+  };
+
   try {
     await klient.query("BEGIN");
+    const vazby = async (osobaId, v) => {
+      const o = (await klient.query(
+        "SELECT vztah, firma_id, prevadzka_id FROM osoba WHERE id = $1", [osobaId])).rows[0];
+      if (!o) return;
+      const kto = `${v.priezvisko} ${v.meno}`;
+      await doplnJednu(osobaId, "vztah", o.vztah, v.vztah, "vzťah",
+        v.vztah === "zivnostnik" ? "živnostník" : "pracovný pomer", kto);
+      await doplnJednu(osobaId, "firma_id", o.firma_id, skupina.firma?.id ?? null,
+        "firma", skupina.firma?.nazov, kto);
+      await doplnJednu(osobaId, "prevadzka_id", o.prevadzka_id, skupina.prevadzka?.id ?? null,
+        "prevádzka", skupina.prevadzka?.nazov, kto);
+    };
+
     for (const r of riadky) {
+      const h = rozoberHlavicku(r);
+      if (h) {
+        const f = firmy.get(h.firma.toLowerCase());
+        const p = h.prevadzka ? prevadzky.get(h.prevadzka.toLowerCase()) : null;
+        if (!f) neznameVazby.add(`firma „${h.firma}"`);
+        if (h.prevadzka && !p) neznameVazby.add(`prevádzka „${h.prevadzka}"`);
+        skupina = { firma: f ?? null, prevadzka: p ?? null };
+        continue;
+      }
+
       const v = rozober(r);
       if (!v) continue;
       if (v.chyba) { zle.push(v.chyba); continue; }
+
+      /* Bez osobného čísla sa páruje podľa mena — inak by druhý import
+         založil tých istých ľudí znova. Číslo je jediný spoľahlivý kľúč,
+         takže je to náhrada, nie rovnocenná cesta: prihlásiť sa taký človek
+         nevie a v zozname je označený, kým sa číslo nedoplní. */
+      if (!v.kod) {
+        const uz = (await klient.query(
+          `SELECT id FROM osoba
+            WHERE lower(priezvisko) = lower($1) AND lower(meno) = lower($2)`,
+          [v.priezvisko, v.meno])).rows[0];
+        if (uz) { rovnaki.push(uz.id); await vazby(uz.id, v); continue; }
+        const novy = (await klient.query(
+          `INSERT INTO osoba (priezvisko, meno, povod_mena, import_kedy)
+           VALUES ($1,$2,'import',now()) RETURNING id`, [v.priezvisko, v.meno])).rows[0];
+        pridani.push(`${v.priezvisko} ${v.meno}`);
+        bezCisla++;
+        await vazby(novy.id, v);
+        continue;
+      }
       videne.add(v.kod);
 
       const je = (await klient.query("SELECT * FROM osoba WHERE kod_dochadzka = $1", [v.kod])).rows[0];
 
       if (!je) {
-        await klient.query(
+        const novy = (await klient.query(
           `INSERT INTO osoba (kod_dochadzka, priezvisko, meno, povod_mena, import_kedy)
-           VALUES ($1,$2,$3,'import',now())`, [v.kod, v.priezvisko, v.meno]);
+           VALUES ($1,$2,$3,'import',now()) RETURNING id`, [v.kod, v.priezvisko, v.meno])).rows[0];
         pridani.push(`${v.priezvisko} ${v.meno}`);
+        await vazby(novy.id, v);
         continue;
       }
       if (je.priezvisko === v.priezvisko && je.meno === v.meno) {
         await klient.query("UPDATE osoba SET import_kedy = now() WHERE id = $1", [je.id]);
         rovnaki.push(je.id);
+        await vazby(je.id, v);
         continue;
       }
       /* Pravidlo o pôvode: ručne opravené meno import neprepíše. */
       if (je.povod_mena === "rucne") {
         nedotknuti.push(`${v.kod}: v appke „${je.priezvisko} ${je.meno}", v súbore „${v.priezvisko} ${v.meno}"`);
         await klient.query("UPDATE osoba SET import_kedy = now() WHERE id = $1", [je.id]);
+        await vazby(je.id, v);
         continue;
       }
       await klient.query(
         `UPDATE osoba SET priezvisko = $2, meno = $3, import_kedy = now() WHERE id = $1`,
         [je.id, v.priezvisko, v.meno]);
       zmeneni.push(`${je.priezvisko} ${je.meno} → ${v.priezvisko} ${v.meno}`);
+      await vazby(je.id, v);
     }
     await klient.query("COMMIT");
   } catch (e) {
@@ -335,17 +456,35 @@ export async function importuj(k) {
     : [];
 
   await zapis(k.osoba.id, "ludia.import", {
-    pridanych: pridani.length, zmenenych: zmeneni.length,
+    pridanych: pridani.length, zmenenych: zmeneni.length, bezCisla,
+    doplnenychVazieb: doplnene.length, neznamychVazieb: neznameVazby.size,
     nedotknutych: nedotknuti.length, rovnakych: rovnaki.length, chybnych: zle.length
   });
 
   const casti = [];
   if (pridani.length) casti.push(`pribudlo ${pridani.length}`);
   if (zmeneni.length) casti.push(`opravených mien ${zmeneni.length}`);
+  if (doplnene.length) casti.push(`doplnených väzieb ${doplnene.length}`);
   if (rovnaki.length) casti.push(`bez zmeny ${rovnaki.length}`);
   const sprava = casti.length ? `Import hotový: ${casti.join(", ")}.` : "Import nepriniesol nič nové.";
 
   const varovania = [];
+  /* Nie chyba, ale nedokončená vec — a keby to nikde nesvietilo, zabudne sa
+     na ňu. Bez čísla sa človek neprihlási a dochádzka ho nespáruje. */
+  if (bezCisla)
+    varovania.push(`${mnoho(bezCisla, ["človek pribudol", "ľudia pribudli", "ľudí pribudlo"])} ` +
+      "bez osobného čísla — prihlásiť sa zatiaľ nevie a s dochádzkou sa nespáruje. " +
+      "Doplňte ho v jeho údajoch, keď bude známe.");
+  /* Toto je tá poistka z rozhodnutia 37. Keby import neznámu firmu ticho
+     založil, z jedného preklepu by vznikla druhá firma a rozbité súčty by sa
+     ukázali až pri uzávierke. Tak sa nezaloží — a povie sa to. */
+  if (neznameVazby.size)
+    varovania.push(`V číselníku nie je: ${[...neznameVazby].join(", ")}. ` +
+      "Tieto väzby sa nepriradili a nič sa nezaložilo — doplňte ich v Číselníkoch " +
+      "a spustite import znova.");
+  if (rozdielne.length)
+    varovania.push(`Väzby, ktoré už v appke sú, sa neprepísali (${rozdielne.length}): ` +
+      rozdielne.slice(0, 8).join(" · ") + (rozdielne.length > 8 ? " …" : ""));
   if (nedotknuti.length)
     varovania.push(`Ručne zadané mená sa neprepísali (${nedotknuti.length}): ${nedotknuti.join(" · ")}`);
   if (zle.length)
@@ -594,6 +733,8 @@ export async function detail(k, zvonku = {}) {
 
     <p style="margin:0 0 12px">Prihlasuje sa osobným číslom
       <strong>${esc(o.kod_dochadzka ?? "—")}</strong> a heslom.
+      ${o.kod_dochadzka ? "" : `<br><strong>Osobné číslo zatiaľ nemá</strong>, takže sa
+        prihlásiť nevie a import z dochádzky ho nespáruje. Doplňte ho vyššie.`}
       ${o.heslo_hash
         ? "Heslo sa nedá pozrieť — v databáze je len jeho odtlačok. Keď ho človek zabudne, vygenerujte nové."
         : "Bez hesla sa človek neprihlási — vygenerujte mu ho."}</p>
