@@ -193,6 +193,7 @@ export async function zobraz(k) {
         </select></div>
     </div>
     <button class="btn" type="submit">Zobraziť</button>
+    <a class="btn" href="/porovnanie?mesiac=${prvy.slice(0, 7)}">Porovnať s papierom</a>
   </form>
 
   ${!ludia.length ? `<div class="infobox">V mesiaci ${esc(mesiacPopis(prvy))} zatiaľ

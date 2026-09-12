@@ -24,6 +24,7 @@ import * as timy from "./timy.js";
 import * as spatne from "./spatne.js";
 import * as nastavenia from "./nastavenia.js";
 import * as mesiacObr from "./mesiac.js";
+import * as porovnanie from "./porovnanie.js";
 import { jeMultipart, citaj } from "./multipart.js";
 
 const tu = dirname(fileURLToPath(import.meta.url));
@@ -183,7 +184,9 @@ const CESTY = [
   ["GET",  "/nastavenia",      nastavenia.zobraz, "admin"],
   ["POST", "/nastavenia",      nastavenia.uloz,   "admin"],
 
-  ["GET",  "/mesiac",          mesiacObr.zobraz,  "admin"]
+  ["GET",  "/mesiac",          mesiacObr.zobraz,  "admin"],
+  ["GET",  "/porovnanie",      porovnanie.zobraz,   "admin"],
+  ["POST", "/porovnanie",      porovnanie.porovnaj, "admin"]
 ];
 
 function smie(osoba, rola) {
